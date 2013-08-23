@@ -1,0 +1,13 @@
+<lcgdict>
+
+  <class name="example::SampleProduct" ClassVersion="10">
+    <version ClassVersion="10" checksum="1535735568"/>
+  </class>
+  <class name="example::SampleProductCollection"/>
+  <class name="example::SampleProductRef"/>
+  <class name="example::SampleProductFwdRef"/>
+  <class name="example::SampleProductRefProd"/>
+  <class name="example::SampleProductRefVector"/>
+  <class name="edm::Wrapper<example::SampleProductCollection>"/>
+
+</lcgdict>
