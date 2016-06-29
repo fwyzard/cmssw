@@ -1,0 +1,6 @@
+<lcgdict>
+  <class name="tcds::TCDSEventRecord" ClassVersion="10">
+    <version ClassVersion="10" checksum="2160927289"/>
+  </class>
+  <class name="edm::Wrapper<tcds::TCDSEventRecord>"/>
+</lcgdict>
