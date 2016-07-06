@@ -1,20 +1,18 @@
 #ifndef CAHitQuadrupletGenerator_H
 #define CAHitQuadrupletGenerator_H
 
-#include "RecoPixelVertexing/PixelTriplets/interface/HitQuadrupletGenerator.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "RecoTracker/TkSeedingLayers/interface/SeedComparitorFactory.h"
 #include "RecoTracker/TkSeedingLayers/interface/SeedComparitor.h"
-#include "RecoPixelVertexing/PixelTrackFitting/src/RZLine.h"
 #include "RecoTracker/TkSeedGenerator/interface/FastCircleFit.h"
 #include "RecoTracker/TkMSParametrization/interface/PixelRecoUtilities.h"
 #include "RecoTracker/TkMSParametrization/interface/LongitudinalBendingCorrection.h"
-#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-
-
 #include "RecoTracker/TkHitPairs/interface/HitPairGeneratorFromLayerPair.h"
 #include "RecoTracker/TkHitPairs/interface/LayerHitMapCache.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Utilities/interface/EDGetToken.h"
+#include "RecoPixelVertexing/PixelTriplets/interface/HitQuadrupletGenerator.h"
+#include "RecoPixelVertexing/PixelTrackFitting/src/RZLine.h"
 
 class TrackingRegion;
 class HitQuadrupletGeneratorFromTripletAndLayers;
@@ -43,7 +41,8 @@ public:
 
     void findQuadruplets(const TrackingRegion& region, OrderedHitSeeds& result,
             const edm::Event& ev, const edm::EventSetup& es,
-            const SeedingLayerSetsHits::SeedingLayerSet& fourLayers);
+            const SeedingLayerSetsHits::SeedingLayerSet& fourLayers,
+            const std::array<const HitDoublets*, 3>& layersDoublets);
     
     
 private:

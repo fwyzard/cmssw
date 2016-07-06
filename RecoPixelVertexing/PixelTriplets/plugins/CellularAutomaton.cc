@@ -2,7 +2,7 @@
 #include "CellularAutomaton.h"
 
 template <unsigned int numberOfLayers>
-void CellularAutomaton<numberOfLayers>::create_and_connect_cells (std::vector<const HitDoublets*> doublets, const SeedingLayerSetsHits::SeedingLayerSet& fourLayers, const TrackingRegion& region, const float thetaCut, const float phiCut)
+void CellularAutomaton<numberOfLayers>::create_and_connect_cells (std::array<const HitDoublets*, numberOfLayers-1> const& doublets, const SeedingLayerSetsHits::SeedingLayerSet& fourLayers, const TrackingRegion& region, const float thetaCut, const float phiCut)
 {
   unsigned int cellId = 0;
   constexpr unsigned int numberOfLayerPairs =   numberOfLayers - 1;

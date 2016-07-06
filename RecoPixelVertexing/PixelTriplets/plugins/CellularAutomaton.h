@@ -13,7 +13,7 @@ public:
 
     }
 
-    void create_and_connect_cells(std::vector<const HitDoublets*>, const SeedingLayerSetsHits::SeedingLayerSet&, const TrackingRegion&, const float, const float);
+    void create_and_connect_cells(std::array<const HitDoublets*, theNumberOfLayers-1> const&, const SeedingLayerSetsHits::SeedingLayerSet&, const TrackingRegion&, const float, const float);
     void evolve();
     void find_ntuplets(std::vector<CACell::CAntuplet>&, const unsigned int);
 
