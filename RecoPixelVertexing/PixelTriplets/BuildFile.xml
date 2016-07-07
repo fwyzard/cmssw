@@ -1,3 +1,4 @@
+<use   name="cuda"/>
 <use   name="FWCore/Framework"/>
 <use   name="FWCore/ParameterSet"/>
 <use   name="FWCore/PluginManager"/>
@@ -18,3 +19,5 @@
 </export>
 
 <flags   CXXFLAGS="-Ofast -fno-math-errno"/>
+<flags   CUDAFLAGS="-std=c++11"/>
+
