@@ -1,7 +1,7 @@
 #ifndef GPU_CACELL_H_
 #define GPU_CACELL_H_
 
-#include "RecoTracker/TkHitPairs/interface/RecHitsSortedInPhi.h"
+#include "RecoPixelVertexing/PixelTriplets/interface/GPUHitsAndDoublets.h"
 #include "TrackingTools/TransientTrackingRecHit/interface/SeedingLayerSetsHits.h"
 #include "RecoTracker/TkTrackingRegions/interface/TrackingRegion.h"
 #include "GPUSimpleVector.h"
@@ -17,11 +17,14 @@ class GPUCACell {
 public:
 
     using CAntuplet = GPUSimpleVector<numberOfLayers, GPUCACell<numberOfLayers>* >;
+    __device__
+    GPUCACell()
+    {
 
-
+    }
 
     __device__
-	void init(const GPU_HitDoublets* doublets,const int layerId, const int doubletId, const int innerHitId, const int outerHitId)
+	void init(const GPULayerDoublets* doublets, const int layerId, const int doubletId, const int innerHitId, const int outerHitId)
     {
         theCAState = 0;
         theInnerHitId = innerHitId;
@@ -30,17 +33,19 @@ public:
         theDoublets=doublets;
         theDoubletId=doubletId;
         theLayerIdInFourLayers=layerId;
-        theInnerX=doublets->d_x(doubletId, GPU_HitDoublets::inner);
-        theOuterX=doublets->d_x(doubletId, GPU_HitDoublets::outer);
 
-        theInnerY=doublets->d_y(doubletId, GPU_HitDoublets::inner);
-        theOuterY=doublets->d_y(doubletId, GPU_HitDoublets::outer);
+        theInnerX=doublets->layers[0].x[doubletId];
+        theOuterX=doublets->layers[1].x[doubletId];
 
-        theInnerZ=doublets->d_z(doubletId, GPU_HitDoublets::inner);
-        theOuterZ=doublets->d_z(doubletId, GPU_HitDoublets::outer);
+        theInnerY=doublets->layers[0].y[doubletId];
+        theOuterY=doublets->layers[1].y[doubletId];
 
-    	theInnerR=doublets->d_r(doubletId, GPU_HitDoublets::inner);
-    	theOuterR=doublets->d_r(doubletId, GPU_HitDoublets::outer);
+        theInnerZ=doublets->layers[0].z[doubletId];
+        theOuterZ=doublets->layers[1].z[doubletId];
+
+    	theInnerR=hypot (theInnerX, theInnerY);
+    	theOuterR=hypot (theOuterX, theOuterY);
+
     }
 
 
@@ -224,7 +229,7 @@ private:
     unsigned int theInnerHitId;
     unsigned int theOuterHitId;
     unsigned int hasSameStateNeighbors;
-    const GPU_HitDoublets* theDoublets;
+    const GPULayerDoublets* theDoublets;
     int theDoubletId;
     int theLayerIdInFourLayers;
     float theInnerX;

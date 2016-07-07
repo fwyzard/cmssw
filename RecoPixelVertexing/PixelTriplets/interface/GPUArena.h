@@ -1,7 +1,20 @@
 #ifndef GPUARENA_H_
 #define GPUARENA_H_
 #include "cuda_runtime.h"
+#define checkCudaError(val) __checkCudaError__ ( (val), #val, __FILE__, __LINE__ )
 
+template <typename T>
+inline void __checkCudaError__(T code, const char *func, const char *file, int line)
+{
+    if (code) {
+        fprintf(stderr, "CUDA error at %s:%d: %s (code=%d)\n",
+                file, line, cudaGetErrorString(code), (unsigned int)code);
+        cudaDeviceReset();
+        exit(EXIT_FAILURE);
+    }
+}
+
+#define checkLastCudaError() checkCudaError( (cudaGetLastError()) )
 
 template <int CHUNK_SIZE, typename T>
 class GPUChunk {
@@ -17,7 +30,11 @@ class GPUChunk {
 	GPUChunk<CHUNK_SIZE, T> *next;
 
 	__device__ int num_values_in_chunk() {
-		return nextFreeValue;
+        if(nextFreeValue > CHUNK_SIZE) {
+            return CHUNK_SIZE;
+        } else {
+		    return nextFreeValue;
+        }
 	}
 
 	__device__ bool push_back(T value) {
@@ -39,7 +56,7 @@ class GPUChunk {
 
 //This iterator starts at the head chunk for a given element on a given layer
 //and iterates "backwards"
-template <int CHUNK_SIZE,typename T>
+template <int CHUNK_SIZE, typename T>
 class GPUArenaIterator {
     private:
     GPUChunk<CHUNK_SIZE, T> *currentChunk;
@@ -75,7 +92,7 @@ __global__ void init_mappings_kernel(GPUChunk<CHUNK_SIZE, T> **mappings, GPUChun
     }
 };
 
-template <int NumLayers, int CHUNK_SIZE, typename T>
+template <int NumLayers,int CHUNK_SIZE, typename T>
 class GPUArena {
     private:
 	//how many elements does the arena store per layer
@@ -89,43 +106,45 @@ class GPUArena {
 	//shared cursor to indicate the next free chunk
 	//next free chunk does not start out as 0 but every element in every layer
 	//by default gets a chunk
-	int nextFreeChunk;
-
     public:
+    //there appears to be a bug in nvcc that doesn't allow for atomicAdd on an int field in this class
+    //(even though the same thing works for GPUChunk above). A work around is to allocate the nextFreeChunk
+    //integer with a cudaMalloc
+	int *nextFreeChunk_d;
 
-	GPUArena(int _capacity)
+	GPUArena(int _capacity, std::array<int, NumLayers> pNumElementsPerLayer)
 	: capacity(_capacity)
 	{
 		//allocate the main arena storage and set everything to 0 (important
 		//because the counters in each chunk must be )
-		cudaMalloc(&chunks, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity);
-		cudaMemset(chunks, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity, 0);
-		nextFreeChunk = 0;
-	}
+		checkCudaError(cudaMalloc(&chunks, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity));
+		checkCudaError(cudaMemset(chunks, 0, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity));
+        checkCudaError(cudaMalloc(&nextFreeChunk_d, sizeof(int)));
+        checkCudaError(cudaMemset(nextFreeChunk_d, 0, sizeof(int)));
 
-	void init_layer(int layer, int numElementsOnLayer) {
-        numElementsPerLayer[layer] = numElementsOnLayer;
+        int offset = 0;
+        for(int layer = 0; layer < NumLayers; layer++) {
+            numElementsPerLayer[layer] = pNumElementsPerLayer[layer];
+		    //each element implicitly gets its own initial chunk
+            size_t mapSizeInBytes = sizeof(GPUChunk<CHUNK_SIZE, T>*) * numElementsPerLayer[layer];
+    		checkCudaError(cudaMalloc(&mappingIdToCurrentChunk[layer], mapSizeInBytes));
 
-		//each element implicitly gets its own initial chunk
-
-        size_t mapSizeInBytes = sizeof(GPUChunk<CHUNK_SIZE, T>*) * numElementsOnLayer;
-
-		cudaMalloc(&mappingIdToCurrentChunk[layer], mapSizeInBytes);
-
-        init_mappings_kernel<<<64, 16>>>(mappingIdToCurrentChunk[layer], chunks, nextFreeChunk, numElementsOnLayer);
-		nextFreeChunk += numElementsPerLayer[layer];
+            init_mappings_kernel<<<64, 16>>>(mappingIdToCurrentChunk[layer], chunks, offset, numElementsPerLayer[layer]);
+            checkLastCudaError();
+            cudaDeviceSynchronize();
+            checkLastCudaError();
+            offset += numElementsPerLayer[layer];
+        }
+        checkCudaError(cudaMemcpy(nextFreeChunk_d, &offset, sizeof(int), cudaMemcpyHostToDevice));
 	}
 
     __device__ int get_num_elements_per_layer(int layer) {
         return numElementsPerLayer[layer];
     }
 
-    __device__ __noinline__ int get_fresh_chunk_id() {
-        int id = atomicAdd(&nextFreeChunk, 1);
-        return id;
-    }
 	__device__ GPUChunk<CHUNK_SIZE, T>* get_new_chunk() {
-        int id = get_fresh_chunk_id();
+        int id = atomicAdd(nextFreeChunk_d, 1);
+
         if(id >= capacity) {
 			printf("PANIC: GPUArena ran out of capacity\n");
             assert(false);
@@ -144,7 +163,6 @@ class GPUArena {
 
 	__device__ void push_back(int layer, int elementId, T &value) {
 
-
 		GPUChunk<CHUNK_SIZE, T> *currentChunk = get_head_chunk(layer, elementId);
 		assert(currentChunk);
 
@@ -161,44 +179,18 @@ class GPUArena {
 				//Note: we don't need a threadfence_system here because we are
 				//either only writing or only reading, never both. And while writing
 				//nobody cares about the next pointer
-				currentChunk = (GPUChunk<CHUNK_SIZE, T>*)atomicCAS((unsigned long long int *)&mappingIdToCurrentChunk[layer][elementId], (unsigned long long int)currentChunk, (unsigned long long int)newChunk);
+				GPUChunk<CHUNK_SIZE, T> *oldChunk = (GPUChunk<CHUNK_SIZE, T>*)atomicCAS((unsigned long long int *)&mappingIdToCurrentChunk[layer][elementId], (unsigned long long int)currentChunk, (unsigned long long int)newChunk);
+                //if our CAS succeeded, oldChunk will be our currentChunk. In this case we move to newChunk immediately to avoid an extra loop;
+                //if oldChunk is different from newChunk, somebody else came first and we will continue with the chunk returned by the atomicCAS
+                //in the latter case, newChunk is wasted, but thats unavoidable to avoid livelocks
+                currentChunk = (oldChunk == currentChunk) ? newChunk : oldChunk;
 			}
 		}
 	}
 
 };
-//
-//__global__ void testWrite(GPUArena<NUM_LAYERS, int> arena, int howMany) {
-//    int myLayer =  blockIdx.y;
-//    assert(myLayer < NUM_LAYERS);
-//    int numElements = arena.get_num_elements_per_layer(myLayer);
-//
-//    for(int myself = threadIdx.x + blockIdx.x * blockDim.x; myself < howMany; myself++) {
-//        //we want multiple concurrent writes to the same element
-//        int myElementId = myself % numElements;
-//        arena.push_back(myLayer, myElementId, myElementId);
-//    }
-//};
-//
-//__global__ void testRead(GPUArena<NUM_LAYERS, int> arena, int howMany) {
-//    int myLayer =  blockIdx.y;
-//    assert(myLayer < NUM_LAYERS);
-//    int numElements = arena.get_num_elements_per_layer(myLayer);
-//
-//    int myElementId = threadIdx.x + blockIdx.x * blockDim.x;
-//    if(myElementId < numElements) {
-//        GPUArenaIterator<int> it = arena.iterator(myLayer, myElementId);
-//        int count = 0;
-//        while(it.has_next()) {
-//            int value = it.get_next();
-//            if(value != myElementId) {
-//                printf("PANIC, list for elementId %d is wrong. Expected %d, got %d\n", myElementId, value, myElementId);
-//            }
-//            count++;
-//        }
-//        if(count != howMany / numElements) {
-//            printf("PANIC, list size for elementId %d is wrong. Expected %d but found %d\n", myElementId, howMany/numElements, count);
-//        }
-//    }
-//};
 #endif
+
+
+
+

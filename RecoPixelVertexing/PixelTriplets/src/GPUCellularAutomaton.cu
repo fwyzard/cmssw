@@ -8,17 +8,17 @@ using CAntuplet = GPUSimpleVector<4, GPUCACell<4>*>;
 
 template<int numberOfLayers>
 __global__
-void kernel_create(const GPU_HitDoublets* gpuDoublets,
+void kernel_create(const GPULayerDoublets* gpuDoublets,
 		GPUCACell<numberOfLayers>** cells, GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>* > isOuterHitOfCell)
 {
 	unsigned int layerPairIndex = blockIdx.y;
 	unsigned int cellIndexInLayerPair = threadIdx.x + blockIdx.x * blockDim.x;
 	if(layerPairIndex < numberOfLayers-1)
 	{
-		for(int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex].d_numberOfDoublets; i+=gridDim.x * blockDim.x)
+		for(int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex].size; i+=gridDim.x * blockDim.x)
 		{
 
-			cells[layerPairIndex][i].init(	&gpuDoublets[layerPairIndex],layerPairIndex,i,gpuDoublets[layerPairIndex].innerHitId(i), gpuDoublets[layerPairIndex].outerHitId(i));
+			cells[layerPairIndex][i].init(	&gpuDoublets[layerPairIndex],layerPairIndex,i,gpuDoublets[layerPairIndex].indices[2*i], gpuDoublets[layerPairIndex].indices[2*i+1]);
 			isOuterHitOfCell.push_back(layerPairIndex,cells[layerPairIndex][i].outerHitId(), &(cells[layerPairIndex][i]));
 		}
 	}
@@ -28,7 +28,7 @@ void kernel_create(const GPU_HitDoublets* gpuDoublets,
 
 template<unsigned int numberOfLayers>
 __global__
-void kernel_connect(const GPU_HitDoublets* gpuDoublets, GPUCACell<numberOfLayers>** cells,
+void kernel_connect(const GPULayerDoublets* gpuDoublets, GPUCACell<numberOfLayers>** cells,
 		GPUArena<numberOfLayers-1,4, GPUCACell<numberOfLayers>* > isOuterHitOfCell,
 		GPUArena<numberOfLayers-1,4, GPUCACell<numberOfLayers>* > innerNeighbors,float ptmin, float region_origin_x,
 		float region_origin_y, float region_origin_radius, float thetaCut,
@@ -39,11 +39,11 @@ void kernel_connect(const GPU_HitDoublets* gpuDoublets, GPUCACell<numberOfLayers
 	unsigned int cellIndexInLayerPair = threadIdx.x + blockIdx.x * blockDim.x;
 	if(layerPairIndex < numberOfLayers-1)
 	{
-		for (int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex].d_numberOfDoublets;
+		for (int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex].size;
 				i += gridDim.x * blockDim.x)
 		{
 			GPUArenaIterator<4, GPUCACell<numberOfLayers>*> innerNeighborsIterator(layerPairIndex,i);
-			GPUCACell<numberOfLayers>* otherCell;
+			GPUCACell<numberOfLayers>* otherCell();
 			while (innerNeighborsIterator.has_next())
 			{
 				otherCell = innerNeighborsIterator.get_next();
@@ -60,7 +60,7 @@ void kernel_connect(const GPU_HitDoublets* gpuDoublets, GPUCACell<numberOfLayers
 
 template<unsigned int numberOfLayers, unsigned int maxNumberOfQuadruplets>
 __global__
-void kernel_find_ntuplets(const GPU_HitDoublets* gpuDoublets,GPUCACell<numberOfLayers>** cells,
+void kernel_find_ntuplets(const GPULayerDoublets* gpuDoublets,GPUCACell<numberOfLayers>** cells,
 		GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets,
 		GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>* >* theInnerNeighbors, const unsigned int minHitsPerNtuplet)
 {
@@ -69,7 +69,7 @@ void kernel_find_ntuplets(const GPU_HitDoublets* gpuDoublets,GPUCACell<numberOfL
 	constexpr unsigned int lastLayerPairIndex = numberOfLayers - 2;
 	CAntuplet tmpNtuplet;
 
-		for (int i = cellIndexInLastLayerPair; i < gpuDoublets[lastLayerPairIndex].d_numberOfDoublets;
+		for (int i = cellIndexInLastLayerPair; i < gpuDoublets[lastLayerPairIndex].size;
 				i += gridDim.x * blockDim.x)
 		{
 			tmpNtuplet.reset();
