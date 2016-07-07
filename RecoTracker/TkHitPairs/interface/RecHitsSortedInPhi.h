@@ -157,6 +157,8 @@ public:
   float        y(int i, layer l) const { return layers[l]->y[indeces[2*i+l]];}
   GlobalPoint gp(int i, layer l) const { return GlobalPoint(x(i,l),y(i,l),z(i,l));}
 
+  std::vector<int> const & indices() const { return indeces; }
+
 private:
 
   std::array<RecHitsSortedInPhi const *,2> layers;
