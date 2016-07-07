@@ -39,10 +39,10 @@ public:
     virtual void hitQuadruplets(const TrackingRegion& reg, OrderedHitSeeds & triplets,
             const edm::Event & ev, const edm::EventSetup& es);
 
-    void findQuadruplets(const TrackingRegion& region, OrderedHitSeeds& result,
+    void findQuadruplets (const TrackingRegion& region, OrderedHitSeeds& result,
             const edm::Event& ev, const edm::EventSetup& es,
             const SeedingLayerSetsHits::SeedingLayerSet& fourLayers,
-            const std::array<const HitDoublets*, 3>& layersDoublets);
+            std::array<const GPULayerDoublets *, 3> const & layersDoublets);
     
     
 private:

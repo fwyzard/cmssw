@@ -8,6 +8,7 @@
 #include "RecoPixelVertexing/PixelTriplets/interface/ThirdHitPredictionFromCircle.h"
 #include "RecoPixelVertexing/PixelTriplets/interface/HitQuadrupletGenerator.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
+#include "RecoPixelVertexing/PixelTriplets/interface/GPUHitsAndDoublets.h"
 
 #include "LayerQuadruplets.h"
 #include "CellularAutomaton.h"
@@ -54,8 +55,7 @@ CAHitQuadrupletGenerator::~CAHitQuadrupletGenerator()
 {
 }
 
-void CAHitQuadrupletGenerator::hitQuadruplets(
-                                              const TrackingRegion& region, OrderedHitSeeds & result,
+void CAHitQuadrupletGenerator::hitQuadruplets(const TrackingRegion& region, OrderedHitSeeds & result,
                                               const edm::Event& ev, const edm::EventSetup& es)
 {
   edm::Handle<SeedingLayerSetsHits> hlayers;
@@ -64,17 +64,32 @@ void CAHitQuadrupletGenerator::hitQuadruplets(
   if (layers.numberOfLayersInSet() != 4)
     throw cms::Exception("Configuration") << "CAHitQuadrupletsGenerator expects SeedingLayerSetsHits::numberOfLayersInSet() to be 4, got " << layers.numberOfLayersInSet();
 
+  std::unordered_map<std::string, GPULayerHits>     gpuHitsMap;
+  std::unordered_map<std::string, GPULayerDoublets> gpuDoubletMap;
+
+  for (unsigned int j = 0; j < layers.size(); j++)
+    for (unsigned int i = 0; i < 4; ++i) {
+      auto const & layer = layers[j][i];
+      if (gpuHitsMap.find(layer.name()) == gpuHitsMap.end()) {
+        RecHitsSortedInPhi const & hits = theLayerCache(layer, region, ev, es);
+        gpuHitsMap[layer.name()] = copy_hits_to_gpu(hits);
+      }
+    }
+
   HitPairGeneratorFromLayerPair thePairGenerator(0, 1, &theLayerCache);
-  std::unordered_map<std::string, HitDoublets> layersMap;
-  std::array<const HitDoublets*, 3> layersDoublets;
-  for (unsigned int j=0; j < layers.size(); j++) {
+  std::unordered_map<std::string, HitDoublets> doubletMap;
+  std::array<const GPULayerDoublets *, 3> layersDoublets;
+  for (unsigned int j = 0; j < layers.size(); j++) {
     for (unsigned int i = 0; i < 3; ++i) {
       auto const & inner = layers[j][i];
       auto const & outer = layers[j][i+1];
       auto layersPair = inner.name() + '+' + outer.name();
-      auto it = layersMap.find(layersPair);
-      if (it == layersMap.end())
-        std::tie(it, std::ignore) = layersMap.insert(std::make_pair(layersPair, thePairGenerator.doublets(region, ev, es, inner, outer)));
+      auto it = gpuDoubletMap.find(layersPair);
+      if (it == gpuDoubletMap.end()) {
+        auto const & h_doublets = thePairGenerator.doublets(region, ev, es, inner, outer);
+        auto const & d_doublets = copy_doublets_to_gpu(h_doublets, gpuHitsMap[inner.name()], gpuHitsMap[outer.name()]);
+        std::tie(it, std::ignore) = gpuDoubletMap.insert(std::make_pair(layersPair, d_doublets));
+      }
       layersDoublets[i] = & it->second;
     }
 
@@ -88,7 +103,7 @@ void
 CAHitQuadrupletGenerator::findQuadruplets (const TrackingRegion& region, OrderedHitSeeds& result,
                                            const edm::Event& ev, const edm::EventSetup& es,
                                            const SeedingLayerSetsHits::SeedingLayerSet& fourLayers,
-                                           std::array<const HitDoublets*, 3> const & layersDoublets)
+                                           std::array<const GPULayerDoublets *, 3> const & layersDoublets)
 {
   if (theComparitor) theComparitor->init (ev, es);
 
