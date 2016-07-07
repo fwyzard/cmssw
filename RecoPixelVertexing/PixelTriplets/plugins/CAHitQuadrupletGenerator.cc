@@ -66,9 +66,8 @@ void CAHitQuadrupletGenerator::hitQuadruplets(
 
   HitPairGeneratorFromLayerPair thePairGenerator(0, 1, &theLayerCache);
   std::unordered_map<std::string, HitDoublets> layersMap;
+  std::array<const HitDoublets*, 3> layersDoublets;
   for (unsigned int j=0; j < layers.size(); j++) {
-    std::array<const HitDoublets*, 3> layersDoublets;
-
     for (unsigned int i = 0; i < 3; ++i) {
       auto const & inner = layers[j][i];
       auto const & outer = layers[j][i+1];
