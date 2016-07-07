@@ -1,46 +1,73 @@
 #ifndef GPUCELLULARAUTOMATON_H_
 #define GPUCELLULARAUTOMATON_H_
 
-
 #include <array>
-#include "GPUCACell.h"
+
 #include "TrackingTools/TransientTrackingRecHit/interface/SeedingLayerSetsHits.h"
 #include "RecoTracker/TkTrackingRegions/interface/TrackingRegion.h"
 #include "RecoTracker/TkHitPairs/interface/RecHitsSortedInPhi.h"
+#include "RecoPixelVertexing/PixelTriplets/interface/GPUArena.h"
+#include "RecoPixelVertexing/PixelTriplets/interface/GPUSimpleVector.h"
+
+#include <cuda.h>
+
+using CAntuplet = GPUSimpleVector<4, GPUCACell<4>*>;
 
 
-template<unsigned int theNumberOfLayers>
+template<unsigned int theNumberOfLayers, unsigned int maxNumberOfQuadruplets>
 class GPUCellularAutomaton {
 public:
 
-    GPUCellularAutomaton(std::vector<const HitDoublets*> doublets, const TrackingRegion& region, const float phiCut, const float thetaCut) {
-
-
-
+    GPUCellularAutomaton(TrackingRegion const & region, float thetaCut, float phiCut) :
+      thePtMin{ region.ptMin() },
+      theRegionOriginX{ region.origin().x() },
+      theRegionOriginY{ region.origin().y() },
+      theRegionOriginRadius{ region.originRBound() },
+      theThetaCut{ thetaCut },
+      thePhiCut{ phiCut }
+    {
     }
 
-    void create_and_connect_cells();
-
-
-    void evolve();
-
-
-    void find_ntuplets(std::vector<GPUCACell<theNumberOfLayers>::CAntuplet>&, const unsigned int);
-
-
+    void run(std::array<const GPULayerDoublets *, theNumberOfLayers-1> const & doublets);
 
 private:
 
-    GPU_HitDoublets* gpuDoublets;
-    RecHitsSortedInPhi_gpu* hits;
-    GPUCACell<numberOfLayers>** theCells;
-    RecHitsSortedInPhi_gpu* hitsOnLayers;
-    GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>* >* isOuterHitOfCell;
-    GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>* >* theInnerNeighbors;
-    GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets;
-
-
+    float thePtMin;
+    float theRegionOriginX;
+    float theRegionOriginY;
+    float theRegionOriginRadius;
+    float theThetaCut;
+    float thePhiCut;
 };
 
+template<unsigned int theNumberOfLayers, unsigned int maxNumberOfQuadruplets>
+void
+GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<const GPULayerDoublets *, theNumberOfLayers-1> const & doublets)
+{
+  int numberOfChunksIn1stArena = 0;
+  std::array<int, theNumberOfLayers-1> numberOfKeysIn1stArena;
+  for (size_t i = 0; i < theNumberOfLayers-1; ++i) {
+    numberOfKeysIn1stArena[i] = doublets[i]->layers[1].size;
+    numberOfChunksIn1stArena += doublets[i]->size;
+  }
+  //GPUArena<theNumberOfLayers-1, 4, GPUCACell<theNumberOfLayers>* > isOuterHitOfCell(numberOfChunksIn1stArena, numberOfKeysIn1stArena);
+  GPUArena<theNumberOfLayers-1, 4, GPUCACell<theNumberOfLayers>> isOuterHitOfCell(numberOfChunksIn1stArena, numberOfKeysIn1stArena);
+
+  int numberOfChunksIn2ndArena = 0;
+  std::array<int, theNumberOfLayers-2> numberOfKeysIn2ndArena;
+  for (size_t i = 1; i < theNumberOfLayers-1; ++i) {
+    numberOfKeysIn2ndArena[i] = doublets[i]->size;
+    numberOfChunksIn2ndArena += doublets[i-1]->size;
+  }
+  //GPUArena<theNumberOfLayers-2, 4, GPUCACell<theNumberOfLayers>* > theInnerNeighbors(numberOfChunksIn2ndArena, numberOfKeysIn2ndArena);
+  GPUArena<theNumberOfLayers-2, 4, GPUCACell<theNumberOfLayers>> theInnerNeighbors(numberOfChunksIn2ndArena, numberOfKeysIn2ndArena);
+
+  GPUCACell<theNumberOfLayers>* theCells[theNumberOfLayers-1];
+  for (unsigned int i = 0; i< theNumberOfLayers-1; ++i)
+    cudaMalloc(& theCells[i], doublets[i]->size * sizeof(GPUCACell<theNumberOfLayers>));
+
+  GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets;
+  cudaMalloc(& foundNtuplets, sizeof(GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>));
+}
 
 #endif

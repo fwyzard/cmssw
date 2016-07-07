@@ -18,6 +18,7 @@ struct GPULayerDoublets {
   GPULayerHits layers[2]; 
 };
 
+inline
 GPULayerHits copy_hits_to_gpu(RecHitsSortedInPhi const & hits) {
   GPULayerHits d_hits;
   d_hits.size = hits.size();
@@ -31,6 +32,7 @@ GPULayerHits copy_hits_to_gpu(RecHitsSortedInPhi const & hits) {
   return d_hits;
 }
 
+inline
 GPULayerDoublets copy_doublets_to_gpu(HitDoublets const & doublets, GPULayerHits const & inner, GPULayerHits const & outer) {
   GPULayerDoublets d_doublets;
   d_doublets.size = doublets.size();

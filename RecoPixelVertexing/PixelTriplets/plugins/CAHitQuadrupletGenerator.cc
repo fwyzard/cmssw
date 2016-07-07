@@ -9,10 +9,11 @@
 #include "RecoPixelVertexing/PixelTriplets/interface/HitQuadrupletGenerator.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
 #include "RecoPixelVertexing/PixelTriplets/interface/GPUHitsAndDoublets.h"
+#include "RecoPixelVertexing/PixelTriplets/interface/GPUCellularAutomaton.h"
 
 #include "LayerQuadruplets.h"
-#include "CellularAutomaton.h"
 #include "CAHitQuadrupletGenerator.h"
+#include "CACell.h"
 
 namespace
 {
@@ -109,13 +110,16 @@ CAHitQuadrupletGenerator::findQuadruplets (const TrackingRegion& region, Ordered
 
   std::vector<CACell::CAntuplet> foundQuadruplets;
 
-  CellularAutomaton<4> ca;
+  GPUCellularAutomaton<4, 1000> ca(region, CAThetaCut, CAPhiCut);
+  ca.run(layersDoublets);
 
+  /*
   ca.create_and_connect_cells (layersDoublets, fourLayers, region, CAThetaCut, CAPhiCut);
 
   ca.evolve();
 
   ca.find_ntuplets(foundQuadruplets, 4);
+  */
 
   const QuantityDependsPtEval maxChi2Eval = maxChi2.evaluator(es);
 

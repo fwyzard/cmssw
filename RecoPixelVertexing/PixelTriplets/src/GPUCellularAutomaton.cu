@@ -1,15 +1,13 @@
 #include "RecoTracker/TkHitPairs/interface/RecHitsSortedInPhi.h"
-#include "../interface/GPUCACell.h"
-#include "../interface/GPUArena.h"
-
-
-using CAntuplet = GPUSimpleVector<4, GPUCACell<4>*>;
+#include "RecoPixelVertexing/PixelTriplets/interface/GPUCACell.h"
+#include "RecoPixelVertexing/PixelTriplets/interface/GPUCellularAutomaton.h"
 
 
 template<int numberOfLayers>
 __global__
 void kernel_create(const GPULayerDoublets* gpuDoublets,
-		GPUCACell<numberOfLayers>** cells, GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>* > isOuterHitOfCell)
+		               GPUCACell<numberOfLayers>** cells, 
+                   GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> isOuterHitOfCell)
 {
 	unsigned int layerPairIndex = blockIdx.y;
 	unsigned int cellIndexInLayerPair = threadIdx.x + blockIdx.x * blockDim.x;
@@ -17,7 +15,6 @@ void kernel_create(const GPULayerDoublets* gpuDoublets,
 	{
 		for(int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex].size; i+=gridDim.x * blockDim.x)
 		{
-
 			cells[layerPairIndex][i].init(	&gpuDoublets[layerPairIndex],layerPairIndex,i,gpuDoublets[layerPairIndex].indices[2*i], gpuDoublets[layerPairIndex].indices[2*i+1]);
 			isOuterHitOfCell.push_back(layerPairIndex,cells[layerPairIndex][i].outerHitId(), &(cells[layerPairIndex][i]));
 		}
@@ -29,8 +26,8 @@ void kernel_create(const GPULayerDoublets* gpuDoublets,
 template<unsigned int numberOfLayers>
 __global__
 void kernel_connect(const GPULayerDoublets* gpuDoublets, GPUCACell<numberOfLayers>** cells,
-		GPUArena<numberOfLayers-1,4, GPUCACell<numberOfLayers>* > isOuterHitOfCell,
-		GPUArena<numberOfLayers-1,4, GPUCACell<numberOfLayers>* > innerNeighbors,float ptmin, float region_origin_x,
+		GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> isOuterHitOfCell,
+		GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> innerNeighbors,float ptmin, float region_origin_x,
 		float region_origin_y, float region_origin_radius, float thetaCut,
 		float phiCut)
 {
@@ -62,7 +59,7 @@ template<unsigned int numberOfLayers, unsigned int maxNumberOfQuadruplets>
 __global__
 void kernel_find_ntuplets(const GPULayerDoublets* gpuDoublets,GPUCACell<numberOfLayers>** cells,
 		GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets,
-		GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>* >* theInnerNeighbors, const unsigned int minHitsPerNtuplet)
+		GPUArena<numberOfLayers, 4, GPUCACell<numberOfLayers>>* theInnerNeighbors, const unsigned int minHitsPerNtuplet)
 {
 	unsigned int cellIndexInLastLayerPair = threadIdx.x
 			+ blockIdx.x * blockDim.x;
@@ -79,7 +76,4 @@ void kernel_find_ntuplets(const GPULayerDoublets* gpuDoublets,GPUCACell<numberOf
 		}
 
 }
-
-
-
 

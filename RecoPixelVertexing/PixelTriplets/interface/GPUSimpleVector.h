@@ -4,22 +4,6 @@
 template< int maxSize, class T>
 struct GPUSimpleVector
 {
-//	__forceinline__ __host__ __device__ CUDAQueue( ) { }
-
-	__inline__ __device__
-	int push_threadsafe(const T& element) {
-		auto previousSize = atomicAdd(&m_size, 1);
-		if(previousSize<maxSize)
-		{
-			m_data[previousSize] = element;
-			return previousSize;
-		} else
-
-		atomicSub(&m_size, 1);
-		return -1;
-	};
-
-
 	__inline__ __device__
 	int push(const T& element) {
 
@@ -30,18 +14,6 @@ struct GPUSimpleVector
 			return previousSize;
 		} else
 			return -1;
-	};
-
-	__inline__ __device__
-	T pop_back_threadsafe() {
-#ifdef __CUDACC__
-		if(m_size > 0)
-		{
-			auto previousSize = atomicAdd (&m_size, -1);
-			return m_data[previousSize-1];
-		}
-#endif
-
 	};
 
 	__inline__ __device__
@@ -66,7 +38,6 @@ struct GPUSimpleVector
 	{
 		return m_size;
 	};
-
 
 
 	T m_data[maxSize];
