@@ -93,6 +93,14 @@ class GPUArenaIterator {
     }
 };
 
+template <int CHUNK_SIZE, typename T>
+__global__
+void init_mappings_kernel(GPUChunk<CHUNK_SIZE, T> **mappings, GPUChunk<CHUNK_SIZE, T> *startOfChunks, int offset, int numElements) {
+  for(int mySlot = threadIdx.x + blockIdx.x * blockDim.x; mySlot < numElements; mySlot += gridDim.x * blockDim.x) {
+    mappings[mySlot] = startOfChunks + offset + mySlot;
+  }
+};
+
 template <int NumLayers, int CHUNK_SIZE, typename T>
 class GPUArena {
   private:
