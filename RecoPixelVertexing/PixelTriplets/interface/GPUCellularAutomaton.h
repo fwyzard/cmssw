@@ -6,12 +6,10 @@
 #include "TrackingTools/TransientTrackingRecHit/interface/SeedingLayerSetsHits.h"
 #include "RecoTracker/TkTrackingRegions/interface/TrackingRegion.h"
 #include "RecoTracker/TkHitPairs/interface/RecHitsSortedInPhi.h"
-#include "RecoPixelVertexing/PixelTriplets/interface/GPUArena.h"
 #include "RecoPixelVertexing/PixelTriplets/interface/GPUSimpleVector.h"
 
 #include <cuda.h>
 
-using CAntuplet = GPUSimpleVector<4, GPUCACell<4>*>;
 
 
 template<unsigned int theNumberOfLayers, unsigned int maxNumberOfQuadruplets>
@@ -40,6 +38,7 @@ private:
     float thePhiCut;
 };
 
+/*
 template<unsigned int theNumberOfLayers, unsigned int maxNumberOfQuadruplets>
 void
 GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<const GPULayerDoublets *, theNumberOfLayers-1> const & doublets)
@@ -69,5 +68,5 @@ GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<
   GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets;
   cudaMalloc(& foundNtuplets, sizeof(GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>));
 }
-
+*/
 #endif
