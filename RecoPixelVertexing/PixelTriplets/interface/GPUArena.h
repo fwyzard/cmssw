@@ -175,7 +175,7 @@ class GPUArena {
     }
 
     __device__
-    void push_back(int layer, int elementId, T* &value) {
+    void push_back(int layer, int elementId, T* value) {
 
       GPUChunk<CHUNK_SIZE, T> *currentChunk = get_head_chunk(layer, elementId);
       assert(currentChunk);
