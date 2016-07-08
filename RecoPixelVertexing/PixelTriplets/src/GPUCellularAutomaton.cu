@@ -7,7 +7,7 @@ using CAntuplet = GPUSimpleVector<4, GPUCACell<4>*>;
 
 template<int numberOfLayers>
 __global__
-void kernel_create(const GPULayerDoublets* gpuDoublets,
+void kernel_create(const GPULayerDoublets* const* gpuDoublets,
 		               GPUCACell<numberOfLayers>** cells, 
                    GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> isOuterHitOfCell)
 {
@@ -15,10 +15,10 @@ void kernel_create(const GPULayerDoublets* gpuDoublets,
 	unsigned int cellIndexInLayerPair = threadIdx.x + blockIdx.x * blockDim.x;
 	if(layerPairIndex < numberOfLayers-1)
 	{
-		for(int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex].size; i+=gridDim.x * blockDim.x)
+		for(int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex]->size; i+=gridDim.x * blockDim.x)
 		{
-			cells[layerPairIndex][i].init(	&gpuDoublets[layerPairIndex],layerPairIndex,i,gpuDoublets[layerPairIndex].indices[2*i], gpuDoublets[layerPairIndex].indices[2*i+1]);
-			isOuterHitOfCell.push_back(layerPairIndex,cells[layerPairIndex][i].outerHitId(), &(cells[layerPairIndex][i]));
+			cells[layerPairIndex][i].init(gpuDoublets[layerPairIndex],layerPairIndex,i,gpuDoublets[layerPairIndex]->indices[2*i], gpuDoublets[layerPairIndex]->indices[2*i+1]);
+			isOuterHitOfCell.push_back(layerPairIndex,cells[layerPairIndex][i].get_outer_hit_id(), & cells[layerPairIndex][i]);
 		}
 	}
 
@@ -79,6 +79,7 @@ void kernel_find_ntuplets(const GPULayerDoublets* gpuDoublets,GPUCACell<numberOf
 
 }
 
+
 template<unsigned int theNumberOfLayers, unsigned int maxNumberOfQuadruplets>
 void
 GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<const GPULayerDoublets *, 
@@ -108,6 +109,9 @@ GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<
 
   GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets;
   cudaMalloc(& foundNtuplets, sizeof(GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>));
+
+  kernel_create<<<1000,256>>>(doublets.data(), theCells, isOuterHitOfCell);
+
 }
 
 template class GPUCellularAutomaton<4, 1000>;
