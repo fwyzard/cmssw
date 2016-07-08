@@ -8,7 +8,7 @@ using CAntuplet = GPUSimpleVector<4, GPUCACell<4>*>;
 template<int numberOfLayers>
 __global__
 void kernel_create(const GPULayerDoublets* const* gpuDoublets,
-		               GPUCACell<numberOfLayers>** cells, 
+		   GPUCACell<numberOfLayers>** cells, 
                    GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> isOuterHitOfCell)
 {
 	unsigned int layerPairIndex = blockIdx.y;
@@ -25,41 +25,44 @@ void kernel_create(const GPULayerDoublets* const* gpuDoublets,
 }
 
 
-template<unsigned int numberOfLayers>
+template<int numberOfLayers>
 __global__
-void kernel_connect(const GPULayerDoublets* gpuDoublets, GPUCACell<numberOfLayers>** cells,
-		GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> isOuterHitOfCell,
-		GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> innerNeighbors,float ptmin, float region_origin_x,
-		float region_origin_y, float region_origin_radius, float thetaCut,
-		float phiCut)
+void kernel_connect(const GPULayerDoublets* const* gpuDoublets, 
+                    GPUCACell<numberOfLayers>** cells,
+		    GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> isOuterHitOfCell,
+		    GPUArena<numberOfLayers-2, 4, GPUCACell<numberOfLayers>> innerNeighbors,
+                    float ptmin,
+                    float region_origin_x,
+		    float region_origin_y,
+                    float region_origin_radius,
+                    float thetaCut,
+		    float phiCut)
 {
+  unsigned int layerPairIndex = blockIdx.y;
+  unsigned int cellIndexInLayerPair = threadIdx.x + blockIdx.x * blockDim.x;
+  if(layerPairIndex < numberOfLayers-1)
+  {
+    for (int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex]->size;
+        i += gridDim.x * blockDim.x)
+    {
+      GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator = innerNeighbors.iterator(layerPairIndex,i);
+      GPUCACell<numberOfLayers>* otherCell;
+      while (innerNeighborsIterator.has_next())
+      {
+        otherCell = innerNeighborsIterator.get_next();
+        if(cells[layerPairIndex][i].check_alignment_and_tag(otherCell,
+              ptmin, region_origin_x, region_origin_y,
+              region_origin_radius, thetaCut, phiCut))
+          innerNeighbors.push_back(layerPairIndex,i,otherCell);
 
-	unsigned int layerPairIndex = blockIdx.y;
-	unsigned int cellIndexInLayerPair = threadIdx.x + blockIdx.x * blockDim.x;
-	if(layerPairIndex < numberOfLayers-1)
-	{
-		for (int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex].size;
-				i += gridDim.x * blockDim.x)
-		{
-			GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator(layerPairIndex,i);
-			GPUCACell<numberOfLayers>* otherCell();
-			while (innerNeighborsIterator.has_next())
-			{
-				otherCell = innerNeighborsIterator.get_next();
-				if(cells[layerPairIndex][i].check_alignment_and_tag(otherCell,
-								ptmin, region_origin_x, region_origin_y,
-								region_origin_radius, thetaCut, phiCut))
-					innerNeighbors.push_back(layerPairIndex,i,otherCell);
-
-
-			}
-		}
-	}
+      }
+    }
+  }
 }
 
-template<unsigned int numberOfLayers, unsigned int maxNumberOfQuadruplets>
+template<int numberOfLayers, int maxNumberOfQuadruplets>
 __global__
-void kernel_find_ntuplets(const GPULayerDoublets* gpuDoublets,GPUCACell<numberOfLayers>** cells,
+void kernel_find_ntuplets(const GPULayerDoublets* const* gpuDoublets,GPUCACell<numberOfLayers>** cells,
 		GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets,
 		GPUArena<numberOfLayers, 4, GPUCACell<numberOfLayers>>* theInnerNeighbors, const unsigned int minHitsPerNtuplet)
 {
@@ -68,7 +71,7 @@ void kernel_find_ntuplets(const GPULayerDoublets* gpuDoublets,GPUCACell<numberOf
 	constexpr unsigned int lastLayerPairIndex = numberOfLayers - 2;
 	CAntuplet tmpNtuplet;
 
-		for (int i = cellIndexInLastLayerPair; i < gpuDoublets[lastLayerPairIndex].size;
+		for (int i = cellIndexInLastLayerPair; i < gpuDoublets[lastLayerPairIndex]->size;
 				i += gridDim.x * blockDim.x)
 		{
 			tmpNtuplet.reset();
@@ -91,7 +94,6 @@ GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<
     numberOfKeysIn1stArena[i] = doublets[i]->layers[1].size;
     numberOfChunksIn1stArena += doublets[i]->size;
   }
-  //GPUArena<theNumberOfLayers-1, 4, GPUCACell<theNumberOfLayers>* > isOuterHitOfCell(numberOfChunksIn1stArena, numberOfKeysIn1stArena);
   GPUArena<theNumberOfLayers-1, 4, GPUCACell<theNumberOfLayers>> isOuterHitOfCell(numberOfChunksIn1stArena, numberOfKeysIn1stArena);
 
   int numberOfChunksIn2ndArena = 0;
@@ -100,7 +102,6 @@ GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<
     numberOfKeysIn2ndArena[i] = doublets[i]->size;
     numberOfChunksIn2ndArena += doublets[i-1]->size;
   }
-  //GPUArena<theNumberOfLayers-2, 4, GPUCACell<theNumberOfLayers>* > theInnerNeighbors(numberOfChunksIn2ndArena, numberOfKeysIn2ndArena);
   GPUArena<theNumberOfLayers-2, 4, GPUCACell<theNumberOfLayers>> theInnerNeighbors(numberOfChunksIn2ndArena, numberOfKeysIn2ndArena);
 
   GPUCACell<theNumberOfLayers>* theCells[theNumberOfLayers-1];
@@ -111,6 +112,8 @@ GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<
   cudaMalloc(& foundNtuplets, sizeof(GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>));
 
   kernel_create<<<1000,256>>>(doublets.data(), theCells, isOuterHitOfCell);
+
+  kernel_connect<<<1000,256>>>(doublets.data(), theCells, isOuterHitOfCell, theInnerNeighbors, thePtMin, theRegionOriginX, theRegionOriginY, theRegionOriginRadius, theThetaCut, thePhiCut);
 
 }
 
