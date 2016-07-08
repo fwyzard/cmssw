@@ -5,7 +5,7 @@ template< int maxSize, class T>
 struct GPUSimpleVector
 {
 	__inline__ __device__
-	int push(const T& element) {
+	int push_back(const T& element) {
 
 		auto previousSize = m_size++;
 		if(previousSize<maxSize)
@@ -22,8 +22,8 @@ struct GPUSimpleVector
 		{
 			auto previousSize = m_size--;
 			return m_data[previousSize-1];
-		}
-
+		} else
+                        return T();
 	};
 
 	__inline__ __host__ __device__
