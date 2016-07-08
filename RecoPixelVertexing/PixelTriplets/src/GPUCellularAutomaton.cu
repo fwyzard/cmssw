@@ -8,7 +8,7 @@ using CAntuplet = GPUSimpleVector<4, GPUCACell<4>*>;
 template<int numberOfLayers>
 __global__
 void kernel_create(const GPULayerDoublets* const* gpuDoublets,
-		   GPUCACell<numberOfLayers>** cells, 
+		   GPUCACell<numberOfLayers>** cells,
                    GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> isOuterHitOfCell)
 {
 	unsigned int layerPairIndex = blockIdx.y;
@@ -27,7 +27,7 @@ void kernel_create(const GPULayerDoublets* const* gpuDoublets,
 
 template<int numberOfLayers>
 __global__
-void kernel_connect(const GPULayerDoublets* const* gpuDoublets, 
+void kernel_connect(const GPULayerDoublets* const* gpuDoublets,
                     GPUCACell<numberOfLayers>** cells,
 		    GPUArena<numberOfLayers-1, 4, GPUCACell<numberOfLayers>> isOuterHitOfCell,
 		    GPUArena<numberOfLayers-2, 4, GPUCACell<numberOfLayers>> innerNeighbors,
@@ -83,24 +83,27 @@ void kernel_find_ntuplets(const GPULayerDoublets* const* gpuDoublets,
 
 template<unsigned int theNumberOfLayers, unsigned int maxNumberOfQuadruplets>
 void
-GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<const GPULayerDoublets *, 
+GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<const GPULayerDoublets *,
                                                                      theNumberOfLayers-1> const & doublets)
 {
   int numberOfChunksIn1stArena = 0;
   std::array<int, theNumberOfLayers-1> numberOfKeysIn1stArena;
+  std::cout << "numberOfKeysIn1stArena size " <<  numberOfKeysIn1stArena.size() << std::endl;
   for (size_t i = 0; i < theNumberOfLayers-1; ++i) {
     numberOfKeysIn1stArena[i] = doublets[i]->layers[1].size;
     numberOfChunksIn1stArena += doublets[i]->size;
+    std::cout << "numberOfKeysIn1stArena[" << i << "]: " << numberOfKeysIn1stArena[i] << std::endl;
   }
   GPUArena<theNumberOfLayers-1, 4, GPUCACell<theNumberOfLayers>> isOuterHitOfCell(numberOfChunksIn1stArena, numberOfKeysIn1stArena);
 
   int numberOfChunksIn2ndArena = 0;
   std::array<int, theNumberOfLayers-2> numberOfKeysIn2ndArena;
   for (size_t i = 1; i < theNumberOfLayers-1; ++i) {
-    numberOfKeysIn2ndArena[i] = doublets[i]->size;
+    numberOfKeysIn2ndArena[i-1] = doublets[i]->size;
     numberOfChunksIn2ndArena += doublets[i-1]->size;
   }
-  GPUArena<theNumberOfLayers-2, 4, GPUCACell<theNumberOfLayers>> theInnerNeighbors(numberOfChunksIn2ndArena, numberOfKeysIn2ndArena);
+  GPUArena<theNumberOfLayers-2, 4, GPUCACell<theNumberOfLayers>>
+                          theInnerNeighbors(numberOfChunksIn2ndArena, numberOfKeysIn2ndArena);
 
   GPUCACell<theNumberOfLayers>* theCells[theNumberOfLayers-1];
   for (unsigned int i = 0; i< theNumberOfLayers-1; ++i)
