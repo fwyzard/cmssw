@@ -82,7 +82,7 @@ class GPUArenaIterator {
     }
 
     __device__ 
-    T & get_next() {
+    T * get_next() {
       if(cursorInChunk < 0) {
         //No more elements left in chunk, go to next chunk
         //assuming there are more chunks because you hopefully called hasNext before
@@ -170,8 +170,8 @@ class GPUArena {
     }
 
     __device__
-    GPUArenaIterator<CHUNK_SIZE, T*> iterator(int layer, int elementId) {
-      return GPUArenaIterator<CHUNK_SIZE, T*>(get_head_chunk(layer, elementId));
+    GPUArenaIterator<CHUNK_SIZE, T> iterator(int layer, int elementId) {
+      return GPUArenaIterator<CHUNK_SIZE, T>(get_head_chunk(layer, elementId));
     }
 
     __device__
