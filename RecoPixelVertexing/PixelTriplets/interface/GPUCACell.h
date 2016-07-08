@@ -112,7 +112,7 @@ public:
     }
 
     __device__
-    void check_alignment_and_tag(const GPUCACell<numberOfLayers>* innerCell, const float ptmin, const float region_origin_x, const float region_origin_y, const float region_origin_radius, const float thetaCut, const float phiCut) {
+    bool check_alignment_and_tag(const GPUCACell<numberOfLayers>* innerCell, const float ptmin, const float region_origin_x, const float region_origin_y, const float region_origin_radius, const float thetaCut, const float phiCut) {
 
         return (are_aligned_RZ(innerCell, ptmin, thetaCut) && have_similar_curvature(innerCell, region_origin_x, region_origin_y, region_origin_radius, phiCut));
 
