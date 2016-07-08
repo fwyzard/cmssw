@@ -1,9 +1,10 @@
+#include <vector>
+#include <array>
+
 #include "RecoTracker/TkHitPairs/interface/RecHitsSortedInPhi.h"
 #include "RecoPixelVertexing/PixelTriplets/interface/GPUCACell.h"
 #include "RecoPixelVertexing/PixelTriplets/interface/GPUArena.h"
 #include "RecoPixelVertexing/PixelTriplets/interface/GPUCellularAutomaton.h"
-
-using CAntuplet = GPUSimpleVector<4, GPUCACell<4>*>;
 
 template<int numberOfLayers>
 __global__
@@ -49,11 +50,10 @@ void kernel_connect(const GPULayerDoublets* const* gpuDoublets,
       while (innerNeighborsIterator.has_next())
       {
         otherCell = innerNeighborsIterator.get_next();
-        if(cells[layerPairIndex][i].check_alignment_and_tag(otherCell,
+        if (cells[layerPairIndex][i].check_alignment_and_tag(otherCell,
               ptmin, region_origin_x, region_origin_y,
               region_origin_radius, thetaCut, phiCut))
           innerNeighbors.push_back(layerPairIndex,i,otherCell);
-
       }
     }
   }
@@ -63,19 +63,20 @@ template<int numberOfLayers, int maxNumberOfQuadruplets>
 __global__
 void kernel_find_ntuplets(const GPULayerDoublets* const* gpuDoublets,
                           GPUCACell<numberOfLayers>** cells,
-                          GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets,
+                          GPUSimpleVector<maxNumberOfQuadruplets, GPUSimpleVector<4, int>>* foundNtuplets,
                           GPUArena<numberOfLayers-2, 4, GPUCACell<numberOfLayers>> theInnerNeighbors,
                           unsigned int minHitsPerNtuplet)
 {
   unsigned int cellIndexInLastLayerPair = threadIdx.x + blockIdx.x * blockDim.x;
   constexpr unsigned int lastLayerPairIndex = numberOfLayers - 2;
-  CAntuplet tmpNtuplet;
+
+  GPUSimpleVector<4, GPUCACell<4>*> stack;
 
   for (int i = cellIndexInLastLayerPair; i < gpuDoublets[lastLayerPairIndex]->size;
       i += gridDim.x * blockDim.x)
   {
-    tmpNtuplet.reset();
-    cells[lastLayerPairIndex][i].find_ntuplets(foundNtuplets, theInnerNeighbors, tmpNtuplet, minHitsPerNtuplet);
+    stack.reset();
+    cells[lastLayerPairIndex][i].find_ntuplets(foundNtuplets, theInnerNeighbors, stack, minHitsPerNtuplet);
   }
 
 }
@@ -83,9 +84,10 @@ void kernel_find_ntuplets(const GPULayerDoublets* const* gpuDoublets,
 
 template<unsigned int theNumberOfLayers, unsigned int maxNumberOfQuadruplets>
 void
-GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<const GPULayerDoublets *, 
-                                                                     theNumberOfLayers-1> const & doublets)
-{
+GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(
+  std::array<const GPULayerDoublets *, theNumberOfLayers-1> const & doublets, 
+  std::vector<std::array<int, 4>> & quadruplets
+) {
   int numberOfChunksIn1stArena = 0;
   std::array<int, theNumberOfLayers-1> numberOfKeysIn1stArena;
   for (size_t i = 0; i < theNumberOfLayers-1; ++i) {
@@ -106,14 +108,22 @@ GPUCellularAutomaton<theNumberOfLayers, maxNumberOfQuadruplets>::run(std::array<
   for (unsigned int i = 0; i< theNumberOfLayers-1; ++i)
     cudaMalloc(& theCells[i], doublets[i]->size * sizeof(GPUCACell<theNumberOfLayers>));
 
-  GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>* foundNtuplets;
-  cudaMalloc(& foundNtuplets, sizeof(GPUSimpleVector<maxNumberOfQuadruplets, CAntuplet>));
+  GPUSimpleVector<maxNumberOfQuadruplets, GPUSimpleVector<4, int>>* foundNtuplets;
+  cudaMalloc(& foundNtuplets, sizeof(GPUSimpleVector<maxNumberOfQuadruplets, GPUSimpleVector<4, int>>));
+  cudaMemset(foundNtuplets, 0x00, sizeof(GPUSimpleVector<maxNumberOfQuadruplets, GPUSimpleVector<4, int>>));
 
   kernel_create<<<1000,256>>>(doublets.data(), theCells, isOuterHitOfCell);
 
   kernel_connect<<<1000,256>>>(doublets.data(), theCells, isOuterHitOfCell, theInnerNeighbors, thePtMin, theRegionOriginX, theRegionOriginY, theRegionOriginRadius, theThetaCut, thePhiCut);
 
   kernel_find_ntuplets<<<1000,256>>>(doublets.data(), theCells, foundNtuplets, theInnerNeighbors, 4);
+
+  auto h_foundNtuplets = new GPUSimpleVector<maxNumberOfQuadruplets, GPUSimpleVector<4, GPUCACell<4>>>();
+  cudaMemcpy(h_foundNtuplets, foundNtuplets, sizeof(GPUSimpleVector<maxNumberOfQuadruplets, GPUSimpleVector<4, GPUCACell<4>>>), cudaMemcpyDeviceToHost);
+
+  quadruplets.resize(h_foundNtuplets->size());
+  memcpy(quadruplets.data(), h_foundNtuplets->m_data, h_foundNtuplets->size() * sizeof(std::array<int, 4>));
+
 }
 
 template class GPUCellularAutomaton<4, 1000>;

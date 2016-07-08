@@ -16,7 +16,7 @@ template<int numberOfLayers>
 class GPUCACell {
 public:
 
-    using CAntuplet = GPUSimpleVector<numberOfLayers, GPUCACell<numberOfLayers>* >;
+    using CAntuplet = GPUSimpleVector<numberOfLayers, GPUCACell<numberOfLayers>>;
     __device__
     GPUCACell()
     {
@@ -173,18 +173,30 @@ public:
 
     template<int maxNumberOfQuadruplets>
     __device__
-    void find_ntuplets(GPUSimpleVector<maxNumberOfQuadruplets,CAntuplet>* foundNtuplets, GPUArena<numberOfLayers-2,4,GPUCACell<numberOfLayers>>& theInnerNeighbors,  CAntuplet& tmpNtuplet, const unsigned int minHitsPerNtuplet) const {
+    void find_ntuplets(
+        GPUSimpleVector<maxNumberOfQuadruplets,GPUSimpleVector<4, int>>* foundNtuplets, 
+        GPUArena<numberOfLayers-2,4,GPUCACell<numberOfLayers>>& theInnerNeighbors,  
+        GPUSimpleVector<4, GPUCACell<4>*>& tmpNtuplet, 
+        const unsigned int minHitsPerNtuplet
+    ) const {
 
         // the building process for a track ends if:
         // it has no right neighbor
         // it has no compatible neighbor
         // the ntuplets is then saved if the number of hits it contains is greater than a threshold
-		GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator = theInnerNeighbors.iterator(theLayerIdInFourLayers,theDoubletId);
-		GPUCACell<numberOfLayers>* otherCell;
+        GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator = theInnerNeighbors.iterator(theLayerIdInFourLayers,theDoubletId);
+        GPUCACell<numberOfLayers>* otherCell;
+        GPUSimpleVector<4, int> found;
 
         if (innerNeighborsIterator.has_next() == 0) {
-            if (tmpNtuplet.size() >= minHitsPerNtuplet - 1)
-                foundNtuplets->push_back(tmpNtuplet);
+            if (tmpNtuplet.size() >= minHitsPerNtuplet - 1) {
+                found.reset();
+                found.push_back(tmpNtuplet.m_data[0]->get_inner_hit_id());
+                found.push_back(tmpNtuplet.m_data[1]->get_inner_hit_id());
+                found.push_back(tmpNtuplet.m_data[2]->get_inner_hit_id());
+                found.push_back(tmpNtuplet.m_data[2]->get_outer_hit_id());
+                foundNtuplets->push_back(found);
+            }
             else
                 return;
         } else {

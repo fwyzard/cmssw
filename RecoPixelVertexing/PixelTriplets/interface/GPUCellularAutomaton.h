@@ -2,14 +2,13 @@
 #define GPUCELLULARAUTOMATON_H_
 
 #include <array>
+#include <vector>
+#include <cuda.h>
 
 #include "TrackingTools/TransientTrackingRecHit/interface/SeedingLayerSetsHits.h"
 #include "RecoTracker/TkTrackingRegions/interface/TrackingRegion.h"
 #include "RecoTracker/TkHitPairs/interface/RecHitsSortedInPhi.h"
-#include "RecoPixelVertexing/PixelTriplets/interface/GPUSimpleVector.h"
-
-#include <cuda.h>
-
+#include "RecoPixelVertexing/PixelTriplets/plugins/CACell.h"
 
 
 template<unsigned int theNumberOfLayers, unsigned int maxNumberOfQuadruplets>
@@ -26,7 +25,7 @@ public:
     {
     }
 
-    void run(std::array<const GPULayerDoublets *, theNumberOfLayers-1> const & doublets);
+    void run(std::array<const GPULayerDoublets *, theNumberOfLayers-1> const & doublets, std::vector<std::array<int, 4>> & quadruplets);
 
 private:
 
