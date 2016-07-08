@@ -91,10 +91,10 @@ public:
     }
 
     __device__
-    void evolve(GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>*>& InnerNeighbors) {
+    void evolve(GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>>& InnerNeighbors) {
 
         hasSameStateNeighbors = 0;
-		GPUArenaIterator<4, GPUCACell<numberOfLayers>*> innerNeighborsIterator(theLayerIdInFourLayers,theDoubletId);
+		GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator(theLayerIdInFourLayers,theDoubletId);
 		GPUCACell<numberOfLayers>* otherCell;
 		while (innerNeighborsIterator.has_next())
 		{
@@ -193,13 +193,13 @@ public:
     // based on the neighborhood connections between cells.
 
     __device__
-    void find_ntuplets(GPUSimpleVector<100,CAntuplet>* foundNtuplets, GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>*>& theInnerNeighbors,  CAntuplet& tmpNtuplet, const unsigned int minHitsPerNtuplet) const {
+    void find_ntuplets(GPUSimpleVector<100,CAntuplet>* foundNtuplets, GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>>& theInnerNeighbors,  CAntuplet& tmpNtuplet, const unsigned int minHitsPerNtuplet) const {
 
         // the building process for a track ends if:
         // it has no right neighbor
         // it has no compatible neighbor
         // the ntuplets is then saved if the number of hits it contains is greater than a threshold
-		GPUArenaIterator<4, GPUCACell<numberOfLayers>*> innerNeighborsIterator(theLayerIdInFourLayers,theDoubletId);
+		GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator(theLayerIdInFourLayers,theDoubletId);
 		GPUCACell<numberOfLayers>* otherCell;
 
         if (theInnerNeighbors.has_next() == 0) {
