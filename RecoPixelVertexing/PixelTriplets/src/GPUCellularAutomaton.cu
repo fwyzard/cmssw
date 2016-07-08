@@ -41,7 +41,7 @@ void kernel_connect(const GPULayerDoublets* gpuDoublets, GPUCACell<numberOfLayer
 		for (int i = cellIndexInLayerPair; i < gpuDoublets[layerPairIndex].size;
 				i += gridDim.x * blockDim.x)
 		{
-			GPUArenaIterator<4, GPUCACell<numberOfLayers>*> innerNeighborsIterator(layerPairIndex,i);
+			GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator(layerPairIndex,i);
 			GPUCACell<numberOfLayers>* otherCell();
 			while (innerNeighborsIterator.has_next())
 			{
