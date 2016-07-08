@@ -91,27 +91,6 @@ public:
     }
 
     __device__
-    void evolve(GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>>& InnerNeighbors) {
-
-        hasSameStateNeighbors = 0;
-		GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator(theLayerIdInFourLayers,theDoubletId);
-		GPUCACell<numberOfLayers>* otherCell;
-		while (innerNeighborsIterator.has_next())
-		{
-			otherCell = innerNeighborsIterator.get_next();
-
-
-            if (otherCell->get_CA_state() == theCAState) {
-
-                hasSameStateNeighbors = 1;
-
-                break;
-            }
-		}
-
-    }
-
-    __device__
     bool check_alignment_and_tag(const GPUCACell<numberOfLayers>* innerCell, const float ptmin, const float region_origin_x, const float region_origin_y, const float region_origin_radius, const float thetaCut, const float phiCut) {
 
         return (are_aligned_RZ(innerCell, ptmin, thetaCut) && have_similar_curvature(innerCell, region_origin_x, region_origin_y, region_origin_radius, phiCut));
@@ -192,17 +171,18 @@ public:
     // trying to free the track building process from hardcoded layers, leaving the visit of the graph
     // based on the neighborhood connections between cells.
 
+    template<int maxNumberOfQuadruplets>
     __device__
-    void find_ntuplets(GPUSimpleVector<100,CAntuplet>* foundNtuplets, GPUArena<numberOfLayers,4,GPUCACell<numberOfLayers>>& theInnerNeighbors,  CAntuplet& tmpNtuplet, const unsigned int minHitsPerNtuplet) const {
+    void find_ntuplets(GPUSimpleVector<maxNumberOfQuadruplets,CAntuplet>* foundNtuplets, GPUArena<numberOfLayers-2,4,GPUCACell<numberOfLayers>>& theInnerNeighbors,  CAntuplet& tmpNtuplet, const unsigned int minHitsPerNtuplet) const {
 
         // the building process for a track ends if:
         // it has no right neighbor
         // it has no compatible neighbor
         // the ntuplets is then saved if the number of hits it contains is greater than a threshold
-		GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator(theLayerIdInFourLayers,theDoubletId);
+		GPUArenaIterator<4, GPUCACell<numberOfLayers>> innerNeighborsIterator = theInnerNeighbors.iterator(theLayerIdInFourLayers,theDoubletId);
 		GPUCACell<numberOfLayers>* otherCell;
 
-        if (theInnerNeighbors.has_next() == 0) {
+        if (innerNeighborsIterator.has_next() == 0) {
             if (tmpNtuplet.size() >= minHitsPerNtuplet - 1)
                 foundNtuplets->push_back(tmpNtuplet);
             else
@@ -210,14 +190,14 @@ public:
         } else {
 
 
-			while (innerNeighborsIterator.has_next())
-			{
-				otherCell = innerNeighborsIterator.get_next();
-				tmpNtuplet.push_back(otherCell);
-				otherCell->find_ntuplets(foundNtuplets, theInnerNeighbors, tmpNtuplet, minHitsPerNtuplet);
-                tmpNtuplet.pop_back();
+          while (innerNeighborsIterator.has_next())
+          {
+            otherCell = innerNeighborsIterator.get_next();
+            tmpNtuplet.push_back(otherCell);
+            otherCell->find_ntuplets(foundNtuplets, theInnerNeighbors, tmpNtuplet, minHitsPerNtuplet);
+            tmpNtuplet.pop_back();
 
-			}
+          }
 
         }
     }
