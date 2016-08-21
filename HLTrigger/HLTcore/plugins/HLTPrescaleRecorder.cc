@@ -122,8 +122,8 @@ void HLTPrescaleRecorder::beginRun(edm::Run const& iRun, const edm::EventSetup& 
     ParameterSet iPS(pPSet.getParameter<ParameterSet>(psetName_));
   
     string defaultLabel(iPS.getParameter<std::string>("lvl1DefaultLabel"));
-    vector<string> labels(iPS.getParameter<std::vector<std::string> >("lvl1Labels"));
-    vector<ParameterSet> vpTable(iPS.getParameter<std::vector<ParameterSet> >("prescaleTable"));
+    vector<string> labels(iPS.getParameter<std::vector<std::string>>("lvl1Labels"));
+    vector<ParameterSet> vpTable(iPS.getParameter<std::vector<ParameterSet>>("prescaleTable"));
 
     unsigned int set(0);
     const unsigned int n(labels.size());
@@ -131,11 +131,11 @@ void HLTPrescaleRecorder::beginRun(edm::Run const& iRun, const edm::EventSetup& 
       if (labels[i]==defaultLabel) set=i;
     }
 
-    map<string,vector<unsigned int> > table;
+    map<string,vector<double>> table;
     const unsigned int m (vpTable.size());
     for (unsigned int i=0; i!=m; ++i) {
       table[vpTable[i].getParameter<std::string>("pathName")] = 
-	vpTable[i].getParameter<std::vector<unsigned int> >("prescales");
+	vpTable[i].getParameter<std::vector<double>>("prescales");
     }
     hlt_=HLTPrescaleTable(set,labels,table);
 
@@ -233,11 +233,11 @@ void HLTPrescaleRecorder::endRun(edm::Run const& iRun, const edm::EventSetup& iS
     oss << " " << i << "/'" << labels.at(i) << "'";
   }
   oss << endl;
-  const map<string,vector<unsigned int> >& table(hlt_.table());
+  auto const & table(hlt_.table());
   oss << "PrescaleTable: # of paths = " << table.size() << endl;
-  const map<string,vector<unsigned int> >::const_iterator tb(table.begin());
-  const map<string,vector<unsigned int> >::const_iterator te(table.end());
-  for (map<string,vector<unsigned int> >::const_iterator ti=tb; ti!=te; ++ti) {
+  const auto tb(table.begin());
+  const auto te(table.end());
+  for (auto ti=tb; ti!=te; ++ti) {
     for (unsigned int i=0; i!=n; ++i) {
       oss << " " << ti->second.at(i);
     }

@@ -94,15 +94,15 @@ class HLTConfigData {
 
   /// HLTLevel1GTSeed module
   /// HLTLevel1GTSeed modules for all trigger paths
-  const std::vector<std::vector<std::pair<bool,std::string> > >& hltL1GTSeeds() const;
+  const std::vector<std::vector<std::pair<bool,std::string>>>& hltL1GTSeeds() const;
   /// HLTLevel1GTSeed modules for trigger path with name
-  const std::vector<std::pair<bool,std::string> >& hltL1GTSeeds(const std::string& trigger) const;
+  const std::vector<std::pair<bool,std::string>>& hltL1GTSeeds(const std::string& trigger) const;
   /// HLTLevel1GTSeed modules for trigger path with index i
-  const std::vector<std::pair<bool,std::string> >& hltL1GTSeeds(unsigned int trigger) const;
+  const std::vector<std::pair<bool,std::string>>& hltL1GTSeeds(unsigned int trigger) const;
 
   /// HLTL1TSeed module
   /// HLTL1TSeed modules for all trigger paths
-  const std::vector<std::vector<std::string> >& hltL1TSeeds() const;
+  const std::vector<std::vector<std::string>>& hltL1TSeeds() const;
   /// HLTL1TSeed modules for trigger path with name
   const std::vector<std::string>& hltL1TSeeds(const std::string& trigger) const;
   /// HLTL1TSeed modules for trigger path with index i
@@ -117,7 +117,7 @@ class HLTConfigData {
   /// index of stream with name
   unsigned int streamIndex(const std::string& stream) const;
   /// names of datasets for all streams
-  const std::vector<std::vector<std::string> >& streamContents() const;
+  const std::vector<std::vector<std::string>>& streamContents() const;
   /// names of datasets in stream with index i
   const std::vector<std::string>& streamContent(unsigned int stream) const;
   /// names of datasets in stream with name
@@ -132,7 +132,7 @@ class HLTConfigData {
   /// index of dataset with name
   unsigned int datasetIndex(const std::string& dataset) const;
   /// names of trigger paths for all datasets
-  const std::vector<std::vector<std::string> >& datasetContents() const;
+  const std::vector<std::vector<std::string>>& datasetContents() const;
   /// names of trigger paths in dataset with index i
   const std::vector<std::string>& datasetContent(unsigned int dataset) const;
   /// names of trigger paths in dataset with name
@@ -146,7 +146,7 @@ class HLTConfigData {
   unsigned int prescaleValue(unsigned int set, const std::string& trigger) const;
   /// low-level data member access 
   const std::vector<std::string>& prescaleLabels() const;
-  const std::map<std::string,std::vector<unsigned int> >& prescaleTable() const;
+  const std::map<std::string,std::vector<double>>& prescaleTable() const;
 
   /// technical: id() function needed for use with ThreadSafeRegistry
   edm::ParameterSetID id() const;
@@ -159,23 +159,23 @@ class HLTConfigData {
   std::string globalTag_;
   std::string tableName_;
   std::vector<std::string> triggerNames_;
-  std::vector<std::vector<std::string> > moduleLabels_;
-  std::vector<std::vector<std::string> > saveTagsModules_;
+  std::vector<std::vector<std::string>> moduleLabels_;
+  std::vector<std::vector<std::string>> saveTagsModules_;
 
   std::map<std::string,unsigned int> triggerIndex_;
-  std::vector<std::map<std::string,unsigned int> > moduleIndex_;
+  std::vector<std::map<std::string,unsigned int>> moduleIndex_;
 
   unsigned int l1tType_;
-  std::vector<std::vector<std::pair<bool,std::string> > > hltL1GTSeeds_;
-  std::vector<std::vector<std::string> > hltL1TSeeds_;
+  std::vector<std::vector<std::pair<bool,std::string>>> hltL1GTSeeds_;
+  std::vector<std::vector<std::string>> hltL1TSeeds_;
 
   std::vector<std::string> streamNames_;
   std::map<std::string,unsigned int> streamIndex_;
-  std::vector<std::vector<std::string> > streamContents_;
+  std::vector<std::vector<std::string>> streamContents_;
 
   std::vector<std::string> datasetNames_;
   std::map<std::string,unsigned int> datasetIndex_;
-  std::vector<std::vector<std::string> > datasetContents_;
+  std::vector<std::vector<std::string>> datasetContents_;
 
   trigger::HLTPrescaleTable hltPrescaleTable_;
 

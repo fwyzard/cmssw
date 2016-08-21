@@ -27,7 +27,7 @@ namespace trigger
     /// names of prescale sets
     std::vector<std::string> labels_;
     /// prescale sets keyed on trigger path name
-    std::map<std::string,std::vector<unsigned int> > table_;
+    std::map<std::string,std::vector<double>> table_;
     /// consistency condition: all vectors must have the same length
 
   ///methods
@@ -42,10 +42,10 @@ namespace trigger
     }
 
     /// high-level user access method: prescale for given trigger path
-    unsigned int prescale(unsigned int set, const std::string& trigger) const {
-      const std::map<std::string,std::vector<unsigned int> >::const_iterator it(table_.find(trigger));
+    double prescale(unsigned int set, const std::string& trigger) const {
+      const auto it = table_.find(trigger);
       if ((it==table_.end()) || (set>=it->second.size())) {
-	return 1;
+	return 1.;
       } else {
 	return it->second[set];
       }
@@ -55,14 +55,14 @@ namespace trigger
     HLTPrescaleTable(): set_(0), labels_(), table_() { }
 
     /// real constructor taking payload
-    HLTPrescaleTable(unsigned int set, const std::vector<std::string>& labels, const std::map<std::string,std::vector<unsigned int> >& table):
+    HLTPrescaleTable(unsigned int set, const std::vector<std::string>& labels, const std::map<std::string,std::vector<double>> & table):
      set_(set), labels_(labels), table_(table) {
       /// checking consistency
       const unsigned int n(labels_.size());
       assert((((set_==0)&&(n==0)) || (set_<n)));
-      const std::map<std::string,std::vector<unsigned int> >::const_iterator ib(table_.begin());
-      const std::map<std::string,std::vector<unsigned int> >::const_iterator ie(table_.end());
-      for (std::map<std::string,std::vector<unsigned int> >::const_iterator it=ib; it!=ie; ++it) {
+      const auto ib(table_.begin());
+      const auto ie(table_.end());
+      for (auto it=ib; it!=ie; ++it) {
 	assert (it->second.size()==n);
       }
     }
@@ -75,7 +75,7 @@ namespace trigger
     /// low-level const accessors for data members
     unsigned int set() const {return set_;}
     const std::vector<std::string>& labels() const {return labels_;}
-    const std::map<std::string,std::vector<unsigned int> >& table() const {return table_;}
+    const std::map<std::string,std::vector<double>> & table() const {return table_;}
 
   };
 }

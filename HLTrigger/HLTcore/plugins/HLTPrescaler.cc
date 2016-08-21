@@ -30,7 +30,7 @@ const unsigned int HLTPrescaler::prescaleSeed_ = 65537;
 //_____________________________________________________________________________
 HLTPrescaler::HLTPrescaler(edm::ParameterSet const& iConfig, const trigger::Efficiency* efficiency) :
   prescaleSet_(0)
-  , prescaleFactor_(1)
+  , prescaleFactor_(1.)
   , eventCount_(0)
   , acceptCount_(0)
   , offsetCount_(0)
@@ -85,7 +85,7 @@ bool HLTPrescaler::filter(edm::Event& iEvent, const edm::EventSetup&)
     if (prescaleService_) {
       std::string const & pathName = iEvent.moduleCallingContext()->placeInPathContext()->pathContext()->pathName();
       const unsigned int oldSet(prescaleSet_);
-      const unsigned int oldPrescale(prescaleFactor_);
+      const double oldPrescale(prescaleFactor_);
 
       edm::Handle<GlobalAlgBlkBxCollection> handle2;
       iEvent.getByToken(gtDigi2Token_,handle2);
@@ -124,12 +124,12 @@ bool HLTPrescaler::filter(edm::Event& iEvent, const edm::EventSetup&)
 
     if (needsInit && (prescaleFactor_ != 0)) {
       // initialize the prescale counter to the first event number multiplied by a big "seed"
-      offsetCount_ = ((uint64_t) (iEvent.id().event() + offsetPhase_) * prescaleSeed_) % prescaleFactor_;
+      offsetCount_ = (unsigned int) std::round(std::fmod((double) (iEvent.id().event() + offsetPhase_) * prescaleSeed_, prescaleFactor_));
     }
   }
 
   const bool result ( (prescaleFactor_ == 0) ? 
-		      false : ((eventCount_ + offsetCount_) % prescaleFactor_ == 0) );
+		      false : (std::fmod((double) (eventCount_ + offsetCount_), prescaleFactor_) < 1.) );
 
   ++eventCount_;
   if (result) ++acceptCount_;

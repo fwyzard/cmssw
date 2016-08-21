@@ -24,7 +24,7 @@ namespace edm {
     // constructor
     PrescaleService::PrescaleService(ParameterSet const& iPS,ActivityRegistry& iReg)
       : forceDefault_(iPS.getParameter<bool>("forceDefault"))
-      , lvl1Labels_(iPS.getParameter<std::vector<std::string> >("lvl1Labels"))
+      , lvl1Labels_(iPS.getParameter<std::vector<std::string>>("lvl1Labels"))
       , lvl1Default_(findDefaultIndex(iPS.getParameter<std::string>("lvl1DefaultLabel"), lvl1Labels_))
       , vpsetPrescales_(iPS.getParameterSetVector("prescaleTable"))
       , prescaleTable_()
@@ -39,19 +39,24 @@ namespace edm {
       }
 
       // Check and store Prescale Table
-      for (unsigned int iVPSet=0; iVPSet < vpsetPrescales_.size(); ++iVPSet) {
-        const ParameterSet& psetPrescales = vpsetPrescales_[iVPSet];
-        const std::string pathName = psetPrescales.getParameter<std::string>("pathName");
-	if (prescaleTable_.find(pathName)!=prescaleTable_.end()) {
+      for (auto const & psetPrescales : vpsetPrescales_) {
+        std::string const & pathName = psetPrescales.getParameter<std::string>("pathName");
+	if (prescaleTable_.find(pathName) != prescaleTable_.end()) {
 	  throw cms::Exception("PrescaleServiceConfigError")
 	    << " Path '" << pathName << "' found more than once!";
 	}
-	std::vector<unsigned int> prescales = psetPrescales.getParameter<std::vector<unsigned int> >("prescales");
-	if (prescales.size()!=lvl1Labels_.size()) {
+	auto prescales = psetPrescales.getParameter<std::vector<double>>("prescales");
+	if (prescales.size() != lvl1Labels_.size()) {
 	  throw cms::Exception("PrescaleServiceConfigError")
 	    << " Path '" << pathName << "' has " << prescales.size() << " prescales, instead of expected " << lvl1Labels_.size() << "!";
 	}
-	prescaleTable_[pathName] = prescales;
+        for (auto prescale: prescales) {
+          // negative values and values between 0 and 1 do not make sense
+          if (prescale < 1 and prescale != 0)
+            throw cms::Exception("PrescaleServiceConfigError")
+	      << " Path '" << pathName << "' has an invalid prescale value " << prescale << ". Valid values are 0, 1, and values greater than 1.";
+        }
+        prescaleTable_[pathName] = prescales;
       }
 
     }
@@ -84,7 +89,7 @@ namespace edm {
       // * each HLTPrescaler instance is part of at least one ptah
 
       // Find all HLTPrescaler instances
-      const std::vector<std::string> allModules=prcPS.getParameter<std::vector<std::string> >("@all_modules");
+      const std::vector<std::string> allModules=prcPS.getParameter<std::vector<std::string>>("@all_modules");
       for(unsigned int i = 0; i < allModules.size(); ++i) {
         ParameterSet const& pset  = prcPS.getParameterSet(allModules[i]);
 	const std::string moduleLabel = pset.getParameter<std::string>("@module_label");
@@ -92,10 +97,10 @@ namespace edm {
         if (moduleType == "HLTPrescaler") module2path[moduleLabel]="";
       }
       // Check all modules on all paths
-      const std::vector<std::string> allPaths = prcPS.getParameter<std::vector<std::string> >("@paths");
+      const std::vector<std::string> allPaths = prcPS.getParameter<std::vector<std::string>>("@paths");
       for (unsigned int iP = 0; iP < allPaths.size(); ++iP) {
         const std::string& pathName = allPaths[iP];
-        std::vector<std::string> modules = prcPS.getParameter<std::vector<std::string> >(pathName);
+        std::vector<std::string> modules = prcPS.getParameter<std::vector<std::string>>(pathName);
         for (unsigned int iM = 0; iM < modules.size(); ++iM) {
           const std::string& moduleLabel = modules[iM];
 	  if (module2path.find(moduleLabel)!=module2path.end()) {
@@ -123,8 +128,8 @@ namespace edm {
       }
 
       // Check paths stored Prescale Table: each path is actually in the process config
-      for (std::map<std::string, std::vector<unsigned int> >::const_iterator it = prescaleTable_.begin(); it!=prescaleTable_.end(); ++it) {
-	if (path2module.find(it->first)==path2module.end()) {
+      for (auto it = prescaleTable_.begin(); it != prescaleTable_.end(); ++it) {
+	if (path2module.find(it->first) == path2module.end()) {
           throw cms::Exception("PrescaleServiceConfigError")
             << " Path '"<< it->first << "' is unknown or does not contain any HLTPrescaler!";
         }
@@ -133,13 +138,13 @@ namespace edm {
     }
     
     // const method
-    unsigned int PrescaleService::getPrescale(std::string const& prescaledPath) const
+    double PrescaleService::getPrescale(std::string const& prescaledPath) const
     {
       return getPrescale(lvl1Default_, prescaledPath);
     }
     
     // const method
-    unsigned int PrescaleService::getPrescale(unsigned int lvl1Index, std::string const& prescaledPath) const
+    double PrescaleService::getPrescale(unsigned int lvl1Index, std::string const& prescaledPath) const
     {
       if (forceDefault_) lvl1Index = lvl1Default_;
 
@@ -148,7 +153,7 @@ namespace edm {
           << "lvl1Index '" << lvl1Index << "' exceeds number of prescale columns " << lvl1Labels_.size() << "!";
       }
       PrescaleTable_t::const_iterator it = prescaleTable_.find(prescaledPath);
-      return (it == prescaleTable_.end()) ? 1 : it->second[lvl1Index];
+      return (it == prescaleTable_.end()) ? 1. : it->second[lvl1Index];
     }
     
     // static method
@@ -167,7 +172,7 @@ namespace edm {
 
       std::vector<std::string> defaultVector;
       defaultVector.push_back(std::string("default"));
-      desc.add<std::vector<std::string> >("lvl1Labels", defaultVector);
+      desc.add<std::vector<std::string>>("lvl1Labels", defaultVector);
 
       // This default vector<ParameterSet> will be used when
       // the configuration does not include this parameter and
@@ -175,14 +180,12 @@ namespace edm {
       std::vector<edm::ParameterSet> defaultVPSet;
       edm::ParameterSet pset0;
       pset0.addParameter<std::string>("pathName", std::string("HLTPath"));
-      std::vector<unsigned> defaultVectorU;
-      defaultVectorU.push_back(1u);
-      pset0.addParameter<std::vector<unsigned> >("prescales", defaultVectorU);
+      pset0.addParameter<std::vector<double>>("prescales", { 1. });
       defaultVPSet.push_back(pset0);
 
       edm::ParameterSetDescription validator;
       validator.add<std::string>("pathName");
-      validator.add<std::vector<unsigned int> >("prescales");
+      validator.add<std::vector<double>>("prescales");
 
       desc.addVPSet("prescaleTable", validator, defaultVPSet);
 

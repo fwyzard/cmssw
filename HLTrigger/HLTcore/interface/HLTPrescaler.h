@@ -37,7 +37,7 @@ namespace trigger {
   };
 }
 
-class HLTPrescaler : public edm::stream::EDFilter<edm::GlobalCache<trigger::Efficiency> >
+class HLTPrescaler : public edm::stream::EDFilter<edm::GlobalCache<trigger::Efficiency>>
 {
 public:
   //
@@ -72,7 +72,7 @@ private:
   unsigned int prescaleSet_;
 
   /// accept one in prescaleFactor_; 0 means never to accept an event
-  unsigned int prescaleFactor_;
+  double prescaleFactor_;
 
   /// event counter
   unsigned int eventCount_;

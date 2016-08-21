@@ -91,8 +91,8 @@ void HLTConfigData::extract()
    // Extract trigger paths (= paths - end_paths)
    if (processPSet_->existsAs<ParameterSet>("@trigger_paths",true)) {
      const ParameterSet& HLTPSet(processPSet_->getParameterSet("@trigger_paths"));
-     if (HLTPSet.existsAs<vector<string> >("@trigger_paths",true)) {
-       triggerNames_= HLTPSet.getParameter<vector<string> >("@trigger_paths");
+     if (HLTPSet.existsAs<vector<string>>("@trigger_paths",true)) {
+       triggerNames_= HLTPSet.getParameter<vector<string>>("@trigger_paths");
      }
    }
 
@@ -100,8 +100,8 @@ void HLTConfigData::extract()
    const unsigned int n(size());
    moduleLabels_.reserve(n);
    for (unsigned int i=0;i!=n; ++i) {
-     if (processPSet_->existsAs<vector<string> >(triggerNames_[i],true)) {
-       moduleLabels_.push_back(processPSet_->getParameter<vector<string> >(triggerNames_[i]));
+     if (processPSet_->existsAs<vector<string>>(triggerNames_[i],true)) {
+       moduleLabels_.push_back(processPSet_->getParameter<vector<string>>(triggerNames_[i]));
      }
    }
    saveTagsModules_.reserve(n);
@@ -179,13 +179,13 @@ void HLTConfigData::extract()
    // Extract and fill streams information
    if (processPSet_->existsAs<ParameterSet>("streams",true)) {
      const ParameterSet& streams(processPSet_->getParameterSet("streams"));
-     streamNames_=streams.getParameterNamesForType<vector<string> >();
+     streamNames_=streams.getParameterNamesForType<vector<string>>();
      sort(streamNames_.begin(),streamNames_.end());
      const unsigned int n(streamNames_.size());
      streamContents_.resize(n);
      for (unsigned int i=0; i!=n; ++i) {
        streamIndex_[streamNames_[i]]=i;
-       streamContents_[i]=streams.getParameter<vector<string> >(streamNames_[i]);
+       streamContents_[i]=streams.getParameter<vector<string>>(streamNames_[i]);
        sort(streamContents_[i].begin(),streamContents_[i].end());
      }
      
@@ -194,13 +194,13 @@ void HLTConfigData::extract()
    // Extract and fill datasets information
    if (processPSet_->existsAs<ParameterSet>("datasets",true)) {
      const ParameterSet& datasets(processPSet_->getParameterSet("datasets"));
-     datasetNames_=datasets.getParameterNamesForType<vector<string> >();
+     datasetNames_=datasets.getParameterNamesForType<vector<string>>();
      sort(datasetNames_.begin(),datasetNames_.end());
      const unsigned int n(datasetNames_.size());
      datasetContents_.resize(n);
      for (unsigned int i=0; i!=n; ++i) {
        datasetIndex_[datasetNames_[i]]=i;
-       datasetContents_[i]=datasets.getParameter< vector<string> >(datasetNames_[i]);
+       datasetContents_[i]=datasets.getParameter< vector<string>>(datasetNames_[i]);
        sort(datasetContents_[i].begin(),datasetContents_[i].end());
      }
    }
@@ -225,21 +225,21 @@ void HLTConfigData::extract()
        defaultLabel = iPS.getParameter<string>("lvl1DefaultLabel");
      }
      vector<string> labels;
-     if (iPS.existsAs<vector<string> >("lvl1Labels",true)) {
-       labels = iPS.getParameter<vector<string> >("lvl1Labels");
+     if (iPS.existsAs<vector<string>>("lvl1Labels",true)) {
+       labels = iPS.getParameter<vector<string>>("lvl1Labels");
      }
      unsigned int set(0);
      const unsigned int n(labels.size());
      for (unsigned int i=0; i!=n; ++i) {
        if (labels[i]==defaultLabel) set=i;
      }
-     map<string,vector<unsigned int> > table;
-     if (iPS.existsAs< vector<ParameterSet> >("prescaleTable",true)) {
+     map<string,vector<double>> table;
+     if (iPS.existsAs< vector<ParameterSet>>("prescaleTable",true)) {
        const vector<ParameterSet>& vpTable(iPS.getParameterSetVector("prescaleTable"));
        const unsigned int m (vpTable.size());
        for (unsigned int i=0; i!=m; ++i) {
 	 table[vpTable[i].getParameter<std::string>("pathName")] = 
-	   vpTable[i].getParameter<std::vector<unsigned int> >("prescales");
+	   vpTable[i].getParameter<std::vector<double>>("prescales");
        }
      }
      if (n>0) {
@@ -391,11 +391,11 @@ void HLTConfigData::dump(const std::string& what) const {
        cout << " " << i << "/'" << labels.at(i) << "'";
      }
      if (n>0) cout << endl;
-     const map<string,vector<unsigned int> >& table(hltPrescaleTable_.table());
+     const auto & table(hltPrescaleTable_.table());
      cout << "HLTConfigData::dump: PrescaleTable: # of paths: " << table.size() << endl;
-     const map<string,vector<unsigned int> >::const_iterator tb(table.begin());
-     const map<string,vector<unsigned int> >::const_iterator te(table.end());
-     for (map<string,vector<unsigned int> >::const_iterator ti=tb; ti!=te; ++ti) {
+     const auto tb(table.begin());
+     const auto te(table.end());
+     for (auto ti=tb; ti!=te; ++ti) {
        for (unsigned int i=0; i!=n; ++i) {
 	 cout << " " << ti->second.at(i);
        }
@@ -523,19 +523,19 @@ unsigned int HLTConfigData::l1tType() const {
   return l1tType_;
 }
 
-const std::vector<std::vector<std::pair<bool,std::string> > >& HLTConfigData::hltL1GTSeeds() const {
+const std::vector<std::vector<std::pair<bool,std::string>>>& HLTConfigData::hltL1GTSeeds() const {
   return hltL1GTSeeds_;
 }
 
-const std::vector<std::pair<bool,std::string> >& HLTConfigData::hltL1GTSeeds(const std::string& trigger) const {
+const std::vector<std::pair<bool,std::string>>& HLTConfigData::hltL1GTSeeds(const std::string& trigger) const {
   return hltL1GTSeeds(triggerIndex(trigger));
 }
 
-const std::vector<std::pair<bool,std::string> >& HLTConfigData::hltL1GTSeeds(unsigned int trigger) const {
+const std::vector<std::pair<bool,std::string>>& HLTConfigData::hltL1GTSeeds(unsigned int trigger) const {
   return hltL1GTSeeds_.at(trigger);
 }
 
-const std::vector<std::vector<std::string > >& HLTConfigData::hltL1TSeeds() const {
+const std::vector<std::vector<std::string >>& HLTConfigData::hltL1TSeeds() const {
   return hltL1TSeeds_;
 }
 
@@ -565,7 +565,7 @@ unsigned int HLTConfigData::streamIndex(const std::string& stream) const {
   }
 }
 
-const std::vector<std::vector<std::string> >& HLTConfigData::streamContents() const {
+const std::vector<std::vector<std::string>>& HLTConfigData::streamContents() const {
   return streamContents_;
 }
 
@@ -595,7 +595,7 @@ unsigned int HLTConfigData::datasetIndex(const std::string& dataset) const {
   }
 }
 
-const std::vector<std::vector<std::string> >& HLTConfigData::datasetContents() const {
+const std::vector<std::vector<std::string>>& HLTConfigData::datasetContents() const {
   return datasetContents_;
 }
 
@@ -618,7 +618,7 @@ unsigned int HLTConfigData::prescaleValue(unsigned int set, const std::string& t
 const std::vector<std::string>& HLTConfigData::prescaleLabels() const {
   return hltPrescaleTable_.labels();
 }
-const std::map<std::string,std::vector<unsigned int> >& HLTConfigData::prescaleTable() const {
+const std::map<std::string,std::vector<double>>& HLTConfigData::prescaleTable() const {
   return hltPrescaleTable_.table();
 }
 

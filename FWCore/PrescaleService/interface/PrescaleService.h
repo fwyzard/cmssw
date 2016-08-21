@@ -33,12 +33,12 @@ namespace edm {
       // member functions
       //
 
-      unsigned int getPrescale(std::string const& prescaledPath) const;
-      unsigned int getPrescale(unsigned int lvl1Index,
+      double getPrescale(std::string const& prescaledPath) const;
+      double getPrescale(unsigned int lvl1Index,
                                std::string const& prescaledPath) const;
 
-      typedef std::vector<std::string>                          VString_t;
-      typedef std::map<std::string, std::vector<unsigned int> > PrescaleTable_t;
+      typedef std::vector<std::string>                   VString_t;
+      typedef std::map<std::string, std::vector<double>> PrescaleTable_t;
       unsigned int getLvl1IndexDefault() const {return lvl1Default_;}
       const VString_t& getLvl1Labels()   const {return lvl1Labels_;}
       const PrescaleTable_t& getPrescaleTable() const {return prescaleTable_;}

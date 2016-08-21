@@ -81,8 +81,9 @@
   <class name="edm::Wrapper<trigger::TriggerEventWithRefs>" splitLevel="0"/>
 
   <class name="std::map<std::string,std::vector<unsigned int> >"/>
-  <class name="trigger::HLTPrescaleTable" ClassVersion="10">
+  <class name="trigger::HLTPrescaleTable" ClassVersion="11">
    <version ClassVersion="10" checksum="2181075001"/>
+   <version ClassVersion="11" checksum="291569652"/>
   </class>
   <class name="edm::Wrapper<trigger::HLTPrescaleTable>"/>
 

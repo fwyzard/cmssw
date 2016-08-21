@@ -85,7 +85,7 @@ class HLTConfigProvider {
   }
 
   /// names of trigger paths
-  const std::vector<std::string>& triggerNames() const {
+  const std::vector<std::string> & triggerNames() const {
     return hltConfigData_->triggerNames();
   }
   const std::string& triggerName(unsigned int triggerIndex) const {
@@ -98,16 +98,16 @@ class HLTConfigProvider {
   }
 
   /// label(s) of module(s) on a trigger path
-  const std::vector<std::string>& moduleLabels(unsigned int trigger) const {
+  const std::vector<std::string> & moduleLabels(unsigned int trigger) const {
     return hltConfigData_->moduleLabels(trigger);
   }
-  const std::vector<std::string>& moduleLabels(const std::string& trigger) const {
+  const std::vector<std::string> & moduleLabels(const std::string& trigger) const {
     return hltConfigData_->moduleLabels(trigger);
   }
-  const std::vector<std::string>& saveTagsModules(unsigned int trigger) const {
+  const std::vector<std::string> & saveTagsModules(unsigned int trigger) const {
     return hltConfigData_->saveTagsModules(trigger);
   }
-  const std::vector<std::string>& saveTagsModules(const std::string& trigger) const {
+  const std::vector<std::string> & saveTagsModules(const std::string& trigger) const {
     return hltConfigData_->saveTagsModules(trigger);
   }
   const std::string& moduleLabel(unsigned int trigger, unsigned int module) const {
@@ -158,36 +158,36 @@ class HLTConfigProvider {
 
   /// HLTLevel1GTSeed module
   /// HLTLevel1GTSeed modules for all trigger paths
-  const std::vector<std::vector<std::pair<bool,std::string> > >& hltL1GTSeeds() const {
+  const std::vector<std::vector<std::pair<bool,std::string>>> & hltL1GTSeeds() const {
     return hltConfigData_->hltL1GTSeeds();
   }
   /// HLTLevel1GTSeed modules for trigger path with name
-  const std::vector<std::pair<bool,std::string> >& hltL1GTSeeds(const std::string& trigger) const {
+  const std::vector<std::pair<bool,std::string>> & hltL1GTSeeds(const std::string& trigger) const {
     return hltConfigData_->hltL1GTSeeds(trigger);
   }
   /// HLTLevel1GTSeed modules for trigger path with index i
-  const std::vector<std::pair<bool,std::string> >& hltL1GTSeeds(unsigned int trigger) const {
+  const std::vector<std::pair<bool,std::string>> & hltL1GTSeeds(unsigned int trigger) const {
     return hltConfigData_->hltL1GTSeeds(trigger);
   }
 
   /// HLTL1TSeed module
   /// HLTL1TSeed modules for all trigger paths
-  const std::vector<std::vector<std::string> >& hltL1TSeeds() const {
+  const std::vector<std::vector<std::string>> & hltL1TSeeds() const {
     return hltConfigData_->hltL1TSeeds();
   }
   /// HLTL1TSeed modules for trigger path with name
-  const std::vector<std::string>& hltL1TSeeds(const std::string& trigger) const {
+  const std::vector<std::string> & hltL1TSeeds(const std::string& trigger) const {
     return hltConfigData_->hltL1TSeeds(trigger);
   }
   /// HLTL1TSeed modules for trigger path with index i
-  const std::vector<std::string>& hltL1TSeeds(unsigned int trigger) const {
+  const std::vector<std::string> & hltL1TSeeds(unsigned int trigger) const {
     return hltConfigData_->hltL1TSeeds(trigger);
   }
 
 
   /// Streams
   /// list of names of all streams
-  const std::vector<std::string>& streamNames() const {
+  const std::vector<std::string> & streamNames() const {
     return hltConfigData_->streamNames();
   }
   /// name of stream with index i
@@ -199,22 +199,22 @@ class HLTConfigProvider {
     return hltConfigData_->streamIndex(stream);
   }
   /// names of datasets for all streams
-  const std::vector<std::vector<std::string> >& streamContents() const {
+  const std::vector<std::vector<std::string>> & streamContents() const {
     return hltConfigData_->streamContents();
   }
   /// names of datasets in stream with index i
-  const std::vector<std::string>& streamContent(unsigned int stream) const {
+  const std::vector<std::string> & streamContent(unsigned int stream) const {
     return hltConfigData_->streamContent(stream);
   }
   /// names of datasets in stream with name
-  const std::vector<std::string>& streamContent(const std::string& stream) const {
+  const std::vector<std::string> & streamContent(const std::string& stream) const {
     return hltConfigData_->streamContent(stream);
   }
 
 
   /// Datasets
   /// list of names of all datasets
-  const std::vector<std::string>& datasetNames() const {
+  const std::vector<std::string> & datasetNames() const {
     return hltConfigData_->datasetNames();
   }
   /// name of dataset with index i
@@ -226,15 +226,15 @@ class HLTConfigProvider {
     return hltConfigData_->datasetIndex(dataset);
   }
   /// names of trigger paths for all datasets
-  const std::vector<std::vector<std::string> >& datasetContents() const {
+  const std::vector<std::vector<std::string>> & datasetContents() const {
     return hltConfigData_->datasetContents();
   }
   /// names of trigger paths in dataset with index i
-  const std::vector<std::string>& datasetContent(unsigned int dataset) const {
+  const std::vector<std::string> & datasetContent(unsigned int dataset) const {
     return hltConfigData_->datasetContent(dataset);
   }
   /// names of trigger paths in dataset with name
-  const std::vector<std::string>& datasetContent(const std::string& dataset) const {
+  const std::vector<std::string> & datasetContent(const std::string& dataset) const {
     return hltConfigData_->datasetContent(dataset);
   }
 
@@ -250,17 +250,17 @@ class HLTConfigProvider {
   }
 
   /// low-level data member access 
-  const std::vector<std::string>& prescaleLabels() const {
+  const std::vector<std::string> & prescaleLabels() const {
     return hltConfigData_->prescaleLabels();
   }
-  const std::map<std::string,std::vector<unsigned int> >& prescaleTable() const {
+  const std::map<std::string,std::vector<double>> & prescaleTable() const {
     return hltConfigData_->prescaleTable();
   }
 
   /// regexp processing
-  static const std::vector<std::string> matched(const std::vector<std::string>& inputs, const std::string& pattern);
+  static const std::vector<std::string> matched(const std::vector<std::string> & inputs, const std::string& pattern);
   static const std::string removeVersion(const std::string& trigger);
-  static const std::vector<std::string> restoreVersion(const std::vector<std::string>& inputs, const std::string& trigger);
+  static const std::vector<std::string> restoreVersion(const std::vector<std::string> & inputs, const std::string& trigger);
 
  private:
 
