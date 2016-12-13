@@ -25,12 +25,15 @@ from FWCore.Examples.sampleAnalyzer_cfi   import sampleAnalyzer
 
 process.sampleProducerHelloWorld = sampleProducer.clone()
 process.sampleProducerHelloWorld.data = [ "Hello world" ]
+process.sampleProducerHelloWorld.time = 20. # ms
 
 process.sampleProducerAnswer = sampleProducer.clone()
 process.sampleProducerAnswer.data = [ "42" ]
+process.sampleProducerAnswer.time = 40. # ms
 
 process.sampleProducerOther = sampleProducer.clone()
 process.sampleProducerOther.data = [ "That's all folks" ]
+process.sampleProducerOther.time = 10. # ms
 
 process.sampleMerger = sampleMerger.clone()
 process.sampleMerger.source = [
