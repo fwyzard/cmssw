@@ -1,6 +1,7 @@
 // system include files
 #include <memory>
 #include <chrono>
+#include <random>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -27,11 +28,16 @@ class SampleProducer : public edm::stream::EDProducer<> {
 
     const std::vector<std::string>  m_data;
     const double                    m_time;
+
+    std::default_random_engine      m_generator;
+    std::poisson_distribution<int>  m_distribution;
 };
 
 SampleProducer::SampleProducer(const edm::ParameterSet& config) :
   m_data( config.getParameter<std::vector<std::string>>("data") ),
-  m_time( config.getParameter<double>("time") )
+  m_time( config.getParameter<double>("time") ),
+  m_generator(),
+  m_distribution(m_time)
 {
   // register produced products
   produces<example::SampleProductCollection>();
@@ -42,9 +48,10 @@ void
 SampleProducer::produce(edm::Event & event, edm::EventSetup const & setup)
 {
   if (m_time > 0.) {
+    auto time = m_distribution(m_generator);
     auto t1 = std::chrono::high_resolution_clock::now();
     auto t2 = std::chrono::high_resolution_clock::now();
-    while (std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() < m_time)
+    while (std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() < time)
       t2 = std::chrono::high_resolution_clock::now();
   }
   auto product = std::make_unique<example::SampleProductCollection>();
