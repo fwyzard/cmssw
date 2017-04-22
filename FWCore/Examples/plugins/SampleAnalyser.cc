@@ -9,6 +9,7 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "DataFormats/Examples/interface/SampleProduct.h"
 
@@ -41,7 +42,7 @@ SampleAnalyzer::analyze(edm::Event const & event, edm::EventSetup const & setup)
   edm::Handle<example::SampleProductCollection> handle;
   event.getByToken(m_source, handle);
   for (auto const & element : *handle)
-    std::cout << element.data() << std::endl;
+    edm::LogAbsolute("SampleAnalyzer") << element.data();
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
