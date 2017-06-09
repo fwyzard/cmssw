@@ -34,7 +34,7 @@ struct MEPSet {
 class FastTimerServiceClient : public DQMEDHarvester {
 public:
   explicit FastTimerServiceClient(edm::ParameterSet const &);
-  ~FastTimerServiceClient();
+  ~FastTimerServiceClient() override;
 
   static void fillDescriptions(edm::ConfigurationDescriptions & descriptions);
   static void fillLumiMePSetDescription(edm::ParameterSetDescription & pset);
@@ -70,9 +70,7 @@ FastTimerServiceClient::FastTimerServiceClient(edm::ParameterSet const & config)
 {
 }
 
-FastTimerServiceClient::~FastTimerServiceClient()
-{
-}
+FastTimerServiceClient::~FastTimerServiceClient() = default;
 
 void
 FastTimerServiceClient::dqmEndJob(DQMStore::IBooker & booker, DQMStore::IGetter & getter)
@@ -112,7 +110,7 @@ void
 FastTimerServiceClient::fillProcessSummaryPlots(DQMStore::IBooker & booker, DQMStore::IGetter & getter, std::string const & current_path) {
 
   MonitorElement * me = getter.get(current_path + "/event");
-  if (me == 0)
+  if (me == nullptr)
     // no FastTimerService DQM information
     return;
 
@@ -178,7 +176,7 @@ FastTimerServiceClient::fillPathSummaryPlots(DQMStore::IBooker & booker, DQMStor
     std::string label = paths->GetXaxis()->GetBinLabel(p);
     MonitorElement * me_counter = getter.get( current_path + "/Paths/" + label + "_module_counter" );
     MonitorElement * me_total   = getter.get( current_path + "/Paths/" + label + "_module_total" );
-    if (me_counter == 0 or me_total == 0)
+    if (me_counter == nullptr or me_total == nullptr)
       continue;
     TH1F * counter = me_counter->getTH1F();
     TH1F * total   = me_total  ->getTH1F();

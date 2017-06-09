@@ -143,7 +143,7 @@ HLTSinglet<T>::hltFilter(edm::Event& iEvent, const edm::EventSetup& iSetup, trig
 
    // look at all objects, check cuts and add to filter object
    int n(0);
-   typename TCollection::const_iterator i ( objects->begin() );
+   auto i ( objects->begin() );
    for (; i!=objects->end(); i++) {
      if ( (i->energy() >= min_E_) &&
 	  (i->pt() >= min_Pt_) &&

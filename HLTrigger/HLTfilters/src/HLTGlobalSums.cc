@@ -126,8 +126,8 @@ HLTGlobalSums<T>::hltFilter(edm::Event& iEvent, const edm::EventSetup& iSetup, t
 
    int n(0);
    double value(0.0);
-   typename TCollection::const_iterator ibegin(objects->begin());
-   typename TCollection::const_iterator iend(objects->end());
+   auto ibegin(objects->begin());
+   auto iend(objects->end());
    typename TCollection::const_iterator iter;
    for (iter=ibegin; iter!=iend; iter++) {
 

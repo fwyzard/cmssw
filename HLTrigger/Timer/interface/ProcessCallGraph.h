@@ -56,11 +56,11 @@ public:
 
     PathType() = default;
 
-    PathType(std::string const & name, std::vector<unsigned int> const & mop, std::vector<unsigned int> const & mad, std::vector<unsigned int> const & ldom) :
-      name_(name),
-      modules_on_path_(mop),
-      modules_and_dependencies_(mad),
-      last_dependency_of_module_(ldom)
+    PathType(std::string  name, std::vector<unsigned int>  mop, std::vector<unsigned int>  mad, std::vector<unsigned int>  ldom) :
+      name_(std::move(name)),
+      modules_on_path_(std::move(mop)),
+      modules_and_dependencies_(std::move(mad)),
+      last_dependency_of_module_(std::move(ldom))
     { }
 
     PathType(std::string && name, std::vector<unsigned int> && mop, std::vector<unsigned int> && mad, std::vector<unsigned int> && ldom) :
@@ -92,19 +92,19 @@ public:
     ProcessType() = delete;
 
     ProcessType(
-      std::string const & name,
+      std::string  name,
       GraphType const & graph,
-      std::vector<unsigned int> const & modules,
-      std::vector<PathType> const & paths,
-      std::vector<PathType> const & endPaths,
-      std::vector<unsigned int> const & subprocesses = {}
+      std::vector<unsigned int>  modules,
+      std::vector<PathType>  paths,
+      std::vector<PathType>  endPaths,
+      std::vector<unsigned int>  subprocesses = {}
     ) :
-      name_(name),
+      name_(std::move(name)),
       graph_(graph),
-      modules_(modules),
-      paths_(paths),
-      endPaths_(endPaths),
-      subprocesses_(subprocesses)
+      modules_(std::move(modules)),
+      paths_(std::move(paths)),
+      endPaths_(std::move(endPaths)),
+      subprocesses_(std::move(subprocesses))
     { }
 
     ProcessType(

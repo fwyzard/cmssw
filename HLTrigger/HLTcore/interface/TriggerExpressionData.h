@@ -32,12 +32,12 @@ public:
     m_throw(true),
     // l1 values and status
     m_l1tResults(nullptr),
-    m_l1tMenu(0),
+    m_l1tMenu(nullptr),
     m_l1tCacheID(),
     m_l1tUpdated(false),
     // hlt values and status
-    m_hltResults(0),
-    m_hltMenu(0),
+    m_hltResults(nullptr),
+    m_hltMenu(nullptr),
     m_hltCacheID(),
     m_hltUpdated(false),
     // event values
@@ -55,12 +55,12 @@ public:
     m_throw(config.getParameter<bool>("throw")),
     // l1 values and status
     m_l1tResults(nullptr),
-    m_l1tMenu(0),
+    m_l1tMenu(nullptr),
     m_l1tCacheID(),
     m_l1tUpdated(false),
     // hlt values and status
-    m_hltResults(0),
-    m_hltMenu(0),
+    m_hltResults(nullptr),
+    m_hltMenu(nullptr),
     m_hltCacheID(),
     m_hltUpdated(false),
     // event values
@@ -72,26 +72,26 @@ public:
 
   // explicit c'tor from single arguments
   Data(
-    edm::InputTag const & hltResultsTag,
-    edm::InputTag const & l1tResultsTag,
+    edm::InputTag  hltResultsTag,
+    edm::InputTag  l1tResultsTag,
     bool                  l1tIgnoreMaskAndPrescale,
     bool                  doThrow,
     edm::ConsumesCollector && iC  ) :
     // configuration
-    m_hltResultsTag(hltResultsTag),
+    m_hltResultsTag(std::move(hltResultsTag)),
     m_hltResultsToken(),
-    m_l1tResultsTag(l1tResultsTag),
+    m_l1tResultsTag(std::move(l1tResultsTag)),
     m_l1tResultsToken(),
     m_l1tIgnoreMaskAndPrescale(l1tIgnoreMaskAndPrescale),
     m_throw(doThrow),
     // l1 values and status
     m_l1tResults(nullptr),
-    m_l1tMenu(0),
+    m_l1tMenu(nullptr),
     m_l1tCacheID(),
     m_l1tUpdated(false),
     // hlt values and status
-    m_hltResults(0),
-    m_hltMenu(0),
+    m_hltResults(nullptr),
+    m_hltMenu(nullptr),
     m_hltCacheID(),
     m_hltUpdated(false),
     // event values

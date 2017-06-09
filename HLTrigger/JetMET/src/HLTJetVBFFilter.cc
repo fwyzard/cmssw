@@ -106,7 +106,7 @@ HLTJetVBFFilter<T>::hltFilter(edm::Event& iEvent, const edm::EventSetup& iSetup,
     // loop on all jets
     int countJet1(0);
     int countJet2(0);
-    typename TCollection::const_iterator jet1 ( objects->begin() );
+    auto jet1 ( objects->begin() );
     for (; jet1!=objects->end(); jet1++) {
       countJet1++;
       if( leadingJetOnly_==true && countJet1>2 ) break;
@@ -115,7 +115,7 @@ HLTJetVBFFilter<T>::hltFilter(edm::Event& iEvent, const edm::EventSetup& iSetup,
       if( std::abs(jet1->eta()) > maxEta_ ) continue;
       //
       countJet2 = countJet1-1;
-      typename TCollection::const_iterator jet2 ( jet1+1 );
+      auto jet2 ( jet1+1 );
       for (; jet2!=objects->end(); jet2++) {
 	countJet2++;
 	if( leadingJetOnly_==true && countJet2>2 ) break;

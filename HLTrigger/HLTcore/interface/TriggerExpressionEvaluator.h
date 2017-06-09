@@ -9,7 +9,7 @@ class Data;
 
 class Evaluator {
 public:
-  Evaluator() { }
+  Evaluator() = default;
 
   // pure virtual, need a concrete implementation
   virtual bool operator()(const Data & data) const = 0;
@@ -21,7 +21,7 @@ public:
   virtual void dump(std::ostream & out) const = 0;
 
   // virtual destructor
-  virtual ~Evaluator() { }
+  virtual ~Evaluator() = default;
 };
 
 inline 

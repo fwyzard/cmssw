@@ -60,8 +60,8 @@ static constexpr unsigned int SIZE = 1000000;
 
 double average(std::vector<double> const & values) {
   double sum = 0;
-  for (size_t i = 0; i < values.size(); ++i)
-    sum += values[i];
+  for (double value : values)
+    sum += value;
   return (sum / values.size());
 }
 
@@ -69,8 +69,8 @@ double sigma(std::vector<double> const & values) {
   if (values.size() > 1) {
     double sum = 0;
     double avg = average(values); 
-    for (size_t i = 0; i < values.size(); ++i)
-      sum += (values[i] - avg) * (values[i] - avg);
+    for (double value : values)
+      sum += (value - avg) * (value - avg);
     return std::sqrt( sum / (values.size()-1) );
   } else {
     return std::numeric_limits<double>::quiet_NaN();
@@ -92,11 +92,11 @@ class BenchmarkBase {
 public:
   BenchmarkBase() = default;
 
-  explicit BenchmarkBase(std::string const & d) :
-    description(d)
+  explicit BenchmarkBase(std::string  d) :
+    description(std::move(d))
   { }
 
-  virtual ~BenchmarkBase() { };
+  virtual ~BenchmarkBase() = default;;
 
   // perform the measurements
   virtual void sample() = 0;
@@ -146,9 +146,9 @@ public:
   }
 
   // take SIZE measurements
-  void sample() {
-    for (unsigned int i = 0; i < SIZE; ++i)
-      values[i] = clock_type::now();
+  void sample() override {
+    for (auto & value : values)
+      value = clock_type::now();
   }
 
   // return the delta between two time_points, expressed in seconds
@@ -157,7 +157,7 @@ public:
   }
 
   // extract the characteristics of the timer from the measurements
-  void compute() {
+  void compute() override {
     // per-call overhead
     overhead = to_seconds(stop - start) / SIZE;
 
@@ -193,7 +193,7 @@ public:
   }
 
   // print a report
-  void report() {
+  void report() override {
     std::cout << std::setprecision(1) << std::fixed;
     std::cout << "Performance of " << description << std::endl;
     std::cout << "\tAverage time per call: " << std::right << std::setw(10) << overhead    * 1e9 << " ns" << std::endl;

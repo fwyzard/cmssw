@@ -49,9 +49,9 @@ public:
     }
   }   
 
-  virtual ~L3MumuTrackingRegion(){}
+  ~L3MumuTrackingRegion() override= default;
 
-  virtual std::vector<std::unique_ptr<TrackingRegion> > regions(const edm::Event& ev,
+  std::vector<std::unique_ptr<TrackingRegion> > regions(const edm::Event& ev,
       const edm::EventSetup& es) const override {
 
     std::vector<std::unique_ptr<TrackingRegion> > result;
@@ -71,7 +71,7 @@ public:
       edm::Handle<reco::VertexCollection> vertices;
       ev.getByToken(theVertexToken,vertices);
       const reco::VertexCollection vertCollection = *(vertices.product());
-      reco::VertexCollection::const_iterator ci = vertCollection.begin();
+      auto ci = vertCollection.begin();
       if (vertCollection.size()>0) {
 	originz = ci->z();
       } else {
@@ -80,7 +80,7 @@ public:
       }
       if (useVtxTks) {
 	for(ci=vertCollection.begin();ci!=vertCollection.end();ci++)
-          for (reco::Vertex::trackRef_iterator trackIt =  ci->tracks_begin();trackIt !=  ci->tracks_end();trackIt++){
+          for (auto trackIt =  ci->tracks_begin();trackIt !=  ci->tracks_end();trackIt++){
 	    reco::TrackRef iTrk =  (*trackIt).castTo<reco::TrackRef>() ;
             GlobalVector dirVector((iTrk)->px(),(iTrk)->py(),(iTrk)->pz());
             result.push_back(
@@ -97,8 +97,8 @@ public:
 
     edm::Handle<reco::TrackCollection> trks;
     if (!theInputTrkToken.isUninitialized()) ev.getByToken(theInputTrkToken, trks);
-    for(reco::TrackCollection::const_iterator iTrk = trks->begin();iTrk != trks->end();iTrk++) {
-      GlobalVector dirVector((iTrk)->px(),(iTrk)->py(),(iTrk)->pz());
+    for(const auto & iTrk : *trks) {
+      GlobalVector dirVector(iTrk.->px(),iTrk.->py(),iTrk.->pz());
       result.push_back( 
          std::make_unique<RectangularEtaPhiTrackingRegion>( dirVector, GlobalPoint(0,0,float(originz)),
 					       thePtMin, theOriginRadius, deltaZVertex, theDeltaEta, theDeltaPhi,

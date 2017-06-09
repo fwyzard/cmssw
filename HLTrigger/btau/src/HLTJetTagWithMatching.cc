@@ -124,7 +124,7 @@ HLTJetTagWithMatching<T>::hltFilter(edm::Event& event, const edm::EventSetup& se
   // Look at all jets in decreasing order of Et.
   int nJet = 0;
   int nTag = 0;
-  for (typename TCollection::const_iterator jet = h_Jets->begin(); jet != h_Jets->end(); ++jet) {
+  for (auto jet = h_Jets->begin(); jet != h_Jets->end(); ++jet) {
     jetRef = TRef(h_Jets,nJet);
     LogTrace("") << "Jet " << nJet
                  << " : Et = " << jet->et()

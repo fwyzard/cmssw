@@ -24,7 +24,7 @@ public:
   // so we keep datamember as builtin types (instead of ParameterSet) 
   // ConeIsolationAlgorithm (int,float,....);
    
-  ~ConeIsolationAlgorithm() {}
+  ~ConeIsolationAlgorithm() = default;
 
   static void fillDescription(edm::ParameterSetDescription& desc);
 

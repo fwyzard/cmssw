@@ -89,7 +89,7 @@ HLTDiJetAveFilter<T>::hltFilter(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     TRef JetRef1,JetRef2;
 
-    typename TCollection::const_iterator i ( objects->begin() );
+    auto i ( objects->begin() );
     for (; i<=(objects->begin()+nmax); i++) {
       if(countjets==0) {
 	ptjet1 = i->pt();

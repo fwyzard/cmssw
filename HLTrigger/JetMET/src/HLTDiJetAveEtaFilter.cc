@@ -88,8 +88,8 @@ HLTDiJetAveEtaFilter<T>::hltFilter(edm::Event& iEvent, const edm::EventSetup& iS
     int n(0);
 
     if(objects->size() > 1){ // events with two or more jets
-        typename TCollection::const_iterator iProbe ( objects->begin() );
-        typename TCollection::const_iterator iEnd ( objects->end() );
+        auto iProbe ( objects->begin() );
+        auto iEnd ( objects->end() );
         for (; iProbe!=iEnd; ++iProbe) {
             if (iProbe->pt() < minPtJet_) continue;
 
@@ -111,7 +111,7 @@ HLTDiJetAveEtaFilter<T>::hltFilter(edm::Event& iEvent, const edm::EventSetup& iS
 
             if (!isProbe) continue;
 
-            typename TCollection::const_iterator iTag ( objects->begin() );
+            auto iTag ( objects->begin() );
             for (;iTag != iEnd; ++iTag){
                 if (iTag==iProbe) continue;
                 if (iTag->pt() < minPtJet_) continue;
