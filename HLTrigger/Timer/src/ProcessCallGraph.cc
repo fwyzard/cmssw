@@ -71,6 +71,9 @@ ProcessCallGraph::preSourceConstruction(edm::ModuleDescription const & module)
 //  - check that the Source has already been added
 //  - check that all module ids are valid (e.g. subprocesses are not being added in
 //    the wrong order)
+//  - needs to be re-thought if the framework sends multiple preBeginJob "signals" 
+//    at the same time for diferent (sub)processes
+//  - at the very least, change `process_id_' to tbb::concurrent_unordered_map
 void
 ProcessCallGraph::preBeginJob(edm::PathsAndConsumesOfModulesBase const & pathsAndConsumes, edm::ProcessContext const & context)
 {
@@ -267,11 +270,10 @@ ProcessCallGraph::dependencies(std::vector<unsigned int> const & path)
 }
 
 // register a (sub)process and assigns it a "process id"
-// if called with a duplicate process name, returns the original process id
+// throws an execption if called for a subprocess before its parent,
+// or if called twice for the (sub)process
 unsigned int ProcessCallGraph::registerProcess(edm::ProcessContext const & context)
 {
-  static unsigned int s_id = 0;
-
   // registerProcess (called by preBeginJob) must be called for the parent process before its subprocess(es)
   if (context.isSubProcess() and process_id_.find(context.parentProcessContext().processName()) == process_id_.end())  {
     throw edm::Exception(edm::errors::LogicError)
@@ -287,7 +289,7 @@ unsigned int ProcessCallGraph::registerProcess(edm::ProcessContext const & conte
       << (context.isSubProcess() ? "subprocess" : "process") << " " << context.processName();
   }
 
-  std::tie(id, std::ignore) = process_id_.insert(std::make_pair(context.processName(), s_id++));
+  std::tie(id, std::ignore) = process_id_.insert(std::make_pair(context.processName(), process_id_.size()));
   return id->second;
 }
 
