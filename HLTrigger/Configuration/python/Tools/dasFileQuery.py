@@ -1,6 +1,16 @@
 import sys
+import os
 import json
 import das_client
+
+def ca():
+  default_ca = os.environ.get("X509_CERT_DIR")
+  if not default_ca or not os.path.exists(default_ca):
+    default_ca = "/etc/grid-security/certificates"
+    if not os.path.exists(default_ca):
+      default_ca = ""
+  return default_ca
+
 
 def dasFileQuery(dataset):
   query   = 'dataset dataset=%s' % dataset
@@ -9,8 +19,10 @@ def dasFileQuery(dataset):
   limit   = 0                             # unlimited
   debug   = 0                             # default
   thr     = 300                           # default
-  ckey    = ""                            # default
-  cert    = ""                            # default
+  ckey    = das_client.x509()             # default
+  cert    = das_client.x509()             # default
+  capath  = ca()                          # default
+  das_client.check_auth(ckey)
   jsondict = das_client.get_data(host, query, idx, limit, debug, thr, ckey, cert)
 
   # check if the pattern matches none, many, or one dataset
