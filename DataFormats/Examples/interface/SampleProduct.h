@@ -2,7 +2,7 @@
 #define SampleProduct_h
 
 #include <string>
-#include "DataFormats/BTauReco/interface/RefMacros.h"
+#include "DataFormats/Examples/interface/RefMacros.h"
 
 namespace example {
 
