@@ -23,6 +23,7 @@ using namespace reco;
 template <class T> T inline sqr( T t) {return t*t;}
 
 namespace {
+  __attribute__((unused))
   std::string print(
 		    const Measurement1D & pt,
 		    const Measurement1D & phi,
@@ -43,6 +44,7 @@ namespace {
     return str.str();
   }
 
+  __attribute__((unused))
   std::string print(const reco::Track & track, const GlobalPoint & origin)
   {
 
@@ -72,6 +74,7 @@ namespace {
     return print(pt, phi, cotTheta, tip, zip, track.chi2(), track.charge());
   }
 
+  __attribute__((unused))
   std::string print(const BasicTrajectoryStateOnSurface & state)
   {
     // TrajectoryStateOnSurface state(bstate);
