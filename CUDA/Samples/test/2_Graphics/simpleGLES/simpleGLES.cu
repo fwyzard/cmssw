@@ -480,12 +480,18 @@ bool runTest(int argc, char **argv, char *ref_file)
     // Create the CUTIL timer
     sdkCreateTimer(&timer);
 
+    int devID = 0;
+#if defined (__aarch64__) || defined(__arm__)
+    // find iGPU on the system which is compute capable which will perform GLES-CUDA interop
+    devID = findIntegratedGPU();
+#else
+    // use command-line specified CUDA device, otherwise use device with highest Gflops/s
+    devID = findCudaDevice(argc, (const char **)argv);
+#endif
+
     // command line mode only
     if (ref_file != NULL)
     {
-        // This will pick the best possible CUDA capable device
-        int devID = findCudaDevice(argc, (const char **)argv);
-
         // create VBO
         checkCudaErrors(cudaMalloc((void **)&d_vbo_buffer, mesh_width*mesh_height*4*sizeof(float)));
 

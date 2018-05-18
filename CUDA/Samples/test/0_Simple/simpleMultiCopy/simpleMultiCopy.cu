@@ -163,6 +163,7 @@ int main(int argc, char *argv[])
         checkCudaErrors(cudaHostAlloc(&h_data_in[i], memsize,
                                       cudaHostAllocDefault));
         checkCudaErrors(cudaMalloc(&d_data_in[i], memsize));
+        checkCudaErrors(cudaMemset(d_data_in[i], 0, memsize));
 
         checkCudaErrors(cudaHostAlloc(&h_data_out[i], memsize,
                                       cudaHostAllocDefault));

@@ -33,15 +33,13 @@ int WIDTH = 8192, HEIGHT = 8192;
 int
 main(int argc, char **argv)
 {
-    TestArgs args;
+    TestArgs args = {0, false};
     CUresult curesult = CUDA_SUCCESS;
     unsigned int j = 0;
     cudaError_t err = cudaSuccess;
-    double curTime;
     EGLNativeFileDescriptorKHR fileDescriptor = EGL_NO_FILE_DESCRIPTOR_KHR;
     struct timespec start, end;
     CUeglFrame cudaEgl1, cudaEgl2;
-    pid_t childPID;
 
     if (parseCmdLine(argc, argv, &args)  < 0) {
         printUsage();

@@ -41,7 +41,6 @@
 // CUDA utilities and system includes
 #include "CUDA/Samples/interface/helper_functions.h"
 #include "CUDA/Samples/interface/helper_cuda.h"    // includes cuda.h and cuda_runtime_api.h
-#include "CUDA/Samples/interface/helper_cuda_gl.h" // includes cuda_gl_interop.h// includes cuda_gl_interop.h
 
 // Includes
 #include <stdlib.h>
@@ -209,7 +208,7 @@ void runBenchmark(int iterations, char *exec_path)
 
         sdkDumpBin((void *)hPos, sizeof(float)*4*psystem->getNumParticles(), "particles.bin");
 
-        if (!sdkCompareBin2BinFloat("particles.bin", g_refFile, sizeof(float)*4*psystem->getNumParticles(),
+        if (!sdkCompareBin2BinFloat("particles.bin", g_refFile, 4*psystem->getNumParticles(),
                                     MAX_EPSILON_ERROR, THRESHOLD, exec_path))
         {
             g_TotalErrors++;
@@ -748,7 +747,7 @@ main(int argc, char **argv)
         }
 
         initGL(&argc, argv);
-        cudaGLInit(argc, argv);
+        cudaInit(argc, argv);
     }
 
     initParticleSystem(numParticles, gridSize, !benchmark && g_refFile==NULL);

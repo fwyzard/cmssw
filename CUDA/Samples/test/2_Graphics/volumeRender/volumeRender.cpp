@@ -46,7 +46,6 @@
 
 // CUDA utilities
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 // Helper functions
 #include "CUDA/Samples/interface/helper_cuda.h"
@@ -469,23 +468,6 @@ void *loadRawFile(char *filename, size_t size)
     return data;
 }
 
-// General initialization call for CUDA Device
-int chooseCudaDevice(int argc, const char **argv, bool bUseOpenGL)
-{
-    int result = 0;
-
-    if (bUseOpenGL)
-    {
-        result = findCudaGLDevice(argc, argv);
-    }
-    else
-    {
-        result = findCudaDevice(argc, argv);
-    }
-
-    return result;
-}
-
 void runSingleTest(const char *ref_file, const char *exec_path)
 {
     bool bTestResult = true;
@@ -582,8 +564,7 @@ main(int argc, char **argv)
 
     if (ref_file)
     {
-        // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-        chooseCudaDevice(argc, (const char **)argv, false);
+        findCudaDevice(argc, (const char **)argv);
     }
     else
     {
@@ -591,8 +572,7 @@ main(int argc, char **argv)
         // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
         initGL(&argc, argv);
 
-        // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-        chooseCudaDevice(argc, (const char **)argv, true);
+        findCudaDevice(argc, (const char **)argv);
     }
 
     // parse arguments

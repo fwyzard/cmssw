@@ -33,18 +33,6 @@ extern "C"
 
     cudaArray *noiseArray;
 
-    void initCuda(bool bUseGL)
-    {
-        if (bUseGL)
-        {
-            cudaGLSetGLDevice(gpuGetMaxGflopsDeviceId());
-        }
-        else
-        {
-            cudaSetDevice(gpuGetMaxGflopsDeviceId());
-        }
-    }
-
     void setParameters(SimParams *hostParams)
     {
         // copy parameters to constant memory

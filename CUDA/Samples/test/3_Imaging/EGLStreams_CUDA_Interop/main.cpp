@@ -66,11 +66,11 @@ int main(int argc, char **argv)
         curesult = CUDA_ERROR_UNKNOWN;
         goto done;
     }
-    curesult = cudaDeviceCreateProducer(&cudaProducer);
+    curesult = cudaDeviceCreateProducer(&cudaProducer, argc, (const char**)argv);
     if (curesult != CUDA_SUCCESS) {
         goto done;
     }
-    curesult = cudaDeviceCreateConsumer(&cudaConsumer);
+    curesult = cudaDeviceCreateConsumer(&cudaConsumer, argc, (const char**)argv);
     if (curesult != CUDA_SUCCESS) {
         goto done;
     }
@@ -175,10 +175,13 @@ int main(int argc, char **argv)
         }
     }
 
+    checkCudaErrors(cuCtxPushCurrent(cudaProducer.context));
     if (CUDA_SUCCESS != (curesult = cudaProducerDeinit(&cudaProducer))) {
         printf("Producer Disconnect FAILED. \n");
         goto done;
     }
+    checkCudaErrors(cuCtxPopCurrent(&cudaProducer.context));
+
     if(!eglQueryStreamKHR(
                 g_display,
                 eglStream,

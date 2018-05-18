@@ -671,8 +671,13 @@ int main(int argc, char **argv)
 
     printf("NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.\n\n");
 
+#if defined (__aarch64__) || defined(__arm__)
+    // find iGPU on the system which is compute capable which will perform GLES-CUDA interop
+    devID = findIntegratedGPU();
+#else
     // use command-line specified CUDA device, otherwise use device with highest Gflops/s
     devID = findCudaDevice(argc, (const char **)argv);
+#endif
 
     // get number of SMs on this GPU
     checkCudaErrors(cudaGetDeviceProperties(&deviceProps, devID));
@@ -711,10 +716,6 @@ int main(int argc, char **argv)
     // Create CUFFT transform plan configuration
     checkCudaErrors(cufftPlan2d(&planr2c, DIM, DIM, CUFFT_R2C));
     checkCudaErrors(cufftPlan2d(&planc2r, DIM, DIM, CUFFT_C2R));
-    // TODO: update kernels to use the new unpadded memory layout for perf
-    // rather than the old FFTW-compatible layout
-    checkCudaErrors(cufftSetCompatibilityMode(planr2c, CUFFT_COMPATIBILITY_FFTW_PADDING));
-    checkCudaErrors(cufftSetCompatibilityMode(planc2r, CUFFT_COMPATIBILITY_FFTW_PADDING));
 
     runFluidsSimulation(argc, argv, ref_file);
 

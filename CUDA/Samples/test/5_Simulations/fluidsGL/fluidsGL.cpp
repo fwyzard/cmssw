@@ -38,7 +38,6 @@
 #include "CUDA/Samples/interface/helper_functions.h"
 #include "CUDA/Samples/interface/rendercheck_gl.h"
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 #include "defines.h"
 #include "fluidsGL_kernels.h"
@@ -414,7 +413,7 @@ int main(int argc, char **argv)
     }
 
     // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-    devID = findCudaGLDevice(argc, (const char **)argv);
+    devID = findCudaDevice(argc, (const char **)argv);
 
     // get number of SMs on this GPU
     checkCudaErrors(cudaGetDeviceProperties(&deviceProps, devID));
@@ -457,10 +456,6 @@ int main(int argc, char **argv)
     // Create CUFFT transform plan configuration
     checkCudaErrors(cufftPlan2d(&planr2c, DIM, DIM, CUFFT_R2C));
     checkCudaErrors(cufftPlan2d(&planc2r, DIM, DIM, CUFFT_C2R));
-    // TODO: update kernels to use the new unpadded memory layout for perf
-    // rather than the old FFTW-compatible layout
-    cufftSetCompatibilityMode(planr2c, CUFFT_COMPATIBILITY_FFTW_PADDING);
-    cufftSetCompatibilityMode(planc2r, CUFFT_COMPATIBILITY_FFTW_PADDING);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

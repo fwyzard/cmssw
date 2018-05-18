@@ -17,6 +17,7 @@
 
 #include "cuda_consumer.h"
 #include "eglstrm_common.h"
+#include <helper_cuda_drvapi.h>
 
 #if defined(EXTENSION_LIST)
 EXTENSION_LIST(EXTLST_EXTERN)
@@ -259,7 +260,7 @@ int checkbuf(FILE *fp1, FILE *fp2) {
     return match;
 }
 
-CUresult cudaDeviceCreateConsumer(test_cuda_consumer_s *cudaConsumer)
+CUresult cudaDeviceCreateConsumer(test_cuda_consumer_s *cudaConsumer, int argc, const char **argv)
 {
     CUdevice device;
     CUresult status = CUDA_SUCCESS;
@@ -267,12 +268,27 @@ CUresult cudaDeviceCreateConsumer(test_cuda_consumer_s *cudaConsumer)
         printf("Failed to initialize CUDA\n");
         return status;
     }
-    
-    if (CUDA_SUCCESS != (status = cuDeviceGet(&device, 0))) {
-        printf("failed to get CUDA device\n");
+
+#if defined (__aarch64__) || defined(__arm__)
+    // On ARM platforms use integrated GPU as currently block-linear format is not supported on discrete-GPU
+    device = findIntegratedGPUDrv();
+#else
+    device = findCudaDeviceDRV(argc, argv);
+#endif
+
+    if (device == -1)
+    {
+        printf("failed to find CUDA capable device\n");
         return status;
     }
-    
+
+    int major = 0, minor = 0;
+    char deviceName[256];
+    checkCudaErrors(cuDeviceGetAttribute(&major, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR, device));
+    checkCudaErrors(cuDeviceGetAttribute(&minor, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR, device));
+    checkCudaErrors(cuDeviceGetName(deviceName, 256, device));
+    printf("CUDA Consumer on GPU Device %d: \"%s\" with compute capability %d.%d\n\n", device, deviceName, major, minor);
+
     if (CUDA_SUCCESS !=  (status = cuCtxCreate(&cudaConsumer->context, 0, device)) ) {
         printf("failed to create CUDA context\n");
         return status;

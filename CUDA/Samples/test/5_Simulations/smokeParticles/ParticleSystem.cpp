@@ -24,7 +24,6 @@
 
 #include "CUDA/Samples/interface/helper_functions.h"
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 #include "ParticleSystem.h"
 #include "ParticleSystem.cuh"
@@ -66,7 +65,6 @@ ParticleSystem::_initialize(int numParticles, bool bUseGL)
 {
     assert(!m_bInitialized);
 
-    //    initCuda(bUseGL);
     createNoiseTexture(64, 64, 64);
 
     m_numParticles = numParticles;

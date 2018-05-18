@@ -234,7 +234,7 @@ int graphics_setup_window(int xpos, int ypos, int width, int height, const char 
         if (drm_conn_info != NULL)
         {
             printf("connector %d found\n", drm_conn_info->connector_id);
-            if (drm_conn_info->connection == DRM_MODE_CONNECTED && drm_conn_info->count_modes > 0)
+            if (drm_conn_info->connection == DRM_MODE_CONNECTED)
             {
                 break;
             }

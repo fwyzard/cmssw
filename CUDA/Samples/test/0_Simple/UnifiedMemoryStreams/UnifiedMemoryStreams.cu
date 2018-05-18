@@ -171,6 +171,8 @@ void* execute(void* inpArgs)
             checkCudaErrors(cublasDgemv(handle[tid+1], CUBLAS_OP_N, t.size, t.size, &one, t.data, t.size, t.vector, 1, &zero, t.result, 1));
         }
     }
+
+    pthread_exit(NULL);
 }
 #else
 template <typename T>

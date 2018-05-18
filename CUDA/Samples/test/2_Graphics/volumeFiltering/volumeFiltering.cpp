@@ -46,13 +46,9 @@
 
 // CUDA utilities and system includes
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
-
-#define MIN_RUNTIME_VERSION 4010
-#define MIN_COMPUTE_VERSION 0x20
 
 #define MAX_EPSILON_ERROR 5.00f
 #define THRESHOLD         0.30f
@@ -668,103 +664,6 @@ void initData(int argc, char **argv)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// CUDA DEVICE
-
-bool checkCUDAProfile(int dev, int min_runtime, int min_compute)
-{
-    int runtimeVersion = 0;
-
-    cudaDeviceProp deviceProp;
-    cudaGetDeviceProperties(&deviceProp, dev);
-
-    fprintf(stderr,"\nDevice %d: \"%s\"\n", dev, deviceProp.name);
-    cudaRuntimeGetVersion(&runtimeVersion);
-    fprintf(stderr,"  CUDA Runtime Version     :\t%d.%d\n", runtimeVersion/1000, (runtimeVersion%100)/10);
-    fprintf(stderr,"  CUDA Compute Capability  :\t%d.%d\n", deviceProp.major, deviceProp.minor);
-
-    if (runtimeVersion >= min_runtime && ((deviceProp.major<<4) + deviceProp.minor) >= min_compute)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-int findCapableDevice(int argc, char **argv)
-{
-    int dev;
-    int bestDev = -1;
-
-    int deviceCount = 0;
-    cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
-
-    if (error_id != cudaSuccess)
-    {
-        printf("cudaGetDeviceCount returned %d\n-> %s\n", (int)error_id, cudaGetErrorString(error_id));
-        exit(EXIT_FAILURE);
-    }
-
-    if (deviceCount == 0)
-    {
-        fprintf(stderr,"There is no device supporting CUDA.\n");
-    }
-    else
-    {
-        fprintf(stderr,"Found %d CUDA Capable Device(s).\n", deviceCount);
-    }
-
-    for (dev = 0; dev < deviceCount; ++dev)
-    {
-        cudaDeviceProp deviceProp;
-        cudaGetDeviceProperties(&deviceProp, dev);
-
-        if (checkCUDAProfile(dev, MIN_RUNTIME_VERSION, MIN_COMPUTE_VERSION))
-        {
-            fprintf(stderr,"\nFound CUDA Capable Device %d: \"%s\"\n", dev, deviceProp.name);
-
-            if (bestDev == -1)
-            {
-                bestDev = dev;
-                fprintf(stderr, "Setting active device to %d\n", bestDev);
-            }
-        }
-    }
-
-    if (bestDev == -1)
-    {
-        fprintf(stderr, "\nNo configuration with available capabilities was found.  Test has been waived.\n");
-        fprintf(stderr, "This CUDA Sample has minimum requirements:\n");
-        fprintf(stderr, "\tCUDA Compute Capability >= %d.%d is required\n", MIN_COMPUTE_VERSION/16, MIN_COMPUTE_VERSION%16);
-        fprintf(stderr, "\tCUDA Runtime Version    >= %d.%d is required\n", MIN_RUNTIME_VERSION/1000, (MIN_RUNTIME_VERSION%100)/10);
-    }
-
-    return bestDev;
-}
-
-
-void checkDeviceMeetComputeSpec(int argc, char **argv)
-{
-    int device = 0;
-    cudaGetDevice(&device);
-
-    if (checkCUDAProfile(device, MIN_RUNTIME_VERSION, MIN_COMPUTE_VERSION))
-    {
-        fprintf(stderr,"\nCUDA Capable Device %d, meets minimum required specs.\n", device);
-    }
-    else
-    {
-        fprintf(stderr, "\nNo configuration with minimum compute capabilities found.  Exiting...\n");
-        fprintf(stderr, "This sample requires:\n");
-        fprintf(stderr, "\tCUDA Compute Capability >= %d.%d is required\n", MIN_COMPUTE_VERSION/16, MIN_COMPUTE_VERSION%16);
-        fprintf(stderr, "\tCUDA Runtime Version    >= %d.%d is required\n", MIN_RUNTIME_VERSION/1000, (MIN_RUNTIME_VERSION%100)/10);
-
-        exit(EXIT_SUCCESS);
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////
 // AUTOMATIC TESTING
 void runSingleTest(const char *ref_file, const char *exec_path)
 {
@@ -882,60 +781,11 @@ main(int argc, char **argv)
         getCmdLineArgumentString(argc, (const char **)argv, "file", &ref_file);
     }
 
-    if (ref_file)
+    int device = findCudaDevice(argc, (const char **)argv);
+
+    if (!ref_file)
     {
-        if (checkCmdLineFlag(argc, (const char **)argv, "device"))
-        {
-            int device = findCudaDevice(argc, (const char **)argv);
-
-            if (device < 0)
-            {
-                printf("No CUDA Capable devices found, exiting...\n");
-                exit(EXIT_SUCCESS);
-            }
-
-            checkDeviceMeetComputeSpec(argc, argv);
-        }
-        else
-        {
-            int dev = findCapableDevice(argc, argv);
-
-            if (dev != -1)
-            {
-                cudaSetDevice(dev);
-            }
-            else
-            {
-                exit(EXIT_SUCCESS);
-            }
-        }
-    }
-    else
-    {
-        if (checkCmdLineFlag(argc, (const char **)argv, "device"))
-        {
-            printf("   This SDK does not explicitly support -device=n when running with OpenGL.\n");
-            printf("   When specifying -device=n (n=0,1,2,....) the sample must not use OpenGL.\n");
-            printf("   See details below to run without OpenGL:\n\n");
-            printf(" > %s -device=n -file=output.bin\n\n", argv[0]);
-            printf("exiting...\n");
-            exit(EXIT_SUCCESS);
-        }
-
-        // First initialize OpenGL context, so we can properly set the GL for CUDA.
-        // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
         initGL(&argc, argv);
-
-        int dev = findCapableDevice(argc, argv);
-
-        if (dev != -1)
-        {
-            cudaGLSetGLDevice(dev);
-        }
-        else
-        {
-            exit(EXIT_SUCCESS);
-        }
     }
 
     // load volume data

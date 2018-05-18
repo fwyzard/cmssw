@@ -84,7 +84,6 @@
 
 #include "CUDA/Samples/interface/helper_cuda.h"    // includes cuda.h and cuda_runtime_api.h
 #include "CUDA/Samples/interface/helper_functions.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 #include "defines.h"
 
@@ -570,7 +569,7 @@ runGraphicsTest(int argc, char **argv)
         return;
     }
 
-    findCudaGLDevice(argc, (const char **)argv);
+    findCudaDevice(argc, (const char **)argv);
 
     // register callbacks
     glutDisplayFunc(display);

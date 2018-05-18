@@ -63,7 +63,6 @@
 // Helper functions
 #include "CUDA/Samples/interface/helper_functions.h" // CUDA SDK Helper functions
 #include "CUDA/Samples/interface/helper_cuda.h"      // CUDA device initialization helper functions
-#include "CUDA/Samples/interface/helper_cuda_gl.h"   // CUDA device + OpenGL initialization functions
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
@@ -652,30 +651,13 @@ void initialize(int argc, char **argv)
 {
     printf("[%s] (OpenGL Mode)\n", sSDKsample);
 
-    // First initialize OpenGL context, so we can properly set the GL for CUDA.
-    // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
     initGL(&argc, argv);
 
-    int devID;
-    cudaDeviceProp deviceProps;
-
-    if (checkCmdLineFlag(argc, (const char **)argv, "device"))
-    {
-        devID = gpuGLDeviceInit(argc, (const char **)argv);
-
-        if (devID < 0)
-        {
-            printf("exiting...\n");
-            exit(EXIT_SUCCESS);
-        }
-    }
-    else
-    {
-        devID = gpuGetMaxGflopsDeviceId();
-        cudaGLSetGLDevice(devID);
-    }
+    // use command-line specified CUDA device, otherwise use device with highest Gflops/s
+    int devID = findCudaDevice(argc, (const char **)argv);
 
     // get number of SMs on this GPU
+    cudaDeviceProp deviceProps;
     checkCudaErrors(cudaGetDeviceProperties(&deviceProps, devID));
     printf("CUDA device [%s] has %d Multi-Processors\n", deviceProps.name, deviceProps.multiProcessorCount);
 

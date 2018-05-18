@@ -132,11 +132,11 @@ int main (int argc, char *argv[])
 
     if (opts.sparse_mat_filename == NULL)
     {
-        opts.sparse_mat_filename =  sdkFindFilePath("lap2D_5pt_n100.mtx", argv[0]);
+        opts.sparse_mat_filename =  sdkFindFilePath("lap2D_5pt_n32.mtx", argv[0]);
         if (opts.sparse_mat_filename != NULL)
             printf("Using default input file [%s]\n", opts.sparse_mat_filename);
         else
-            printf("Could not find lap2D_5pt_n100.mtx\n");
+            printf("Could not find lap2D_5pt_n32.mtx\n");
     }
     else
     {

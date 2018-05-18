@@ -68,7 +68,6 @@
 
 // CUDA utilities and system includes
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 #include "CUDA/Samples/interface/helper_functions.h"
 #include "CUDA/Samples/interface/rendercheck_gl.h"
@@ -157,7 +156,6 @@ void FreeResource();
 void Cleanup(int iExitCode);
 
 // GL functionality
-bool initCUDA(int argc, char **argv, bool bUseGL);
 bool initGL(int *argc, char **argv);
 
 #ifdef USE_TEXSUBIMAGE2D
@@ -974,8 +972,8 @@ runStdProgram(int argc, char **argv)
         return;
     }
 
-    // Now initialize CUDA context (GL context has been created already)
-    initCUDA(argc, argv, true);
+    // Now initialize CUDA context 
+    findCudaDevice(argc, (const char **)argv);
 
     sdkCreateTimer(&timer);
     sdkResetTimer(&timer);
@@ -1024,24 +1022,6 @@ runStdProgram(int argc, char **argv)
 
     // Normally unused return path
     Cleanup(EXIT_SUCCESS);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//! Initialize CUDA context
-////////////////////////////////////////////////////////////////////////////////
-bool
-initCUDA(int argc, char **argv, bool bUseGL)
-{
-    if (bUseGL)
-    {
-        findCudaGLDevice(argc, (const char **)argv);
-    }
-    else
-    {
-        findCudaDevice(argc, (const char **)argv);
-    }
-
-    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

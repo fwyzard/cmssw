@@ -42,7 +42,6 @@
 #include <cuda_gl_interop.h>
 
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 #include "ParticleSystem.h"
 #include "ParticleSystem.cuh"
@@ -962,7 +961,7 @@ main(int argc, char **argv)
         // This is needed to achieve optimal performance with OpenGL/CUDA interop.
         initGL(&argc, argv);
 
-        findCudaGLDevice(argc, (const char **)argv);
+        findCudaDevice(argc, (const char **)argv);
 
         // This is the normal code path for SmokeParticles
         initParticles(numParticles, true, true);

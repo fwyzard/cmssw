@@ -68,13 +68,13 @@ namespace cg = cooperative_groups;
     See the CUDA SDK "reduction" sample for more information.
 */
 
-__device__ void reduceBlock(float *sdata, const cg::thread_block &cta)
+__device__ void reduceBlock(double *sdata, const cg::thread_block &cta)
 {
     const unsigned int tid = cta.thread_rank();
     cg::thread_block_tile<32> tile32 = cg::tiled_partition<32>(cta);
 
-    float beta  = sdata[tid];
-    float temp;
+    double beta  = sdata[tid];
+    double temp;
 
     for (int i = tile32.size() / 2; i > 0; i >>= 1) {
         if (tile32.thread_rank() < i) {
@@ -106,13 +106,16 @@ extern "C" __global__ void reduceSinglePassMultiBlockCG(const float *g_idata, fl
     cg::thread_block block = cg::this_thread_block();
     cg::grid_group grid = cg::this_grid();
 
-    extern float __shared__ sdata[];
+    extern double __shared__ sdata[];
 
     // Stride over grid and add the values to a shared memory buffer
     sdata[block.thread_rank()] = 0;
+
     for (int i = grid.thread_rank(); i < n; i += grid.size()) {
         sdata[block.thread_rank()] += g_idata[i];
     }
+
+    cg::sync(block);
 
     // Reduce each block (called once per block)
     reduceBlock(sdata, block);
@@ -134,7 +137,7 @@ extern "C" __global__ void reduceSinglePassMultiBlockCG(const float *g_idata, fl
 ////////////////////////////////////////////////////////////////////////////////
 void call_reduceSinglePassMultiBlockCG(int size, int threads, int numBlocks, float *d_idata, float *d_odata)
 {
-    int smemSize = threads * sizeof(float);
+    int smemSize = threads * sizeof(double);
     void *kernelArgs[] = {
         (void*)&d_idata,
         (void*)&d_odata,
@@ -331,7 +334,7 @@ runTest(int argc, char **argv, int device)
 
     // We calculate the occupancy to know how many block can actually fit on the GPU
     int numBlocksPerSm = 0;
-    checkCudaErrors(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocksPerSm, reduceSinglePassMultiBlockCG, numThreads, numThreads*sizeof(float)));
+    checkCudaErrors(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocksPerSm, reduceSinglePassMultiBlockCG, numThreads, numThreads*sizeof(double)));
 
     int numSms = prop.multiProcessorCount;
     if (numBlocks > numBlocksPerSm * numSms)

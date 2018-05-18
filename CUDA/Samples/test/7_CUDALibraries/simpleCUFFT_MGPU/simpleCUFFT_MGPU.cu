@@ -71,6 +71,46 @@ int main(int argc, char **argv)
         exit(EXIT_WAIVED);
     }
 
+    int *major_minor =  (int *) malloc(sizeof(int)*GPU_N*2);
+    int found2IdenticalGPUs = 0;
+    int nGPUs = 2;
+    int *whichGPUs ;
+    whichGPUs = (int*) malloc(sizeof(int) * nGPUs);
+
+    for(int i=0; i<GPU_N; i++)
+    {
+        cudaDeviceProp deviceProp;
+        checkCudaErrors(cudaGetDeviceProperties(&deviceProp, i));
+        major_minor[i*2] = deviceProp.major;
+        major_minor[i*2 + 1] = deviceProp.minor;
+        printf("GPU Device %d: \"%s\" with compute capability %d.%d\n", i, deviceProp.name, deviceProp.major, deviceProp.minor);
+    }
+
+    for (int i=0; i<GPU_N; i++)
+    {
+        for (int j=i+1; j<GPU_N; j++)
+        {
+            if((major_minor[i*2] == major_minor[j*2]) && (major_minor[i*2 + 1] == major_minor[j*2 + 1]))
+            {
+                whichGPUs[0] = i;
+                whichGPUs[1] = j;
+                found2IdenticalGPUs = 1;
+                break;
+            }
+        }
+        if (found2IdenticalGPUs)
+        {
+            break;
+        }
+    }
+
+    free(major_minor);
+    if (!found2IdenticalGPUs)
+    {
+        printf("No Two GPUs with same architecture found\nWaiving simpleCUFFT_2d_MGPU sample\n");
+        exit(EXIT_WAIVED);
+    }
+
     // Allocate host memory for the signal
     Complex *h_signal = (Complex *)malloc(sizeof(Complex) * SIGNAL_SIZE);
 
@@ -104,26 +144,7 @@ int main(int argc, char **argv)
     checkCudaErrors (cufftCreate (&plan_input));
 
     // cufftXtSetGPUs() - Define which GPUs to use
-    int nGPUs = 2;
-    int *whichGPUs ;
-    whichGPUs = (int*) malloc(sizeof(int) * nGPUs);
-
-    // Iterate all device combinations to see if a supported combo exists
-    for (int i = 0; i < GPU_N; i++)
-    {
-        for (int j = i+1; j < GPU_N; j++)
-        {
-            whichGPUs[0] = i;
-            whichGPUs[1] = j;
-            result = cufftXtSetGPUs (plan_input, nGPUs, whichGPUs);
-
-            if (result == CUFFT_INVALID_DEVICE) { continue; }
-            else if (result == CUFFT_SUCCESS) { break; }
-            else { printf ("cufftXtSetGPUs failed\n"); exit(EXIT_FAILURE); }
-        }
-
-        if (result == CUFFT_SUCCESS) { break; }
-    }
+    result = cufftXtSetGPUs (plan_input, nGPUs, whichGPUs);
 
     if (result == CUFFT_INVALID_DEVICE)
     {
@@ -131,8 +152,13 @@ int main(int argc, char **argv)
         printf ("No such board was found. Waiving sample.\n");
         exit (EXIT_WAIVED);
     }
+    else if (result != CUFFT_SUCCESS)
+    {
+        printf ("cufftXtSetGPUs failed\n"); exit (EXIT_FAILURE); 
+    }
 
     //Print the device information to run the code
+    printf("\nRunning on GPUs\n");
     for (int i = 0 ; i < nGPUs ; i++)
     {
         cudaDeviceProp deviceProp;
@@ -145,40 +171,29 @@ int main(int argc, char **argv)
     worksize =(size_t*)malloc(sizeof(size_t) * nGPUs);
 
     // cufftMakePlan1d() - Create the plan
-    result = cufftMakePlan1d(plan_input, new_size, CUFFT_C2C, 1, worksize);
-    if (result != CUFFT_SUCCESS) { printf ("*MakePlan* failed\n"); exit (EXIT_FAILURE); }
+    checkCudaErrors(cufftMakePlan1d(plan_input, new_size, CUFFT_C2C, 1, worksize));
 
     // cufftXtMalloc() - Malloc data on multiple GPUs
     cudaLibXtDesc *d_signal ;
-    result = cufftXtMalloc (plan_input, (cudaLibXtDesc **)&d_signal, CUFFT_XT_FORMAT_INPLACE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMalloc failed\n"); exit (EXIT_FAILURE); }
+    checkCudaErrors(cufftXtMalloc (plan_input, (cudaLibXtDesc **)&d_signal, CUFFT_XT_FORMAT_INPLACE));
     cudaLibXtDesc *d_out_signal ;
-    result = cufftXtMalloc (plan_input, (cudaLibXtDesc **)&d_out_signal, CUFFT_XT_FORMAT_INPLACE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMalloc failed\n"); exit (EXIT_FAILURE); }
+    checkCudaErrors(cufftXtMalloc (plan_input, (cudaLibXtDesc **)&d_out_signal, CUFFT_XT_FORMAT_INPLACE));
     cudaLibXtDesc *d_filter_kernel;
-    result = cufftXtMalloc (plan_input, (cudaLibXtDesc **)&d_filter_kernel, CUFFT_XT_FORMAT_INPLACE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMalloc failed\n"); exit (EXIT_FAILURE); }
+    checkCudaErrors(cufftXtMalloc (plan_input, (cudaLibXtDesc **)&d_filter_kernel, CUFFT_XT_FORMAT_INPLACE));
     cudaLibXtDesc *d_out_filter_kernel;
-    result = cufftXtMalloc (plan_input, (cudaLibXtDesc **)&d_out_filter_kernel, CUFFT_XT_FORMAT_INPLACE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMalloc failed\n"); exit (EXIT_FAILURE); }
+    checkCudaErrors(cufftXtMalloc (plan_input, (cudaLibXtDesc **)&d_out_filter_kernel, CUFFT_XT_FORMAT_INPLACE));
 
     // cufftXtMemcpy() - Copy data from host to multiple GPUs
-    result = cufftXtMemcpy (plan_input,d_signal, h_padded_signal, CUFFT_COPY_HOST_TO_DEVICE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMemcpy failed\n"); exit (EXIT_FAILURE); }
-    result = cufftXtMemcpy (plan_input, d_filter_kernel, h_padded_filter_kernel, CUFFT_COPY_HOST_TO_DEVICE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMemcpy failed\n"); exit (EXIT_FAILURE) ; }
+    checkCudaErrors(cufftXtMemcpy (plan_input,d_signal, h_padded_signal, CUFFT_COPY_HOST_TO_DEVICE));
+    checkCudaErrors(cufftXtMemcpy (plan_input, d_filter_kernel, h_padded_filter_kernel, CUFFT_COPY_HOST_TO_DEVICE));
 
     // cufftXtExecDescriptorC2C() - Execute FFT on data on multiple GPUs
-    result = cufftXtExecDescriptorC2C(plan_input, d_signal,  d_signal, CUFFT_FORWARD);
-    if (result != CUFFT_SUCCESS) { printf ("*XtExecC2C  failed\n"); exit (EXIT_FAILURE) ; }
-    result = cufftXtExecDescriptorC2C(plan_input, d_filter_kernel, d_filter_kernel, CUFFT_FORWARD);
-    if (result != CUFFT_SUCCESS) { printf ("*XtExecC2C  failed\n"); exit (EXIT_FAILURE) ; }
+    checkCudaErrors(cufftXtExecDescriptorC2C(plan_input, d_signal,  d_signal, CUFFT_FORWARD));
+    checkCudaErrors(cufftXtExecDescriptorC2C(plan_input, d_filter_kernel, d_filter_kernel, CUFFT_FORWARD));
 
     // cufftXtMemcpy() - Copy the data to natural order on GPUs
-    result = cufftXtMemcpy (plan_input, d_out_signal, d_signal, CUFFT_COPY_DEVICE_TO_DEVICE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMemcpy failed\n"); exit (EXIT_FAILURE) ; }
-    result = cufftXtMemcpy (plan_input, d_out_filter_kernel, d_filter_kernel, CUFFT_COPY_DEVICE_TO_DEVICE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMemcpy failed\n"); exit (EXIT_FAILURE) ; }
+    checkCudaErrors(cufftXtMemcpy (plan_input, d_out_signal, d_signal, CUFFT_COPY_DEVICE_TO_DEVICE));
+    checkCudaErrors(cufftXtMemcpy (plan_input, d_out_filter_kernel, d_filter_kernel, CUFFT_COPY_DEVICE_TO_DEVICE));
 
     printf("\n\nValue of Library Descriptor\n");
     printf("Number of GPUs %d\n", d_out_signal->descriptor->nGPUs );
@@ -191,8 +206,7 @@ int main(int argc, char **argv)
 
     // cufftXtExecDescriptorC2C() - Execute inverse  FFT on data on multiple GPUs
     printf("Transforming signal back cufftExecC2C\n");
-    result = cufftXtExecDescriptorC2C(plan_input, d_out_signal,  d_out_signal, CUFFT_INVERSE);
-    if (result != CUFFT_SUCCESS) { printf ("*XtExecC2C  failed\n"); exit (EXIT_FAILURE) ; }
+    checkCudaErrors(cufftXtExecDescriptorC2C(plan_input, d_out_signal,  d_out_signal, CUFFT_INVERSE));
 
     // Create host pointer pointing to padded signal
     Complex *h_convolved_signal = h_padded_signal;
@@ -201,8 +215,7 @@ int main(int argc, char **argv)
     Complex *h_convolved_signal_ref = (Complex *)malloc(sizeof(Complex) * SIGNAL_SIZE);
 
     // cufftXtMemcpy() - Copy data from multiple GPUs to host
-    result = cufftXtMemcpy (plan_input,h_convolved_signal, d_out_signal, CUFFT_COPY_DEVICE_TO_HOST);
-    if (result != CUFFT_SUCCESS) { printf ("*XtMemcpy failed\n"); exit (EXIT_FAILURE); }
+    checkCudaErrors(cufftXtMemcpy (plan_input,h_convolved_signal, d_out_signal, CUFFT_COPY_DEVICE_TO_HOST));
 
     // Convolve on the host
     Convolve(h_signal, SIGNAL_SIZE, h_filter_kernel,
@@ -224,18 +237,13 @@ int main(int argc, char **argv)
     free(h_convolved_signal_ref);
 
     // cudaXtFree() - Free GPU memory
-    result = cufftXtFree(d_signal);
-    if (result != CUFFT_SUCCESS) { printf ("*XtFree failed\n"); exit (EXIT_FAILURE); }
-    result = cufftXtFree(d_filter_kernel);
-    if (result != CUFFT_SUCCESS) { printf ("*XtFree failed\n"); exit (EXIT_FAILURE) ; }
-    result = cufftXtFree(d_out_signal);
-    if (result != CUFFT_SUCCESS) { printf ("*XtFree failed\n"); exit (EXIT_FAILURE) ; }
-    result = cufftXtFree(d_out_filter_kernel);
-    if (result != CUFFT_SUCCESS) { printf ("*XtFree failed\n"); exit (EXIT_FAILURE) ; }
+    checkCudaErrors(cufftXtFree(d_signal));
+    checkCudaErrors(cufftXtFree(d_filter_kernel));
+    checkCudaErrors(cufftXtFree(d_out_signal));
+    checkCudaErrors(cufftXtFree(d_out_filter_kernel));
 
     // cufftDestroy() - Destroy FFT plan
-    result = cufftDestroy(plan_input);
-    if (result != CUFFT_SUCCESS) { printf ("cufftDestroy failed: code %d\n",(int)result); exit (EXIT_FAILURE); }
+    checkCudaErrors(cufftDestroy(plan_input));
 
     exit(bTestResult ? EXIT_SUCCESS : EXIT_FAILURE);
 }

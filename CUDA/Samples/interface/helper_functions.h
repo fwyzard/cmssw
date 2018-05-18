@@ -9,34 +9,35 @@
  *
  */
 
-// These are helper functions for the SDK samples (string parsing, timers, image helpers, etc)
-#ifndef HELPER_FUNCTIONS_H
-#define HELPER_FUNCTIONS_H
+// These are helper functions for the SDK samples (string parsing,
+// timers, image helpers, etc)
+#ifndef COMMON_HELPER_FUNCTIONS_H_
+#define COMMON_HELPER_FUNCTIONS_H_
 
 #ifdef WIN32
-#pragma warning(disable:4996)
+#pragma warning(disable : 4996)
 #endif
 
 // includes, project
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
 #include <assert.h>
 #include "CUDA/Samples/interface/exception.h"
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <fstream>
-#include <vector>
-#include <iostream>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 // includes, timer, string parsing, image helpers
-#include "CUDA/Samples/interface/helper_timer.h"   // helper functions for timers
+#include "CUDA/Samples/interface/helper_image.h"  // helper functions for image compare, dump, data comparisons
 #include "CUDA/Samples/interface/helper_string.h"  // helper functions for string parsing
-#include "CUDA/Samples/interface/helper_image.h"   // helper functions for image compare, dump, data comparisons
+#include "CUDA/Samples/interface/helper_timer.h"   // helper functions for timers
 
 #ifndef EXIT_WAIVED
 #define EXIT_WAIVED 2
 #endif
 
-#endif //  HELPER_FUNCTIONS_H
+#endif  // COMMON_HELPER_FUNCTIONS_H_

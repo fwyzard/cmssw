@@ -50,6 +50,6 @@ typedef struct _test_cuda_producer_s
 void cudaProducerInit(test_cuda_producer_s *cudaProducer, EGLDisplay eglDisplay, EGLStreamKHR eglStream, TestArgs *args);
 CUresult cudaProducerTest(test_cuda_producer_s *parserArg, char *file);
 CUresult cudaProducerDeinit(test_cuda_producer_s *cudaProducer);
-CUresult cudaDeviceCreateProducer(test_cuda_producer_s *cudaProducer);
+CUresult cudaDeviceCreateProducer(test_cuda_producer_s *cudaProducer, int argc, const char **argv);
 #endif
 
