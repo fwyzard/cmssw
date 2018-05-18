@@ -43,8 +43,6 @@
 
 #include "CUDA/Samples/interface/helper_functions.h"
 #include <cuda_gl_interop.h>
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
-
 
 #define MAX_EPSILON_ERROR 5.0f
 #define THRESHOLD         0.15f
@@ -282,23 +280,6 @@ void initGL(int *argc, char **argv)
     }
 }
 
-// General initialization call for CUDA Device
-int chooseCudaDevice(int argc, char **argv, bool bUseOpenGL)
-{
-    int result = 0;
-
-    if (bUseOpenGL)
-    {
-        result = findCudaGLDevice(argc, (const char **)argv);
-    }
-    else
-    {
-        result = findCudaDevice(argc, (const char **)argv);
-    }
-
-    return result;
-}
-
 void runAutoTest(const char *ref_file, char *exec_path)
 {
     size_t windowBytes = windowSize.x * windowSize.y * sizeof(GLubyte)*4;
@@ -404,18 +385,12 @@ main(int argc, char **argv)
 
     srand(15234);
 
-    if (ref_file)
-    {
-        chooseCudaDevice(argc, argv, false);
-    }
-    else
-    {
-        // First initialize OpenGL context, so we can properly set the GL for CUDA.
-        // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
-        initGL(&argc, argv);
+    // use command-line specified CUDA device, otherwise use device with highest Gflops/s
+    findCudaDevice(argc, (const char **)argv);
 
-        // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-        chooseCudaDevice(argc, argv, true);
+    if (!ref_file)
+    {
+        initGL(&argc, argv);
 
         // OpenGL buffers
         initGLBuffers();

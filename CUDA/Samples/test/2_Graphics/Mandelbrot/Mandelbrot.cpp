@@ -40,7 +40,6 @@
 
 #include "CUDA/Samples/interface/helper_functions.h"
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 // Includes
 #include <stdio.h>
@@ -1187,19 +1186,6 @@ void runBenchmark(int argc, char **argv)
     sdkDeleteTimer(&kernel_timer);
 }
 
-// General initialization call for CUDA Device
-void chooseCudaDevice(int argc, const char **argv, bool bUseOpenGL)
-{
-    if (bUseOpenGL)
-    {
-        findCudaGLDevice(argc, argv);
-    }
-    else
-    {
-        findCudaDevice(argc, argv);
-    }
-}
-
 void printHelp()
 {
     printf("[Mandelbrot]\n");
@@ -1286,7 +1272,7 @@ int main(int argc, char **argv)
     {
         //run benchmark
         // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-        chooseCudaDevice(argc, (const char **)argv, false); // no OpenGL usage
+        findCudaDevice(argc, (const char **)argv);
 
         // We run the Automated Performance Test
         runBenchmark(argc, argv);
@@ -1303,9 +1289,6 @@ int main(int argc, char **argv)
         printf("exiting...\n");
         exit(EXIT_SUCCESS);
     }
-
-    // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-    chooseCudaDevice(argc, (const char **)argv, true); // yes to OpenGL usage
 
     // Otherwise it succeeds, we will continue to run this sample
     initData(argc, argv);

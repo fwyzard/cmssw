@@ -59,7 +59,6 @@
 
 // CUDA helper functions
 #include "CUDA/Samples/interface/helper_cuda.h"         // helper functions for CUDA error check
-#include "CUDA/Samples/interface/helper_cuda_gl.h"      // helper functions for CUDA/GL interop
 
 #include <vector_types.h>
 
@@ -178,61 +177,6 @@ bool checkHW(char *name, const char *gpuType, int dev)
     }
 }
 
-int findGraphicsGPU(char *name)
-{
-    int nGraphicsGPU = 0;
-    int deviceCount = 0;
-    bool bFoundGraphics = false;
-    char firstGraphicsName[256], temp[256];
-
-    cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
-
-    if (error_id != cudaSuccess)
-    {
-        printf("cudaGetDeviceCount returned %d\n-> %s\n", (int)error_id, cudaGetErrorString(error_id));
-        printf("> FAILED %s sample finished, exiting...\n", sSDKsample);
-        exit(EXIT_FAILURE);
-    }
-
-    // This function call returns 0 if there are no CUDA capable devices.
-    if (deviceCount == 0)
-    {
-        printf("> There are no device(s) supporting CUDA\n");
-        return false;
-    }
-    else
-    {
-        printf("> Found %d CUDA Capable Device(s)\n", deviceCount);
-    }
-
-    for (int dev = 0; dev < deviceCount; ++dev)
-    {
-        bool bGraphics = !checkHW(temp, (const char *)"Tesla", dev);
-        printf("> %s\t\tGPU %d: %s\n", (bGraphics ? "Graphics" : "Compute"), dev, temp);
-
-        if (bGraphics)
-        {
-            if (!bFoundGraphics)
-            {
-                strcpy(firstGraphicsName, temp);
-            }
-
-            nGraphicsGPU++;
-        }
-    }
-
-    if (nGraphicsGPU)
-    {
-        strcpy(name, firstGraphicsName);
-    }
-    else
-    {
-        strcpy(name, "this hardware");
-    }
-
-    return nGraphicsGPU;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // Program main
 ////////////////////////////////////////////////////////////////////////////////
@@ -333,12 +277,12 @@ bool runTest(int argc, char **argv, char *ref_file)
     // Create the CUTIL timer
     sdkCreateTimer(&timer);
 
+    // use command-line specified CUDA device, otherwise use device with highest Gflops/s
+    int devID = findCudaDevice(argc, (const char **)argv);
+
     // command line mode only
     if (ref_file != NULL)
     {
-        // This will pick the best possible CUDA capable device
-        int devID = findCudaDevice(argc, (const char **)argv);
-
         // create VBO
         checkCudaErrors(cudaMalloc((void **)&d_vbo_buffer, mesh_width*mesh_height*4*sizeof(float)));
 
@@ -358,19 +302,6 @@ bool runTest(int argc, char **argv, char *ref_file)
         if (false == initGL(&argc, argv))
         {
             return false;
-        }
-
-        // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-        if (checkCmdLineFlag(argc, (const char **)argv, "device"))
-        {
-            if (gpuGLDeviceInit(argc, (const char **)argv) == -1)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            cudaGLSetGLDevice(gpuGetMaxGflopsDeviceId());
         }
 
         // register callbacks

@@ -54,7 +54,6 @@
 // CUDA utilities and system includes
 #include "CUDA/Samples/interface/helper_functions.h"
 #include "CUDA/Samples/interface/helper_cuda.h"      // includes cuda.h and cuda_runtime_api.h
-#include "CUDA/Samples/interface/helper_cuda_gl.h"   // includes cuda_runtime_api.h
 
 // Includes
 #include <stdlib.h>
@@ -510,10 +509,9 @@ main(int argc, char **argv)
     }
     else
     {
-        // First initialize OpenGL context, so we can properly set the GL for CUDA.
-        // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
+        // First initialize OpenGL context, and then select CUDA device.
         initGL(&argc, argv);
-        findCudaGLDevice(argc, (const char **)argv);
+        findCudaDevice(argc, (const char **)argv);
     }
 
     initCudaBuffers();

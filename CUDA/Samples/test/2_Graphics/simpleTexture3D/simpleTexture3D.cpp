@@ -40,7 +40,6 @@
 
 // CUDA utilities and system includes
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 #include "CUDA/Samples/interface/helper_functions.h"
 #include <vector_types.h>
 
@@ -287,23 +286,6 @@ void initGL(int *argc, char **argv)
     }
 }
 
-// General initialization call for CUDA Device
-int chooseCudaDevice(int argc, char **argv, bool bUseOpenGL)
-{
-    int result = 0;
-
-    if (bUseOpenGL)
-    {
-        result = findCudaGLDevice(argc, (const char **)argv);
-    }
-    else
-    {
-        result = findCudaDevice(argc, (const char **)argv);
-    }
-
-    return result;
-}
-
 void runAutoTest(const char *ref_file, char *exec_path)
 {
     checkCudaErrors(cudaMalloc((void **)&d_output, width*height*sizeof(GLubyte)*4));
@@ -375,22 +357,17 @@ main(int argc, char **argv)
         getCmdLineArgumentString(argc, (const char **)argv, "file", &ref_file);
     }
 
+    // use command-line specified CUDA device, otherwise use device with highest Gflops/s
+    findCudaDevice(argc, (const char **)argv);
+
     if (ref_file)
     {
-        chooseCudaDevice(argc, argv, false);
-
         loadVolumeData(argv[0]);
-
         runAutoTest(ref_file, argv[0]);
     }
     else
     {
-        // First initialize OpenGL context, so we can properly set the GL for CUDA.
-        // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
         initGL(&argc, argv);
-
-        // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-        chooseCudaDevice(argc, argv, true);
 
         // OpenGL buffers
         initGLBuffers();

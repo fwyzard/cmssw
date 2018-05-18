@@ -29,6 +29,7 @@
 int   *pArgc = NULL;
 char **pArgv = NULL;
 
+// This sample can support a system-wide maximum of eight peer connections. 
 #define MAX_DEVICES          8
 #define PROCESSES_PER_DEVICE 1
 #define DATA_BUF_SIZE        4096
@@ -51,7 +52,7 @@ typedef struct ipcCUDA_st
 typedef struct ipcDevices_st
 {
     int count;
-    int ordinals[MAX_DEVICES];
+    int ordinals[MAX_DEVICES + 1];
 } ipcDevices_t;
 
 typedef struct ipcBarrier_st
@@ -110,10 +111,11 @@ void getDeviceCount(ipcDevices_t *devices)
     {
         int i;
         int count, uvaCount = 0;
-        int uvaOrdinals[MAX_DEVICES];
         printf("\nChecking for multiple GPUs...\n");
         checkCudaErrors(cudaGetDeviceCount(&count));
         printf("CUDA-capable device count: %i\n", count);
+
+        int *uvaOrdinals = (int*) malloc(sizeof(int)*count);
 
         printf("\nSearching for UVA capable devices...\n");
 
@@ -155,7 +157,7 @@ void getDeviceCount(ipcDevices_t *devices)
             checkCudaErrors(cudaDeviceCanAccessPeer(&canAccessPeer_0i, uvaOrdinals[0], uvaOrdinals[i]));
             checkCudaErrors(cudaDeviceCanAccessPeer(&canAccessPeer_i0, uvaOrdinals[i], uvaOrdinals[0]));
 
-            if (canAccessPeer_0i*canAccessPeer_i0)
+            if (canAccessPeer_0i*canAccessPeer_i0 && devices->count <= MAX_DEVICES)
             {
                 devices->ordinals[devices->count] = uvaOrdinals[i];
                 printf("> Two-way peer access between GPU%d and GPU%d: YES\n", devices->ordinals[0], devices->ordinals[devices->count]);
@@ -163,6 +165,12 @@ void getDeviceCount(ipcDevices_t *devices)
             }
         }
 
+        if (devices->count > MAX_DEVICES)
+        {
+            printf("\nSkipping other GPUs, as a this sample can support a system-wide maximum of %d peer connections\n",  MAX_DEVICES);
+        }
+
+        free(uvaOrdinals);
         exit(EXIT_SUCCESS);
     }
     else
@@ -178,7 +186,7 @@ inline bool IsAppBuiltAs64()
     return sizeof(void*) == 8;
 }
 
-void runTestMultiKernel(ipcCUDA_t *s_mem, int index)
+void runTestMultiKernel(ipcCUDA_t *s_mem, int index, ipcDevices_t* s_devices)
 {
     /*
      * a) Process 0 loads a reference buffer into GPU0 memory
@@ -203,9 +211,9 @@ void runTestMultiKernel(ipcCUDA_t *s_mem, int index)
     {
         printf("\nLaunching kernels...\n");
         // host memory buffer for checking results
-        int h_results[DATA_BUF_SIZE * MAX_DEVICES * PROCESSES_PER_DEVICE];
+        int *h_results = (int*)malloc(sizeof(int)*DATA_BUF_SIZE * s_devices->count * PROCESSES_PER_DEVICE);
 
-        cudaEvent_t event[MAX_DEVICES * PROCESSES_PER_DEVICE];
+        cudaEvent_t *event = (cudaEvent_t*)malloc(sizeof(cudaEvent_t) * s_devices->count * PROCESSES_PER_DEVICE);
         checkCudaErrors(cudaMalloc((void **) &d_ptr, DATA_BUF_SIZE * g_processCount * sizeof(int)));
         checkCudaErrors(cudaIpcGetMemHandle((cudaIpcMemHandle_t *) &s_mem[0].memHandle, (void *) d_ptr));
         checkCudaErrors(cudaMemcpy((void *) d_ptr, (void *) h_refData, DATA_BUF_SIZE * sizeof(int), cudaMemcpyHostToDevice));
@@ -247,6 +255,8 @@ void runTestMultiKernel(ipcCUDA_t *s_mem, int index)
                 }
             }
         }
+        free(h_results);
+        free(event);
     }
     else
     {
@@ -376,7 +386,7 @@ int main(int argc, char **argv)
     printf("> Process %3d -> GPU%d\n", index, s_mem[index].device);
 
     // launch our test
-    runTestMultiKernel(s_mem, index);
+    runTestMultiKernel(s_mem, index, s_devices);
 
     // Cleanup and shutdown
     if (index == 0)

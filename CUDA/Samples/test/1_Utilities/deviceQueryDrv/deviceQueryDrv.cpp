@@ -230,6 +230,10 @@ main(int argc, char **argv)
         getCudaAttribute<int>(&unifiedAddressing, CU_DEVICE_ATTRIBUTE_UNIFIED_ADDRESSING, dev);
         printf("  Device supports Unified Addressing (UVA):      %s\n", unifiedAddressing ? "Yes" : "No");
 
+        int computePreemption;
+        getCudaAttribute<int>(&computePreemption, CU_DEVICE_ATTRIBUTE_COMPUTE_PREEMPTION_SUPPORTED, dev);
+        printf("  Device supports Compute Preemption:            %s\n", computePreemption ? "Yes" : "No");
+
         int cooperativeLaunch;
         getCudaAttribute<int>(&cooperativeLaunch, CU_DEVICE_ATTRIBUTE_COOPERATIVE_LAUNCH, dev);
         printf("  Supports Cooperative Kernel Launch:            %s\n", cooperativeLaunch ? "Yes" : "No");

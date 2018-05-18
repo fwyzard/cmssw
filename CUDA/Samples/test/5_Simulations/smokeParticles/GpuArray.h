@@ -20,7 +20,6 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 template <class T>
 class GpuArray

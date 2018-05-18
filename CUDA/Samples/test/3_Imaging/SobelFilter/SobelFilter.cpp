@@ -463,10 +463,8 @@ int main(int argc, char **argv)
         exit(EXIT_SUCCESS);
     }
 
-    // First initialize OpenGL context, so we can properly set the GL for CUDA.
-    // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
     initGL(&argc, argv);
-    cudaGLSetGLDevice(gpuGetMaxGflopsDeviceId());
+    findCudaDevice(argc, (const char **)argv);
 
     sdkCreateTimer(&timer);
     sdkResetTimer(&timer);

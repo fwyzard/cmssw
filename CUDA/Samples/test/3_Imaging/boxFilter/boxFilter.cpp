@@ -44,13 +44,9 @@
 // Helper functions
 #include "CUDA/Samples/interface/helper_functions.h"  // CUDA SDK Helper functions
 #include "CUDA/Samples/interface/helper_cuda.h"       // CUDA device initialization helper functions
-#include "CUDA/Samples/interface/helper_cuda_gl.h"    // CUDA device + OpenGL initialization functions
 
 #define MAX_EPSILON_ERROR 5.0f
 #define REFRESH_DELAY     10 //ms
-
-#define MIN_RUNTIME_VERSION 1000
-#define MIN_COMPUTE_VERSION 0x10
 
 const static char *sSDKsample = "CUDA Iterative Box Filter";
 
@@ -534,83 +530,7 @@ void loadImageData(int argc, char **argv)
     printf("Loaded '%s', %d x %d pixels\n", image_path, width, height);
 }
 
-bool checkCUDAProfile(int dev, int min_runtime, int min_compute)
-{
-    int runtimeVersion = 0;
-
-    cudaDeviceProp deviceProp;
-    cudaGetDeviceProperties(&deviceProp, dev);
-
-    fprintf(stderr,"\nDevice %d: \"%s\"\n", dev, deviceProp.name);
-    cudaRuntimeGetVersion(&runtimeVersion);
-    fprintf(stderr,"  CUDA Runtime Version     :\t%d.%d\n", runtimeVersion/1000, (runtimeVersion%100)/10);
-    fprintf(stderr,"  CUDA Compute Capability  :\t%d.%d\n", deviceProp.major, deviceProp.minor);
-
-    if (runtimeVersion >= min_runtime && ((deviceProp.major<<4) + deviceProp.minor) >= min_compute)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-int findCapableDevice(int argc, char **argv)
-{
-    int dev;
-    int bestDev = -1;
-
-    int deviceCount = 0;
-    cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
-
-    if (error_id != cudaSuccess)
-    {
-        fprintf(stderr, "cudaGetDeviceCount returned %d\n-> %s\n", (int)error_id, cudaGetErrorString(error_id));
-        exit(EXIT_FAILURE);
-    }
-
-    if (deviceCount==0)
-    {
-        fprintf(stderr,"There are no CUDA capable devices.\n");
-        exit(EXIT_SUCCESS);
-    }
-    else
-    {
-        fprintf(stderr,"Found %d CUDA Capable device(s) supporting CUDA\n", deviceCount);
-    }
-
-    for (dev = 0; dev < deviceCount; ++dev)
-    {
-        cudaDeviceProp deviceProp;
-        cudaGetDeviceProperties(&deviceProp, dev);
-
-        if (checkCUDAProfile(dev, MIN_RUNTIME_VERSION, MIN_COMPUTE_VERSION))
-        {
-            fprintf(stderr,"\nFound CUDA Capable Device %d: \"%s\"\n", dev, deviceProp.name);
-
-            if (bestDev == -1)
-            {
-                bestDev = dev;
-                fprintf(stderr, "Setting active device to %d\n", bestDev);
-            }
-        }
-    }
-
-    if (bestDev == -1)
-    {
-        fprintf(stderr, "\nNo configuration with available capabilities was found.  Test has been waived.\n");
-        fprintf(stderr, "The CUDA Sample minimum requirements:\n");
-        fprintf(stderr, "\tCUDA Compute Capability >= %d.%d is required\n", MIN_COMPUTE_VERSION/16, MIN_COMPUTE_VERSION%16);
-        fprintf(stderr, "\tCUDA Runtime Version    >= %d.%d is required\n", MIN_RUNTIME_VERSION/1000, (MIN_RUNTIME_VERSION%100)/10);
-        exit(EXIT_SUCCESS);
-    }
-
-    return bestDev;
-}
-
-void
-printHelp()
+void printHelp()
 {
     printf("boxFilter usage\n");
     printf("    -threads=n (specify the # of of threads to use)\n");
@@ -671,12 +591,11 @@ main(int argc, char **argv)
 
     // load image to process
     loadImageData(argc, argv);
+    devID = findCudaDevice(argc, (const char **)argv);
 
     if (checkCmdLineFlag(argc, (const char **)argv, "benchmark"))
     {
         // This is a separate mode of the sample, where we are benchmark the kernels for performance
-        devID = findCudaDevice(argc, (const char **)argv);
-
         // Running CUDA kernels (boxfilter) in Benchmarking mode
         g_TotalErrors += runBenchmark();
         exit(g_TotalErrors == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
@@ -685,7 +604,6 @@ main(int argc, char **argv)
              checkCmdLineFlag(argc, (const char **)argv, "passes"))
     {
         // This overrides the default mode.  Users can specify the radius used by the filter kernel
-        devID = findCudaDevice(argc, (const char **)argv);
         g_TotalErrors += runSingleTest(ref_file, argv[0]);
         exit(g_TotalErrors == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
     }
@@ -695,21 +613,8 @@ main(int argc, char **argv)
         // the output automatically changes animation
         printf("\n");
 
-        // First initialize OpenGL context, so we can properly set the GL for CUDA.
-        // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
         initGL(&argc, argv);
-        int dev = findCapableDevice(argc, argv);
 
-        if (dev != -1)
-        {
-            cudaGLSetGLDevice(dev);
-        }
-        else
-        {
-            exit(EXIT_SUCCESS);
-        }
-
-        // Now we can create a CUDA context and bind it to the OpenGL context
         initCuda(true);
         initGLResources();
 

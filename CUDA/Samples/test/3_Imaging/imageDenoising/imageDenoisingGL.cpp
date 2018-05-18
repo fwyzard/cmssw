@@ -561,10 +561,8 @@ int main(int argc, char **argv)
         LoadBMPFile(&h_Src, &imageW, &imageH, image_path);
         printf("Data init done.\n");
 
-        // First initialize OpenGL context, so we can properly set the GL for CUDA.
-        // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
         initGL(&argc, argv);
-        cudaGLSetGLDevice(gpuGetMaxGflopsDeviceId());
+        findCudaDevice(argc, (const char **)argv);
 
         checkCudaErrors(CUDA_MallocArray(&h_Src, imageW, imageH));
 

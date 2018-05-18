@@ -95,6 +95,21 @@ __global__ void updateHeightmapKernel(float  *heightMap,
     heightMap[i] = ht[i].x * sign_correction;
 }
 
+// update height map values based on output of FFT
+__global__ void updateHeightmapKernel_y(float  *heightMap,
+                                      float2 *ht,
+                                      unsigned int width)
+{
+    unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
+    unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
+    unsigned int i = y*width+x;
+
+    // cos(pi * (m1 + m2))
+    float sign_correction = ((x + y) & 0x01) ? -1.0f : 1.0f;
+
+    heightMap[i] = ht[i].y * sign_correction;
+}
+
 // generate slope by partial differences in spatial domain
 __global__ void calculateSlopeKernel(float *h, float2 *slopeOut, unsigned int width, unsigned int height)
 {
@@ -132,11 +147,19 @@ extern "C"
 void cudaUpdateHeightmapKernel(float  *d_heightMap,
                                float2 *d_ht,
                                unsigned int width,
-                               unsigned int height)
+                               unsigned int height,
+                               bool autoTest)
 {
     dim3 block(8, 8, 1);
     dim3 grid(cuda_iDivUp(width, block.x), cuda_iDivUp(height, block.y), 1);
-    updateHeightmapKernel<<<grid, block>>>(d_heightMap, d_ht, width);
+    if (autoTest)
+    {
+        updateHeightmapKernel_y<<<grid, block>>>(d_heightMap, d_ht, width);
+    }
+    else
+    {
+        updateHeightmapKernel<<<grid, block>>>(d_heightMap, d_ht, width);
+    }
 }
 
 extern "C"

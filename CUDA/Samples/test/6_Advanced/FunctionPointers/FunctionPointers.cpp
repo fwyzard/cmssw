@@ -31,7 +31,6 @@
 #include <cuda_gl_interop.h>  // CUDA OpenGL interop
 
 #include "CUDA/Samples/interface/helper_cuda.h"      // includes for CUDA initialization and error checking
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
 
 #include "FunctionPointers_kernels.h"
 
@@ -485,15 +484,6 @@ int main(int argc, char **argv)
         initGL(&argc, argv);
 
         int dev = findCudaDevice(argc, (const char **)argv);
-
-        if (dev != -1)
-        {
-            cudaGLSetGLDevice(dev);
-        }
-        else
-        {
-            exit(EXIT_WAIVED);
-        }
 
         sdkCreateTimer(&timer);
         sdkResetTimer(&timer);

@@ -395,7 +395,7 @@ bool initCudaResources(int argc, char **argv, int *bTCC)
         if (g_bUseInterop)
         {
             initGL(argc, argv, bTCC);
-            cuda_device = findCudaGLDeviceDRV(argc, (const char **)argv);
+            cuda_device = findCudaDeviceDRV(argc, (const char **)argv);
         }
         else
         {
@@ -422,7 +422,7 @@ bool initCudaResources(int argc, char **argv, int *bTCC)
 
         if (g_bUseInterop && !(*bTCC))
         {
-            cuda_device = findCudaGLDeviceDRV(argc, (const char **)argv);
+            cuda_device = findCudaDeviceDRV(argc, (const char **)argv);
             checkCudaErrors(cuDeviceGet(&g_oDevice, cuda_device));
         }
         else

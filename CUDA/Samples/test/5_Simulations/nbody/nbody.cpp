@@ -32,8 +32,6 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
-
 #include "CUDA/Samples/interface/helper_functions.h"
 
 #include "bodysystemcuda.h"
@@ -1166,7 +1164,7 @@ main(int argc, char **argv)
                 customGPU = true;
             }
 
-            devID = findCudaGLDevice(argc, (const char **)argv);
+            devID = findCudaDevice(argc, (const char **)argv);
         }
 
         checkCudaErrors(cudaGetDevice(&devID));

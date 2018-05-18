@@ -68,6 +68,47 @@ int main(int argc, char **argv)
         exit(EXIT_WAIVED);
     }
 
+
+    int *major_minor =  (int *) malloc(sizeof(int)*GPU_N*2);
+    int found2IdenticalGPUs = 0;
+    int nGPUs = 2;
+    int *whichGPUs ;
+    whichGPUs = (int*) malloc(sizeof(int) * nGPUs);
+
+    for(int i=0; i<GPU_N; i++)
+    {
+        cudaDeviceProp deviceProp;
+        checkCudaErrors(cudaGetDeviceProperties(&deviceProp, i));
+        major_minor[i*2] = deviceProp.major;
+        major_minor[i*2 + 1] = deviceProp.minor;
+        printf("GPU Device %d: \"%s\" with compute capability %d.%d\n", i, deviceProp.name, deviceProp.major, deviceProp.minor);
+    }
+
+    for (int i=0; i<GPU_N; i++)
+    {
+        for (int j=i+1; j<GPU_N; j++)
+        {
+            if((major_minor[i*2] == major_minor[j*2]) && (major_minor[i*2 + 1] == major_minor[j*2 + 1]))
+            {
+                whichGPUs[0] = i;
+                whichGPUs[1] = j;
+                found2IdenticalGPUs = 1;
+                break;
+            }
+        }
+        if (found2IdenticalGPUs)
+        {
+            break;
+        }
+    }
+
+    free(major_minor);
+    if (!found2IdenticalGPUs)
+    {
+        printf("No Two GPUs with same architecture found\nWaiving simpleCUFFT_2d_MGPU sample\n");
+        exit(EXIT_WAIVED);
+    }
+
     int N = 64;
     float xMAX = 1.0f, xMIN = 0.0f, yMIN = 0.0f,h = (xMAX - xMIN)/((float)N), s = 0.1, s2 = s*s;
     float *x, *y, *f, *u_a, r2;
@@ -116,44 +157,27 @@ int main(int argc, char **argv)
     if (result != CUFFT_SUCCESS) { printf ("cufftCreate failed\n"); exit (EXIT_FAILURE); }
 
     // cufftXtSetGPUs() - Define which GPUs to use
-    int nGPUs = 2;
-    int *whichGPUs ;
-    whichGPUs = (int*) malloc(sizeof(int) * nGPUs);
+    result = cufftXtSetGPUs (planComplex, nGPUs, whichGPUs);
 
-    // Iterate all device combinations to see if a supported combo exists
-    for (int i = 0; i < GPU_N; i++)
-    {
-        for (int j = i+1; j < GPU_N; j++)
-        {
-            whichGPUs[0] = i;
-            whichGPUs[1] = j;
-            result = cufftXtSetGPUs (planComplex, nGPUs, whichGPUs);
-
-            if (result == CUFFT_INVALID_DEVICE) { continue; }
-            else if (result == CUFFT_SUCCESS) { break; }
-            else { printf ("cufftXtSetGPUs failed\n"); exit (EXIT_FAILURE); }
-        }
-
-        if (result == CUFFT_SUCCESS) { break; }
-    }
-
-    if (result == CUFFT_INVALID_DEVICE)
+    if (result == CUFFT_INVALID_DEVICE) 
     {
         printf ("This sample requires two GPUs on the same board.\n");
         printf ("No such board was found. Waiving sample.\n");
         exit (EXIT_WAIVED);
     }
+    else if (result != CUFFT_SUCCESS) 
+    {
+        printf ("cufftXtSetGPUs failed\n"); exit (EXIT_FAILURE); 
+    }
 
     //Print the device information to run the code
+    printf("\nRunning on GPUs\n");
     for (int i = 0 ; i < 2 ; i++)
     {
         cudaDeviceProp deviceProp;
         checkCudaErrors(cudaGetDeviceProperties(&deviceProp, whichGPUs[i]));
         printf("GPU Device %d: \"%s\" with compute capability %d.%d\n", whichGPUs[i], deviceProp.name, deviceProp.major, deviceProp.minor);
     }
-
-    result = cufftXtSetGPUs (planComplex, nGPUs, whichGPUs);
-    if (result != CUFFT_SUCCESS) { printf ("cufftXtSetGPUs failed\n"); exit (EXIT_FAILURE) ; }
 
     size_t* worksize;
     worksize =(size_t*)malloc(sizeof(size_t) * nGPUs);

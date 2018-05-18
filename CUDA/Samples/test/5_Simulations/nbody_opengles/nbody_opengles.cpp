@@ -1048,7 +1048,13 @@ main(int argc, char **argv)
             customGPU = true;
         }
 
+#if defined (__aarch64__) || defined(__arm__)
+        // find iGPU on the system which is compute capable which will perform GLES-CUDA interop
+        devID = findIntegratedGPU();
+#else
+        // use command-line specified CUDA device, otherwise use device with highest Gflops/s
         devID = findCudaDevice(argc, (const char **)argv);
+#endif
 
         checkCudaErrors(cudaGetDevice(&devID));
         checkCudaErrors(cudaGetDeviceProperties(&props, devID));

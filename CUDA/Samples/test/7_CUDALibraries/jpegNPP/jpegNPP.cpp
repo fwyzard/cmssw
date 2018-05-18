@@ -1,5 +1,5 @@
 /*
-* Copyright 1993-2015 NVIDIA Corporation.  All rights reserved.
+* Copyright 1993-2017 NVIDIA Corporation.  All rights reserved.
 *
 * NOTICE TO USER:
 *
@@ -794,7 +794,8 @@ int main(int argc, char **argv)
     }
 
     // Scale to target image size
-    for (int i = 0; i < 3; ++i)
+    Npp8u * apLanczosBuffer[3];
+    for (int i = 0; i < 3; ++ i)
     {
         NppiSize oBlocksPerMCU = {oFrameHeader.aSamplingFactors[i] >> 4, oFrameHeader.aSamplingFactors[i] & 0x0f};
         NppiSize oSrcImageSize = {aSrcActualSize[i].width, aSrcActualSize[i].height};
@@ -804,14 +805,18 @@ int main(int argc, char **argv)
         oDstImageROI.y = 0;
         oDstImageROI.width = DivUp(oDstImageSize.width * oBlocksPerMCU.width, nMCUBlocksH);
         oDstImageROI.height = DivUp(oDstImageSize.height * oBlocksPerMCU.height, nMCUBlocksV);
+        NppiSize oDstImageSize = {oDstImageROI.width, oDstImageROI.height};
         
-        NppiInterpolationMode eInterploationMode = NPPI_INTER_SUPER;
+        NppiInterpolationMode eInterploationMode = NPPI_INTER_LANCZOS3_ADVANCED;   
         
-        if (nScaleFactor >= 1.f)
-            eInterploationMode = NPPI_INTER_LANCZOS;
-        
-        NPP_CHECK_NPP(nppiResize_8u_C1R(apSrcImage[i], aSrcImageStep[i], oSrcImageSize, oSrcImageROI,
-                                        apDstImage[i], aDstImageStep[i], oDstImageSize, oDstImageROI, eInterploationMode));
+        int nBufferSize;
+        NPP_CHECK_NPP(nppiResizeAdvancedGetBufferHostSize_8u_C1R(oSrcImageSize, oDstImageSize, &nBufferSize, NPPI_INTER_LANCZOS3_ADVANCED));
+        NPP_CHECK_CUDA(cudaMalloc(&apLanczosBuffer[i], nBufferSize));
+        NPP_CHECK_NPP(nppiResizeSqrPixel_8u_C1R_Advanced(apSrcImage[i], oSrcImageSize, aSrcImageStep[i], oSrcImageROI,
+                          apDstImage[i], aDstImageStep[i], oDstImageROI,
+                          nScaleFactor, nScaleFactor,
+                          apLanczosBuffer[i],
+                          NPPI_INTER_LANCZOS3_ADVANCED));        
     }
 
     /***************************
@@ -922,8 +927,10 @@ int main(int argc, char **argv)
         cudaFreeHost(aphDCT[i]);
         cudaFree(apSrcImage[i]);
         cudaFree(apDstImage[i]);
+        cudaFree(apLanczosBuffer[i]);
     }
 
     return EXIT_SUCCESS;
 }
+
 

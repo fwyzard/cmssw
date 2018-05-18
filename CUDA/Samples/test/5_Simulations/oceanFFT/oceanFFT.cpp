@@ -41,8 +41,6 @@
 #include <cufft.h>
 
 #include "CUDA/Samples/interface/helper_cuda.h"
-#include "CUDA/Samples/interface/helper_cuda_gl.h"
-
 #include "CUDA/Samples/interface/helper_functions.h"
 #include <math_constants.h>
 
@@ -139,7 +137,8 @@ extern "C"
 void cudaUpdateHeightmapKernel(float  *d_heightMap,
                                float2 *d_ht,
                                unsigned int width,
-                               unsigned int height);
+                               unsigned int height,
+                               bool autoTest);
 
 extern "C"
 void cudaCalculateSlopeKernel(float *h, float2 *slopeOut,
@@ -272,7 +271,7 @@ void runGraphicsTest(int argc, char **argv)
         return;
     }
 
-    findCudaGLDevice(argc, (const char **)argv);
+    findCudaDevice(argc, (const char **)argv);
 
     // create FFT plan
     checkCudaErrors(cufftPlan2d(&fftPlan, meshSize, meshSize, CUFFT_C2C));
@@ -421,7 +420,7 @@ void runCuda()
     checkCudaErrors(cudaGraphicsMapResources(1, &cuda_heightVB_resource, 0));
     checkCudaErrors(cudaGraphicsResourceGetMappedPointer((void **)&g_hptr, &num_bytes, cuda_heightVB_resource));
 
-    cudaUpdateHeightmapKernel(g_hptr, d_ht, meshSize, meshSize);
+    cudaUpdateHeightmapKernel(g_hptr, d_ht, meshSize, meshSize, false);
 
     // calculate slope for shading
     checkCudaErrors(cudaGraphicsMapResources(1, &cuda_slopeVB_resource, 0));
@@ -445,14 +444,14 @@ void runCudaTest(char *exec_path)
     checkCudaErrors(cufftExecC2C(fftPlan, d_ht, d_ht, CUFFT_INVERSE));
 
     // update heightmap values
-    cudaUpdateHeightmapKernel(g_hptr, d_ht, meshSize, meshSize);
+    cudaUpdateHeightmapKernel(g_hptr, d_ht, meshSize, meshSize, true);
 
     {
         float *hptr = (float *)malloc(meshSize*meshSize*sizeof(float));
         cudaMemcpy((void *)hptr, (void *)g_hptr, meshSize*meshSize*sizeof(float), cudaMemcpyDeviceToHost);
         sdkDumpBin((void *)hptr, meshSize*meshSize*sizeof(float), "spatialDomain.bin");
 
-        if (!sdkCompareBin2BinFloat("spatialDomain.bin", "ref_spatialDomain.bin", meshSize*meshSize*sizeof(float),
+        if (!sdkCompareBin2BinFloat("spatialDomain.bin", "ref_spatialDomain.bin", meshSize*meshSize,
                                     MAX_EPSILON, THRESHOLD, exec_path))
         {
             g_TotalErrors++;
@@ -469,7 +468,7 @@ void runCudaTest(char *exec_path)
         cudaMemcpy((void *)sptr, (void *)g_sptr, meshSize*meshSize*sizeof(float2), cudaMemcpyDeviceToHost);
         sdkDumpBin(sptr, meshSize*meshSize*sizeof(float2), "slopeShading.bin");
 
-        if (!sdkCompareBin2BinFloat("slopeShading.bin", "ref_slopeShading.bin", meshSize*meshSize*sizeof(float2),
+        if (!sdkCompareBin2BinFloat("slopeShading.bin", "ref_slopeShading.bin", meshSize*meshSize*2,
                                     MAX_EPSILON, THRESHOLD, exec_path))
         {
             g_TotalErrors++;

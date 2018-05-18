@@ -40,67 +40,42 @@
 #include "libcuhook.h"
 
 // For interposing dlsym(). See elf/dl-libc.c for the internal dlsym interface function
+// For interposing dlopen(). Sell elf/dl-lib.c for the internal dlopen_mode interface function
 extern "C" { void* __libc_dlsym (void *map, const char *name); }
+extern "C" { void* __libc_dlopen_mode (const char* name, int mode); }
 
 // We need to give the pre-processor a chance to replace a function, such as:
 // cuMemAlloc => cuMemAlloc_v2
 #define STRINGIFY(x) #x
 #define CUDA_SYMBOL_STRING(x) STRINGIFY(x)
 
-#define CU_HOOK_PRINT(args...) { fprintf(stderr, "CUDA Hook Library: " args); }
-#define CU_HOOK_DIE_IF(condition, args...)        \
-    do {                                          \
-        if (condition) {                          \
-            CU_HOOK_PRINT(args);                  \
-            exit(EXIT_FAILURE);                   \
-        }                                         \
-    } while (0)
-
 // We need to interpose dlsym since anyone using dlopen+dlsym to get the CUDA driver symbols will bypass
 // the hooking mechanism (this includes the CUDA runtime). Its tricky though, since if we replace the
 // real dlsym with ours, we can't dlsym() the real dlsym. To get around that, call the 'private'
 // libc interface called __libc_dlsym to get the real dlsym.
 typedef void* (*fnDlsym)(void*, const char*);
+
 static void* real_dlsym(void *handle, const char* symbol)
 {
-    static fnDlsym internal_dlsym = (fnDlsym)__libc_dlsym(dlopen("libdl.so.2", RTLD_LAZY), "dlsym");
+    static fnDlsym internal_dlsym = (fnDlsym)__libc_dlsym(__libc_dlopen_mode("libdl.so.2", RTLD_LAZY), "dlsym");
     return (*internal_dlsym)(handle, symbol);
 }
 
 // Main structure that gets initialized at library load time
-struct HookInfo
+// Choose a unique name, or it can clash with other preloaded libraries.
+struct cuHookInfo
 {
     void        *handle;
-    void        *realFunctions[CU_HOOK_SYMBOLS];
     void        *preHooks[CU_HOOK_SYMBOLS];
     void        *postHooks[CU_HOOK_SYMBOLS];
-    
+
     // Debugging/Stats Info
     int         bDebugEnabled;
     int         hookedFunctionCalls[CU_HOOK_SYMBOLS];
 
-    HookInfo(const char* dl)
+    cuHookInfo()
     {
         const char* envHookDebug;
-
-        // Load the libcuda.so library with RTLD_GLOBAL so we can hook the function calls
-        handle = dlopen(dl, RTLD_LAZY | RTLD_GLOBAL);
-        CU_HOOK_DIE_IF(!handle, "Failed to load libcuda.so, %s\n", dlerror());
-
-        realFunctions[CU_HOOK_MEM_ALLOC] = real_dlsym(handle, CUDA_SYMBOL_STRING(cuMemAlloc));
-        CU_HOOK_DIE_IF(!realFunctions[CU_HOOK_MEM_ALLOC], "Failed to find symbol cuMemAlloc, %s\n", dlerror());
-
-        realFunctions[CU_HOOK_MEM_FREE] = real_dlsym(handle, CUDA_SYMBOL_STRING(cuMemFree));
-        CU_HOOK_DIE_IF(!realFunctions[CU_HOOK_MEM_FREE], "Failed to find symbol cuMemFree, %s\n", dlerror());
-
-        realFunctions[CU_HOOK_CTX_GET_CURRENT] = real_dlsym(handle, CUDA_SYMBOL_STRING(cuCtxGetCurrent));
-        CU_HOOK_DIE_IF(!realFunctions[CU_HOOK_CTX_GET_CURRENT], "Failed to find symbol cuCtxGetCurrent, %s\n", dlerror());
-
-        realFunctions[CU_HOOK_CTX_SET_CURRENT] = real_dlsym(handle, CUDA_SYMBOL_STRING(cuCtxSetCurrent));
-        CU_HOOK_DIE_IF(!realFunctions[CU_HOOK_CTX_SET_CURRENT], "Failed to find symbol cuCtxSetCurrent, %s\n", dlerror());
-
-        realFunctions[CU_HOOK_CTX_DESTROY] = real_dlsym(handle, CUDA_SYMBOL_STRING(cuCtxDestroy));
-        CU_HOOK_DIE_IF(!realFunctions[CU_HOOK_CTX_DESTROY], "Failed to find symbol cuCtxDestroy, %s\n", dlerror());
 
         // Check environment for CU_HOOK_DEBUG to facilitate debugging
         envHookDebug = getenv("CU_HOOK_DEBUG");
@@ -110,7 +85,7 @@ struct HookInfo
         }
     }
 
-    ~HookInfo()
+    ~cuHookInfo()
     {
         if (bDebugEnabled) {
             pid_t pid = getpid();
@@ -134,7 +109,7 @@ struct HookInfo
 
 };
 
-static HookInfo cuhl("libcuda.so.1");
+static struct cuHookInfo cuhl;
 
 // Exposed API
 void cuHookRegisterCallback(HookSymbols symbol, HookTypes type, void* callback)
@@ -182,6 +157,7 @@ void* dlsym(void *handle, const char *symbol)
 #define CU_HOOK_GENERATE_INTERCEPT(hooksymbol, funcname, params, ...)   \
     CUresult CUDAAPI funcname params                                    \
     {                                                                   \
+        static void* real_func = (void*)real_dlsym(RTLD_NEXT, CUDA_SYMBOL_STRING(funcname)); \
         CUresult result = CUDA_SUCCESS;                                 \
                                                                         \
         if (cuhl.bDebugEnabled) {                                       \
@@ -190,7 +166,7 @@ void* dlsym(void *handle, const char *symbol)
         if (cuhl.preHooks[hooksymbol]) {                                \
             ((CUresult CUDAAPI (*)params)cuhl.preHooks[hooksymbol])(__VA_ARGS__);               \
         }                                                                                       \
-        result = ((CUresult CUDAAPI (*)params)cuhl.realFunctions[hooksymbol])(__VA_ARGS__);     \
+        result = ((CUresult CUDAAPI (*)params)real_func)(__VA_ARGS__);                          \
         if (cuhl.postHooks[hooksymbol] && result == CUDA_SUCCESS) {                             \
             ((CUresult CUDAAPI (*)params)cuhl.postHooks[hooksymbol])(__VA_ARGS__);              \
         }                                                                                       \
