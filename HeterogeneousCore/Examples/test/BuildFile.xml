@@ -1,0 +1,9 @@
+<use name="cuda"/>
+
+<bin name="cudaHelloWorld" file="cudaHelloWorld.cu">
+</bin>
+
+<library name="HeterogeneousCoreExamplesScrambler" file="Scrambler.cc ScramblerKernel.cu">
+  <use name="FWCore/Framework"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
