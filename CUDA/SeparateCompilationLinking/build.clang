@@ -1,0 +1,38 @@
+#! /bin/bash -e
+
+CUDA_BASE=$(scram tool tag cuda CUDA_BASE)
+
+COMMON_LD_FLAGS="-L$CMSSW_BASE/lib/$SCRAM_ARCH -L$CMSSW_BASE/external/$SCRAM_ARCH/lib -L$CMSSW_RELEASE_BASE/lib/$SCRAM_ARCH -L$CMSSW_RELEASE_BASE/external/$SCRAM_ARCH/lib -L$CUDA_BASE/lib64/stubs -L$CUDA_BASE/lib64"
+
+CUDA_LD_FLAGS="$COMMON_LD_FLAGS -lcudadevrt"
+HOST_LD_FLAGS="-Wl,-E -Wl,--hash-style=gnu $COMMON_LD_FLAGS -lcudart -lcudadevrt -lnvToolsExt -lcuda -lrt -lpthread -ldl"
+
+CPP_FLAGS="-DGNU_GCC -D_GNU_SOURCE -DCMSSW_GIT_HASH=CMSSW_10_2_0_pre5_Patatrack -DPROJECT_NAME=CMSSW -DPROJECT_VERSION=CMSSW_10_2_0_pre5_Patatrack -I$CMSSW_BASE/src -I$CMSSW_RELEASE_BASE/src -I$CUDA_BASE/include"
+CXX_FLAGS="-O2 -pthread -pipe -Werror=main -Werror=pointer-arith -Werror=overlength-strings -Wno-vla -Werror=overflow -ftree-vectorize -Wstrict-overflow -Werror=array-bounds -Werror=type-limits -fvisibility-inlines-hidden -fno-math-errno --param vect-max-version-for-alias-checks=50 -Xassembler --compress-debug-sections -msse3 -felide-constructors -fmessage-length=0 -Wall -Wno-long-long -Wreturn-type -Wunused -Wparentheses -Wno-deprecated -Werror=return-type -Werror=missing-braces -Werror=unused-value -Werror=address -Werror=format -Werror=sign-compare -Werror=write-strings -Werror=delete-non-virtual-dtor -Werror=strict-aliasing -Werror=narrowing -Werror=reorder -Werror=unused-variable -Werror=conversion-null -Wnon-virtual-dtor -Werror=switch -fdiagnostics-show-option -Wno-unused-local-typedefs -Wno-attributes -Wno-c99-extensions -Wno-c++11-narrowing -D__STRICT_ANSI__ -Wno-unused-private-field -Wno-unknown-pragmas -Wno-unused-command-line-argument -Wno-unknown-warning-option -ftemplate-depth=512 -Wno-error=potentially-evaluated-expression -DBOOST_DISABLE_ASSERTS -fPIC"
+CUDA_FLAGS="--cuda-path=$CUDA_BASE --cuda-gpu-arch=sm_35 --cuda-gpu-arch=sm_50 --cuda-gpu-arch=sm_61 -fcuda-rdc --no-cuda-include-ptx=all"
+
+SRC=$CMSSW_BASE/src/CUDA/SeparateCompilationLinking/test
+TMP=$CMSSW_BASE/tmp/$SCRAM_ARCH/src/CUDA/SeparateCompilationLinking/test/cudaApp
+rm -rf $TMP
+mkdir -p $TMP
+
+# compile the host-only source files
+clang++ -std=c++17 -c $CPP_FLAGS $CXX_FLAGS -MMD -MF $TMP/main.cc.d $SRC/main.cc -o $TMP/main.cc.o
+
+# compile the CUDA source files
+clang++ -std=c++17 -c $CPP_FLAGS $CXX_FLAGS $CUDA_FLAGS $SRC/v3.cu            -MMD -MF $TMP/v3.cu.d              -o $TMP/v3.cu.o
+clang++ -std=c++17 -c $CPP_FLAGS $CXX_FLAGS $CUDA_FLAGS $SRC/propagate_gpu.cu -MMD -MF $TMP/propagate_gpu.cu.d   -o $TMP/propagate_gpu.cu.o
+clang++ -std=c++17 -c $CPP_FLAGS $CXX_FLAGS $CUDA_FLAGS $SRC/particle.cu      -MMD -MF $TMP/particle.cu.d        -o $TMP/particle.cu.o
+
+# link the device binary objects
+nvlink -cpu-arch=X86_64 -m64 --arch=sm_35 -L$CUDA_BASE/lib64/stubs -L$CUDA_BASE/lib64 $TMP/v3.cu.o $TMP/propagate_gpu.cu.o $TMP/particle.cu.o -lcudadevrt -o $TMP/cudaApp_scramcuda.sm_35.cubin --register-link-binaries=$TMP/cudaApp_scramcuda.reg.c
+nvlink -cpu-arch=X86_64 -m64 --arch=sm_50 -L$CUDA_BASE/lib64/stubs -L$CUDA_BASE/lib64 $TMP/v3.cu.o $TMP/propagate_gpu.cu.o $TMP/particle.cu.o -lcudadevrt -o $TMP/cudaApp_scramcuda.sm_50.cubin --register-link-binaries=$TMP/cudaApp_scramcuda.reg.c
+nvlink -cpu-arch=X86_64 -m64 --arch=sm_61 -L$CUDA_BASE/lib64/stubs -L$CUDA_BASE/lib64 $TMP/v3.cu.o $TMP/propagate_gpu.cu.o $TMP/particle.cu.o -lcudadevrt -o $TMP/cudaApp_scramcuda.sm_61.cubin --register-link-binaries=$TMP/cudaApp_scramcuda.reg.c
+fatbinary -64 -link --image=profile=sm_35,file=$TMP/cudaApp_scramcuda.sm_35.cubin --image=profile=sm_50,file=$TMP/cudaApp_scramcuda.sm_50.cubin --image=profile=sm_61,file=$TMP/cudaApp_scramcuda.sm_61.cubin --create=$TMP/cudaApp_scramcuda.fatbin --embedded-fatbin=$TMP/cudaApp_scramcuda.fatbin.c
+clang++ -x c++ -std=c++17 -c $CPP_FLAGS $CXX_FLAGS -Wno-overlength-strings -DFATBINFILE=\"$TMP/cudaApp_scramcuda.fatbin.c\" -DREGISTERLINKBINARYFILE=\"$TMP/cudaApp_scramcuda.reg.c\" -D__NV_EXTRA_INITIALIZATION= -D__NV_EXTRA_FINALIZATION= -D__CUDACC_VER_MAJOR__=9 -D__CUDACC_VER_MINOR__=2 -D__CUDACC_VER_BUILD__=88 -I. -I$CUDA_BASE/include -c $CUDA_BASE/bin/crt/link.stub -o $TMP/cudaApp_scramcuda.o
+
+# link the host-only binaries, the host binaries from the CUDA sources, and the CUDA device binary
+clang++ -std=c++17 $CXX_FLAGS $TMP/main.cc.o $TMP/v3.cu.o $TMP/propagate_gpu.cu.o $TMP/particle.cu.o $TMP/cudaApp_scramcuda.o $HOST_LD_FLAGS -o $TMP/cudaApp
+
+# run
+$TMP/cudaApp
