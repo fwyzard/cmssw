@@ -48,7 +48,8 @@ int main(int argc, char* argv[]) {
     ("printBranchDetails,b", "Call Print()sc for all branches")
     ("tree,t", boost::program_options::value<std::string>(), "Select tree used with -P and -b options")
     ("events,e", "Print list of all Events, Runs, and LuminosityBlocks in the file sorted by run number, luminosity block number, and event number.  Also prints the entry numbers and whether it is possible to use fast copy with the file.")
-    ("eventsInLumis","Print how many Events are in each LuminosityBlock.");
+    ("eventsInLumis,L", "Print how many Events are in each LuminosityBlock.")
+    ("timestamp,T", "Together with --events or --eventsInLumis, print the timestamp for each Run, LuminosityBlock and Event.");
 
   // What trees do we require for this to be a valid collection?
   std::vector<std::string> expectedTrees;
@@ -111,11 +112,12 @@ int main(int argc, char* argv[]) {
     bool verbose = more && (vm.count("verbose") > 0 ? true : false);
     bool events = more && (vm.count("events") > 0 ? true : false);
     bool eventsInLumis = more && (vm.count("eventsInLumis") > 0 ? true : false);
+    bool timestamp = more && (events || eventsInLumis) && (vm.count("timestamp") > 0 ? true : false);
     bool ls = more && (vm.count("ls") > 0 ? true : false);
     bool tree = more && (vm.count("tree") > 0 ? true : false);
     bool print = more && (vm.count("print") > 0 ? true : false);
     bool printBranchDetails = more && (vm.count("printBranchDetails") > 0 ? true : false);
-    bool onlyDecodeLFN = decodeLFN && !(uuid || adler32 || allowRecovery || json || events || tree || ls || print || printBranchDetails);
+    bool onlyDecodeLFN = decodeLFN && !(uuid || adler32 || allowRecovery || json || events || eventsInLumis || tree || ls || print || printBranchDetails);
     std::string selectedTree = tree ? vm["tree"].as<std::string>() : edm::poolNames::eventTreeName();
 
     if (events||eventsInLumis) {
@@ -280,11 +282,11 @@ int main(int argc, char* argv[]) {
 
       // Print out event lists
       if (events) {
-        edm::printEventLists(tfile.get());
+        edm::printEventLists(tfile.get(), timestamp);
       }
 
       if(eventsInLumis) {
-        edm::printEventsInLumis(tfile.get());
+        edm::printEventsInLumis(tfile.get(), timestamp);
       }
       
       tfile->Close();

@@ -17,8 +17,8 @@ namespace edm {
   void longBranchPrint(TTree *tr);
   std::string getUuid(TTree *uuidTree);
   void printUuids(TTree *uuidTree);
-  void printEventLists(TFile *tfl);
-  void printEventsInLumis(TFile* tfl);
+  void printEventLists(TFile *tfl, bool timestamp = false);
+  void printEventsInLumis(TFile* tfl, bool timestamp = false);
 }
 
 #endif

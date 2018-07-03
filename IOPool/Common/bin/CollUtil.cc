@@ -112,7 +112,7 @@ namespace edm {
     std::cout << "UUID: " << fid.fid() << std::endl;
   }
 
-  static void preIndexIntoFilePrintEventLists(TFile*, FileFormatVersion const& fileFormatVersion, TTree *metaDataTree) {
+  static void preIndexIntoFilePrintEventLists(TFile*, FileFormatVersion const& fileFormatVersion, TTree *metaDataTree, bool timestamp) {
     FileIndex fileIndex;
     FileIndex *findexPtr = &fileIndex;
     if (metaDataTree->FindBranch(poolNames::fileIndexBranchName().c_str()) != nullptr) {
@@ -147,7 +147,7 @@ namespace edm {
     std::cout << "(Note that other factors can prevent fast copy from occurring)\n\n";
   }
 
-  static void postIndexIntoFilePrintEventLists(TFile* tfl, FileFormatVersion const& fileFormatVersion, TTree *metaDataTree) {
+  static void postIndexIntoFilePrintEventLists(TFile* tfl, FileFormatVersion const& fileFormatVersion, TTree *metaDataTree, bool timestamp) {
     IndexIntoFile indexIntoFile;
     IndexIntoFile *findexPtr = &indexIntoFile;
     if (metaDataTree->FindBranch(poolNames::indexIntoFileBranchName().c_str()) != nullptr) {
@@ -179,8 +179,10 @@ namespace edm {
     std::cout << std::setw(15) << "Run"
        << std::setw(15) << "Lumi"
        << std::setw(15) << "Event"
-       << std::setw(15) << "TTree Entry"
-       << "\n";
+       << std::setw(15) << "TTree Entry";
+    if (timestamp)
+      std::cout << std::setw(27) << "Time stamp";
+    std::cout << "\n";
 
     for(IndexIntoFile::IndexIntoFileItr it = indexIntoFile.begin(IndexIntoFile::firstAppearanceOrder),
                                         itEnd = indexIntoFile.end(IndexIntoFile::firstAppearanceOrder);
@@ -203,7 +205,10 @@ namespace edm {
         default:
         break;
       }
-      std::cout << std::setw(15) << eventNum << std::setw(15) << it.entry() << " " << type << std::endl;
+      std::cout << std::setw(15) << eventNum << std::setw(15) << it.entry() << " " << std::setw(15) << type;
+      if (timestamp)
+        std::cout << std::setw(27) << Timestamper(timeUnix, timeUsec); // it. ... ?
+      std::cout << std::endl;
     }
 
     std::cout << "\nFileFormatVersion = " << fileFormatVersion << ".  ";
@@ -226,7 +231,7 @@ namespace edm {
     std::cout << "(Note that other factors can prevent fast copy from occurring)\n\n";
   }
 
-  void printEventLists(TFile *tfl) {
+  void printEventLists(TFile *tfl, bool timestamp /*= false*/) {
     TTree *metaDataTree = dynamic_cast<TTree *>(tfl->Get(poolNames::metaDataTreeName().c_str()));
     assert(nullptr != metaDataTree);
 
@@ -238,13 +243,13 @@ namespace edm {
       fft->GetEntry(0);
     }
     if(fileFormatVersion.hasIndexIntoFile()) {
-      postIndexIntoFilePrintEventLists(tfl, fileFormatVersion, metaDataTree);
+      postIndexIntoFilePrintEventLists(tfl, fileFormatVersion, metaDataTree, timestamp);
     } else {
-      preIndexIntoFilePrintEventLists(tfl, fileFormatVersion, metaDataTree);
+      preIndexIntoFilePrintEventLists(tfl, fileFormatVersion, metaDataTree, timestamp);
     }
   }
 
-  static void preIndexIntoFilePrintEventsInLumis(TFile*, FileFormatVersion const& fileFormatVersion, TTree *metaDataTree) {
+  static void preIndexIntoFilePrintEventsInLumis(TFile*, FileFormatVersion const& fileFormatVersion, TTree *metaDataTree, bool timestamp) {
     FileIndex fileIndex;
     FileIndex *findexPtr = &fileIndex;
     if (metaDataTree->FindBranch(poolNames::fileIndexBranchName().c_str()) != nullptr) {
@@ -260,11 +265,17 @@ namespace edm {
 
     std::cout <<"\n"<< std::setw(15) << "Run"
     << std::setw(15) << "Lumi"
-    << std::setw(15) << "# Events"
-    << "\n";
+    << std::setw(15) << "# Events";
+    if (timestamp)
+      std::cout << std::setw(27) << "Time stamp";
+    std::cout << "\n";
+
     unsigned long nEvents = 0;
     unsigned long runID = 0;
     unsigned long lumiID = 0;
+    unsigned long timeUnix = 0;
+    unsigned long timeUsec = 0;
+
     for(std::vector<FileIndex::Element>::const_iterator it = fileIndex.begin(), itEnd = fileIndex.end(); it != itEnd; ++it) {
       if(it->getEntryType() == FileIndex::kEvent) {
         ++nEvents;
@@ -274,8 +285,11 @@ namespace edm {
           //print the previous one
           if(lumiID !=0) {
             std::cout << std::setw(15) << runID
-            << std::setw(15) << lumiID
-            << std::setw(15) << nEvents<<"\n";
+                      << std::setw(15) << lumiID
+                      << std::setw(15) << nEvents;
+            if (timestamp)
+              std::cout << std::setw(27) << Timestamper(timeUnix, timeUsec);
+            std::cout << "\n";
           }
           nEvents=0;
           runID = it->run_;
@@ -286,14 +300,17 @@ namespace edm {
     //print the last one
     if(lumiID !=0) {
       std::cout << std::setw(15) << runID
-      << std::setw(15) << lumiID
-      << std::setw(15) << nEvents<<"\n";
+                << std::setw(15) << lumiID
+                << std::setw(15) << nEvents;
+      if (timestamp)
+        std::cout << std::setw(27) << Timestamper(timeUnix, timeUsec);
+      std::cout << "\n";
     }
 
     std::cout << "\n";
   }
 
-  static void postIndexIntoFilePrintEventsInLumis(TFile* tfl, FileFormatVersion const& fileFormatVersion, TTree *metaDataTree) {
+  static void postIndexIntoFilePrintEventsInLumis(TFile* tfl, FileFormatVersion const& fileFormatVersion, TTree *metaDataTree, bool timestamp) {
     IndexIntoFile indexIntoFile;
     IndexIntoFile *findexPtr = &indexIntoFile;
     if (metaDataTree->FindBranch(poolNames::indexIntoFileBranchName().c_str()) != nullptr) {
@@ -306,14 +323,19 @@ namespace edm {
       "files created with earlier releases and printout of the event list will fail.\n";
       return;
     }
-    std::cout <<"\n"<< std::setw(15) << "Run"
-    << std::setw(15) << "Lumi"
-    << std::setw(15) << "# Events"
-    << "\n";
+
+    std::cout << "\n" << std::setw(15) << "Run"
+              << std::setw(15) << "Lumi"
+              << std::setw(15) << "# Events";
+    if (timestamp)
+      std::cout << std::setw(27) << "Time stamp";
+    std::cout << "\n";
 
     unsigned long nEvents = 0;
     unsigned long runID = 0;
     unsigned long lumiID = 0;
+    unsigned long timeUnix = 0;
+    unsigned long timeUsec = 0;
 
     for(IndexIntoFile::IndexIntoFileItr it = indexIntoFile.begin(IndexIntoFile::firstAppearanceOrder),
         itEnd = indexIntoFile.end(IndexIntoFile::firstAppearanceOrder);
@@ -327,12 +349,17 @@ namespace edm {
             //print the previous one
             if(lumiID !=0) {
               std::cout << std::setw(15) << runID
-              << std::setw(15) << lumiID
-              << std::setw(15) << nEvents<<"\n";
+                        << std::setw(15) << lumiID
+                        << std::setw(15) << nEvents;
+              if (timestamp)
+                std::cout << std::setw(27) << Timestamper(timeUnix, timeUsec);
+              std::cout << "\n";
             }
-            nEvents=0;
+            nEvents = 0;
             runID = it.run();
             lumiID = it.lumi();
+            timeUnix = 0;
+            timeUsec = 0;
           }
           break;
         case IndexIntoFile::kEvent:
@@ -345,13 +372,16 @@ namespace edm {
     //print the last one
     if(lumiID !=0) {
       std::cout << std::setw(15) << runID
-      << std::setw(15) << lumiID
-      << std::setw(15) << nEvents<<"\n";
+                << std::setw(15) << lumiID
+                << std::setw(15) << nEvents;
+      if (timestamp)
+        std::cout << std::setw(27) << Timestamper(timeUnix, timeUsec);
+      std::cout << "\n";
     }
     std::cout << "\n";
   }
 
-  void printEventsInLumis(TFile *tfl) {
+  void printEventsInLumis(TFile *tfl, bool timestamp /*= false*/) {
     TTree *metaDataTree = dynamic_cast<TTree *>(tfl->Get(poolNames::metaDataTreeName().c_str()));
     assert(nullptr != metaDataTree);
 
@@ -363,9 +393,9 @@ namespace edm {
       fft->GetEntry(0);
     }
     if(fileFormatVersion.hasIndexIntoFile()) {
-      postIndexIntoFilePrintEventsInLumis(tfl, fileFormatVersion, metaDataTree);
+      postIndexIntoFilePrintEventsInLumis(tfl, fileFormatVersion, metaDataTree, timestamp);
     } else {
-      preIndexIntoFilePrintEventsInLumis(tfl, fileFormatVersion, metaDataTree);
+      preIndexIntoFilePrintEventsInLumis(tfl, fileFormatVersion, metaDataTree, timestamp);
     }
   }
 }
