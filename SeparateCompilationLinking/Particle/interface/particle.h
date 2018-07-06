@@ -24,19 +24,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <cstdlib>
-#include <cstdio>
+#ifndef __particle_h__
+#define __particle_h__
 
-void propagate_gpu(int n, int seed);
+#include "SeparateCompilationLinking/Particle/interface/v3.h"
 
-int main(int argc, char ** argv)
+class particle
 {
-	int n    = 1000000;
-        int seed = 0;
-	if (argc > 1)	{ n = atoi(argv[1]);}     // Number of particles
-	if (argc > 2)	{ seed = atoi(argv[2]); } // Random seed
+	private:
+		v3 position;
+		v3 velocity;
+		v3 totalDistance;
 
-        propagate_gpu(n, seed);
+	public:
+		particle();
+		__host__ __device__ void advance(float dist);
+		const v3& getTotalDistance() const;
 
-	return 0;
-}
+};
+
+#endif

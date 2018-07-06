@@ -1,0 +1,5 @@
+<use name="cuda"/>
+<use name="SeparateCompilationLinking/Particle"/>
+<export>
+  <lib name="1"/>
+</export>

@@ -26,35 +26,28 @@
  */
 
 #include <cmath>
-#include "v3.h"
+#include <cstdio>
+#include <cstdlib>
 
-v3::v3()
-{	randomize(); }
+#include <cuda_runtime.h>
 
-v3::v3(float xIn, float yIn, float zIn) : x(xIn), y(yIn), z(zIn)
-{}
+#include "SeparateCompilationLinking/Particle/interface/v3.h"
+#include "SeparateCompilationLinking/Propagate/interface/propagate.h"
 
-void v3::randomize()
+int main(int argc, char ** argv)
 {
-	x = (float)rand() / (float)RAND_MAX;
-	y = (float)rand() / (float)RAND_MAX;
-	z = (float)rand() / (float)RAND_MAX;
-}
+	int n    = 1000000;
+        int seed = 0;
+	if(argc > 1)	{ n = atoi(argv[1]);}     // Number of particles
+	if(argc > 2)	{ seed = atoi(argv[2]); } // Random seed
 
-__host__ __device__ void v3::normalize()
-{
-	float t = sqrt(x*x + y*y + z*z);
-	x /= t;
-	y /= t;
-	z /= t;
-}
+        v3 totalDistance = propagate(n, seed);
 
-__host__ __device__ void v3::scramble()
-{
-	float tx = 0.317f*(x + 1.0) + y + z * x * x + y + z;
-	float ty = 0.619f*(y + 1.0) + y * y + x * y * z + y + x;
-	float tz = 0.124f*(z + 1.0) + z * y + x * y * z + y + x;
-	x = tx;
-	y = ty;
-	z = tz;
+	float avgX = totalDistance.x /(float)n;
+	float avgY = totalDistance.y /(float)n;
+	float avgZ = totalDistance.z /(float)n;
+	float avgNorm = sqrt(avgX*avgX + avgY*avgY + avgZ*avgZ);
+	printf(	"Moved %d particles 100 steps. Average distance traveled is |(%f, %f, %f)| = %f\n", 
+					n, avgX, avgY, avgZ, avgNorm);
+	return 0;
 }

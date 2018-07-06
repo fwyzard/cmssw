@@ -24,22 +24,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __v3_h__
-#define __v3_h__
 
-class v3
+#include "SeparateCompilationLinking/Particle/interface/particle.h"
+
+particle::particle() : 	position(), velocity(), totalDistance(0,0,0)
+{}
+
+__device__ __host__ 
+void particle::advance(float d)
 {
-public:
-	float x;
-	float y;
-	float z;
-	
-	v3();
-	v3(float xIn, float yIn, float zIn);
-	void randomize();
-	__host__ __device__ void normalize();
-	__host__ __device__ void scramble();
+	velocity.normalize();
+	float dx = d * velocity.x;
+	position.x += dx;
+	totalDistance.x += dx;
+	float dy = d * velocity.y;
+ 	position.y += dy;
+ 	totalDistance.y += dy;
+ 	float dz = d * velocity.z;
+	position.z += dz;
+	totalDistance.z += dz;
+	velocity.scramble();
+}
 
-};
-
-#endif
+const v3& particle::getTotalDistance() const
+{	return totalDistance; }

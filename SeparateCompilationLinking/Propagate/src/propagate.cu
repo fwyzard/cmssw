@@ -24,10 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <cstdlib>
-#include <cstdio>
 
-#include "particle.h"
+#include <cstdlib>
+
+#include <cuda_runtime.h>
+
+#include "SeparateCompilationLinking/Particle/interface/particle.h"
+#include "SeparateCompilationLinking/Propagate/interface/propagate.h"
 
 __global__ void advanceParticles(float dt, particle * pArray, int nParticles)
 {
@@ -38,9 +41,10 @@ __global__ void advanceParticles(float dt, particle * pArray, int nParticles)
 	}
 }
 
-void propagate_gpu(int n, int seed)
+
+v3 propagate(int n, int seed)
 {
-	srand(seed);
+        srand(seed);
 
 	particle * pArray = new particle[n];
 	particle * devPArray = NULL;
@@ -62,10 +66,5 @@ void propagate_gpu(int n, int seed)
 		totalDistance.y += temp.y;
 		totalDistance.z += temp.z;
 	}
-	float avgX = totalDistance.x /(float)n;
-	float avgY = totalDistance.y /(float)n;
-	float avgZ = totalDistance.z /(float)n;
-	float avgNorm = sqrt(avgX*avgX + avgY*avgY + avgZ*avgZ);
-	printf(	"Moved %d particles 100 steps. Average distance traveled is |(%f, %f, %f)| = %f\n", 
-					n, avgX, avgY, avgZ, avgNorm);
+        return totalDistance;
 }
