@@ -45,6 +45,11 @@ phase1Pixel.toModify(siPixelClusters,
 
 )
 
+# Adjustment to online
+siPixelClusters.ChannelThreshold = 1000
+siPixelClusters.maxNumberOfClusters = 40000
+
+
 # Need these until phase2 pixel templates are used
 from Configuration.Eras.Modifier_phase2_tracker_cff import phase2_tracker
 phase2_tracker.toModify(siPixelClusters, # FIXME

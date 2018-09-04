@@ -32,7 +32,11 @@ from RecoTracker.IterativeTracking.InitialStep_cff import initialStepSeedLayers,
 # TrackingRegion
 pixelTracksTrackingRegions = _globalTrackingRegion.clone()
 trackingLowPU.toReplaceWith(pixelTracksTrackingRegions, _globalTrackingRegionFromBeamSpot.clone())
-
+# adjustment to online
+pixelTracksTrackingRegions = _globalTrackingRegionFromBeamSpot.clone(RegionPSet = dict(
+    originRadius = 0.02,
+    ptMin = 0.8,
+))
 
 # Pixel Quadruplets Tracking
 pixelTracksSeedLayers = initialStepSeedLayers.clone(
@@ -52,6 +56,8 @@ pixelTracksHitQuadruplets = _initialStepCAHitQuadruplets.clone(
 )
 from Configuration.ProcessModifiers.gpu_cff import gpu
 gpu.toModify(pixelTracksHitQuadruplets, trackingRegions = "pixelTracksTrackingRegions")
+# adjustment to online
+pixelTracksHitQuadruplets.CAThetaCut = 0.002
 
 # for trackingLowPU
 pixelTracksHitTriplets = _pixelTripletHLTEDProducer.clone(

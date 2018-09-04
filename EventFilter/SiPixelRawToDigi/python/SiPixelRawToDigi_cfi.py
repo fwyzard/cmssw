@@ -19,6 +19,9 @@ siPixelDigis.UsePhase1 = cms.bool(False)
 siPixelDigis.Regions = cms.PSet( ) 
 siPixelDigis.CablingMapLabel = cms.string("")
 
+# adjustment to online
+siPixelDigis.UserErrorList = []
+
 from Configuration.Eras.Modifier_phase1Pixel_cff import phase1Pixel
 phase1Pixel.toModify(siPixelDigis, UsePhase1=True)
 
@@ -27,4 +30,3 @@ _siPixelDigis_gpu.includeErrors = cms.bool(True)
 
 from Configuration.ProcessModifiers.gpu_cff import gpu
 gpu.toReplaceWith(siPixelDigis, _siPixelDigis_gpu)
-

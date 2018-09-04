@@ -35,3 +35,10 @@ phase1Pixel.toModify(siPixelClustersHeterogeneous,
 
 # The following is copied from SiPixelRawToDigi_cfi
 phase1Pixel.toModify(siPixelClustersHeterogeneous, UsePhase1=True)
+
+# Adjustment to online
+# digi
+siPixelClustersHeterogeneous.UserErrorList = []
+# clusters
+siPixelClustersHeterogeneous.ChannelThreshold = 1000
+# there is no equivalent of maxNumberOfClusters
