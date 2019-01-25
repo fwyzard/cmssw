@@ -6,10 +6,11 @@
 
 #include <cuda/api_wrappers.h>
 
-#include "FWCore/Utilities/interface/StreamID.h"
-
 #include "CUDADataFormats/Common/interface/device_unique_ptr.h"
 #include "CUDADataFormats/Common/interface/host_unique_ptr.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/Utilities/interface/StreamID.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
 namespace edm {
   class ParameterSet;
@@ -131,6 +132,29 @@ public:
 
   // Free pinned host memory (to be called from unique_ptr)
   void free_host(void *ptr);
+
+  // Estimate the block size that achieves maximum potential occupancy for a device function.
+  // See the documenation for cudaOccupancyMaxPotentialBlockSize().
+  template <typename T>
+  static inline
+  unsigned int estimateBlockSize_(T func, const char* name, size_t sharedMememorySize = 0, int blockSizeLimit = 0)
+  {
+    int gridSize = 0;
+    int blockSize = 0;
+    cudaCheck(cudaOccupancyMaxPotentialBlockSize(& gridSize, & blockSize, func, sharedMememorySize, blockSizeLimit));
+    edm::LogInfo("CUDAService") << "Estimated optimal grid and block size for " << name << ": <<<" << gridSize << ", " << blockSize << ">>>" << std::endl;
+    return blockSize;
+  }
+
+  // Helper macro to copy the kernel name as an extra C string argument
+  #define estimateBlockSize(FUNC, ...) estimateBlockSize_((FUNC), #FUNC, ##__VA_ARGS__)
+
+  // Compute the grid size required to cover the number of threads with a given block size.
+  static inline
+  unsigned int estimateGridSize(unsigned int blockSize, unsigned int threads)
+  {
+    return (threads + blockSize - 1) / blockSize;
+  }
 
 private:
   // PIMPL to hide details of allocator
