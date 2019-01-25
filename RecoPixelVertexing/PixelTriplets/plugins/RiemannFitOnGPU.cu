@@ -2,16 +2,17 @@
 // Author: Felice Pantaleo, CERN
 //
 
-#include "RiemannFitOnGPU.h"
-#include "RecoPixelVertexing/PixelTrackFitting/interface/RiemannFit.h"
-
 #include <cstdint>
 #include <cuda_runtime.h>
 
+#include "HeterogeneousCore/CUDAServices/interface/CUDAService.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
 #include "RecoLocalTracker/SiPixelRecHits/plugins/siPixelRecHitsHeterogeneousProduct.h"
+#include "RecoPixelVertexing/PixelTrackFitting/interface/RiemannFit.h"
+
+#include "RiemannFitOnGPU.h"
 
 
 using HitsOnCPU = siPixelRecHitsHeterogeneousProduct::HitsOnCPU;
@@ -30,16 +31,17 @@ void kernelFastFitAllHits(TuplesOnGPU::Container const * __restrict__ foundNtupl
     double * __restrict__ pfast_fit,
     uint32_t offset)
 {
-
-  assert(hits_in_fit==4); // FixMe later template
-
-  assert(pfast_fit); assert(foundNtuplets);
+  assert(hits_in_fit == 4); // FIXME later template
+  assert(pfast_fit);
+  assert(foundNtuplets);
 
   auto local_start = (blockIdx.x * blockDim.x + threadIdx.x);
   auto helix_start = local_start + offset;
 
-  if (helix_start>=foundNtuplets->nbins()) return;
-  if (foundNtuplets->size(helix_start)<hits_in_fit) {
+  if (helix_start >= foundNtuplets->nbins()) {
+    return;
+  }
+  if (foundNtuplets->size(helix_start) < hits_in_fit) {
     return;
   }
 
@@ -166,30 +168,74 @@ void kernelLineFitAllHits(TuplesOnGPU::Container const * __restrict__ foundNtupl
 #endif
 }
 
+void RiemannFitOnGPU::allocateOnGPU(TuplesOnGPU::Container const * tuples, Rfit::helix_fit * helix_fit_results) {
+  tuples_d = tuples;
+  helix_fit_results_d = helix_fit_results;
+
+  assert(tuples_d);
+  assert(helix_fit_results_d);
+
+  // kernelFastFitAllHits
+  {
+    auto blockSize = CUDAService::estimateBlockSize(kernelFastFitAllHits);
+    kernelFastFitAllHitsLaunchConfiguration_.blockSize = blockSize;
+    kernelFastFitAllHitsLaunchConfiguration_.gridSize  = CUDAService::estimateGridSize(blockSize, maxNumberOfConcurrentFits_);
+  }
+
+  // kernelCircleFitAllHits
+  {
+    auto blockSize = CUDAService::estimateBlockSize(kernelCircleFitAllHits);
+    kernelCircleFitAllHitsLaunchConfiguration_.blockSize = blockSize;
+    kernelCircleFitAllHitsLaunchConfiguration_.gridSize  = CUDAService::estimateGridSize(blockSize, maxNumberOfConcurrentFits_);
+  }
+
+  // kernelLineFitAllHits
+  {
+    auto blockSize = CUDAService::estimateBlockSize(kernelLineFitAllHits);
+    kernelLineFitAllHitsLaunchConfiguration_.blockSize = blockSize;
+    kernelLineFitAllHitsLaunchConfiguration_.gridSize  = CUDAService::estimateGridSize(blockSize, maxNumberOfConcurrentFits_);
+  }
+
+  cudaCheck(cudaMalloc(&hitsGPU_, maxNumberOfConcurrentFits_ * sizeof(Rfit::Matrix3xNd<4>)));
+  cudaCheck(cudaMemset(hitsGPU_, 0x00, maxNumberOfConcurrentFits_ * sizeof(Rfit::Matrix3xNd<4>)));
+
+  cudaCheck(cudaMalloc(&hits_geGPU_, maxNumberOfConcurrentFits_ * sizeof(Rfit::Matrix6x4f)));
+  cudaCheck(cudaMemset(hits_geGPU_, 0x00, maxNumberOfConcurrentFits_ * sizeof(Rfit::Matrix6x4f)));
+
+  cudaCheck(cudaMalloc(&fast_fit_resultsGPU_, maxNumberOfConcurrentFits_ * sizeof(Rfit::Vector4d)));
+  cudaCheck(cudaMemset(fast_fit_resultsGPU_, 0x00, maxNumberOfConcurrentFits_ * sizeof(Rfit::Vector4d)));
+
+  cudaCheck(cudaMalloc(&circle_fit_resultsGPU_, maxNumberOfConcurrentFits_ * sizeof(Rfit::circle_fit)));
+  cudaCheck(cudaMemset(circle_fit_resultsGPU_, 0x00, maxNumberOfConcurrentFits_ * sizeof(Rfit::circle_fit)));
+}
+
+void RiemannFitOnGPU::deallocateOnGPU() {
+  cudaFree(hitsGPU_);
+  cudaFree(hits_geGPU_);
+  cudaFree(fast_fit_resultsGPU_);
+  cudaFree(circle_fit_resultsGPU_);
+}
 
 void RiemannFitOnGPU::launchKernels(HitsOnCPU const & hh, uint32_t nhits, uint32_t maxNumberOfTuples, cudaStream_t cudaStream)
 {
-    assert(tuples_d); assert(fast_fit_resultsGPU_);
+  assert(tuples_d);
+  assert(fast_fit_resultsGPU_);
 
-    auto blockSize = 128;
-    auto numberOfBlocks = (maxNumberOfConcurrentFits_ + blockSize - 1) / blockSize;
+  for (uint32_t offset=0; offset<maxNumberOfTuples; offset += maxNumberOfConcurrentFits_) {
+    kernelFastFitAllHits<<<kernelFastFitAllHitsLaunchConfiguration_.gridSize, kernelFastFitAllHitsLaunchConfiguration_.blockSize, 0, cudaStream>>>(
+        tuples_d, hh.gpu_d, 4,
+        hitsGPU_, hits_geGPU_, fast_fit_resultsGPU_,offset);
+    cudaCheck(cudaGetLastError());
 
-    for (uint32_t offset=0; offset<maxNumberOfTuples; offset+=maxNumberOfConcurrentFits_) {
-      kernelFastFitAllHits<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-          tuples_d, hh.gpu_d, 4,
-          hitsGPU_, hits_geGPU_, fast_fit_resultsGPU_,offset);
-      cudaCheck(cudaGetLastError());
+    kernelCircleFitAllHits<<<kernelCircleFitAllHitsLaunchConfiguration_.gridSize, kernelCircleFitAllHitsLaunchConfiguration_.blockSize, 0, cudaStream>>>(
+        tuples_d, 4, bField_,
+        hitsGPU_, hits_geGPU_, fast_fit_resultsGPU_, circle_fit_resultsGPU_, offset);
+    cudaCheck(cudaGetLastError());
 
-      kernelCircleFitAllHits<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-          tuples_d, 4, bField_,
-          hitsGPU_, hits_geGPU_, fast_fit_resultsGPU_, circle_fit_resultsGPU_, offset);
-      cudaCheck(cudaGetLastError());
-
-
-      kernelLineFitAllHits<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-             tuples_d, 4,  bField_, helix_fit_results_d,
-             hitsGPU_, hits_geGPU_, fast_fit_resultsGPU_, circle_fit_resultsGPU_,
-             offset);
-      cudaCheck(cudaGetLastError());
-    }
+    kernelLineFitAllHits<<<kernelLineFitAllHitsLaunchConfiguration_.gridSize, kernelLineFitAllHitsLaunchConfiguration_.blockSize, 0, cudaStream>>>(
+        tuples_d, 4,  bField_, helix_fit_results_d,
+        hitsGPU_, hits_geGPU_, fast_fit_resultsGPU_, circle_fit_resultsGPU_,
+        offset);
+    cudaCheck(cudaGetLastError());
+  }
 }

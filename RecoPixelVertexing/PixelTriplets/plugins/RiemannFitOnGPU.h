@@ -1,6 +1,7 @@
 #ifndef RecoPixelVertexing_PixelTrackFitting_plugins_RiemannFitOnGPU_h
 #define RecoPixelVertexing_PixelTrackFitting_plugins_RiemannFitOnGPU_h
 
+#include "HeterogeneousCore/CUDAUtilities/interface/CUDALaunchConfiguration.h"
 #include "RecoPixelVertexing/PixelTrackFitting/interface/FitResult.h"
 #include "RecoPixelVertexing/PixelTriplets/plugins/pixelTuplesHeterogeneousProduct.h"
 
@@ -9,14 +10,13 @@ namespace siPixelRecHitsHeterogeneousProduct {
 }
 
 namespace Rfit {
-  constexpr uint32_t maxNumberOfConcurrentFits() { return 2*1024;}
-  constexpr uint32_t stride() { return maxNumberOfConcurrentFits();}
-  using Matrix3x4d = Eigen::Matrix<double,3,4>;
-  using Map3x4d = Eigen::Map<Matrix3x4d,0,Eigen::Stride<3*stride(),stride()> >;
-  using Matrix6x4f = Eigen::Matrix<float,6,4>;
-  using Map6x4f = Eigen::Map<Matrix6x4f,0,Eigen::Stride<6*stride(),stride()> >;
-  using Map4d = Eigen::Map<Vector4d,0,Eigen::InnerStride<stride()> >;
-
+  constexpr uint32_t maxNumberOfConcurrentFits() { return 2*1024; }
+  constexpr uint32_t stride() { return maxNumberOfConcurrentFits(); }
+  using Matrix3x4d  = Eigen::Matrix<double, 3, 4>;
+  using Map3x4d     = Eigen::Map<Matrix3x4d, 0, Eigen::Stride<3*stride(), stride()> >;
+  using Matrix6x4f  = Eigen::Matrix<float, 6, 4>;
+  using Map6x4f     = Eigen::Map<Matrix6x4f, 0, Eigen::Stride<6*stride(), stride()> >;
+  using Map4d       = Eigen::Map<Vector4d, 0, Eigen::InnerStride<stride()> >;
 }
 
 
@@ -29,25 +29,22 @@ public:
    using TuplesOnGPU = pixelTuplesHeterogeneousProduct::TuplesOnGPU;
 
    RiemannFitOnGPU() = default;
-   ~RiemannFitOnGPU() { deallocateOnGPU();}
+   ~RiemannFitOnGPU() { deallocateOnGPU(); }
 
-   void setBField(double bField) { bField_ = bField;}
+   void setBField(double bField) { bField_ = bField; }
    void launchKernels(HitsOnCPU const & hh, uint32_t nhits, uint32_t maxNumberOfTuples, cudaStream_t cudaStream);
 
    void allocateOnGPU(TuplesOnGPU::Container const * tuples, Rfit::helix_fit * helix_fit_results);
    void deallocateOnGPU();
 
-
 private:
 
-    static constexpr uint32_t maxNumberOfConcurrentFits_ = Rfit::maxNumberOfConcurrentFits();
+   static constexpr uint32_t maxNumberOfConcurrentFits_ = Rfit::maxNumberOfConcurrentFits();
 
-    // fowarded
-    TuplesOnGPU::Container const * tuples_d = nullptr;
-    double bField_;
-    Rfit::helix_fit * helix_fit_results_d = nullptr;
-
-
+   // fowarded
+   TuplesOnGPU::Container const * tuples_d = nullptr;
+   double bField_;
+   Rfit::helix_fit * helix_fit_results_d = nullptr;
 
    // Riemann Fit internals
    double *hitsGPU_ = nullptr;
@@ -55,6 +52,10 @@ private:
    double *fast_fit_resultsGPU_ = nullptr;
    Rfit::circle_fit *circle_fit_resultsGPU_ = nullptr;
 
+   // kernel launch configuration
+   CUDALaunchConfiguration kernelFastFitAllHitsLaunchConfiguration_;
+   CUDALaunchConfiguration kernelCircleFitAllHitsLaunchConfiguration_;
+   CUDALaunchConfiguration kernelLineFitAllHitsLaunchConfiguration_;
 };
 
-#endif
+#endif // RecoPixelVertexing_PixelTrackFitting_plugins_RiemannFitOnGPU_h
