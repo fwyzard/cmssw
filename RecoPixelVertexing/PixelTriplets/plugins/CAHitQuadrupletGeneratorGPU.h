@@ -21,14 +21,11 @@
 #include "RecoTracker/TkSeedingLayers/interface/SeedComparitor.h"
 #include "RecoTracker/TkSeedingLayers/interface/SeedComparitorFactory.h"
 #include "RecoPixelVertexing/PixelTriplets/plugins/RecHitsMap.h"
-
-#include "CAHitQuadrupletGeneratorKernels.h"
-#include "RiemannFitOnGPU.h"
-
 #include "RecoPixelVertexing/PixelTriplets/plugins/pixelTuplesHeterogeneousProduct.h"
 
-// FIXME  (split header???)
+#include "CAHitQuadrupletGeneratorKernels.h"
 #include "GPUCACell.h"
+#include "RiemannFitOnGPU.h"
 
 class TrackingRegion;
 
@@ -89,9 +86,7 @@ private:
 
     void launchKernels(HitsOnCPU const & hh, bool doRiemannFit, bool transferToCPU, cudaStream_t);
 
-
     std::vector<std::array<int,4>> fetchKernelResult(int);
-
 
     CAHitQuadrupletGeneratorKernels kernels;
     RiemannFitOnGPU fitter;
@@ -100,7 +95,6 @@ private:
     const float caThetaCut = 0.00125f;
     const float caPhiCut = 0.1f;
     const float caHardPtCut = 0.f;
-
 
     // products
     std::vector<uint32_t> indToEdm; // index of    tuple in reco tracks....

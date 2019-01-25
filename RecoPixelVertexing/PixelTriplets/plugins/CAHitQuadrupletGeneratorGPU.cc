@@ -160,8 +160,6 @@ void CAHitQuadrupletGeneratorGPU::allocateOnGPU()
 
   kernels.allocateOnGPU();
   fitter.allocateOnGPU(gpu_.tuples_d, gpu_.helix_fit_results_d);
-
-
 }
 
 void CAHitQuadrupletGeneratorGPU::launchKernels(HitsOnCPU const & hh,
@@ -169,7 +167,6 @@ void CAHitQuadrupletGeneratorGPU::launchKernels(HitsOnCPU const & hh,
                                                 bool transferToCPU,
                                                 cudaStream_t cudaStream)
 {
-
   kernels.launchKernels(hh, gpu_, cudaStream); 
   if (doRiemannFit) {
     fitter.launchKernels(hh, hh.nHits, CAConstants::maxNumberOfQuadruplets(), cudaStream);
@@ -187,7 +184,6 @@ void CAHitQuadrupletGeneratorGPU::launchKernels(HitsOnCPU const & hh,
     cudaCheck(cudaMemcpyAsync(quality_,gpu_.quality_d,
                               sizeof(Quality)*CAConstants::maxNumberOfQuadruplets(),
                               cudaMemcpyDeviceToHost, cudaStream));
-
   }
 
 }
@@ -195,8 +191,6 @@ void CAHitQuadrupletGeneratorGPU::launchKernels(HitsOnCPU const & hh,
 void CAHitQuadrupletGeneratorGPU::cleanup(cudaStream_t cudaStream) {
   kernels.cleanup(cudaStream);
 }
-
-
 
 std::vector<std::array<int, 4>>
 CAHitQuadrupletGeneratorGPU::fetchKernelResult(int)
