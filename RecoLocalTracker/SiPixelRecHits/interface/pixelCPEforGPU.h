@@ -82,7 +82,7 @@ namespace pixelCPEforGPU {
   };
 
 
-  constexpr uint32_t MaxClusInModule=256;
+  constexpr uint32_t MaxClusInModule = 256;
   using ClusParams = ClusParamsT<256>;
 
   constexpr inline

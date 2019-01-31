@@ -6,8 +6,9 @@
 #include <cuda_runtime.h>
 
 // CMSSW headers
-#include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelRawToClusterGPUKernel.h"
+#include "HeterogeneousCore/CUDAServices/interface/CUDAService.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
+#include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelRawToClusterGPUKernel.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/gpuClusteringConstants.h"
 #include "PixelRecHits.h"
 #include "gpuPixelRecHits.h"
@@ -109,7 +110,14 @@ namespace pixelgpudetails {
 #ifdef GPU_DEBUG
     cudaCheck(cudaMallocHost(&h_hitsLayerStart_, 11 * sizeof(uint32_t)));
 #endif
+
+    // the block size must be at least pixelCPEforGPU::MaxClusInModule
+    // however, a bigger lock size results in a significant slow down
+    getHitsLaunchConfiguration_.blockSize = pixelCPEforGPU::MaxClusInModule;
+    // the grid size is determined event by event by the number of active modules (with digis)
+    getHitsLaunchConfiguration_.gridSize  = 0;
   }
+
   PixelRecHitGPUKernel::~PixelRecHitGPUKernel() {
     cudaCheck(cudaFree(gpu_.bs_d));
     cudaCheck(cudaFree(gpu_.hitsLayerStart_d));
@@ -139,13 +147,13 @@ namespace pixelgpudetails {
     gpu_.cpeParams = cpeParams; // copy it for use in clients
     cudaCheck(cudaMemcpyAsync(gpu_d, &gpu_, sizeof(HitsOnGPU), cudaMemcpyDefault, stream.id()));
 
-    int threadsPerBlock = 256;
     int blocks = input.nModules; // active modules (with digis)
 
 #ifdef GPU_DEBUG
     std::cout << "launching getHits kernel for " << blocks << " blocks" << std::endl;
 #endif
-    gpuPixelRecHits::getHits<<<blocks, threadsPerBlock, 0, stream.id()>>>(
+    // the grid size is determined by the number of active modules (with digis)
+    gpuPixelRecHits::getHits<<<blocks, getHitsLaunchConfiguration_.blockSize, 0, stream.id()>>>(
       cpeParams,
       gpu_.bs_d,
       input.digis_d.moduleInd(),
