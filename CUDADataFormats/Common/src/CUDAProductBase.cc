@@ -3,8 +3,8 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "HeterogeneousCore/CUDAServices/interface/CUDAService.h"
 
-CUDAProductBase::CUDAProductBase(int device, std::shared_ptr<cuda::stream_t<>> stream):
-  stream_(std::move(stream)),
+CUDAProductBase::CUDAProductBase(int device, std::shared_ptr<CUstream_st> stream):
+  stream_(stream),
   device_(device)
 {
   edm::Service<CUDAService> cs;
@@ -13,7 +13,5 @@ CUDAProductBase::CUDAProductBase(int device, std::shared_ptr<cuda::stream_t<>> s
   // Record CUDA event to the CUDA stream. The event will become
   // "occurred" after all work queued to the stream before this
   // point has been finished.
-  event_->record(stream_->id());
+  event_->record(stream_.get());
 }
-
-

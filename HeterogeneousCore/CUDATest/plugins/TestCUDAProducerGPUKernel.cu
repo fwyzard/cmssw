@@ -54,7 +54,7 @@ namespace {
   }
 }
 
-cudautils::device::unique_ptr<float[]> TestCUDAProducerGPUKernel::runAlgo(const std::string& label, const float *d_input, cuda::stream_t<>& stream) const {
+cudautils::device::unique_ptr<float[]> TestCUDAProducerGPUKernel::runAlgo(const std::string& label, const float *d_input, cudaStream_t stream) const {
   // First make the sanity check
   if(d_input != nullptr) {
     auto h_check = std::make_unique<float[]>(NUM_VALUES);
@@ -79,16 +79,16 @@ cudautils::device::unique_ptr<float[]> TestCUDAProducerGPUKernel::runAlgo(const 
   auto d_a = cs->make_device_unique<float[]>(NUM_VALUES, stream);
   auto d_b = cs->make_device_unique<float[]>(NUM_VALUES, stream);
 
-  cuda::memory::async::copy(d_a.get(), h_a.get(), NUM_VALUES*sizeof(float), stream.id());
-  cuda::memory::async::copy(d_b.get(), h_b.get(), NUM_VALUES*sizeof(float), stream.id());
+  cuda::memory::async::copy(d_a.get(), h_a.get(), NUM_VALUES*sizeof(float), stream);
+  cuda::memory::async::copy(d_b.get(), h_b.get(), NUM_VALUES*sizeof(float), stream);
 
   int threadsPerBlock {32};
   int blocksPerGrid = (NUM_VALUES + threadsPerBlock - 1) / threadsPerBlock;
 
   auto d_c = cs->make_device_unique<float[]>(NUM_VALUES, stream);
   auto current_device = cuda::device::current::get();
-  edm::LogVerbatim("TestHeterogeneousEDProducerGPU") << "  " << label << " GPU launching kernels device " << current_device.id() << " CUDA stream " << stream.id();
-  vectorAdd<<<blocksPerGrid, threadsPerBlock, 0, stream.id()>>>(d_a.get(), d_b.get(), d_c.get(), NUM_VALUES);
+  edm::LogVerbatim("TestHeterogeneousEDProducerGPU") << "  " << label << " GPU launching kernels device " << current_device.id() << " CUDA stream " << stream;
+  vectorAdd<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(d_a.get(), d_b.get(), d_c.get(), NUM_VALUES);
 
   auto d_ma = cs->make_device_unique<float[]>(NUM_VALUES*NUM_VALUES, stream);
   auto d_mb = cs->make_device_unique<float[]>(NUM_VALUES*NUM_VALUES, stream);
@@ -101,12 +101,12 @@ cudautils::device::unique_ptr<float[]> TestCUDAProducerGPUKernel::runAlgo(const 
     blocksPerGrid3.x = ceil(double(NUM_VALUES)/double(threadsPerBlock3.x));
     blocksPerGrid3.y = ceil(double(NUM_VALUES)/double(threadsPerBlock3.y));
   }
-  vectorProd<<<blocksPerGrid3, threadsPerBlock3, 0, stream.id()>>>(d_a.get(), d_b.get(), d_ma.get(), NUM_VALUES);
-  vectorProd<<<blocksPerGrid3, threadsPerBlock3, 0, stream.id()>>>(d_a.get(), d_c.get(), d_mb.get(), NUM_VALUES);
-  matrixMul<<<blocksPerGrid3, threadsPerBlock3, 0, stream.id()>>>(d_ma.get(), d_mb.get(), d_mc.get(), NUM_VALUES);
+  vectorProd<<<blocksPerGrid3, threadsPerBlock3, 0, stream>>>(d_a.get(), d_b.get(), d_ma.get(), NUM_VALUES);
+  vectorProd<<<blocksPerGrid3, threadsPerBlock3, 0, stream>>>(d_a.get(), d_c.get(), d_mb.get(), NUM_VALUES);
+  matrixMul<<<blocksPerGrid3, threadsPerBlock3, 0, stream>>>(d_ma.get(), d_mb.get(), d_mc.get(), NUM_VALUES);
 
-  matrixMulVector<<<blocksPerGrid, threadsPerBlock, 0, stream.id()>>>(d_mc.get(), d_b.get(), d_c.get(), NUM_VALUES);
+  matrixMulVector<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(d_mc.get(), d_b.get(), d_c.get(), NUM_VALUES);
 
-  edm::LogVerbatim("TestHeterogeneousEDProducerGPU") << "  " << label << " GPU kernels launched, returning return pointer device " << current_device.id() << " CUDA stream " << stream.id();
+  edm::LogVerbatim("TestHeterogeneousEDProducerGPU") << "  " << label << " GPU kernels launched, returning return pointer device " << current_device.id() << " CUDA stream " << stream;
   return d_a;
 }

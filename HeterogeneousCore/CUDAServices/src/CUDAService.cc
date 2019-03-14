@@ -504,14 +504,21 @@ void CUDAService::free_host(void *ptr) {
 struct CUDAService::CUDAStreamCache {
   explicit CUDAStreamCache(int ndev): cache(ndev) {}
 
+  // custom deleter for cudaStream_t
+  static void cudaStreamDeleter(cudaStream_t stream) {
+    cudaCheck(cudaStreamDestroy(stream));
+  }
+
   // Separate caches for each device for fast lookup
-  std::vector<edm::ReusableObjectHolder<cuda::stream_t<>>> cache;
+  //std::vector<edm::ReusableObjectHolder<CUstream_st, decltype((cudaStreamDeleter))>> cache;
+  std::vector<edm::ReusableObjectHolder<CUstream_st, void(*)(cudaStream_t)>> cache;
 };
 
-std::shared_ptr<cuda::stream_t<>> CUDAService::getCUDAStream() {
+std::shared_ptr<CUstream_st> CUDAService::getCUDAStream() {
   return cudaStreamCache_->cache[getCurrentDevice()].makeOrGet([](){
-      auto current_device = cuda::device::current::get();
-      return std::make_unique<cuda::stream_t<>>(current_device.create_stream(cuda::stream::implicitly_synchronizes_with_default_stream));
+      cudaStream_t stream;
+      cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
+      return std::unique_ptr<CUstream_st, void(*)(cudaStream_t)>(stream, CUDAService::CUDAStreamCache::cudaStreamDeleter);
     });
 }
 

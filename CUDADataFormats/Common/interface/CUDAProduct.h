@@ -40,7 +40,7 @@ private:
   friend class CUDAScopedContext;
   friend class edm::Wrapper<CUDAProduct<T>>;
 
-  explicit CUDAProduct(int device, std::shared_ptr<cuda::stream_t<>> stream, T data):
+  explicit CUDAProduct(int device, std::shared_ptr<CUstream_st> stream, T data):
     CUDAProductBase(device, std::move(stream)),
     data_(std::move(data))
   {}

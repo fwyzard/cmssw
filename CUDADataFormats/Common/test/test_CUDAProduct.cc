@@ -13,7 +13,10 @@ namespace cudatest {
     static
     CUDAScopedContext make(int dev) {
       auto device = cuda::device::get(dev);
-      return CUDAScopedContext(dev, std::make_unique<cuda::stream_t<>>(device.create_stream(cuda::stream::implicitly_synchronizes_with_default_stream)));
+      cudaStream_t stream;
+      cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
+      return CUDAScopedContext(dev,
+          std::unique_ptr<CUstream_st, void(*)(cudaStream_t)>(stream, [](cudaStream_t stream){ cudaCheck(cudaStreamDestroy(stream)); }));
     }
   };
 }
@@ -37,7 +40,7 @@ TEST_CASE("Use of CUDAProduct template", "[CUDACore]") {
     SECTION("Construct from CUDAScopedContext") {
       REQUIRE(data.isValid());
       REQUIRE(data.device() == defaultDevice);
-      REQUIRE(data.stream().id() == ctx.stream().id());
+      REQUIRE(data.stream().id() == ctx.stream());
       REQUIRE(&data.event() != nullptr);
     }
 

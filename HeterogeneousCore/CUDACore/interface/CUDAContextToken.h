@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <cuda.h>
+
 /**
  * The purpose of this class is to deliver the device and CUDA stream
  * information from ExternalWork's acquire() to producer() via a
@@ -21,17 +23,18 @@ public:
 private:
   friend class CUDAScopedContext;
 
-  explicit CUDAContextToken(int device, std::shared_ptr<cuda::stream_t<>> stream):
+  explicit CUDAContextToken(int device, std::shared_ptr<CUstream_st> stream):
     stream_(std::move(stream)),
     device_(device)
   {}
 
   int device() { return device_; }
-  std::shared_ptr<cuda::stream_t<>>&& streamPtr() {
+
+  std::shared_ptr<CUstream_st>&& streamPtr() {
     return std::move(stream_);
   }
 
-  std::shared_ptr<cuda::stream_t<>> stream_;
+  std::shared_ptr<CUstream_st> stream_;
   int device_;
 };
 

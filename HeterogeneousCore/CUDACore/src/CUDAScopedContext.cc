@@ -16,15 +16,16 @@ CUDAScopedContext::CUDAScopedContext(edm::StreamID streamID):
   stream_ = cs->getCUDAStream();
 }
 
-CUDAScopedContext::CUDAScopedContext(int device, std::unique_ptr<cuda::stream_t<>> stream):
+CUDAScopedContext::CUDAScopedContext(int device, std::unique_ptr<CUstream_st, void(*)(cudaStream_t)> stream):
   currentDevice_(device),
   setDeviceForThisScope_(device),
   stream_(std::move(stream))
 {}
 
 CUDAScopedContext::~CUDAScopedContext() {
-  if(waitingTaskHolder_.has_value()) {
-    stream_->enqueue.callback([device=currentDevice_,
+  if (waitingTaskHolder_.has_value()) {
+    cuda::stream_t(currentDevice_, stream_.get()).enqueue.callback(
+                              [device=currentDevice_,
                                waitingTaskHolder=*waitingTaskHolder_]
                               (cuda::stream::id_t streamId, cuda::status_t status) mutable {
                                 if(cuda::is_success(status)) {
@@ -52,7 +53,7 @@ void CUDAScopedContext::synchronizeStreams(int dataDevice, const cuda::stream_t<
     throw cms::Exception("LogicError") << "Handling data from multiple devices is not yet supported";
   }
 
-  if(dataStream.id() != stream_->id()) {
+  if(dataStream.id() != stream_.get()) {
     // Different streams, need to synchronize
     if(!dataEvent.has_occurred()) {
       // Event not yet occurred, so need to add synchronization
@@ -60,7 +61,7 @@ void CUDAScopedContext::synchronizeStreams(int dataDevice, const cuda::stream_t<
       // wait for an event, so all subsequent work in the stream
       // will run only after the event has "occurred" (i.e. data
       // product became available).
-      auto ret = cudaStreamWaitEvent(stream_->id(), dataEvent.id(), 0);
+      auto ret = cudaStreamWaitEvent(stream_.get(), dataEvent.id(), 0);
       cuda::throw_if_error(ret, "Failed to make a stream to wait for an event");
     }
   }

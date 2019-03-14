@@ -13,7 +13,10 @@ namespace cudatest {
     static
     CUDAScopedContext make(int dev) {
       auto device = cuda::device::get(dev);
-      return CUDAScopedContext(dev, std::make_unique<cuda::stream_t<>>(device.create_stream(cuda::stream::implicitly_synchronizes_with_default_stream)));
+      cudaStream_t stream;
+      cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
+      return CUDAScopedContext(dev,
+          std::unique_ptr<CUstream_st, void(*)(cudaStream_t)>(stream, [](cudaStream_t stream){ cudaCheck(cudaStreamDestroy(stream)); }));
     }
   };
 }
@@ -22,8 +25,9 @@ namespace {
   std::unique_ptr<CUDAProduct<int *> > produce(int device, int *d, int *h) {
     auto ctx = cudatest::TestCUDAScopedContext::make(device);
 
-    cuda::memory::async::copy(d, h, sizeof(int), ctx.stream().id());
-    testCUDAScopedContextKernels_single(d, ctx.stream());
+    cuda::memory::async::copy(d, h, sizeof(int), ctx.stream());
+    cuda::stream_t stream(device, ctx.stream());
+    testCUDAScopedContextKernels_single(d, stream);
     return ctx.wrap(d);
   }
 }
@@ -43,7 +47,7 @@ TEST_CASE("Use of CUDAScopedContext", "[CUDACore]") {
       std::unique_ptr<CUDAProduct<int> > dataPtr = ctx.wrap(10);
       REQUIRE(dataPtr.get() != nullptr);
       REQUIRE(dataPtr->device() == ctx.device());
-      REQUIRE(dataPtr->stream().id() == ctx.stream().id());
+      REQUIRE(dataPtr->stream().id() == ctx.stream());
     }
 
     SECTION("Construct from from CUDAProduct<T>") {
@@ -52,7 +56,7 @@ TEST_CASE("Use of CUDAScopedContext", "[CUDACore]") {
 
       CUDAScopedContext ctx2{data};
       REQUIRE(cuda::device::current::get().id() == data.device());
-      REQUIRE(ctx2.stream().id() == data.stream().id());
+      REQUIRE(ctx2.stream() == data.stream().id());
     }
 
     SECTION("Storing state as CUDAContextToken") {
@@ -67,7 +71,7 @@ TEST_CASE("Use of CUDAScopedContext", "[CUDACore]") {
       { // produce
         CUDAScopedContext ctx2{std::move(ctxtok)};
         REQUIRE(cuda::device::current::get().id() == ctx.device());
-        REQUIRE(ctx2.stream().id() == ctx.stream().id());
+        REQUIRE(ctx2.stream() == ctx.stream());
       }
     }
 
@@ -94,16 +98,17 @@ TEST_CASE("Use of CUDAScopedContext", "[CUDACore]") {
       auto prod2 = ctx.get(*wprod2);
 
       auto d_a3 = cuda::memory::device::make_unique<int>(current_device);
-      testCUDAScopedContextKernels_join(prod1, prod2, d_a3.get(), ctx.stream());
-      ctx.stream().synchronize();
+      cuda::stream_t stream(current_device.id(), ctx.stream());
+      testCUDAScopedContextKernels_join(prod1, prod2, d_a3.get(), stream);
+      stream.synchronize();
       REQUIRE(wprod2->event().has_occurred());
 
       h_a1 = 0;
       h_a2 = 0;
       int h_a3 = 0;
-      cuda::memory::async::copy(&h_a1, d_a1.get(), sizeof(int), ctx.stream().id());
-      cuda::memory::async::copy(&h_a2, d_a2.get(), sizeof(int), ctx.stream().id());
-      cuda::memory::async::copy(&h_a3, d_a3.get(), sizeof(int), ctx.stream().id());
+      cuda::memory::async::copy(&h_a1, d_a1.get(), sizeof(int), ctx.stream());
+      cuda::memory::async::copy(&h_a2, d_a2.get(), sizeof(int), ctx.stream());
+      cuda::memory::async::copy(&h_a3, d_a3.get(), sizeof(int), ctx.stream());
 
       REQUIRE(h_a1 == 2);
       REQUIRE(h_a2 == 4);

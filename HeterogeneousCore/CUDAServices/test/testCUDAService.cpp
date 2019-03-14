@@ -179,19 +179,18 @@ TEST_CASE("Tests of CUDAService", "[CUDAService]") {
     ps.addUntrackedParameter("allocator", alloc);
     auto cs = makeCUDAService(ps, ar);
     cs.setCurrentDevice(0);
-    auto cudaStreamPtr = cs.getCUDAStream();
-    auto& cudaStream = *cudaStreamPtr;
+    cudaStream_t cudaStream = cs.getCUDAStream().get();
     
     SECTION("Destructor") {
       auto ptr = cs.make_device_unique<int>(cudaStream);
       REQUIRE(ptr.get() != nullptr);
-      cudaStream.synchronize();
+      cudaStreamSynchronize(cudaStream);
     }
 
     SECTION("Reset") {
       auto ptr = cs.make_device_unique<int[]>(5, cudaStream);
       REQUIRE(ptr.get() != nullptr);
-      cudaStream.synchronize();
+      cudaStreamSynchronize(cudaStream);
 
       ptr.reset();
       REQUIRE(ptr.get() == nullptr);
@@ -214,8 +213,7 @@ TEST_CASE("Tests of CUDAService", "[CUDAService]") {
     ps.addUntrackedParameter("allocator", alloc);
     auto cs = makeCUDAService(ps, ar);
     cs.setCurrentDevice(0);
-    auto cudaStreamPtr = cs.getCUDAStream();
-    auto& cudaStream = *cudaStreamPtr;
+    cudaStream_t cudaStream = cs.getCUDAStream().get();
     
     SECTION("Destructor") {
       auto ptr = cs.make_host_unique<int>(cudaStream);

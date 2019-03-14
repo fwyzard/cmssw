@@ -58,9 +58,9 @@ public:
 
   int device() const { return currentDevice_; }
 
-  cuda::stream_t<>& stream() { return *stream_; }
-  const cuda::stream_t<>& stream() const { return *stream_; }
-  const std::shared_ptr<cuda::stream_t<>>& streamPtr() const { return stream_; }
+  cudaStream_t stream() { return stream_.get(); }
+  const cudaStream_t stream() const { return stream_.get(); }
+  const std::shared_ptr<CUstream_st> streamPtr() const { return stream_; }
 
   CUDAContextToken toToken() {
     return CUDAContextToken(currentDevice_, stream_);
@@ -84,7 +84,7 @@ public:
     // CUDAProduct<T> constructor records CUDA event to the CUDA
     // stream. The event will become "occurred" after all work queued
     // to the stream before this point has been finished.
-    return std::unique_ptr<CUDAProduct<T> >(new CUDAProduct<T>(device(), streamPtr(), std::move(data)));
+    return std::unique_ptr<CUDAProduct<T>>(new CUDAProduct<T>(device(), streamPtr(), std::move(data)));
   }
 
   template <typename T, typename... Args>
@@ -96,14 +96,14 @@ private:
   friend class cudatest::TestCUDAScopedContext;
 
   // This construcor is only meant for testing
-  explicit CUDAScopedContext(int device, std::unique_ptr<cuda::stream_t<>> stream);
+  explicit CUDAScopedContext(int device, std::unique_ptr<CUstream_st, void(*)(cudaStream_t)> stream);
 
   void synchronizeStreams(int dataDevice, const cuda::stream_t<>& dataStream, const cuda::event_t& dataEvent);
 
   int currentDevice_;
   std::optional<edm::WaitingTaskWithArenaHolder> waitingTaskHolder_;
   cuda::device::current::scoped_override_t<> setDeviceForThisScope_;
-  std::shared_ptr<cuda::stream_t<>> stream_;
+  std::shared_ptr<CUstream_st> stream_;
 };
 
 #endif

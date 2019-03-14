@@ -114,6 +114,7 @@ void SiPixelRawToClusterCUDA::fillDescriptions(edm::ConfigurationDescriptions& d
 
 void SiPixelRawToClusterCUDA::acquire(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
   CUDAScopedContext ctx{iEvent.streamID(), std::move(waitingTaskHolder)};
+  cuda::stream_t<> stream(ctx.device(), ctx.stream());
 
   edm::ESHandle<SiPixelFedCablingMapGPUWrapper> hgpuMap;
   iSetup.get<CkfComponentsRecord>().get(hgpuMap);
@@ -121,12 +122,12 @@ void SiPixelRawToClusterCUDA::acquire(const edm::Event& iEvent, const edm::Event
     throw cms::Exception("LogicError") << "UseQuality of the module (" << useQuality_ << ") differs the one from SiPixelFedCablingMapGPUWrapper. Please fix your configuration.";
   }
   // get the GPU product already here so that the async transfer can begin
-  const auto *gpuMap = hgpuMap->getGPUProductAsync(ctx.stream());
+  const auto *gpuMap = hgpuMap->getGPUProductAsync(stream);
 
   edm::ESHandle<SiPixelGainCalibrationForHLTGPU> hgains;
   iSetup.get<SiPixelGainCalibrationForHLTGPURcd>().get(hgains);
   // get the GPU product already here so that the async transfer can begin
-  const auto *gpuGains = hgains->getGPUProductAsync(ctx.stream());
+  const auto *gpuGains = hgains->getGPUProductAsync(stream);
 
   cudautils::device::unique_ptr<unsigned char[]> modulesToUnpackRegional;
   const unsigned char *gpuModulesToUnpack;
@@ -135,11 +136,11 @@ void SiPixelRawToClusterCUDA::acquire(const edm::Event& iEvent, const edm::Event
     regions_->run(iEvent, iSetup);
     LogDebug("SiPixelRawToCluster") << "region2unpack #feds: "<<regions_->nFEDs();
     LogDebug("SiPixelRawToCluster") << "region2unpack #modules (BPIX,EPIX,total): "<<regions_->nBarrelModules()<<" "<<regions_->nForwardModules()<<" "<<regions_->nModules();
-    modulesToUnpackRegional = hgpuMap->getModToUnpRegionalAsync(*(regions_->modulesToUnpack()), ctx.stream());
+    modulesToUnpackRegional = hgpuMap->getModToUnpRegionalAsync(*(regions_->modulesToUnpack()), stream);
     gpuModulesToUnpack = modulesToUnpackRegional.get();
   }
   else {
-    gpuModulesToUnpack = hgpuMap->getModToUnpAllAsync(ctx.stream());
+    gpuModulesToUnpack = hgpuMap->getModToUnpAllAsync(stream);
   }
 
   // initialize cabling map or update if necessary
@@ -164,7 +165,7 @@ void SiPixelRawToClusterCUDA::acquire(const edm::Event& iEvent, const edm::Event
 
   // In CPU algorithm this loop is part of PixelDataFormatter::interpretRawData()
   ErrorChecker errorcheck;
-  auto wordFedAppender = pixelgpudetails::SiPixelRawToClusterGPUKernel::WordFedAppender(ctx.stream());
+  auto wordFedAppender = pixelgpudetails::SiPixelRawToClusterGPUKernel::WordFedAppender(stream);
   for(int fedId: fedIds_) {
     if (!usePilotBlade_ && (fedId==40) ) continue; // skip pilot blade data
     if (regions_ && !regions_->mayUnpackFED(fedId)) continue;
@@ -223,7 +224,7 @@ void SiPixelRawToClusterCUDA::acquire(const edm::Event& iEvent, const edm::Event
                              wordCounterGPU, fedCounter, convertADCtoElectrons_,
                              useQuality_, includeErrors_,
                              edm::MessageDrop::instance()->debugEnabled,
-                             ctx.stream());
+                             stream);
 
   ctxTmp_ = ctx.toToken();
 }

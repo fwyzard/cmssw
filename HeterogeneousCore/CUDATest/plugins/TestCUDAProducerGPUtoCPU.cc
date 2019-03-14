@@ -53,7 +53,7 @@ void TestCUDAProducerGPUtoCPU::acquire(const edm::Event& iEvent, const edm::Even
   edm::Service<CUDAService> cs;
   buffer_ = cs->make_host_unique<float[]>(TestCUDAProducerGPUKernel::NUM_VALUES, ctx.stream());
   // Enqueue async copy, continue in produce once finished
-  cuda::memory::async::copy(buffer_.get(), device.get(), TestCUDAProducerGPUKernel::NUM_VALUES*sizeof(float), ctx.stream().id());
+  cuda::memory::async::copy(buffer_.get(), device.get(), TestCUDAProducerGPUKernel::NUM_VALUES*sizeof(float), ctx.stream());
 
   edm::LogVerbatim("TestCUDAProducerGPUtoCPU") << label_ << " TestCUDAProducerGPUtoCPU::acquire end event " << iEvent.id().event() << " stream " << iEvent.streamID();
 }
