@@ -11,9 +11,10 @@
  */
 
 #include <iostream>
-#include <vector>
+#include <mutex>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 // boost optional (used by boost graph) results in some false positives with -Wmaybe-uninitialized
 #pragma GCC diagnostic push
@@ -24,16 +25,17 @@
 #pragma GCC diagnostic pop
 
 #include "DataFormats/Provenance/interface/ModuleDescription.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/Registry.h"
 #include "FWCore/ServiceRegistry/interface/ActivityRegistry.h"
 #include "FWCore/ServiceRegistry/interface/ConsumesInfo.h"
+#include "FWCore/ServiceRegistry/interface/ModuleCallingContext.h"
 #include "FWCore/ServiceRegistry/interface/PathsAndConsumesOfModulesBase.h"
 #include "FWCore/ServiceRegistry/interface/ProcessContext.h"
 #include "FWCore/Utilities/interface/Exception.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 using namespace edm;
 using namespace edm::service;
@@ -61,7 +63,10 @@ public:
 
   void preSourceConstruction(ModuleDescription const &);
   void preBeginJob(PathsAndConsumesOfModulesBase const &, ProcessContext const &);
-  void postBeginJob();
+  void postEndJob();
+
+  void preSourceEvent(edm::StreamID);
+  void preModuleEvent(edm::StreamContext const &, edm::ModuleCallingContext const &);
 
 private:
   bool highlighted(std::string const & module) {
@@ -113,6 +118,7 @@ private:
     std::string   label;
     std::string   class_;
     unsigned int  id;
+    unsigned int  run;
     EDMModuleType type;
     bool          scheduled;
   };
@@ -139,10 +145,15 @@ private:
       boost::property<boost::graph_edge_attribute_t, GraphvizAttributes>>>>
   >> m_graph;
 
-  std::string m_filename;
-  std::unordered_set<std::string> m_highlightModules;
+  // synchronise changes to the graph
+  std::mutex m_lock;
 
-  bool m_showPathDependencies;
+  const std::string m_filename;
+  const std::unordered_set<std::string> m_highlightModules;
+
+  const bool m_showModulesType;
+  const bool m_showUnusedModules;
+  const bool m_showPathDependencies;
   bool m_initialized;
 };
 
@@ -190,6 +201,8 @@ DependencyGraph::fillDescriptions(edm::ConfigurationDescriptions & descriptions)
   edm::ParameterSetDescription desc;
   desc.addUntracked<std::string>("fileName", "dependency.gv");
   desc.addUntracked<std::vector<std::string>>("highlightModules", {});
+  desc.addUntracked<bool>("showModulesType", false);
+  desc.addUntracked<bool>("showUnusedModules", false);
   desc.addUntracked<bool>("showPathDependencies", true);
   descriptions.add("DependencyGraph", desc);
 }
@@ -198,12 +211,14 @@ DependencyGraph::fillDescriptions(edm::ConfigurationDescriptions & descriptions)
 DependencyGraph::DependencyGraph(ParameterSet const & config, ActivityRegistry & registry) :
   m_filename( config.getUntrackedParameter<std::string>("fileName") ),
   m_highlightModules( make_unordered_set(config.getUntrackedParameter<std::vector<std::string>>("highlightModules")) ),
+  m_showModulesType( config.getUntrackedParameter<bool>("showModulesType") ),
+  m_showUnusedModules( config.getUntrackedParameter<bool>("showUnusedModules") ),
   m_showPathDependencies( config.getUntrackedParameter<bool>("showPathDependencies") ),
   m_initialized( false )
 {
   registry.watchPreSourceConstruction(this, &DependencyGraph::preSourceConstruction);
   registry.watchPreBeginJob(this, &DependencyGraph::preBeginJob);
-  registry.watchPostBeginJob(this, &DependencyGraph::postBeginJob);
+  registry.watchPostEndJob(this, &DependencyGraph::postEndJob);
 }
 
 
@@ -224,14 +239,17 @@ iterator_pair_as_a_range<I> make_range(std::pair<I, I> p)
   return iterator_pair_as_a_range<I>(p);
 }
 
-
 void
 DependencyGraph::preSourceConstruction(ModuleDescription const & module) {
   // create graph vertex for the source module and fill its attributes
   boost::add_vertex(m_graph);
-  m_graph.m_graph[module.id()] = node{ module.moduleLabel(), module.moduleName(), module.id(), EDMModuleType::Source, true };
+  m_graph.m_graph[module.id()] = node{ module.moduleLabel(), module.moduleName(), module.id(), 0, EDMModuleType::Source, true };
   auto & attributes = boost::get(boost::get(boost::vertex_attribute, m_graph), 0);
-  attributes["label"] = module.moduleLabel();
+  if (m_showModulesType) {
+    attributes["label"] = module.moduleName() + "\n" + module.moduleLabel();
+  } else {
+    attributes["label"] = module.moduleLabel();
+  }
   attributes["tooltip"] = module.moduleName();
   attributes["shape"] = shapes[static_cast<std::underlying_type_t<EDMModuleType>>(EDMModuleType::Source)];
   attributes["style"] = "filled";
@@ -280,10 +298,14 @@ DependencyGraph::preBeginJob(PathsAndConsumesOfModulesBase const & pathsAndConsu
 
   // set the vertices properties (use the module id as the global index into the graph)
   for (edm::ModuleDescription const * module: pathsAndConsumes.allModules()) {
-    m_graph.m_graph[module->id()] = { module->moduleLabel(), module->moduleName(), module->id(), edmModuleTypeEnum(*module), false };
+    m_graph.m_graph[module->id()] = node{ module->moduleLabel(), module->moduleName(), module->id(), 0, edmModuleTypeEnum(*module), false };
 
     auto & attributes = boost::get(boost::get(boost::vertex_attribute, m_graph), module->id());
-    attributes["label"] = module->moduleLabel();
+    if (m_showModulesType) {
+      attributes["label"] = module->moduleName() + "\n" + module->moduleLabel();
+    } else {
+      attributes["label"] = module->moduleLabel();
+    }
     attributes["tooltip"] = module->moduleName();
     attributes["shape"] = shapes[static_cast<std::underlying_type_t<EDMModuleType>>(edmModuleTypeEnum(*module))];
     attributes["style"] = "filled";
@@ -360,10 +382,13 @@ DependencyGraph::preBeginJob(PathsAndConsumesOfModulesBase const & pathsAndConsu
 }
 
 void
-DependencyGraph::postBeginJob() {
+DependencyGraph::postEndJob() {
 
   if (not m_initialized)
     return;
+
+  // remove the modules that did not run
+  //XXX
 
   // draw the dependency graph
   std::ofstream out(m_filename);
@@ -372,6 +397,18 @@ DependencyGraph::postBeginJob() {
       m_graph
   );
   out.close();
+}
+
+void
+DependencyGraph::preSourceEvent(edm::StreamID) {
+  std::lock_guard<std::mutex> lock(m_lock);
+  ++m_graph.m_graph[0].run;
+}
+
+void
+DependencyGraph::preModuleEvent(edm::StreamContext const &, edm::ModuleCallingContext const & mcc) {
+  std::lock_guard<std::mutex> lock(m_lock);
+  ++m_graph.m_graph[mcc.moduleDescription()->id()].run;
 }
 
 namespace edm {
