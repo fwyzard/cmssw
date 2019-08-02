@@ -62,6 +62,10 @@ the worker is reset().
 #include <exception>
 #include <unordered_map>
 
+#define __MAKE_UNIQUE_TOKEN(TOKEN, ID) TOKEN ## ID
+#define _MAKE_UNIQUE_TOKEN(TOKEN, ID) __MAKE_UNIQUE_TOKEN(TOKEN, ID)
+#define MAKE_UNIQUE_TOKEN(TOKEN) _MAKE_UNIQUE_TOKEN(TOKEN, __LINE__)
+
 namespace edm {
   class EventPrincipal;
   class EarlyDeleteHelper;
@@ -432,7 +436,7 @@ namespace edm {
 
       tbb::task* execute() override {
         //Need to make the services available early so other services can see them
-        ServiceRegistry::Operate guard(m_serviceToken);
+        ServiceRegistry::Operate MAKE_UNIQUE_TOKEN(guard)(m_serviceToken);
 
         //incase the emit causes an exception, we need a memory location
         // to hold the exception_ptr
@@ -462,7 +466,7 @@ namespace edm {
                       sContext = m_context,
                       serviceToken = m_serviceToken]() {
               //Need to make the services available
-              ServiceRegistry::Operate guard(serviceToken);
+              ServiceRegistry::Operate MAKE_UNIQUE_TOKEN(guard)(serviceToken);
 
               //If needed, we pause the queue in begin transition and resume it
               // at the end transition. This guarantees that the module
@@ -533,7 +537,7 @@ namespace edm {
 
       tbb::task* execute() override {
         //Need to make the services available early so other services can see them
-        ServiceRegistry::Operate guard(m_serviceToken);
+        ServiceRegistry::Operate MAKE_UNIQUE_TOKEN(guard)(m_serviceToken);
 
         //incase the emit causes an exception, we need a memory location
         // to hold the exception_ptr
@@ -560,7 +564,7 @@ namespace edm {
                         serviceToken = m_serviceToken,
                         holder = m_holder]() {
               //Need to make the services available
-              ServiceRegistry::Operate guard(serviceToken);
+              ServiceRegistry::Operate MAKE_UNIQUE_TOKEN(guard)(serviceToken);
 
               std::exception_ptr* ptr = nullptr;
               worker->runAcquireAfterAsyncPrefetch(ptr, principal, es, parentContext, holder);
@@ -875,7 +879,7 @@ namespace edm {
         auto selectionTask =
             make_waiting_task(tbb::task::allocate_root(),
                               [ownRunTask, parentContext, &ep, token, this](std::exception_ptr const*) mutable {
-                                ServiceRegistry::Operate guard(token);
+                                ServiceRegistry::Operate MAKE_UNIQUE_TOKEN(guard)(token);
                                 prefetchAsync(ownRunTask->release(), token, parentContext, ep);
                               });
         prePrefetchSelectionAsync(selectionTask, token, streamID, &ep);
@@ -940,7 +944,7 @@ namespace edm {
         std::exception_ptr exceptionPtr;
         try {
           //Need to make the services available
-          ServiceRegistry::Operate guard(serviceToken);
+          ServiceRegistry::Operate MAKE_UNIQUE_TOKEN(guard)(serviceToken);
 
           this->runModule<T>(principal, es, streamID, parentContext, context);
         } catch (...) {
@@ -951,8 +955,8 @@ namespace edm {
       if (auto queue = this->serializeRunModule()) {
         queue.push(toDo);
       } else {
-        auto task = make_functor_task(tbb::task::allocate_root(), toDo);
-        tbb::task::spawn(*task);
+        auto new_task = make_functor_task(tbb::task::allocate_root(), toDo);
+        tbb::task::spawn(*new_task);
       }
     }
   }
@@ -1060,7 +1064,7 @@ namespace edm {
       auto serviceToken = ServiceRegistry::instance().presentToken();
       queue.pushAndWait([&]() {
         //Need to make the services available
-        ServiceRegistry::Operate guard(serviceToken);
+        ServiceRegistry::Operate MAKE_UNIQUE_TOKEN(guard)(serviceToken);
         try {
           rc = runModule<T>(ep, es, streamID, parentContext, context);
         } catch (...) {
