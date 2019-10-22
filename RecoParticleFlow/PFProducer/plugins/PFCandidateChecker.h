@@ -25,49 +25,39 @@
 \date   August 2011
 */
 
-
-
-
 class PFCandidateChecker : public edm::stream::EDAnalyzer<> {
- public:
-
+public:
   explicit PFCandidateChecker(const edm::ParameterSet&);
 
   ~PFCandidateChecker() override;
-  
+
   void analyze(const edm::Event&, const edm::EventSetup&) override;
 
-  void beginRun(const edm::Run & r, const edm::EventSetup & c) override;
+  void beginRun(const edm::Run& r, const edm::EventSetup& c) override;
 
- private:
-  
-  void printJets(const reco::PFJetCollection& pfJetsReco,
-		 const reco::PFJetCollection& pfJetsReReco) const;
+private:
+  void printJets(const reco::PFJetCollection& pfJetsReco, const reco::PFJetCollection& pfJetsReReco) const;
 
-  void printMet(const reco::PFCandidateCollection& pfReco,
-		const reco::PFCandidateCollection& pfReReco) const; 
+  void printMet(const reco::PFCandidateCollection& pfReco, const reco::PFCandidateCollection& pfReReco) const;
 
-  void printElementsInBlocks(const reco::PFCandidate& cand,
-			     std::ostream& out=std::cout) const;
+  void printElementsInBlocks(const reco::PFCandidate& cand, std::ostream& out = std::cout) const;
 
-
-  
-  /// PFCandidates in which we'll look for pile up particles 
-  edm::InputTag   inputTagPFCandidatesReco_;
-  edm::InputTag   inputTagPFCandidatesReReco_;
-  edm::InputTag   inputTagPFJetsReco_;
-  edm::InputTag   inputTagPFJetsReReco_;
+  /// PFCandidates in which we'll look for pile up particles
+  edm::InputTag inputTagPFCandidatesReco_;
+  edm::InputTag inputTagPFCandidatesReReco_;
+  edm::InputTag inputTagPFJetsReco_;
+  edm::InputTag inputTagPFJetsReReco_;
 
   /// Cuts for comparison
   double deltaEMax_;
   double deltaEtaMax_;
   double deltaPhiMax_;
-  
+
   /// verbose ?
-  bool   verbose_;
+  bool verbose_;
 
   /// print the blocks associated to a given candidate ?
-  bool   printBlocks_;
+  bool printBlocks_;
 
   /// rank the candidates by Pt
   bool rankByPt_;
@@ -75,12 +65,7 @@ class PFCandidateChecker : public edm::stream::EDAnalyzer<> {
   /// Counter
   unsigned entry_;
 
-  static bool greaterPt( const reco::PFCandidate& a, const reco::PFCandidate& b ) {
-    return (a.pt()>b.pt());
-  }
-
-
-
+  static bool greaterPt(const reco::PFCandidate& a, const reco::PFCandidate& b) { return (a.pt() > b.pt()); }
 };
 
 DEFINE_FWK_MODULE(PFCandidateChecker);

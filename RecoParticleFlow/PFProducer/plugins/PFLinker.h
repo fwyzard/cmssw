@@ -32,36 +32,35 @@
 #include <string>
 
 class PFLinker : public edm::stream::EDProducer<> {
- public:
-
+public:
   explicit PFLinker(const edm::ParameterSet&);
 
   ~PFLinker() override;
-  
+
   void produce(edm::Event&, const edm::EventSetup&) override;
 
- private:
-  template<typename TYPE>
-    edm::ValueMap<reco::PFCandidatePtr> fillValueMap(edm::Event & event,
-						     std::string label,
-						     edm::Handle<TYPE>& inputObjCollection,
-						     const std::map<edm::Ref<TYPE>, reco::PFCandidatePtr> & mapToTheCandidate,
-						     const edm::OrphanHandle<reco::PFCandidateCollection> & newPFCandColl) const;    
-  
- private:
- 
+private:
+  template <typename TYPE>
+  edm::ValueMap<reco::PFCandidatePtr> fillValueMap(
+      edm::Event& event,
+      std::string label,
+      edm::Handle<TYPE>& inputObjCollection,
+      const std::map<edm::Ref<TYPE>, reco::PFCandidatePtr>& mapToTheCandidate,
+      const edm::OrphanHandle<reco::PFCandidateCollection>& newPFCandColl) const;
+
+private:
   /// Input PFCandidates
-  std::vector<edm::EDGetTokenT<reco::PFCandidateCollection> >       inputTagPFCandidates_;
+  std::vector<edm::EDGetTokenT<reco::PFCandidateCollection> > inputTagPFCandidates_;
 
   /// Input GsfElectrons
-  edm::EDGetTokenT<reco::GsfElectronCollection>    inputTagGsfElectrons_;
+  edm::EDGetTokenT<reco::GsfElectronCollection> inputTagGsfElectrons_;
 
   /// Input Photons
-  edm::EDGetTokenT<reco::PhotonCollection>         inputTagPhotons_;
+  edm::EDGetTokenT<reco::PhotonCollection> inputTagPhotons_;
 
   /// Input Muons
   edm::InputTag muonTag_;
-  edm::EDGetTokenT<reco::MuonCollection>      inputTagMuons_;
+  edm::EDGetTokenT<reco::MuonCollection> inputTagMuons_;
   edm::EDGetTokenT<reco::MuonToMuonMap> inputTagMuonMap_;
   /// name of output collection of PFCandidate
   std::string nameOutputPF_;

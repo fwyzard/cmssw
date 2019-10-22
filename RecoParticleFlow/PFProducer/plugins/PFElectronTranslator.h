@@ -18,73 +18,69 @@
 #include <string>
 #include <map>
 
-
-
-class PFElectronTranslator : public edm::stream::EDProducer<>
-{
- public:
+class PFElectronTranslator : public edm::stream::EDProducer<> {
+public:
   explicit PFElectronTranslator(const edm::ParameterSet&);
   ~PFElectronTranslator() override;
-  
-  void produce(edm::Event &, const edm::EventSetup&) override;
 
-  typedef std::vector< edm::Handle< edm::ValueMap<double> > > IsolationValueMaps;
+  void produce(edm::Event&, const edm::EventSetup&) override;
 
+  typedef std::vector<edm::Handle<edm::ValueMap<double> > > IsolationValueMaps;
 
- private:
+private:
   // to retrieve the collection from the event
-  bool fetchCandidateCollection(edm::Handle<reco::PFCandidateCollection>& c, 
-				const edm::InputTag& tag, 
-				const edm::Event& iEvent) const;
+  bool fetchCandidateCollection(edm::Handle<reco::PFCandidateCollection>& c,
+                                const edm::InputTag& tag,
+                                const edm::Event& iEvent) const;
   // to retrieve the collection from the event
-  void fetchGsfCollection(edm::Handle<reco::GsfTrackCollection>& c, 
-			  const edm::InputTag& tag, 
-			  const edm::Event& iEvent) const ;
+  void fetchGsfCollection(edm::Handle<reco::GsfTrackCollection>& c,
+                          const edm::InputTag& tag,
+                          const edm::Event& iEvent) const;
 
   // makes a basic cluster from PFBlockElement and add it to the collection ; the corrected energy is taken
   // from the PFCandidate
-  void createBasicCluster(const reco::PFBlockElement & ,  reco::BasicClusterCollection & basicClusters,
-			  std::vector<const reco::PFCluster *> &,
-			  const reco::PFCandidate & coCandidate) const;
+  void createBasicCluster(const reco::PFBlockElement&,
+                          reco::BasicClusterCollection& basicClusters,
+                          std::vector<const reco::PFCluster*>&,
+                          const reco::PFCandidate& coCandidate) const;
   // makes a preshower cluster from of PFBlockElement and add it to the collection
-  void createPreshowerCluster(const reco::PFBlockElement & PFBE, 
-			      reco::PreshowerClusterCollection& preshowerClusters,
-			      unsigned plane) const;
+  void createPreshowerCluster(const reco::PFBlockElement& PFBE,
+                              reco::PreshowerClusterCollection& preshowerClusters,
+                              unsigned plane) const;
 
   // make a super cluster from its ingredients and add it to the collection
-  void createSuperClusters(const reco::PFCandidateCollection &,
-			  reco::SuperClusterCollection &superClusters) const;
+  void createSuperClusters(const reco::PFCandidateCollection&, reco::SuperClusterCollection& superClusters) const;
 
   // make GsfElectronCores from ingredients
-  void createGsfElectronCores(reco::GsfElectronCoreCollection &) const;
+  void createGsfElectronCores(reco::GsfElectronCoreCollection&) const;
 
   // create the basic cluster Ptr
-  void createBasicClusterPtrs(const edm::OrphanHandle<reco::BasicClusterCollection> & basicClustersHandle );
+  void createBasicClusterPtrs(const edm::OrphanHandle<reco::BasicClusterCollection>& basicClustersHandle);
 
   // create the preshower cluster Refs
-  void createPreshowerClusterPtrs(const edm::OrphanHandle<reco::PreshowerClusterCollection> & preshowerClustersHandle );
+  void createPreshowerClusterPtrs(const edm::OrphanHandle<reco::PreshowerClusterCollection>& preshowerClustersHandle);
 
   // create the super cluster Refs
-  void createSuperClusterGsfMapRefs(const edm::OrphanHandle<reco::SuperClusterCollection> & superClustersHandle );
+  void createSuperClusterGsfMapRefs(const edm::OrphanHandle<reco::SuperClusterCollection>& superClustersHandle);
 
   // create the GsfElectronCore Refs
-  void createGsfElectronCoreRefs(const edm::OrphanHandle<reco::GsfElectronCoreCollection> & gsfElectronCoreHandle);
+  void createGsfElectronCoreRefs(const edm::OrphanHandle<reco::GsfElectronCoreCollection>& gsfElectronCoreHandle);
 
   // create the GsfElectrons
-  void createGsfElectrons(const reco::PFCandidateCollection &,
-			  const IsolationValueMaps& isolationValues,
-			  reco::GsfElectronCollection &);
+  void createGsfElectrons(const reco::PFCandidateCollection&,
+                          const IsolationValueMaps& isolationValues,
+                          reco::GsfElectronCollection&);
 
   // The following methods are used to fill the value maps
-  void fillMVAValueMap(edm::Event& iEvent, edm::ValueMap<float>::Filler & filler) ;
-  void fillValueMap(edm::Event& iEvent, edm::ValueMap<float>::Filler & filler) const;
-  void fillSCRefValueMap(edm::Event& iEvent, 
-			 edm::ValueMap<reco::SuperClusterRef>::Filler & filler) const;
-  void getAmbiguousGsfTracks(const reco::PFBlockElement & PFBE, std::vector<reco::GsfTrackRef>& ) const ; 
+  void fillMVAValueMap(edm::Event& iEvent, edm::ValueMap<float>::Filler& filler);
+  void fillValueMap(edm::Event& iEvent, edm::ValueMap<float>::Filler& filler) const;
+  void fillSCRefValueMap(edm::Event& iEvent, edm::ValueMap<reco::SuperClusterRef>::Filler& filler) const;
+  void getAmbiguousGsfTracks(const reco::PFBlockElement& PFBE, std::vector<reco::GsfTrackRef>&) const;
 
+  const reco::PFCandidate& correspondingDaughterCandidate(const reco::PFCandidate& cand,
+                                                          const reco::PFBlockElement& pfbe) const;
 
-  const reco::PFCandidate & correspondingDaughterCandidate(const reco::PFCandidate & cand, const reco::PFBlockElement & pfbe) const;
- private:
+private:
   edm::InputTag inputTagPFCandidates_;
   edm::InputTag inputTagPFCandidateElectrons_;
   edm::InputTag inputTagGSFTracks_;
@@ -99,9 +95,9 @@ class PFElectronTranslator : public edm::stream::EDProducer<>
   double MVACut_;
   bool checkStatusFlag_;
 
-  // The following vectors correspond to a GSF track, but the order is not 
+  // The following vectors correspond to a GSF track, but the order is not
   // the order of the tracks in the GSF track collection
-  std::vector<reco::GsfTrackRef> GsfTrackRef_;  
+  std::vector<reco::GsfTrackRef> GsfTrackRef_;
   // the list of candidatePtr
   std::vector<reco::CandidatePtr> CandidatePtr_;
   //the list of KfTrackRef
@@ -111,7 +107,7 @@ class PFElectronTranslator : public edm::stream::EDProducer<>
   // the collection of basic clusters associated to a GSF track
   std::vector<reco::BasicClusterCollection> basicClusters_;
   // the correcsponding PFCluster ref
-  std::vector<std::vector<const reco::PFCluster *> > pfClusters_;
+  std::vector<std::vector<const reco::PFCluster*> > pfClusters_;
   // the collection of preshower clusters associated to a GSF track
   std::vector<reco::PreshowerClusterCollection> preshowerClusters_;
   // the super cluster collection (actually only one) associated to a GSF track
@@ -124,12 +120,11 @@ class PFElectronTranslator : public edm::stream::EDProducer<>
   std::vector<reco::GsfElectronCoreRef> gsfElectronCoreRefs_;
   // keep track of the index of the PF Candidate
   std::vector<int> gsfPFCandidateIndex_;
-  // maps to ease the creation of the Value Maps 
-  std::map<reco::GsfTrackRef,reco::SuperClusterRef> scMap_;
-  std::map<reco::GsfTrackRef,float> gsfMvaMap_;
+  // maps to ease the creation of the Value Maps
+  std::map<reco::GsfTrackRef, reco::SuperClusterRef> scMap_;
+  std::map<reco::GsfTrackRef, float> gsfMvaMap_;
 
   bool emptyIsOk_;
-
 };
 
 DEFINE_FWK_MODULE(PFElectronTranslator);

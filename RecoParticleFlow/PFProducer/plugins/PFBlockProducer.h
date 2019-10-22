@@ -21,28 +21,23 @@ flow blocks This is done at a later stage, see PFProducer and PFAlgo.
 
 class FSimEvent;
 
-
-
 class PFBlockProducer : public edm::stream::EDProducer<> {
- public:
-
+public:
   explicit PFBlockProducer(const edm::ParameterSet&);
 
   ~PFBlockProducer() override;
-  
-  void beginLuminosityBlock(edm::LuminosityBlock const&, 
-				    edm::EventSetup const&) override;
+
+  void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
   void produce(edm::Event&, const edm::EventSetup&) override;
 
- private:
+private:
   /// verbose ?
-  const bool   verbose_;
+  const bool verbose_;
   const edm::EDPutTokenT<reco::PFBlockCollection> putToken_;
-  
-  /// Particle flow block algorithm 
-  PFBlockAlgo            pfBlockAlgo_;
 
+  /// Particle flow block algorithm
+  PFBlockAlgo pfBlockAlgo_;
 };
 
 DEFINE_FWK_MODULE(PFBlockProducer);

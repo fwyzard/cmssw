@@ -38,39 +38,34 @@ This producer makes use of PFAlgo, the particle flow algorithm.
 \date   July 2006
 */
 
-
 class PFEGammaProducer : public edm::stream::EDProducer<edm::GlobalCache<pfEGHelpers::HeavyObjectCache> > {
-
- public:
-  explicit PFEGammaProducer(const edm::ParameterSet&, const pfEGHelpers::HeavyObjectCache* );
+public:
+  explicit PFEGammaProducer(const edm::ParameterSet&, const pfEGHelpers::HeavyObjectCache*);
   ~PFEGammaProducer() override {}
 
-  static std::unique_ptr<pfEGHelpers::HeavyObjectCache>
-    initializeGlobalCache( const edm::ParameterSet& conf ) {
-       return std::unique_ptr<pfEGHelpers::HeavyObjectCache>(new pfEGHelpers::HeavyObjectCache(conf));
-   }
+  static std::unique_ptr<pfEGHelpers::HeavyObjectCache> initializeGlobalCache(const edm::ParameterSet& conf) {
+    return std::unique_ptr<pfEGHelpers::HeavyObjectCache>(new pfEGHelpers::HeavyObjectCache(conf));
+  }
 
-  static void globalEndJob(pfEGHelpers::HeavyObjectCache const* ) {}
+  static void globalEndJob(pfEGHelpers::HeavyObjectCache const*) {}
 
   void produce(edm::Event&, const edm::EventSetup&) override;
-  void beginRun(const edm::Run &, const edm::EventSetup &) override {}
+  void beginRun(const edm::Run&, const edm::EventSetup&) override {}
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
- private:
-
+private:
   void setPFEGParameters(PFEGammaAlgo::PFEGConfigInfo&);
 
-  void setPFVertexParameters(reco::VertexCollection const&  primaryVertices);
+  void setPFVertexParameters(reco::VertexCollection const& primaryVertices);
 
-  void createSingleLegConversions(reco::PFCandidateEGammaExtraCollection &extras,
-                                  reco::ConversionCollection &oneLegConversions,
-                                  const edm::RefProd<reco::ConversionCollection> &convProd);
+  void createSingleLegConversions(reco::PFCandidateEGammaExtraCollection& extras,
+                                  reco::ConversionCollection& oneLegConversions,
+                                  const edm::RefProd<reco::ConversionCollection>& convProd);
 
-
-  const edm::EDGetTokenT<reco::PFBlockCollection>            inputTagBlocks_;
+  const edm::EDGetTokenT<reco::PFBlockCollection> inputTagBlocks_;
   const edm::EDGetTokenT<reco::PFCluster::EEtoPSAssociation> eetopsSrc_;
-  const edm::EDGetTokenT<reco::VertexCollection>             vertices_;
+  const edm::EDGetTokenT<reco::VertexCollection> vertices_;
 
   // Use vertices for Neutral particles ?
   const bool useVerticesForNeutral_;
@@ -84,7 +79,6 @@ class PFEGammaProducer : public edm::stream::EDProducer<edm::GlobalCache<pfEGHel
 
   const std::string ebeeClustersCollection_;
   const std::string esClustersCollection_;
-
 };
 
 #include "FWCore/Framework/interface/MakerMacros.h"

@@ -37,8 +37,8 @@
 #include "RecoEcal/EgammaCoreTools/interface/PositionCalc.h"
 #include "RecoEgamma/PhotonIdentification/interface/PhotonIsolationCalculator.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionFactory.h"
-#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionBaseClass.h" 
-#include "CondFormats/EcalObjects/interface/EcalFunctionParameters.h" 
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionBaseClass.h"
+#include "CondFormats/EcalObjects/interface/EcalFunctionParameters.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
 
 #include "DataFormats/EgammaCandidates/interface/ConversionFwd.h"
@@ -57,53 +57,59 @@
 #include "TLorentzVector.h"
 #include "TMath.h"
 
-class PFPhotonTranslator : public edm::stream::EDProducer<>
-{
- public:
-  explicit PFPhotonTranslator(const edm::ParameterSet&);
+class PFPhotonTranslator : public edm::stream::EDProducer<> {
+public:
+  explicit PFPhotonTranslator(const edm::ParameterSet &);
   ~PFPhotonTranslator() override;
-  
-  void produce(edm::Event &, const edm::EventSetup&) override;
 
-  typedef std::vector< edm::Handle< edm::ValueMap<double> > > IsolationValueMaps;
+  void produce(edm::Event &, const edm::EventSetup &) override;
 
- private:
+  typedef std::vector<edm::Handle<edm::ValueMap<double> > > IsolationValueMaps;
+
+private:
   // to retrieve the collection from the event
-  bool fetchCandidateCollection(edm::Handle<reco::PFCandidateCollection>& c, 
-				const edm::InputTag& tag, 
-				const edm::Event& iEvent) const;
-
+  bool fetchCandidateCollection(edm::Handle<reco::PFCandidateCollection> &c,
+                                const edm::InputTag &tag,
+                                const edm::Event &iEvent) const;
 
   // makes a basic cluster from PFBlockElement and add it to the collection ; the corrected energy is taken
   // from the PFCandidate
-  void createBasicCluster(const reco::PFBlockElement & ,  reco::BasicClusterCollection & basicClusters,
-			  std::vector<const reco::PFCluster *> &,
-			  const reco::PFCandidate & coCandidate) const;
+  void createBasicCluster(const reco::PFBlockElement &,
+                          reco::BasicClusterCollection &basicClusters,
+                          std::vector<const reco::PFCluster *> &,
+                          const reco::PFCandidate &coCandidate) const;
   // makes a preshower cluster from of PFBlockElement and add it to the collection
-  void createPreshowerCluster(const reco::PFBlockElement & PFBE, 
-			      reco::PreshowerClusterCollection& preshowerClusters,
-			      unsigned plane) const;
-  
+  void createPreshowerCluster(const reco::PFBlockElement &PFBE,
+                              reco::PreshowerClusterCollection &preshowerClusters,
+                              unsigned plane) const;
+
   // create the basic cluster Ptr
-  void createBasicClusterPtrs(const edm::OrphanHandle<reco::BasicClusterCollection> & basicClustersHandle );
+  void createBasicClusterPtrs(const edm::OrphanHandle<reco::BasicClusterCollection> &basicClustersHandle);
 
   // create the preshower cluster Refs
-  void createPreshowerClusterPtrs(const edm::OrphanHandle<reco::PreshowerClusterCollection> & preshowerClustersHandle );
+  void createPreshowerClusterPtrs(const edm::OrphanHandle<reco::PreshowerClusterCollection> &preshowerClustersHandle);
 
   // make a super cluster from its ingredients and add it to the collection
-  void createSuperClusters(const reco::PFCandidateCollection &,
-			  reco::SuperClusterCollection &superClusters) const;
-  
-  void createOneLegConversions(const edm::OrphanHandle<reco::SuperClusterCollection> & superClustersHandle, reco::ConversionCollection &oneLegConversions);
+  void createSuperClusters(const reco::PFCandidateCollection &, reco::SuperClusterCollection &superClusters) const;
+
+  void createOneLegConversions(const edm::OrphanHandle<reco::SuperClusterCollection> &superClustersHandle,
+                               reco::ConversionCollection &oneLegConversions);
 
   //create photon cores
-  void createPhotonCores(const edm::OrphanHandle<reco::SuperClusterCollection> & superClustersHandle, const edm::OrphanHandle<reco::ConversionCollection> & oneLegConversionHandle, reco::PhotonCoreCollection &photonCores) ;
+  void createPhotonCores(const edm::OrphanHandle<reco::SuperClusterCollection> &superClustersHandle,
+                         const edm::OrphanHandle<reco::ConversionCollection> &oneLegConversionHandle,
+                         reco::PhotonCoreCollection &photonCores);
 
   //create photons
   //void createPhotons(reco::VertexCollection &vertexCollection, const edm::OrphanHandle<reco::PhotonCoreCollection> & superClustersHandle, const CaloTopology* topology, const EcalRecHitCollection * barrelRecHits, const EcalRecHitCollection * endcapRecHits, const edm::Handle<CaloTowerCollection> & hcalTowersHandle, const IsolationValueMaps& isolationValues, reco::PhotonCollection &photons) ;
-  void createPhotons(reco::VertexCollection &vertexCollection, edm::Handle<reco::PhotonCollection> &egPhotons, const edm::OrphanHandle<reco::PhotonCoreCollection> & photonCoresHandle, const IsolationValueMaps& isolationValues, reco::PhotonCollection &photons) ;
+  void createPhotons(reco::VertexCollection &vertexCollection,
+                     edm::Handle<reco::PhotonCollection> &egPhotons,
+                     const edm::OrphanHandle<reco::PhotonCoreCollection> &photonCoresHandle,
+                     const IsolationValueMaps &isolationValues,
+                     reco::PhotonCollection &photons);
 
-  const reco::PFCandidate & correspondingDaughterCandidate(const reco::PFCandidate & cand, const reco::PFBlockElement & pfbe) const;
+  const reco::PFCandidate &correspondingDaughterCandidate(const reco::PFCandidate &cand,
+                                                          const reco::PFBlockElement &pfbe) const;
 
   edm::InputTag inputTagPFCandidates_;
   std::vector<edm::InputTag> inputTagIsoVals_;
@@ -114,7 +120,7 @@ class PFPhotonTranslator : public edm::stream::EDProducer<>
   std::string PFPhotonCollection_;
   std::string PFConversionCollection_;
   std::string EGPhotonCollection_;
-  std::string  vertexProducer_;
+  std::string vertexProducer_;
   edm::InputTag barrelEcalHits_;
   edm::InputTag endcapEcalHits_;
   edm::InputTag hcalTowers_;
@@ -132,7 +138,7 @@ class PFPhotonTranslator : public edm::stream::EDProducer<>
   std::vector<reco::CaloClusterPtrVector> basicClusterPtr_;
   // the references to the basic clusters associated to a photon
   std::vector<reco::CaloClusterPtrVector> preshowerClusterPtr_;
-   // keep track of the index of the PF Candidate
+  // keep track of the index of the PF Candidate
   std::vector<int> photPFCandidateIndex_;
   // the list of candidatePtr
   std::vector<reco::CandidatePtr> CandidatePtr_;
@@ -140,15 +146,15 @@ class PFPhotonTranslator : public edm::stream::EDProducer<>
   std::vector<reco::SuperClusterRef> egSCRef_;
   // the e/g photon associated
   std::vector<reco::PhotonRef> egPhotonRef_;
-  // the PF MVA and regression 
+  // the PF MVA and regression
   std::vector<float> pfPhotonMva_;
   std::vector<float> energyRegression_;
   std::vector<float> energyRegressionError_;
 
   //Vector of vector of Conversions Refs
-  std::vector<reco::ConversionRefVector > pfConv_;
-  std::vector< std::vector<reco::TrackRef> > pfSingleLegConv_;
-  std::vector< std::vector<float> > pfSingleLegConvMva_;
+  std::vector<reco::ConversionRefVector> pfConv_;
+  std::vector<std::vector<reco::TrackRef> > pfSingleLegConv_;
+  std::vector<std::vector<float> > pfSingleLegConvMva_;
   //std::vector<reco::TrackRef> * pfSingleLegConv_;
 
   std::vector<int> conv1legPFCandidateIndex_;
@@ -158,7 +164,6 @@ class PFPhotonTranslator : public edm::stream::EDProducer<>
   edm::ESHandle<CaloGeometry> theCaloGeom_;
 
   bool emptyIsOk_;
-
 };
 
 DEFINE_FWK_MODULE(PFPhotonTranslator);

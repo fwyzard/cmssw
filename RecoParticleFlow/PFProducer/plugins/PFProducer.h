@@ -42,40 +42,38 @@ This producer makes use of PFAlgo, the particle flow algorithm.
 */
 
 class PFProducer : public edm::stream::EDProducer<> {
- public:
+public:
   explicit PFProducer(const edm::ParameterSet&);
-  
-  void produce(edm::Event&, const edm::EventSetup&) override;
-  void beginRun(const edm::Run &, const edm::EventSetup &) override;
 
- private:
+  void produce(edm::Event&, const edm::EventSetup&) override;
+  void beginRun(const edm::Run&, const edm::EventSetup&) override;
+
+private:
   const edm::EDPutTokenT<reco::PFCandidateCollection> putToken_;
 
-  edm::EDGetTokenT<reco::PFBlockCollection>  inputTagBlocks_;
-  edm::EDGetTokenT<reco::MuonCollection>     inputTagMuons_;
-  edm::EDGetTokenT<reco::VertexCollection>   vertices_;
+  edm::EDGetTokenT<reco::PFBlockCollection> inputTagBlocks_;
+  edm::EDGetTokenT<reco::MuonCollection> inputTagMuons_;
+  edm::EDGetTokenT<reco::VertexCollection> vertices_;
   edm::EDGetTokenT<reco::GsfElectronCollection> inputTagEgammaElectrons_;
 
-
-  std::vector<edm::EDGetTokenT<reco::PFRecHitCollection> >  inputTagCleanedHF_;
+  std::vector<edm::EDGetTokenT<reco::PFRecHitCollection> > inputTagCleanedHF_;
   std::string electronOutputCol_;
   std::string electronExtraOutputCol_;
   std::string photonExtraOutputCol_;
 
   // NEW EGamma Filters
-  edm::EDGetTokenT<edm::ValueMap<reco::GsfElectronRef> >inputTagValueMapGedElectrons_;
+  edm::EDGetTokenT<edm::ValueMap<reco::GsfElectronRef> > inputTagValueMapGedElectrons_;
   edm::EDGetTokenT<edm::ValueMap<reco::PhotonRef> > inputTagValueMapGedPhotons_;
   edm::EDGetTokenT<edm::View<reco::PFCandidate> > inputTagPFEGammaCandidates_;
 
   bool use_EGammaFilters_;
   std::unique_ptr<PFEGammaFilters> pfegamma_ = nullptr;
 
-
   //Use of HO clusters and links in PF Reconstruction
   bool useHO_;
 
   /// verbose ?
-  bool  verbose_;
+  bool verbose_;
 
   // Post muon cleaning ?
   bool postMuonCleaning_;
@@ -85,11 +83,11 @@ class PFProducer : public edm::stream::EDProducer<> {
 
   // Use PF photons ?
   bool usePFPhotons_;
-  
+
   // Use photon regression
   bool usePhotonReg_;
   bool useRegressionFromDB_;
-  const GBRForest * ReaderGC_;
+  const GBRForest* ReaderGC_;
   const GBRForest* ReaderLC_;
   const GBRForest* ReaderRes_;
   const GBRForest* ReaderLCEB_;
@@ -111,10 +109,9 @@ class PFProducer : public edm::stream::EDProducer<> {
   bool postHFCleaning_;
   // Name of the calibration functions to read from the database
   // std::vector<std::string> fToRead;
-  
+
   /// particle flow algorithm
   PFAlgo pfAlgo_;
-
 };
 
 #include "FWCore/Framework/interface/MakerMacros.h"

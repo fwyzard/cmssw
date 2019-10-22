@@ -15,15 +15,14 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 class PFConcretePFCandidateProducer : public edm::stream::EDProducer<> {
- public:
+public:
   explicit PFConcretePFCandidateProducer(const edm::ParameterSet&);
   ~PFConcretePFCandidateProducer() override;
-  
+
   void produce(edm::Event&, const edm::EventSetup&) override;
 
- private:
-
-  edm::InputTag  inputColl_;
+private:
+  edm::InputTag inputColl_;
 };
 
 #include "FWCore/Framework/interface/MakerMacros.h"
