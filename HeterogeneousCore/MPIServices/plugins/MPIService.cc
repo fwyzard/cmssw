@@ -26,6 +26,24 @@ public:
 };
 
 MPIService::MPIService(edm::ParameterSet const& config) {
+  /* As of Open MPI 4.1.0, `MPI_THREAD_MULTIPLE` is supported by the following transports:
+   *   - the `ob1` PML, with the following BTLs:
+   *       - `self`
+   *       - `sm`
+   *       - `smcuda`
+   *       - `tcp`
+   *       - `ugni`
+   *       - `usnic`
+   *   - the `cm` PML, with the following MTLs:
+   *       - `ofi` (Libfabric)
+   *       - `portals4`
+   *   - the `ucx` PML
+   *
+   * MPI File operations are not thread safe even if MPI is initialized for `MPI_THREAD_MULTIPLE` support.
+   *
+   * See https://github.com/open-mpi/ompi/blob/v4.1.0/README .
+   */
+
   // initializes the MPI execution environment, requesting multi-threading support
   int provided;
   MPI_Init_thread(nullptr, nullptr, MPI_THREAD_MULTIPLE, &provided);
@@ -36,6 +54,7 @@ MPIService::MPIService(edm::ParameterSet const& config) {
         << " level.";
   } else {
     edm::LogInfo log("MPIService");
+    log << "The MPI library provides the " << mpi_thread_support_level[provided] << " multithreading support level\n";
 
     // get the number of processes
     int world_size;
@@ -53,7 +72,8 @@ MPIService::MPIService(edm::ParameterSet const& config) {
     MPI_Get_processor_name(processor_name, &name_len);
     log << "MPI processor name:  " << processor_name << '\n';
 
-    log << "The MPI library provides the " << mpi_thread_support_level[provided] << " multithreading support level\n";
+    // initialisation done
+    log << '\n';
     log << "MPI successfully initialised";
   }
 }
