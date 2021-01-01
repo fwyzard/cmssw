@@ -1,4 +1,6 @@
 // -*- C++ -*-
+#include <cstdlib>
+#include <string>
 
 #include <mpi.h>
 
@@ -39,6 +41,13 @@ MPIService::MPIService(edm::ParameterSet const& config) {
    *
    * See https://github.com/open-mpi/ompi/blob/v4.1.0/README .
    */
+
+  // set the pmix_server_uri MCA parameter if specified in the configuration and not already set in the environment
+  if (config.existsAs<std::string>("pmix_server_uri", false)) {
+    std::string uri = config.getUntrackedParameter<std::string>("pmix_server_uri");
+    // do not overwrite the environment variable if it is already set
+    setenv("OMPI_MCA_pmix_server_uri", uri.c_str(), false);
+  }
 
   // initializes the MPI execution environment, requesting multi-threading support
   int provided;
@@ -81,6 +90,7 @@ MPIService::~MPIService() {
 
 void MPIService::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
+  desc.addOptionalUntracked<std::string>("pmix_server_uri")->setComment("Set the OpenMPI MCA pmix_server_uri parameter if not already set in the environment");
   descriptions.add("MPIService", desc);
   descriptions.setComment(R"(This Service provides a common interface to MPI configuration for the CMSSW job.)");
 }
