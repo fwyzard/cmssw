@@ -8,6 +8,7 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "HeterogeneousCore/MPIServices/interface/MPIService.h"
 
@@ -90,7 +91,19 @@ MPIService::~MPIService() {
 
 void MPIService::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
-  desc.addOptionalUntracked<std::string>("pmix_server_uri")->setComment("Set the OpenMPI MCA pmix_server_uri parameter if not already set in the environment");
+  desc.addOptionalUntracked<std::string>("pmix_server_uri")
+      ->setComment("Set the OpenMPI MCA pmix_server_uri parameter if not already set in the environment");
   descriptions.add("MPIService", desc);
   descriptions.setComment(R"(This Service provides a common interface to MPI configuration for the CMSSW job.)");
+}
+
+void MPIService::required() {
+  edm::Service<MPIService> s;
+  if (not s.isAvailable()) {
+    throw cms::Exception("Configuration") << R"(The MPIService is required by this module.
+Please add it to the configuration, for example via
+
+process.load("HeterogeneousCore.MPIServices.MPIService_cfi")
+)";
+  }
 }

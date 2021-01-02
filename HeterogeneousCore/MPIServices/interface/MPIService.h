@@ -9,6 +9,7 @@ public:
   ~MPIService();
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  static void required();
 };
 
 #endif  // HeterogeneousCore_MPIServices_interface_MPIService_h
