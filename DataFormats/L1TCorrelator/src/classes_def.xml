@@ -1,19 +1,20 @@
 
 <lcgdict>
 
-  <class name="l1t::TkPrimaryVertex" ClassVersion="3">
-   <version ClassVersion="3" checksum="2843779965"/>
-  </class>
-  <class name="std::vector<l1t::TkPrimaryVertex>"/>
-  <class name="edm::Wrapper<std::vector<l1t::TkPrimaryVertex> >"/>
-  <class name="edm::Ref<std::vector<l1t::TkPrimaryVertex>,l1t::TkPrimaryVertex,edm::refhelper::FindUsingAdvance<std::vector<l1t::TkPrimaryVertex>,l1t::TkPrimaryVertex> >"/>
-  <class name="std::vector<edm::Ref<std::vector<l1t::TkPrimaryVertex>,l1t::TkPrimaryVertex,edm::refhelper::FindUsingAdvance<std::vector<l1t::TkPrimaryVertex>,l1t::TkPrimaryVertex> > >"/>
+ <class name="l1t::TkPrimaryVertex" ClassVersion="3">
+  <version ClassVersion="3" checksum="2843779965"/>
+ </class>
+ <class name="std::vector<l1t::TkPrimaryVertex>"/>
+ <class name="edm::Wrapper<std::vector<l1t::TkPrimaryVertex> >"/>
+ <class name="edm::Ref<std::vector<l1t::TkPrimaryVertex>,l1t::TkPrimaryVertex,edm::refhelper::FindUsingAdvance<std::vector<l1t::TkPrimaryVertex>,l1t::TkPrimaryVertex> >"/>
+ <class name="std::vector<edm::Ref<std::vector<l1t::TkPrimaryVertex>,l1t::TkPrimaryVertex,edm::refhelper::FindUsingAdvance<std::vector<l1t::TkPrimaryVertex>,l1t::TkPrimaryVertex> > >"/>
+
 
   <class name="l1t::TkEtMiss" ClassVersion="3">
    <version ClassVersion="3" checksum="77762919"/>
   </class>
   <class name="std::vector<l1t::TkEtMiss>"/>
-  <class name="edm::Wrapper<l1t::TkEtMiss>"/>
+ <class name="edm::Wrapper<l1t::TkEtMiss>"/>
   <class name="edm::Wrapper<std::vector<l1t::TkEtMiss> >"/>
 
   <class name="l1t::TkEm" ClassVersion="3">
@@ -23,6 +24,7 @@
   <class name="edm::Wrapper<std::vector<l1t::TkEm> >"/>
   <class name="edm::Ref<std::vector<l1t::TkEm>,l1t::TkEm,edm::refhelper::FindUsingAdvance<std::vector<l1t::TkEm>,l1t::TkEm> >"/>
   <class name="std::vector<edm::Ref<std::vector<l1t::TkEm>,l1t::TkEm,edm::refhelper::FindUsingAdvance<std::vector<l1t::TkEm>,l1t::TkEm> > >"/>
+
 
   <class name="l1t::TkEGTau" ClassVersion="3">
    <version ClassVersion="3" checksum="3759113668"/>
@@ -71,8 +73,6 @@
 
   <class name="l1t::TkMuon" ClassVersion="4">
    <version ClassVersion="4" checksum="2325700664"/>
-   <version ClassVersion="3" checksum="4118337663"/>
-
   </class>
   <class name="std::vector<l1t::TkMuon>"/>
   <class name="edm::Wrapper<std::vector<l1t::TkMuon> >"/>

@@ -25,6 +25,7 @@
 #include "L1Trigger/Phase2L1ParticleFlow/interface/BitwisePFAlgo.h"
 #include "L1Trigger/Phase2L1ParticleFlow/interface/PuppiAlgo.h"
 #include "L1Trigger/Phase2L1ParticleFlow/interface/LinearizedPuppiAlgo.h"
+#include "L1Trigger/Phase2L1ParticleFlow/interface/BitwisePuppiAlgo.h"
 #include "L1Trigger/Phase2L1ParticleFlow/interface/DiscretePFInputsIO.h"
 #include "L1Trigger/Phase2L1ParticleFlow/interface/COEFile.h"
 
@@ -58,6 +59,8 @@ private:
   std::vector<edm::EDGetTokenT<l1t::PFClusterCollection>> hadCands_;
 
   float emPtCut_, hadPtCut_;
+
+  bool sortOutputs_;
 
   l1tpf_impl::RegionMapper l1regions_;
   std::unique_ptr<l1tpf_impl::PFAlgoBase> l1pfalgo_;
@@ -97,6 +100,7 @@ L1TPFProducer::L1TPFProducer(const edm::ParameterSet& iConfig)
       tkMuCands_(consumes<l1t::TkMuonCollection>(iConfig.getParameter<edm::InputTag>("tkMuons"))),
       emPtCut_(iConfig.getParameter<double>("emPtCut")),
       hadPtCut_(iConfig.getParameter<double>("hadPtCut")),
+      sortOutputs_(iConfig.getParameter<bool>("sortOutputs")),
       l1regions_(iConfig),
       l1pfalgo_(nullptr),
       l1pualgo_(nullptr),
@@ -141,6 +145,8 @@ L1TPFProducer::L1TPFProducer(const edm::ParameterSet& iConfig)
     l1pualgo_.reset(new l1tpf_impl::PuppiAlgo(iConfig));
   } else if (pualgo == "LinearizedPuppi") {
     l1pualgo_.reset(new l1tpf_impl::LinearizedPuppiAlgo(iConfig));
+  } else if (pualgo == "BitwisePuppiAlgo") {
+    l1pualgo_.reset(new l1tpf_impl::BitwisePuppiAlgo(iConfig));
   } else
     throw cms::Exception("Configuration", "Unsupported PUAlgo");
 
@@ -345,12 +351,9 @@ void L1TPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     l1pfalgo_->runPF(l1region);
     l1pualgo_->runChargedPV(l1region, z0);
   }
-  // save PF into the event
-  iEvent.put(l1regions_.fetch(false), "PF");
-
   // Then get our alphas (globally)
   std::vector<float> puGlobals;
-  l1pualgo_->doPUGlobals(l1regions_.regions(), -1., puGlobals);  // FIXME we don't have yet an external PU estimate
+  l1pualgo_->doPUGlobals(l1regions_.regions(), z0, -1., puGlobals);  // FIXME we don't have yet an external PU estimate
   const std::vector<std::string>& puGlobalNames = l1pualgo_->puGlobalNames();
   if (puGlobals.size() != puGlobalNames.size())
     throw cms::Exception("LogicError", "Mismatch in the number of global pileup inputs");
@@ -363,8 +366,13 @@ void L1TPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   // Then run puppi (regionally)
   for (auto& l1region : l1regions_.regions()) {
-    l1pualgo_->runNeutralsPU(l1region, -1., puGlobals);
+    l1pualgo_->runNeutralsPU(l1region, z0, -1., puGlobals);
+    l1region.outputCrop(sortOutputs_);
   }
+
+  // save PF into the event
+  iEvent.put(l1regions_.fetch(false), "PF");
+
   // and save puppi
   iEvent.put(l1regions_.fetch(true), "Puppi");
 

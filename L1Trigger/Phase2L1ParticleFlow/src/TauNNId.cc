@@ -1,14 +1,16 @@
 #include "L1Trigger/Phase2L1ParticleFlow/interface/TauNNId.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
-#include "DataFormats/Math/interface/deltaPhi.h"
 #include <cmath>
 
-static constexpr unsigned int n_particles_max = 10;
-
-TauNNId::TauNNId(const std::string &iInput, const TauNNTFCache *cache, const std::string &iWeightFile, int iNParticles) {
-  NNvectorVar_.clear();
+TauNNId::TauNNId() { NNvectorVar_.clear(); }
+TauNNId::~TauNNId() {
+  tensorflow::closeSession(session_);
+  delete graphDef_;
+}
+void TauNNId::initialize(const std::string &iInput, const std::string &iWeightFile, int iNParticles) {
   edm::FileInPath fp(iWeightFile);
-  session_ = tensorflow::createSession(cache->graphDef);
+  graphDef_ = tensorflow::loadGraphDef(fp.fullPath());
+  session_ = tensorflow::createSession(graphDef_);
   fNParticles_ = iNParticles;
 
   fPt_ = std::make_unique<float[]>(fNParticles_);
@@ -17,9 +19,7 @@ TauNNId::TauNNId(const std::string &iInput, const TauNNTFCache *cache, const std
   fId_ = std::make_unique<float[]>(fNParticles_);
   fInput_ = iInput;
 }
-
-TauNNId::~TauNNId() { tensorflow::closeSession(session_); }
-void TauNNId::setNNVectorVar() {
+void TauNNId::SetNNVectorVar() {
   NNvectorVar_.clear();
   for (int i0 = 0; i0 < fNParticles_; i0++) {
     NNvectorVar_.push_back(fPt_.get()[i0]);   //pT
@@ -45,7 +45,8 @@ float TauNNId::EvaluateNN() {
   }
   std::vector<tensorflow::Tensor> outputs;
   tensorflow::run(session_, {{fInput_, input}}, {"dense_4/Sigmoid:0"}, &outputs);
-  return outputs[0].matrix<float>()(0, 0);
+  float disc = outputs[0].matrix<float>()(0, 0);
+  return disc;
 }  //end EvaluateNN
 
 float TauNNId::compute(const l1t::PFCandidate &iSeed, l1t::PFCandidateCollection &iParts) {
@@ -57,13 +58,18 @@ float TauNNId::compute(const l1t::PFCandidate &iSeed, l1t::PFCandidateCollection
   }
   std::sort(iParts.begin(), iParts.end(), [](l1t::PFCandidate i, l1t::PFCandidate j) { return (i.pt() > j.pt()); });
   for (unsigned int i0 = 0; i0 < iParts.size(); i0++) {
-    if (i0 > n_particles_max || i0 >= (unsigned int)fNParticles_)
+    if (i0 > 10)
       break;
     fPt_.get()[i0] = iParts[i0].pt();
     fEta_.get()[i0] = iSeed.eta() - iParts[i0].eta();
-    fPhi_.get()[i0] = deltaPhi(iSeed.phi(), iParts[i0].phi());
+    float lDPhi = iSeed.phi() - iParts[i0].phi();
+    if (lDPhi > M_PI)
+      lDPhi -= M_PI;
+    if (lDPhi < -M_PI)
+      lDPhi += M_PI;
+    fPhi_.get()[i0] = lDPhi;
     fId_.get()[i0] = iParts[i0].id();
   }
-  setNNVectorVar();
+  SetNNVectorVar();
   return EvaluateNN();
 }

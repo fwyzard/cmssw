@@ -104,7 +104,8 @@ namespace l1tpf_impl {
       puppiOverflow = 0;
     }
 
-    void inputSort();
+    void inputCrop(bool doSort);
+    void outputCrop(bool doSort);
   };
 
 }  // namespace l1tpf_impl
