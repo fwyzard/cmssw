@@ -530,8 +530,8 @@ process.load("HLT_75e33/modules/hltPFPuppiJetForBtagEta4p0_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiJetForBtagSelectorEta2p4_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiJetForBtagSelectorEta4p0_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMET_cfi")
-process.load("HLT_75e33/modules/hltPFPuppiMET120_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMETTypeOne_cfi")
+process.load("HLT_75e33/modules/hltPFPuppiMETTypeOne120_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMETTypeOneCorrector_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMHT_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMHT120_cfi")
@@ -700,7 +700,7 @@ process.load("HLT_75e33/paths/HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TripleP
 process.load("HLT_75e33/paths/HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4_v1_cfi")
 process.load("HLT_75e33/paths/HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepFlavour_2p4_v1_cfi")
 process.load("HLT_75e33/paths/HLT_PFPuppiHT1050_cfi")
-process.load("HLT_75e33/paths/HLT_PFPuppiMET120_PFPuppiMHT120_cfi")
+process.load("HLT_75e33/paths/HLT_PFPuppiMETTypeOne120_PFPuppiMHT120_cfi")
 process.load("HLT_75e33/paths/HLTObjects_cfi")
 process.load("HLT_75e33/paths/L1_DoublePFPuppiJets128_DoublePFPuppiBTagDeepCSV_p71_2p4_v1_cfi")
 process.load("HLT_75e33/paths/L1_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4_v1_cfi")
@@ -1299,7 +1299,7 @@ process.schedule = cms.Schedule(*[
     # Jets/MET HLT paths
     process.HLT_AK4PFPuppiJet500,
     process.HLT_PFPuppiHT1050,
-    process.HLT_PFPuppiMET120_PFPuppiMHT120,
+    process.HLT_PFPuppiMETTypeOne120_PFPuppiMHT120,
 
     # L1T and HLT objects used by b-tagging
     process.L1Objects,
