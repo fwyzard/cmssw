@@ -561,24 +561,24 @@ process.load("HLT_75e33/modules/hltPFPuppiCentralJetQuad30MaxEta2p4_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiCentralJetsQuad30HT200MaxEta2p4_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiCentralJetsQuad30HT330MaxEta2p4_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiHT_cfi")
-process.load("HLT_75e33/modules/hltPFPuppiHT1050_cfi")
+process.load("HLT_75e33/modules/hltPFPuppiHT1070_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiJetForBtagEta2p4_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiJetForBtagEta4p0_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiJetForBtagSelectorEta2p4_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiJetForBtagSelectorEta4p0_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMET_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMETTypeOne_cfi")
-process.load("HLT_75e33/modules/hltPFPuppiMETTypeOne120_cfi")
+process.load("HLT_75e33/modules/hltPFPuppiMETTypeOne140_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMETTypeOneCorrector_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMETv0_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiMHT_cfi")
-process.load("HLT_75e33/modules/hltPFPuppiMHT120_cfi")
+process.load("HLT_75e33/modules/hltPFPuppiMHT140_cfi")
 process.load("HLT_75e33/modules/hltPFPuppiNoLep_cfi")
 process.load("HLT_75e33/modules/hltPFSoftKillerMET_cfi")
 process.load("HLT_75e33/modules/hltPixelClustersMultiplicity_cfi")
 process.load("HLT_75e33/modules/hltPrimaryVertexAssociation_cfi")
 process.load("HLT_75e33/modules/hltPrimaryVertexAssociationModEta2p4_cfi")
-process.load("HLT_75e33/modules/hltSingleAK4PFPuppiJet500_cfi")
+process.load("HLT_75e33/modules/hltSingleAK4PFPuppiJet520_cfi")
 process.load("HLT_75e33/modules/horeco_cfi")
 process.load("HLT_75e33/modules/hybridSuperClusters_cfi")
 process.load("HLT_75e33/modules/inclusiveSecondaryVertices_cfi")
@@ -731,15 +731,15 @@ process.load("HLT_75e33/modules/uncleanedOnlyMulti5x5SuperClustersWithPreshower_
 process.load("HLT_75e33/modules/unsortedOfflinePrimaryVertices_cfi")
 process.load("HLT_75e33/modules/vertexMerger_cfi")
 process.load("HLT_75e33/modules/zdcreco_cfi")
-process.load("HLT_75e33/paths/HLT_AK4PFPuppiJet500_cfi")
+process.load("HLT_75e33/paths/HLT_AK4PFPuppiJet520_cfi")
 process.load("HLT_75e33/paths/HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepCSV_2p4_v1_cfi")
 process.load("HLT_75e33/paths/HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepFlavour_2p4_v1_cfi")
 process.load("HLT_75e33/paths/HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepCSV_2p4_v1_cfi")
 process.load("HLT_75e33/paths/HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepFlavour_2p4_v1_cfi")
 process.load("HLT_75e33/paths/HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4_v1_cfi")
 process.load("HLT_75e33/paths/HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepFlavour_2p4_v1_cfi")
-process.load("HLT_75e33/paths/HLT_PFPuppiHT1050_cfi")
-process.load("HLT_75e33/paths/HLT_PFPuppiMETTypeOne120_PFPuppiMHT120_cfi")
+process.load("HLT_75e33/paths/HLT_PFPuppiHT1070_cfi")
+process.load("HLT_75e33/paths/HLT_PFPuppiMETTypeOne140_PFPuppiMHT140_cfi")
 process.load("HLT_75e33/paths/HLTObjects_cfi")
 process.load("HLT_75e33/paths/L1_DoublePFPuppiJets128_DoublePFPuppiBTagDeepCSV_p71_2p4_v1_cfi")
 process.load("HLT_75e33/paths/L1_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4_v1_cfi")
@@ -1345,9 +1345,9 @@ process.schedule = cms.Schedule(*[
     process.L1T_PFPuppiMET220off,
 
     # Jets/MET HLT paths
-    process.HLT_AK4PFPuppiJet500,
-    process.HLT_PFPuppiHT1050,
-    process.HLT_PFPuppiMETTypeOne120_PFPuppiMHT120,
+    process.HLT_AK4PFPuppiJet520,
+    process.HLT_PFPuppiHT1070,
+    process.HLT_PFPuppiMETTypeOne140_PFPuppiMHT140,
 
     # L1T and HLT objects used by b-tagging
     process.L1Objects,
