@@ -17,7 +17,7 @@ particleFlowRecHitECAL = cms.EDProducer("PFRecHitProducer",
                 cms.PSet(
                     applySelectionsToAllCrystals = cms.bool(True),
                     name = cms.string('PFRecHitQTestDBThreshold')
-                ), 
+                ),
                 cms.PSet(
                     cleaningThreshold = cms.double(2.0),
                     name = cms.string('PFRecHitQTestECAL'),
@@ -28,14 +28,14 @@ particleFlowRecHitECAL = cms.EDProducer("PFRecHitProducer",
             ),
             srFlags = cms.InputTag(""),
             src = cms.InputTag("ecalRecHit","EcalRecHitsEB")
-        ), 
+        ),
         cms.PSet(
             name = cms.string('PFEERecHitCreator'),
             qualityTests = cms.VPSet(
                 cms.PSet(
                     applySelectionsToAllCrystals = cms.bool(True),
                     name = cms.string('PFRecHitQTestDBThreshold')
-                ), 
+                ),
                 cms.PSet(
                     cleaningThreshold = cms.double(2.0),
                     name = cms.string('PFRecHitQTestECAL'),

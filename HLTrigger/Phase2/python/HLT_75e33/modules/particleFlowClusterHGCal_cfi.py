@@ -9,12 +9,12 @@ particleFlowClusterHGCal = cms.EDProducer("PFClusterProducer",
         calibMaxEta = cms.double(3.0),
         calibMinEta = cms.double(1.4),
         egammaCalib = cms.vdouble(
-            1.0, 1.0, 1.01, 1.01, 1.02, 
+            1.0, 1.0, 1.01, 1.01, 1.02,
             1.01, 1.01, 1.01
         ),
         exclusiveFraction = cms.double(0.6),
         hadronCalib = cms.vdouble(
-            1.28, 1.28, 1.24, 1.19, 1.17, 
+            1.28, 1.28, 1.24, 1.19, 1.17,
             1.17, 1.17, 1.17
         ),
         invisibleFraction = cms.double(0.6),

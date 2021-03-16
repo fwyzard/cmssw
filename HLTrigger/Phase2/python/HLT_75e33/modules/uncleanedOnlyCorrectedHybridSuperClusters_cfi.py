@@ -13,8 +13,8 @@ uncleanedOnlyCorrectedHybridSuperClusters = cms.EDProducer("EgammaSCCorrectionMa
         brLinearLowThr = cms.double(1.1),
         fBremVec = cms.vdouble(-0.04382, 0.1169, 0.9267, -0.0009413, 1.419),
         fEtEtaVec = cms.vdouble(
-            0, 1.00121, -0.63672, 0, 0, 
-            0, 0.5655, 6.457, 0.5081, 8.0, 
+            0, 1.00121, -0.63672, 0, 0,
+            0, 0.5655, 6.457, 0.5081, 8.0,
             1.023, -0.00181
         )
     ),

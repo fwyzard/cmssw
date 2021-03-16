@@ -14,7 +14,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     minLayersApart = cms.int32(2),
                     verboseInfo = cms.untracked.bool(True),
                     wideSeg = cms.double(3.0)
-                ), 
+                ),
                 cms.PSet(
                     chi2Max = cms.double(99999.0),
                     dPhiFineMax = cms.double(0.025),
@@ -27,22 +27,22 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                 )
             ),
             chamber_types = cms.vstring(
-                'ME1/a', 
-                'ME1/b', 
-                'ME1/2', 
-                'ME1/3', 
-                'ME2/1', 
-                'ME2/2', 
-                'ME3/1', 
-                'ME3/2', 
-                'ME4/1', 
+                'ME1/a',
+                'ME1/b',
+                'ME1/2',
+                'ME1/3',
+                'ME2/1',
+                'ME2/2',
+                'ME3/1',
+                'ME3/2',
+                'ME4/1',
                 'ME4/2'
             ),
             parameters_per_chamber_type = cms.vint32(
-                2, 1, 1, 1, 1, 
+                2, 1, 1, 1, 1,
                 1, 1, 1, 1, 1
             )
-        ), 
+        ),
         cms.PSet(
             algo_name = cms.string('CSCSegAlgoTC'),
             algo_psets = cms.VPSet(
@@ -56,7 +56,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     dRPhiMax = cms.double(1.2),
                     minLayersApart = cms.int32(2),
                     verboseInfo = cms.untracked.bool(True)
-                ), 
+                ),
                 cms.PSet(
                     SegmentSorting = cms.int32(1),
                     chi2Max = cms.double(6000.0),
@@ -70,22 +70,22 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                 )
             ),
             chamber_types = cms.vstring(
-                'ME1/a', 
-                'ME1/b', 
-                'ME1/2', 
-                'ME1/3', 
-                'ME2/1', 
-                'ME2/2', 
-                'ME3/1', 
-                'ME3/2', 
-                'ME4/1', 
+                'ME1/a',
+                'ME1/b',
+                'ME1/2',
+                'ME1/3',
+                'ME2/1',
+                'ME2/2',
+                'ME3/1',
+                'ME3/2',
+                'ME4/1',
                 'ME4/2'
             ),
             parameters_per_chamber_type = cms.vint32(
-                2, 1, 1, 1, 1, 
+                2, 1, 1, 1, 1,
                 1, 1, 1, 1, 1
             )
-        ), 
+        ),
         cms.PSet(
             algo_name = cms.string('CSCSegAlgoDF'),
             algo_psets = cms.VPSet(
@@ -107,7 +107,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     preClustering = cms.untracked.bool(False),
                     tanPhiMax = cms.double(0.5),
                     tanThetaMax = cms.double(1.2)
-                ), 
+                ),
                 cms.PSet(
                     CSCSegmentDebug = cms.untracked.bool(False),
                     Pruning = cms.untracked.bool(False),
@@ -126,7 +126,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     preClustering = cms.untracked.bool(False),
                     tanPhiMax = cms.double(0.8),
                     tanThetaMax = cms.double(2.0)
-                ), 
+                ),
                 cms.PSet(
                     CSCSegmentDebug = cms.untracked.bool(False),
                     Pruning = cms.untracked.bool(False),
@@ -148,22 +148,22 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                 )
             ),
             chamber_types = cms.vstring(
-                'ME1/a', 
-                'ME1/b', 
-                'ME1/2', 
-                'ME1/3', 
-                'ME2/1', 
-                'ME2/2', 
-                'ME3/1', 
-                'ME3/2', 
-                'ME4/1', 
+                'ME1/a',
+                'ME1/b',
+                'ME1/2',
+                'ME1/3',
+                'ME2/1',
+                'ME2/2',
+                'ME3/1',
+                'ME3/2',
+                'ME4/1',
                 'ME4/2'
             ),
             parameters_per_chamber_type = cms.vint32(
-                3, 1, 2, 2, 1, 
+                3, 1, 2, 2, 1,
                 2, 1, 2, 1, 2
             )
-        ), 
+        ),
         cms.PSet(
             algo_name = cms.string('CSCSegAlgoST'),
             algo_psets = cms.VPSet(
@@ -204,7 +204,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     useShowering = cms.bool(False),
                     yweightPenalty = cms.double(1.5),
                     yweightPenaltyThreshold = cms.double(1.0)
-                ), 
+                ),
                 cms.PSet(
                     BPMinImprovement = cms.double(10000.0),
                     BrutePruning = cms.bool(True),
@@ -245,22 +245,22 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                 )
             ),
             chamber_types = cms.vstring(
-                'ME1/a', 
-                'ME1/b', 
-                'ME1/2', 
-                'ME1/3', 
-                'ME2/1', 
-                'ME2/2', 
-                'ME3/1', 
-                'ME3/2', 
-                'ME4/1', 
+                'ME1/a',
+                'ME1/b',
+                'ME1/2',
+                'ME1/3',
+                'ME2/1',
+                'ME2/2',
+                'ME3/1',
+                'ME3/2',
+                'ME4/1',
                 'ME4/2'
             ),
             parameters_per_chamber_type = cms.vint32(
-                2, 1, 1, 1, 1, 
+                2, 1, 1, 1, 1,
                 1, 1, 1, 1, 1
             )
-        ), 
+        ),
         cms.PSet(
             algo_name = cms.string('CSCSegAlgoRU'),
             algo_psets = cms.VPSet(
@@ -276,7 +276,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     enlarge = cms.bool(False),
                     minLayersApart = cms.int32(1),
                     wideSeg = cms.double(3.0)
-                ), 
+                ),
                 cms.PSet(
                     chi2Max = cms.double(100.0),
                     chi2Norm_2D_ = cms.double(35),
@@ -289,7 +289,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     enlarge = cms.bool(False),
                     minLayersApart = cms.int32(1),
                     wideSeg = cms.double(3.0)
-                ), 
+                ),
                 cms.PSet(
                     chi2Max = cms.double(100.0),
                     chi2Norm_2D_ = cms.double(35),
@@ -302,7 +302,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     enlarge = cms.bool(False),
                     minLayersApart = cms.int32(1),
                     wideSeg = cms.double(3.0)
-                ), 
+                ),
                 cms.PSet(
                     chi2Max = cms.double(60.0),
                     chi2Norm_2D_ = cms.double(20),
@@ -315,7 +315,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     enlarge = cms.bool(False),
                     minLayersApart = cms.int32(1),
                     wideSeg = cms.double(3.0)
-                ), 
+                ),
                 cms.PSet(
                     chi2Max = cms.double(180.0),
                     chi2Norm_2D_ = cms.double(60),
@@ -328,7 +328,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                     enlarge = cms.bool(False),
                     minLayersApart = cms.int32(1),
                     wideSeg = cms.double(3.0)
-                ), 
+                ),
                 cms.PSet(
                     chi2Max = cms.double(100.0),
                     chi2Norm_2D_ = cms.double(35),
@@ -344,19 +344,19 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
                 )
             ),
             chamber_types = cms.vstring(
-                'ME1/a', 
-                'ME1/b', 
-                'ME1/2', 
-                'ME1/3', 
-                'ME2/1', 
-                'ME2/2', 
-                'ME3/1', 
-                'ME3/2', 
-                'ME4/1', 
+                'ME1/a',
+                'ME1/b',
+                'ME1/2',
+                'ME1/3',
+                'ME2/1',
+                'ME2/2',
+                'ME3/1',
+                'ME3/2',
+                'ME4/1',
                 'ME4/2'
             ),
             parameters_per_chamber_type = cms.vint32(
-                1, 2, 3, 4, 5, 
+                1, 2, 3, 4, 5,
                 6, 5, 6, 5, 6
             )
         )

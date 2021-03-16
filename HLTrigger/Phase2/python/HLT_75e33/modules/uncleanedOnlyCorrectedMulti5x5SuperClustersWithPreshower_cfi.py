@@ -14,7 +14,7 @@ uncleanedOnlyCorrectedMulti5x5SuperClustersWithPreshower = cms.EDProducer("Egamm
         brLinearLowThr = cms.double(0.9),
         fBremVec = cms.vdouble(-0.05228, 0.08738, 0.9508, 0.002677, 1.221),
         fEtEtaVec = cms.vdouble(
-            1, -0.4386, -32.38, 0.6372, 15.67, 
+            1, -0.4386, -32.38, 0.6372, 15.67,
             -0.0928, -2.462, 1.138, 20.93
         )
     ),

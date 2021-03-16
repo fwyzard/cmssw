@@ -11,7 +11,7 @@ particleFlowClusterHF = cms.EDProducer("PFClusterProducer",
                 detector = cms.string('HF_EM'),
                 gatheringThreshold = cms.double(0.8),
                 gatheringThresholdPt = cms.double(0.0)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('HF_HAD'),
                 gatheringThreshold = cms.double(0.8),
@@ -44,7 +44,7 @@ particleFlowClusterHF = cms.EDProducer("PFClusterProducer",
             cms.PSet(
                 detector = cms.string('HF_EM'),
                 recHitEnergyNorm = cms.double(0.8)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('HF_HAD'),
                 recHitEnergyNorm = cms.double(0.8)
@@ -67,7 +67,7 @@ particleFlowClusterHF = cms.EDProducer("PFClusterProducer",
                 detector = cms.string('HF_EM'),
                 seedingThreshold = cms.double(1.4),
                 seedingThresholdPt = cms.double(0.0)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('HF_HAD'),
                 seedingThreshold = cms.double(1.4),

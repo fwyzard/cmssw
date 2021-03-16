@@ -8,19 +8,19 @@ regressionModifier80X = cms.PSet(
         combinationKey_25ns = cms.string('gedelectron_p4combination_25ns'),
         combinationKey_50ns = cms.string('gedelectron_p4combination_50ns'),
         regressionKey_25ns = cms.vstring(
-            'gedelectron_EBCorrection_25ns', 
+            'gedelectron_EBCorrection_25ns',
             'gedelectron_EECorrection_25ns'
         ),
         regressionKey_50ns = cms.vstring(
-            'gedelectron_EBCorrection_50ns', 
+            'gedelectron_EBCorrection_50ns',
             'gedelectron_EECorrection_50ns'
         ),
         uncertaintyKey_25ns = cms.vstring(
-            'gedelectron_EBUncertainty_25ns', 
+            'gedelectron_EBUncertainty_25ns',
             'gedelectron_EEUncertainty_25ns'
         ),
         uncertaintyKey_50ns = cms.vstring(
-            'gedelectron_EBUncertainty_50ns', 
+            'gedelectron_EBUncertainty_50ns',
             'gedelectron_EEUncertainty_50ns'
         )
     ),
@@ -28,19 +28,19 @@ regressionModifier80X = cms.PSet(
     modifierName = cms.string('EGRegressionModifierV1'),
     photon_config = cms.PSet(
         regressionKey_25ns = cms.vstring(
-            'gedphoton_EBCorrection_25ns', 
+            'gedphoton_EBCorrection_25ns',
             'gedphoton_EECorrection_25ns'
         ),
         regressionKey_50ns = cms.vstring(
-            'gedphoton_EBCorrection_50ns', 
+            'gedphoton_EBCorrection_50ns',
             'gedphoton_EECorrection_50ns'
         ),
         uncertaintyKey_25ns = cms.vstring(
-            'gedphoton_EBUncertainty_25ns', 
+            'gedphoton_EBUncertainty_25ns',
             'gedphoton_EEUncertainty_25ns'
         ),
         uncertaintyKey_50ns = cms.vstring(
-            'gedphoton_EBUncertainty_50ns', 
+            'gedphoton_EBUncertainty_50ns',
             'gedphoton_EEUncertainty_50ns'
         )
     ),

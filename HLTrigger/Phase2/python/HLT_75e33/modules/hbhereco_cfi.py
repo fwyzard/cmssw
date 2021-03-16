@@ -5,7 +5,7 @@ hbhereco = cms.EDProducer("HBHEPhase1Reconstructor",
     algorithm = cms.PSet(
         Class = cms.string('SimpleHBHEPhase1Algo'),
         activeBXs = cms.vint32(
-            -3, -2, -1, 0, 1, 
+            -3, -2, -1, 0, 1,
             2, 3, 4
         ),
         applyLegacyHBMCorrection = cms.bool(False),
@@ -57,25 +57,25 @@ hbhereco = cms.EDProducer("HBHEPhase1Reconstructor",
         pulseShapeParameterSets = cms.VPSet(
             cms.PSet(
                 pulseShapeParameters = cms.vdouble(
-                    0.0, 100.0, -50.0, 0.0, -15.0, 
+                    0.0, 100.0, -50.0, 0.0, -15.0,
                     0.15
                 )
-            ), 
+            ),
             cms.PSet(
                 pulseShapeParameters = cms.vdouble(
-                    100.0, 2000.0, -50.0, 0.0, -5.0, 
+                    100.0, 2000.0, -50.0, 0.0, -5.0,
                     0.05
                 )
-            ), 
+            ),
             cms.PSet(
                 pulseShapeParameters = cms.vdouble(
-                    2000.0, 1000000.0, -50.0, 0.0, 95.0, 
+                    2000.0, 1000000.0, -50.0, 0.0, 95.0,
                     0.0
                 )
-            ), 
+            ),
             cms.PSet(
                 pulseShapeParameters = cms.vdouble(
-                    -1000000.0, 1000000.0, 45.0, 0.1, 1000000.0, 
+                    -1000000.0, 1000000.0, 45.0, 0.1, 1000000.0,
                     0.0
                 )
             )
@@ -106,11 +106,11 @@ hbhereco = cms.EDProducer("HBHEPhase1Reconstructor",
         TS3TS4UpperChargeThreshold = cms.double(20),
         TS4TS5ChargeThreshold = cms.double(70),
         TS4TS5LowerCut = cms.vdouble(
-            -1, -0.7, -0.5, -0.4, -0.3, 
+            -1, -0.7, -0.5, -0.4, -0.3,
             0.1
         ),
         TS4TS5LowerThreshold = cms.vdouble(
-            100, 120, 160, 200, 300, 
+            100, 120, 160, 200, 300,
             500
         ),
         TS4TS5UpperCut = cms.vdouble(1, 0.8, 0.75, 0.72),

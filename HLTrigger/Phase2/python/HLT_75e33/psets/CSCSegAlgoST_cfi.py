@@ -40,7 +40,7 @@ CSCSegAlgoST = cms.PSet(
             useShowering = cms.bool(False),
             yweightPenalty = cms.double(1.5),
             yweightPenaltyThreshold = cms.double(1.0)
-        ), 
+        ),
         cms.PSet(
             BPMinImprovement = cms.double(10000.0),
             BrutePruning = cms.bool(True),
@@ -81,19 +81,19 @@ CSCSegAlgoST = cms.PSet(
         )
     ),
     chamber_types = cms.vstring(
-        'ME1/a', 
-        'ME1/b', 
-        'ME1/2', 
-        'ME1/3', 
-        'ME2/1', 
-        'ME2/2', 
-        'ME3/1', 
-        'ME3/2', 
-        'ME4/1', 
+        'ME1/a',
+        'ME1/b',
+        'ME1/2',
+        'ME1/3',
+        'ME2/1',
+        'ME2/2',
+        'ME3/1',
+        'ME3/2',
+        'ME4/1',
         'ME4/2'
     ),
     parameters_per_chamber_type = cms.vint32(
-        2, 1, 1, 1, 1, 
+        2, 1, 1, 1, 1,
         1, 1, 1, 1, 1
     )
 )

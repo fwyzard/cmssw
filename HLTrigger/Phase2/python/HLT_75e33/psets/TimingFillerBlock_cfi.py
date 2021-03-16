@@ -10,8 +10,8 @@ TimingFillerBlock = cms.PSet(
             PruneCut = cms.double(9.0),
             ServiceParameters = cms.PSet(
                 Propagators = cms.untracked.vstring(
-                    'SteppingHelixPropagatorAny', 
-                    'PropagatorWithMaterial', 
+                    'SteppingHelixPropagatorAny',
+                    'PropagatorWithMaterial',
                     'PropagatorWithMaterialOpposite'
                 ),
                 RPCLayers = cms.bool(True)
@@ -30,8 +30,8 @@ TimingFillerBlock = cms.PSet(
             RequireBothProjections = cms.bool(False),
             ServiceParameters = cms.PSet(
                 Propagators = cms.untracked.vstring(
-                    'SteppingHelixPropagatorAny', 
-                    'PropagatorWithMaterial', 
+                    'SteppingHelixPropagatorAny',
+                    'PropagatorWithMaterial',
                     'PropagatorWithMaterialOpposite'
                 ),
                 RPCLayers = cms.bool(True)

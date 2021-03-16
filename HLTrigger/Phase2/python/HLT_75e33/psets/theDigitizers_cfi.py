@@ -4,29 +4,29 @@ theDigitizers = cms.PSet(
     ecal = cms.PSet(
         ConstantTerm = cms.double(0.003),
         EBCorrNoiseMatrixG01 = cms.vdouble(
-            1.0, 0.73354, 0.64442, 0.58851, 0.55425, 
+            1.0, 0.73354, 0.64442, 0.58851, 0.55425,
             0.53082, 0.51916, 0.51097, 0.50732, 0.50409
         ),
         EBCorrNoiseMatrixG06 = cms.vdouble(
-            1.0, 0.70946, 0.58021, 0.49846, 0.45006, 
+            1.0, 0.70946, 0.58021, 0.49846, 0.45006,
             0.41366, 0.39699, 0.38478, 0.37847, 0.37055
         ),
         EBCorrNoiseMatrixG12 = cms.vdouble(
-            1.0, 0.71073, 0.55721, 0.46089, 0.40449, 
+            1.0, 0.71073, 0.55721, 0.46089, 0.40449,
             0.35931, 0.33924, 0.32439, 0.31581, 0.30481
         ),
         EBdigiCollection = cms.string(''),
         EBs25notContainment = cms.double(0.9675),
         EECorrNoiseMatrixG01 = cms.vdouble(
-            1.0, 0.72698, 0.62048, 0.55691, 0.51848, 
+            1.0, 0.72698, 0.62048, 0.55691, 0.51848,
             0.49147, 0.47813, 0.47007, 0.46621, 0.46265
         ),
         EECorrNoiseMatrixG06 = cms.vdouble(
-            1.0, 0.71217, 0.47464, 0.34056, 0.26282, 
+            1.0, 0.71217, 0.47464, 0.34056, 0.26282,
             0.20287, 0.17734, 0.16256, 0.15618, 0.14443
         ),
         EECorrNoiseMatrixG12 = cms.vdouble(
-            1.0, 0.71373, 0.44825, 0.30152, 0.21609, 
+            1.0, 0.71373, 0.44825, 0.30152, 0.21609,
             0.14786, 0.11772, 0.10165, 0.09465, 0.08098
         ),
         EEdigiCollection = cms.string(''),
@@ -40,7 +40,7 @@ theDigitizers = cms.PSet(
         apdDigiTag = cms.string('APD'),
         apdDoPEStats = cms.bool(True),
         apdNonlParms = cms.vdouble(
-            1.48, -3.75, 1.81, 1.26, 2.0, 
+            1.48, -3.75, 1.81, 1.26, 2.0,
             45, 1.0
         ),
         apdSeparateDigi = cms.bool(True),
@@ -159,23 +159,23 @@ theDigitizers = cms.PSet(
         HFDarkening = cms.bool(False),
         HFRecalParameterBlock = cms.PSet(
             HFdepthOneParameterA = cms.vdouble(
-                0.004123, 0.00602, 0.008201, 0.010489, 0.013379, 
-                0.016997, 0.021464, 0.027371, 0.034195, 0.044807, 
+                0.004123, 0.00602, 0.008201, 0.010489, 0.013379,
+                0.016997, 0.021464, 0.027371, 0.034195, 0.044807,
                 0.058939, 0.125497
             ),
             HFdepthOneParameterB = cms.vdouble(
-                -4e-06, -2e-06, 0.0, 4e-06, 1.5e-05, 
-                2.6e-05, 6.3e-05, 8.4e-05, 0.00016, 0.000107, 
+                -4e-06, -2e-06, 0.0, 4e-06, 1.5e-05,
+                2.6e-05, 6.3e-05, 8.4e-05, 0.00016, 0.000107,
                 0.000425, 0.000209
             ),
             HFdepthTwoParameterA = cms.vdouble(
-                0.002861, 0.004168, 0.0064, 0.008388, 0.011601, 
-                0.014425, 0.018633, 0.023232, 0.028274, 0.035447, 
+                0.002861, 0.004168, 0.0064, 0.008388, 0.011601,
+                0.014425, 0.018633, 0.023232, 0.028274, 0.035447,
                 0.051579, 0.086593
             ),
             HFdepthTwoParameterB = cms.vdouble(
-                -2e-06, -0.0, -7e-06, -6e-06, -2e-06, 
-                1e-06, 1.9e-05, 3.1e-05, 6.7e-05, 1.2e-05, 
+                -2e-06, -0.0, -7e-06, -6e-06, -2e-06,
+                1e-06, 1.9e-05, 3.1e-05, 6.7e-05, 1.2e-05,
                 0.000157, -3e-06
             )
         ),
@@ -198,9 +198,9 @@ theDigitizers = cms.PSet(
             firstRing = cms.int32(1),
             readoutFrameSize = cms.int32(10),
             samplingFactors = cms.vdouble(
-                125.44, 125.54, 125.32, 125.13, 124.46, 
-                125.01, 125.22, 125.48, 124.45, 125.9, 
-                125.83, 127.01, 126.82, 129.73, 131.83, 
+                125.44, 125.54, 125.32, 125.13, 124.46,
+                125.01, 125.22, 125.48, 124.45, 125.9,
+                125.83, 127.01, 126.82, 129.73, 131.83,
                 143.52
             ),
             simHitToPhotoelectrons = cms.double(2000.0),
@@ -217,22 +217,22 @@ theDigitizers = cms.PSet(
             firstRing = cms.int32(16),
             readoutFrameSize = cms.int32(10),
             samplingFactors = cms.vdouble(
-                210.55, 197.93, 186.12, 189.64, 189.63, 
-                189.96, 190.03, 190.11, 190.18, 190.25, 
-                190.32, 190.4, 190.47, 190.54, 190.61, 
-                190.69, 190.83, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
-                190.94, 190.94, 190.94, 190.94, 190.94, 
+                210.55, 197.93, 186.12, 189.64, 189.63,
+                189.96, 190.03, 190.11, 190.18, 190.25,
+                190.32, 190.4, 190.47, 190.54, 190.61,
+                190.69, 190.83, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
+                190.94, 190.94, 190.94, 190.94, 190.94,
                 190.94, 190.94, 190.94, 190.94, 190.94
             ),
             simHitToPhotoelectrons = cms.double(2000.0),
@@ -276,8 +276,8 @@ theDigitizers = cms.PSet(
             firstRing = cms.int32(1),
             readoutFrameSize = cms.int32(10),
             samplingFactors = cms.vdouble(
-                231.0, 231.0, 231.0, 231.0, 360.0, 
-                360.0, 360.0, 360.0, 360.0, 360.0, 
+                231.0, 231.0, 231.0, 231.0, 360.0,
+                360.0, 360.0, 360.0, 360.0, 360.0,
                 360.0, 360.0, 360.0, 360.0, 360.0
             ),
             siPMCode = cms.int32(1),
@@ -295,8 +295,8 @@ theDigitizers = cms.PSet(
             firstRing = cms.int32(1),
             readoutFrameSize = cms.int32(10),
             samplingFactors = cms.vdouble(
-                231.0, 231.0, 231.0, 231.0, 360.0, 
-                360.0, 360.0, 360.0, 360.0, 360.0, 
+                231.0, 231.0, 231.0, 231.0, 360.0,
+                360.0, 360.0, 360.0, 360.0, 360.0,
                 360.0, 360.0, 360.0, 360.0, 360.0
             ),
             siPMCode = cms.int32(2),
@@ -314,8 +314,8 @@ theDigitizers = cms.PSet(
             firstRing = cms.int32(1),
             readoutFrameSize = cms.int32(10),
             samplingFactors = cms.vdouble(
-                231.0, 231.0, 231.0, 231.0, 360.0, 
-                360.0, 360.0, 360.0, 360.0, 360.0, 
+                231.0, 231.0, 231.0, 231.0, 360.0,
+                360.0, 360.0, 360.0, 360.0, 360.0,
                 360.0, 360.0, 360.0, 360.0, 360.0
             ),
             siPMCode = cms.int32(2),
@@ -363,7 +363,7 @@ theDigitizers = cms.PSet(
             feCfg = cms.PSet(
                 adcNbits = cms.uint32(10),
                 adcPulse = cms.vdouble(
-                    0.0, 0.017, 0.817, 0.163, 0.003, 
+                    0.0, 0.017, 0.817, 0.163, 0.003,
                     0.0
                 ),
                 adcSaturation_fC = cms.double(100),
@@ -372,13 +372,13 @@ theDigitizers = cms.PSet(
                 jitterConstant_ns = cms.vdouble(0.0004, 0.0004, 0.0004),
                 jitterNoise_ns = cms.vdouble(25.0, 25.0, 25.0),
                 pulseAvgT = cms.vdouble(
-                    0.0, 23.42298, 13.16733, 6.41062, 5.03946, 
+                    0.0, 23.42298, 13.16733, 6.41062, 5.03946,
                     4.532
                 ),
                 targetMIPvalue_ADC = cms.uint32(10),
                 tdcChargeDrainParameterisation = cms.vdouble(
-                    -919.13, 365.36, -14.1, 0.2, -21.85, 
-                    49.39, 22.21, 0.8, -0.28, 27.14, 
+                    -919.13, 365.36, -14.1, 0.2, -21.85,
+                    49.39, 22.21, 0.8, -0.28, 27.14,
                     43.95, 3.89048
                 ),
                 tdcForToAOnset_fC = cms.vdouble(12.0, 12.0, 12.0),
@@ -422,7 +422,7 @@ theDigitizers = cms.PSet(
             feCfg = cms.PSet(
                 adcNbits = cms.uint32(10),
                 adcPulse = cms.vdouble(
-                    0.0, 0.017, 0.817, 0.163, 0.003, 
+                    0.0, 0.017, 0.817, 0.163, 0.003,
                     0.0
                 ),
                 adcSaturation_fC = cms.double(68.75),
@@ -431,13 +431,13 @@ theDigitizers = cms.PSet(
                 jitterConstant_ns = cms.vdouble(0.0004, 0.0004, 0.0004),
                 jitterNoise_ns = cms.vdouble(25.0, 25.0, 25.0),
                 pulseAvgT = cms.vdouble(
-                    0.0, 23.42298, 13.16733, 6.41062, 5.03946, 
+                    0.0, 23.42298, 13.16733, 6.41062, 5.03946,
                     4.532
                 ),
                 targetMIPvalue_ADC = cms.uint32(15),
                 tdcChargeDrainParameterisation = cms.vdouble(
-                    -919.13, 365.36, -14.1, 0.2, -21.85, 
-                    49.39, 22.21, 0.8, -0.28, 27.14, 
+                    -919.13, 365.36, -14.1, 0.2, -21.85,
+                    49.39, 22.21, 0.8, -0.28, 27.14,
                     43.95, 3.89048
                 ),
                 tdcForToAOnset_fC = cms.vdouble(12.0, 12.0, 12.0),
@@ -489,7 +489,7 @@ theDigitizers = cms.PSet(
             feCfg = cms.PSet(
                 adcNbits = cms.uint32(10),
                 adcPulse = cms.vdouble(
-                    0.0, 0.017, 0.817, 0.163, 0.003, 
+                    0.0, 0.017, 0.817, 0.163, 0.003,
                     0.0
                 ),
                 adcSaturation_fC = cms.double(100),
@@ -498,13 +498,13 @@ theDigitizers = cms.PSet(
                 jitterConstant_ns = cms.vdouble(0.0004, 0.0004, 0.0004),
                 jitterNoise_ns = cms.vdouble(25.0, 25.0, 25.0),
                 pulseAvgT = cms.vdouble(
-                    0.0, 23.42298, 13.16733, 6.41062, 5.03946, 
+                    0.0, 23.42298, 13.16733, 6.41062, 5.03946,
                     4.532
                 ),
                 targetMIPvalue_ADC = cms.uint32(10),
                 tdcChargeDrainParameterisation = cms.vdouble(
-                    -919.13, 365.36, -14.1, 0.2, -21.85, 
-                    49.39, 22.21, 0.8, -0.28, 27.14, 
+                    -919.13, 365.36, -14.1, 0.2, -21.85,
+                    49.39, 22.21, 0.8, -0.28, 27.14,
                     43.95, 3.89048
                 ),
                 tdcForToAOnset_fC = cms.vdouble(12.0, 12.0, 12.0),
@@ -594,13 +594,13 @@ theDigitizers = cms.PSet(
             DeadModules = cms.VPSet(),
             DeadModules_DB = cms.bool(False),
             EfficiencyFactors_Barrel = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999, 0.999, 0.999, 0.999, 0.999
             ),
             EfficiencyFactors_Endcap = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999
             ),
             ElectronPerAdc = cms.double(135.0),
@@ -637,13 +637,13 @@ theDigitizers = cms.PSet(
             DeadModules = cms.VPSet(),
             DeadModules_DB = cms.bool(False),
             EfficiencyFactors_Barrel = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999, 0.999, 0.999, 0.999, 0.999
             ),
             EfficiencyFactors_Endcap = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999
             ),
             ElectronPerAdc = cms.double(135.0),
@@ -680,13 +680,13 @@ theDigitizers = cms.PSet(
             DeadModules = cms.VPSet(),
             DeadModules_DB = cms.bool(False),
             EfficiencyFactors_Barrel = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999, 0.999, 0.999, 0.999, 0.999
             ),
             EfficiencyFactors_Endcap = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999
             ),
             ElectronPerAdc = cms.double(600.0),
@@ -728,13 +728,13 @@ theDigitizers = cms.PSet(
             DeadModules = cms.VPSet(),
             DeadModules_DB = cms.bool(False),
             EfficiencyFactors_Barrel = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999, 0.999, 0.999, 0.999, 0.999
             ),
             EfficiencyFactors_Endcap = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999
             ),
             ElectronPerAdc = cms.double(600.0),
@@ -763,43 +763,43 @@ theDigitizers = cms.PSet(
                 Curves = cms.VPSet(
                     cms.PSet(
                         charge = cms.vdouble(
-                            1000, 1025, 1050, 1100, 1200, 
-                            1500, 2000, 6000, 10000, 15000, 
+                            1000, 1025, 1050, 1100, 1200,
+                            1500, 2000, 6000, 10000, 15000,
                             20000, 30000
                         ),
                         delay = cms.vdouble(
-                            26.8, 23.73, 21.92, 19.46, 16.52, 
-                            12.15, 8.88, 3.03, 1.69, 0.95, 
+                            26.8, 23.73, 21.92, 19.46, 16.52,
+                            12.15, 8.88, 3.03, 1.69, 0.95,
                             0.56, 0.19
                         )
-                    ), 
+                    ),
                     cms.PSet(
                         charge = cms.vdouble(
-                            1200, 1225, 1250, 1500, 2000, 
+                            1200, 1225, 1250, 1500, 2000,
                             6000, 10000, 15000, 20000, 30000
                         ),
                         delay = cms.vdouble(
-                            26.28, 23.5, 21.79, 14.92, 10.27, 
+                            26.28, 23.5, 21.79, 14.92, 10.27,
                             3.33, 1.86, 1.07, 0.66, 0.27
                         )
-                    ), 
+                    ),
                     cms.PSet(
                         charge = cms.vdouble(
-                            1500, 1525, 1550, 1600, 2000, 
+                            1500, 1525, 1550, 1600, 2000,
                             6000, 10000, 15000, 20000, 30000
                         ),
                         delay = cms.vdouble(
-                            25.36, 23.05, 21.6, 19.56, 12.94, 
+                            25.36, 23.05, 21.6, 19.56, 12.94,
                             3.79, 2.14, 1.26, 0.81, 0.39
                         )
-                    ), 
+                    ),
                     cms.PSet(
                         charge = cms.vdouble(
-                            3000, 3025, 3050, 3100, 3500, 
+                            3000, 3025, 3050, 3100, 3500,
                             6000, 10000, 15000, 20000, 30000
                         ),
                         delay = cms.vdouble(
-                            25.63, 23.63, 22.35, 20.65, 14.92, 
+                            25.63, 23.63, 22.35, 20.65, 14.92,
                             6.7, 3.68, 2.29, 1.62, 1.02
                         )
                     )
@@ -810,9 +810,9 @@ theDigitizers = cms.PSet(
             TofUpperCut = cms.double(12.5)
         ),
         ROUList = cms.vstring(
-            'TrackerHitsPixelBarrelLowTof', 
-            'TrackerHitsPixelBarrelHighTof', 
-            'TrackerHitsPixelEndcapLowTof', 
+            'TrackerHitsPixelBarrelLowTof',
+            'TrackerHitsPixelBarrelHighTof',
+            'TrackerHitsPixelEndcapLowTof',
             'TrackerHitsPixelEndcapHighTof'
         ),
         SSDigitizerAlgorithm = cms.PSet(
@@ -829,13 +829,13 @@ theDigitizers = cms.PSet(
             DeadModules = cms.VPSet(),
             DeadModules_DB = cms.bool(False),
             EfficiencyFactors_Barrel = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999, 0.999, 0.999, 0.999, 0.999
             ),
             EfficiencyFactors_Endcap = cms.vdouble(
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
-                0.999, 0.999, 0.999, 0.999, 0.999, 
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
+                0.999, 0.999, 0.999, 0.999, 0.999,
                 0.999
             ),
             ElectronPerAdc = cms.double(135.0),
@@ -849,7 +849,7 @@ theDigitizers = cms.PSet(
             NoiseInElectrons = cms.double(1000),
             Phase2ReadoutMode = cms.int32(0),
             PulseShapeParameters = cms.vdouble(
-                -3.0, 16.043703, 99.999857, 40.57165, 2.0, 
+                -3.0, 16.043703, 99.999857, 40.57165, 2.0,
                 1.2459094
             ),
             ReadoutNoiseInElec = cms.double(1000.0),
@@ -955,7 +955,7 @@ theDigitizers = cms.PSet(
         PedestalsOffset = cms.double(128),
         PreMixingMode = cms.bool(False),
         ROUList = cms.vstring(
-            'g4SimHitsTrackerHitsPixelBarrelLowTof', 
+            'g4SimHitsTrackerHitsPixelBarrelLowTof',
             'g4SimHitsTrackerHitsPixelEndcapLowTof'
         ),
         RealPedestals = cms.bool(True),

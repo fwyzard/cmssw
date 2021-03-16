@@ -7,11 +7,11 @@ ctppsOpticalFunctionsESSource = cms.ESSource("CTPPSOpticalFunctionsESSource",
             cms.PSet(
                 fileName = cms.FileInPath('CalibPPS/ESProducers/data/optical_functions/2018/version4/120urad.root'),
                 xangle = cms.double(120)
-            ), 
+            ),
             cms.PSet(
                 fileName = cms.FileInPath('CalibPPS/ESProducers/data/optical_functions/2018/version4/130urad.root'),
                 xangle = cms.double(130)
-            ), 
+            ),
             cms.PSet(
                 fileName = cms.FileInPath('CalibPPS/ESProducers/data/optical_functions/2018/version4/140urad.root'),
                 xangle = cms.double(140)

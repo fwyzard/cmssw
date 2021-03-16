@@ -21,7 +21,7 @@ CSCSegAlgoDF = cms.PSet(
             preClustering = cms.untracked.bool(False),
             tanPhiMax = cms.double(0.5),
             tanThetaMax = cms.double(1.2)
-        ), 
+        ),
         cms.PSet(
             CSCSegmentDebug = cms.untracked.bool(False),
             Pruning = cms.untracked.bool(False),
@@ -40,7 +40,7 @@ CSCSegAlgoDF = cms.PSet(
             preClustering = cms.untracked.bool(False),
             tanPhiMax = cms.double(0.8),
             tanThetaMax = cms.double(2.0)
-        ), 
+        ),
         cms.PSet(
             CSCSegmentDebug = cms.untracked.bool(False),
             Pruning = cms.untracked.bool(False),
@@ -62,19 +62,19 @@ CSCSegAlgoDF = cms.PSet(
         )
     ),
     chamber_types = cms.vstring(
-        'ME1/a', 
-        'ME1/b', 
-        'ME1/2', 
-        'ME1/3', 
-        'ME2/1', 
-        'ME2/2', 
-        'ME3/1', 
-        'ME3/2', 
-        'ME4/1', 
+        'ME1/a',
+        'ME1/b',
+        'ME1/2',
+        'ME1/3',
+        'ME2/1',
+        'ME2/2',
+        'ME3/1',
+        'ME3/2',
+        'ME4/1',
         'ME4/2'
     ),
     parameters_per_chamber_type = cms.vint32(
-        3, 1, 2, 2, 1, 
+        3, 1, 2, 2, 1,
         2, 1, 2, 1, 2
     )
 )

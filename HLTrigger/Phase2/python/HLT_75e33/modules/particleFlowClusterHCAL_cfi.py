@@ -14,15 +14,15 @@ particleFlowClusterHCAL = cms.EDProducer("PFMultiDepthClusterProducer",
                     depths = cms.vint32(1, 2, 3, 4),
                     detector = cms.string('HCAL_BARREL1'),
                     logWeightDenominator = cms.vdouble(0.8, 1.2, 1.2, 1.2)
-                ), 
+                ),
                 cms.PSet(
                     depths = cms.vint32(
-                        1, 2, 3, 4, 5, 
+                        1, 2, 3, 4, 5,
                         6, 7
                     ),
                     detector = cms.string('HCAL_ENDCAP'),
                     logWeightDenominator = cms.vdouble(
-                        0.1, 0.2, 0.2, 0.2, 0.2, 
+                        0.1, 0.2, 0.2, 0.2, 0.2,
                         0.2, 0.2
                     )
                 )

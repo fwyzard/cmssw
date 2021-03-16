@@ -11,7 +11,7 @@ particleFlowClusterHO = cms.EDProducer("PFClusterProducer",
                 detector = cms.string('HCAL_BARREL2_RING0'),
                 gatheringThreshold = cms.double(0.05),
                 gatheringThresholdPt = cms.double(0.0)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('HCAL_BARREL2_RING1'),
                 gatheringThreshold = cms.double(0.05),
@@ -44,7 +44,7 @@ particleFlowClusterHO = cms.EDProducer("PFClusterProducer",
             cms.PSet(
                 detector = cms.string('HCAL_BARREL2_RING0'),
                 recHitEnergyNorm = cms.double(0.05)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('HCAL_BARREL2_RING1'),
                 recHitEnergyNorm = cms.double(0.05)
@@ -67,7 +67,7 @@ particleFlowClusterHO = cms.EDProducer("PFClusterProducer",
                 detector = cms.string('HCAL_BARREL2_RING0'),
                 seedingThreshold = cms.double(0.08),
                 seedingThresholdPt = cms.double(0.0)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('HCAL_BARREL2_RING1'),
                 seedingThreshold = cms.double(0.08),

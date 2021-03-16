@@ -15,9 +15,9 @@ MessageLogger = cms.Service("MessageLogger",
         optionalPSet = cms.untracked.bool(True)
     ),
     categories = cms.untracked.vstring(
-        'FwkJob', 
-        'FwkReport', 
-        'FwkSummary', 
+        'FwkJob',
+        'FwkReport',
+        'FwkSummary',
         'Root_NoDictionary'
     ),
     destinations = cms.untracked.vstring('cerr'),

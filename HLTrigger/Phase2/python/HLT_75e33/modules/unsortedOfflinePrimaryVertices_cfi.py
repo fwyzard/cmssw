@@ -36,7 +36,7 @@ unsortedOfflinePrimaryVertices = cms.EDProducer("PrimaryVertexProducer",
             maxDistanceToBeam = cms.double(1.0),
             minNdof = cms.double(0.0),
             useBeamConstraint = cms.bool(False)
-        ), 
+        ),
         cms.PSet(
             algorithm = cms.string('AdaptiveVertexFitter'),
             chi2cutoff = cms.double(2.5),

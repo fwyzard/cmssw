@@ -3,8 +3,8 @@ import FWCore.ParameterSet.Config as cms
 candidateCombinedSecondaryVertexV2Computer = cms.ESProducer("CandidateCombinedSecondaryVertexESProducer",
     SoftLeptonFlip = cms.bool(False),
     calibrationRecords = cms.vstring(
-        'CombinedSVIVFV2RecoVertex', 
-        'CombinedSVIVFV2PseudoVertex', 
+        'CombinedSVIVFV2RecoVertex',
+        'CombinedSVIVFV2PseudoVertex',
         'CombinedSVIVFV2NoVertex'
     ),
     categoryVariableName = cms.string('vertexCategory'),

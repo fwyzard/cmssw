@@ -9,13 +9,13 @@ multi5x5SuperClustersCleaned = cms.EDProducer("Multi5x5SuperClusterProducer",
         barrel = cms.PSet(
             cryMin = cms.int32(2),
             cryVec = cms.vint32(
-                16, 13, 11, 10, 9, 
-                8, 7, 6, 5, 4, 
+                16, 13, 11, 10, 9,
+                8, 7, 6, 5, 4,
                 3
             ),
             etVec = cms.vdouble(
-                5.0, 10.0, 15.0, 20.0, 30.0, 
-                40.0, 45.0, 55.0, 135.0, 195.0, 
+                5.0, 10.0, 15.0, 20.0, 30.0,
+                40.0, 45.0, 55.0, 135.0, 195.0,
                 225.0
             )
         ),

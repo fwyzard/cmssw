@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 ghostTrackComputer = cms.ESProducer("GhostTrackESProducer",
     calibrationRecords = cms.vstring(
-        'GhostTrackRecoVertex', 
-        'GhostTrackPseudoVertex', 
+        'GhostTrackRecoVertex',
+        'GhostTrackPseudoVertex',
         'GhostTrackNoVertex'
     ),
     categoryVariableName = cms.string('vertexCategory'),

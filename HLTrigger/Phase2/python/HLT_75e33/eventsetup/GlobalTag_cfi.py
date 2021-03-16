@@ -22,27 +22,27 @@ GlobalTag = cms.ESSource("PoolDBESSource",
             connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
             record = cms.string('EcalIntercalibConstantsRcd'),
             tag = cms.string('EcalIntercalibConstants_TL1000_upgrade_8deg_v2_mc')
-        ), 
+        ),
         cms.PSet(
             connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
             record = cms.string('EcalIntercalibConstantsMCRcd'),
             tag = cms.string('EcalIntercalibConstantsMC_TL1000_upgrade_8deg_v2_mc')
-        ), 
+        ),
         cms.PSet(
             connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
             record = cms.string('EcalLaserAPDPNRatiosRcd'),
             tag = cms.string('EcalLaserAPDPNRatios_TL1000_upgrade_8deg_mc')
-        ), 
+        ),
         cms.PSet(
             connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
             record = cms.string('EcalPedestalsRcd'),
             tag = cms.string('EcalPedestals_TL1000_upgradeTIA_8deg_mc')
-        ), 
+        ),
         cms.PSet(
             connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
             record = cms.string('EcalTPGLinearizationConstRcd'),
             tag = cms.string('EcalTPGLinearizationConst_TL1000_upgrade_8deg_mc')
-        ), 
+        ),
         cms.PSet(
             label = cms.untracked.string('AK4PF'),
             record = cms.string('JetCorrectionsRecord'),

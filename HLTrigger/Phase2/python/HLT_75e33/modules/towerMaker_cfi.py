@@ -13,8 +13,8 @@ towerMaker = cms.EDProducer("CaloTowersCreator",
     EEWeight = cms.double(1.0),
     EEWeights = cms.vdouble(1.0, 1.0, 1.0, 1.0, 1.0),
     EcalRecHitSeveritiesToBeExcluded = cms.vstring(
-        'kTime', 
-        'kWeird', 
+        'kTime',
+        'kWeird',
         'kBad'
     ),
     EcalSeveritiesToBeUsedInBadTowers = cms.vstring(),

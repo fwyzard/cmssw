@@ -5,7 +5,7 @@ initialStepTrajectoryFilterPreSplitting = cms.PSet(
     filters = cms.VPSet(
         cms.PSet(
             refToPSet_ = cms.string('initialStepTrajectoryFilterBasePreSplitting')
-        ), 
+        ),
         cms.PSet(
             refToPSet_ = cms.string('initialStepTrajectoryFilterShapePreSplitting')
         )

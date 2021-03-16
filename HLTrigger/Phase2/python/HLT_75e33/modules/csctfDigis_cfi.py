@@ -6,10 +6,10 @@ csctfDigis = cms.EDProducer("CSCTFUnpacker",
     mappingFile = cms.string(''),
     producer = cms.InputTag("rawDataCollector"),
     slot2sector = cms.vint32(
-        0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
         0, 0
     ),
     swapME1strips = cms.bool(False)

@@ -16,7 +16,7 @@ me0Segments = cms.EDProducer("ME0SegmentProducer",
                 preClustering = cms.bool(True),
                 preClusteringUseChaining = cms.bool(True)
             )
-        ), 
+        ),
         cms.PSet(
             algo_name = cms.string('ME0SegAlgoRU'),
             algo_pset = cms.PSet(

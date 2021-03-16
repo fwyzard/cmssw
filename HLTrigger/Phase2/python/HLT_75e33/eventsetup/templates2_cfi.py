@@ -9,8 +9,8 @@ templates2 = cms.ESProducer("PixelCPEClusterRepairESProducer",
     MaxSizeMismatchInY = cms.double(0.3),
     MinChargeRatio = cms.double(0.8),
     Recommend2D = cms.vstring(
-        'PXB 2', 
-        'PXB 3', 
+        'PXB 2',
+        'PXB 3',
         'PXB 4'
     ),
     RunDamagedClusters = cms.bool(False),

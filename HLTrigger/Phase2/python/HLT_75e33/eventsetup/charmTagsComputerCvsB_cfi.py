@@ -8,14 +8,14 @@ charmTagsComputerCvsB = cms.ESProducer("CharmTaggerESProducer",
     slComputerCfg = cms.PSet(
         SoftLeptonFlip = cms.bool(False),
         calibrationRecords = cms.vstring(
-            'CombinedSVRecoVertexNoSoftLepton', 
-            'CombinedSVPseudoVertexNoSoftLepton', 
-            'CombinedSVNoVertexNoSoftLepton', 
-            'CombinedSVRecoVertexSoftMuon', 
-            'CombinedSVPseudoVertexSoftMuon', 
-            'CombinedSVNoVertexSoftMuon', 
-            'CombinedSVRecoVertexSoftElectron', 
-            'CombinedSVPseudoVertexSoftElectron', 
+            'CombinedSVRecoVertexNoSoftLepton',
+            'CombinedSVPseudoVertexNoSoftLepton',
+            'CombinedSVNoVertexNoSoftLepton',
+            'CombinedSVRecoVertexSoftMuon',
+            'CombinedSVPseudoVertexSoftMuon',
+            'CombinedSVNoVertexSoftMuon',
+            'CombinedSVRecoVertexSoftElectron',
+            'CombinedSVPseudoVertexSoftElectron',
             'CombinedSVNoVertexSoftElectron'
         ),
         categoryVariableName = cms.string('vertexLeptonCategory'),
@@ -102,273 +102,273 @@ charmTagsComputerCvsB = cms.ESProducer("CharmTaggerESProducer",
             default = cms.double(-1),
             name = cms.string('vertexLeptonCategory'),
             taggingVarName = cms.string('vertexLeptonCategory')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-100),
             idx = cms.int32(0),
             name = cms.string('trackSip2dSig_0'),
             taggingVarName = cms.string('trackSip2dSig')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-100),
             idx = cms.int32(1),
             name = cms.string('trackSip2dSig_1'),
             taggingVarName = cms.string('trackSip2dSig')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-100),
             idx = cms.int32(0),
             name = cms.string('trackSip3dSig_0'),
             taggingVarName = cms.string('trackSip3dSig')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-100),
             idx = cms.int32(1),
             name = cms.string('trackSip3dSig_1'),
             taggingVarName = cms.string('trackSip3dSig')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('trackPtRel_0'),
             taggingVarName = cms.string('trackPtRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(1),
             name = cms.string('trackPtRel_1'),
             taggingVarName = cms.string('trackPtRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('trackPPar_0'),
             taggingVarName = cms.string('trackPPar')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(1),
             name = cms.string('trackPPar_1'),
             taggingVarName = cms.string('trackPPar')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('trackEtaRel_0'),
             taggingVarName = cms.string('trackEtaRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(1),
             name = cms.string('trackEtaRel_1'),
             taggingVarName = cms.string('trackEtaRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(0),
             name = cms.string('trackDeltaR_0'),
             taggingVarName = cms.string('trackDeltaR')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(1),
             name = cms.string('trackDeltaR_1'),
             taggingVarName = cms.string('trackDeltaR')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(0),
             name = cms.string('trackPtRatio_0'),
             taggingVarName = cms.string('trackPtRatio')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(1),
             name = cms.string('trackPtRatio_1'),
             taggingVarName = cms.string('trackPtRatio')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(1.1),
             idx = cms.int32(0),
             name = cms.string('trackPParRatio_0'),
             taggingVarName = cms.string('trackPParRatio')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(1.1),
             idx = cms.int32(1),
             name = cms.string('trackPParRatio_1'),
             taggingVarName = cms.string('trackPParRatio')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(0),
             name = cms.string('trackJetDist_0'),
             taggingVarName = cms.string('trackJetDist')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(1),
             name = cms.string('trackJetDist_1'),
             taggingVarName = cms.string('trackJetDist')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(0),
             name = cms.string('trackDecayLenVal_0'),
             taggingVarName = cms.string('trackDecayLenVal')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(1),
             name = cms.string('trackDecayLenVal_1'),
             taggingVarName = cms.string('trackDecayLenVal')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(0),
             name = cms.string('jetNSecondaryVertices'),
             taggingVarName = cms.string('jetNSecondaryVertices')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             name = cms.string('jetNTracks'),
             taggingVarName = cms.string('jetNTracks')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             name = cms.string('trackSumJetEtRatio'),
             taggingVarName = cms.string('trackSumJetEtRatio')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             name = cms.string('trackSumJetDeltaR'),
             taggingVarName = cms.string('trackSumJetDeltaR')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(0),
             name = cms.string('vertexMass_0'),
             taggingVarName = cms.string('vertexMass')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-10),
             idx = cms.int32(0),
             name = cms.string('vertexEnergyRatio_0'),
             taggingVarName = cms.string('vertexEnergyRatio')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-999),
             idx = cms.int32(0),
             name = cms.string('trackSip2dSigAboveCharm_0'),
             taggingVarName = cms.string('trackSip2dSigAboveCharm')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-999),
             idx = cms.int32(0),
             name = cms.string('trackSip3dSigAboveCharm_0'),
             taggingVarName = cms.string('trackSip3dSigAboveCharm')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('flightDistance2dSig_0'),
             taggingVarName = cms.string('flightDistance2dSig')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('flightDistance3dSig_0'),
             taggingVarName = cms.string('flightDistance3dSig')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(0),
             name = cms.string('vertexJetDeltaR_0'),
             taggingVarName = cms.string('vertexJetDeltaR')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(0),
             idx = cms.int32(0),
             name = cms.string('vertexNTracks_0'),
             taggingVarName = cms.string('vertexNTracks')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(0),
             name = cms.string('massVertexEnergyFraction_0'),
             taggingVarName = cms.string('massVertexEnergyFraction')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-0.1),
             idx = cms.int32(0),
             name = cms.string('vertexBoostOverSqrtJetPt_0'),
             taggingVarName = cms.string('vertexBoostOverSqrtJetPt')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('leptonPtRel_0'),
             taggingVarName = cms.string('leptonPtRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(1),
             name = cms.string('leptonPtRel_1'),
             taggingVarName = cms.string('leptonPtRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-10000),
             idx = cms.int32(0),
             name = cms.string('leptonSip3d_0'),
             taggingVarName = cms.string('leptonSip3d')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-10000),
             idx = cms.int32(1),
             name = cms.string('leptonSip3d_1'),
             taggingVarName = cms.string('leptonSip3d')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('leptonDeltaR_0'),
             taggingVarName = cms.string('leptonDeltaR')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(1),
             name = cms.string('leptonDeltaR_1'),
             taggingVarName = cms.string('leptonDeltaR')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('leptonRatioRel_0'),
             taggingVarName = cms.string('leptonRatioRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(1),
             name = cms.string('leptonRatioRel_1'),
             taggingVarName = cms.string('leptonRatioRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('leptonEtaRel_0'),
             taggingVarName = cms.string('leptonEtaRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(1),
             name = cms.string('leptonEtaRel_1'),
             taggingVarName = cms.string('leptonEtaRel')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(0),
             name = cms.string('leptonRatio_0'),
             taggingVarName = cms.string('leptonRatio')
-        ), 
+        ),
         cms.PSet(
             default = cms.double(-1),
             idx = cms.int32(1),

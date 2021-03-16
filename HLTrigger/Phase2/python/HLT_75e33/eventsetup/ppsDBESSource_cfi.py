@@ -10,7 +10,7 @@ ppsDBESSource = cms.ESSource("PoolDBESSource",
             connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
             record = cms.string('LHCInfoRcd'),
             tag = cms.string('LHCInfoEndFill_prompt_v2')
-        ), 
+        ),
         cms.PSet(
             connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
             record = cms.string('CTPPSOpticsRcd'),

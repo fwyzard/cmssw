@@ -6,7 +6,7 @@ siStripGainESProducer = cms.ESProducer("SiStripGainESProducer",
             Label = cms.untracked.string(''),
             NormalizationFactor = cms.untracked.double(1.0),
             Record = cms.string('SiStripApvGainRcd')
-        ), 
+        ),
         cms.PSet(
             Label = cms.untracked.string(''),
             NormalizationFactor = cms.untracked.double(1.0),

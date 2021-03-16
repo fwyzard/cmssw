@@ -5,7 +5,7 @@ pixelPairStepTrajectoryFilter = cms.PSet(
     filters = cms.VPSet(
         cms.PSet(
             refToPSet_ = cms.string('pixelPairStepTrajectoryFilterBase')
-        ), 
+        ),
         cms.PSet(
             refToPSet_ = cms.string('ClusterShapeTrajectoryFilter')
         )

@@ -2,15 +2,15 @@ import FWCore.ParameterSet.Config as cms
 
 ecalRecHit = cms.EDProducer("EcalRecHitProducer",
     ChannelStatusToBeExcluded = cms.vstring(
-        'kDAC', 
-        'kNoisy', 
-        'kNNoisy', 
-        'kFixedG6', 
-        'kFixedG1', 
-        'kFixedG0', 
-        'kNonRespondingIsolated', 
-        'kDeadVFE', 
-        'kDeadFE', 
+        'kDAC',
+        'kNoisy',
+        'kNNoisy',
+        'kFixedG6',
+        'kFixedG1',
+        'kFixedG0',
+        'kNonRespondingIsolated',
+        'kDeadVFE',
+        'kDeadFE',
         'kNoDataNoTP'
     ),
     EBLaserMAX = cms.double(3.0),
@@ -51,19 +51,19 @@ ecalRecHit = cms.EDProducer("EcalRecHitProducer",
     flagsMapDBReco = cms.PSet(
         kDead = cms.vstring('kNoDataNoTP'),
         kGood = cms.vstring(
-            'kOk', 
-            'kDAC', 
-            'kNoLaser', 
+            'kOk',
+            'kDAC',
+            'kNoLaser',
             'kNoisy'
         ),
         kNeighboursRecovered = cms.vstring(
-            'kFixedG0', 
-            'kNonRespondingIsolated', 
+            'kFixedG0',
+            'kNonRespondingIsolated',
             'kDeadVFE'
         ),
         kNoisy = cms.vstring(
-            'kNNoisy', 
-            'kFixedG6', 
+            'kNNoisy',
+            'kFixedG6',
             'kFixedG1'
         ),
         kTowerRecovered = cms.vstring('kDeadFE')

@@ -12,19 +12,19 @@ particleFlowClusterHBHE = cms.EDProducer("PFClusterProducer",
                 detector = cms.string('HCAL_BARREL1'),
                 gatheringThreshold = cms.vdouble(0.8, 1.2, 1.2, 1.2),
                 gatheringThresholdPt = cms.vdouble(0.0, 0.0, 0.0, 0.0)
-            ), 
+            ),
             cms.PSet(
                 depths = cms.vint32(
-                    1, 2, 3, 4, 5, 
+                    1, 2, 3, 4, 5,
                     6, 7
                 ),
                 detector = cms.string('HCAL_ENDCAP'),
                 gatheringThreshold = cms.vdouble(
-                    0.1, 0.2, 0.2, 0.2, 0.2, 
+                    0.1, 0.2, 0.2, 0.2, 0.2,
                     0.2, 0.2
                 ),
                 gatheringThresholdPt = cms.vdouble(
-                    0.0, 0.0, 0.0, 0.0, 0.0, 
+                    0.0, 0.0, 0.0, 0.0, 0.0,
                     0.0, 0.0
                 )
             )
@@ -40,15 +40,15 @@ particleFlowClusterHBHE = cms.EDProducer("PFClusterProducer",
                     depths = cms.vint32(1, 2, 3, 4),
                     detector = cms.string('HCAL_BARREL1'),
                     logWeightDenominator = cms.vdouble(0.8, 1.2, 1.2, 1.2)
-                ), 
+                ),
                 cms.PSet(
                     depths = cms.vint32(
-                        1, 2, 3, 4, 5, 
+                        1, 2, 3, 4, 5,
                         6, 7
                     ),
                     detector = cms.string('HCAL_ENDCAP'),
                     logWeightDenominator = cms.vdouble(
-                        0.1, 0.2, 0.2, 0.2, 0.2, 
+                        0.1, 0.2, 0.2, 0.2, 0.2,
                         0.2, 0.2
                     )
                 )
@@ -71,15 +71,15 @@ particleFlowClusterHBHE = cms.EDProducer("PFClusterProducer",
                     depths = cms.vint32(1, 2, 3, 4),
                     detector = cms.string('HCAL_BARREL1'),
                     logWeightDenominator = cms.vdouble(0.8, 1.2, 1.2, 1.2)
-                ), 
+                ),
                 cms.PSet(
                     depths = cms.vint32(
-                        1, 2, 3, 4, 5, 
+                        1, 2, 3, 4, 5,
                         6, 7
                     ),
                     detector = cms.string('HCAL_ENDCAP'),
                     logWeightDenominator = cms.vdouble(
-                        0.1, 0.2, 0.2, 0.2, 0.2, 
+                        0.1, 0.2, 0.2, 0.2, 0.2,
                         0.2, 0.2
                     )
                 )
@@ -93,15 +93,15 @@ particleFlowClusterHBHE = cms.EDProducer("PFClusterProducer",
                 depths = cms.vint32(1, 2, 3, 4),
                 detector = cms.string('HCAL_BARREL1'),
                 recHitEnergyNorm = cms.vdouble(0.8, 1.2, 1.2, 1.2)
-            ), 
+            ),
             cms.PSet(
                 depths = cms.vint32(
-                    1, 2, 3, 4, 5, 
+                    1, 2, 3, 4, 5,
                     6, 7
                 ),
                 detector = cms.string('HCAL_ENDCAP'),
                 recHitEnergyNorm = cms.vdouble(
-                    0.1, 0.2, 0.2, 0.2, 0.2, 
+                    0.1, 0.2, 0.2, 0.2, 0.2,
                     0.2, 0.2
                 )
             )
@@ -144,19 +144,19 @@ particleFlowClusterHBHE = cms.EDProducer("PFClusterProducer",
                 detector = cms.string('HCAL_BARREL1'),
                 seedingThreshold = cms.vdouble(1.0, 1.5, 1.5, 1.5),
                 seedingThresholdPt = cms.vdouble(0.0, 0.0, 0.0, 0.0)
-            ), 
+            ),
             cms.PSet(
                 depths = cms.vint32(
-                    1, 2, 3, 4, 5, 
+                    1, 2, 3, 4, 5,
                     6, 7
                 ),
                 detector = cms.string('HCAL_ENDCAP'),
                 seedingThreshold = cms.vdouble(
-                    0.1375, 0.275, 0.275, 0.275, 0.275, 
+                    0.1375, 0.275, 0.275, 0.275, 0.275,
                     0.275, 0.275
                 ),
                 seedingThresholdPt = cms.vdouble(
-                    0.0, 0.0, 0.0, 0.0, 0.0, 
+                    0.0, 0.0, 0.0, 0.0, 0.0,
                     0.0, 0.0
                 )
             )

@@ -18,13 +18,13 @@ particleFlowRecHitHF = cms.EDProducer("PFRecHitProducer",
             cms.PSet(
                 cleaningThresholds = cms.vdouble(0.0, 120.0, 60.0),
                 flags = cms.vstring(
-                    'Standard', 
-                    'HFLong', 
+                    'Standard',
+                    'HFLong',
                     'HFShort'
                 ),
                 maxSeverities = cms.vint32(11, 9, 9),
                 name = cms.string('PFRecHitQTestHCALChannel')
-            ), 
+            ),
             cms.PSet(
                 cuts = cms.VPSet(cms.PSet(
                     depth = cms.vint32(1, 2),
