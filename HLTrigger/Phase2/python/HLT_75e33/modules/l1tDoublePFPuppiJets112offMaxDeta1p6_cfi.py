@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-l1tDoublePFPuppiJets128Eta2p3MaxDeta1p6 = cms.EDFilter("HLT2CaloJetCaloJet",
+l1tDoublePFPuppiJets112offMaxDeta1p6 = cms.EDFilter("HLT2CaloJetCaloJet",
     MaxDelR = cms.double(1000.0),
     MaxDeta = cms.double(1.6),
     MaxDphi = cms.double(10000000.0),
