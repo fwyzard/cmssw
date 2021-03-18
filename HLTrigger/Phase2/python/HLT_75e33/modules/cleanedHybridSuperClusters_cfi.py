@@ -3,13 +3,13 @@ import FWCore.ParameterSet.Config as cms
 cleanedHybridSuperClusters = cms.EDProducer("HybridClusterProducer",
     HybridBarrelSeedThr = cms.double(1.0),
     RecHitFlagToBeExcluded = cms.vstring(
-        'kFaultyHardware', 
-        'kTowerRecovered', 
+        'kFaultyHardware',
+        'kTowerRecovered',
         'kDead'
     ),
     RecHitSeverityToBeExcluded = cms.vstring(
-        'kWeird', 
-        'kBad', 
+        'kWeird',
+        'kBad',
         'kTime'
     ),
     basicclusterCollection = cms.string('hybridBarrelBasicClusters'),

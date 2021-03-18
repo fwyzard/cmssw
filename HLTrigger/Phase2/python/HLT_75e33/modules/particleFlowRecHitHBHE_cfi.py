@@ -14,21 +14,21 @@ particleFlowRecHitHBHE = cms.EDProducer("PFRecHitProducer",
                         depth = cms.vint32(1, 2, 3, 4),
                         detectorEnum = cms.int32(1),
                         threshold = cms.vdouble(0.8, 1.2, 1.2, 1.2)
-                    ), 
+                    ),
                     cms.PSet(
                         depth = cms.vint32(
-                            1, 2, 3, 4, 5, 
+                            1, 2, 3, 4, 5,
                             6, 7
                         ),
                         detectorEnum = cms.int32(2),
                         threshold = cms.vdouble(
-                            0.1, 0.2, 0.2, 0.2, 0.2, 
+                            0.1, 0.2, 0.2, 0.2, 0.2,
                             0.2, 0.2
                         )
                     )
                 ),
                 name = cms.string('PFRecHitQTestHCALThresholdVsDepth')
-            ), 
+            ),
             cms.PSet(
                 cleaningThresholds = cms.vdouble(0.0),
                 flags = cms.vstring('Standard'),

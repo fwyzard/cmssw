@@ -11,8 +11,8 @@ DTTimingExtractorBlock = cms.PSet(
         RequireBothProjections = cms.bool(False),
         ServiceParameters = cms.PSet(
             Propagators = cms.untracked.vstring(
-                'SteppingHelixPropagatorAny', 
-                'PropagatorWithMaterial', 
+                'SteppingHelixPropagatorAny',
+                'PropagatorWithMaterial',
                 'PropagatorWithMaterialOpposite'
             ),
             RPCLayers = cms.bool(True)

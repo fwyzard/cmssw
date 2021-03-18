@@ -9,8 +9,8 @@ MIdIsoExtractorPSetBlock = cms.PSet(
         DR_Veto_H = cms.double(0.1),
         DR_Veto_HO = cms.double(0.1),
         DepositInstanceLabels = cms.vstring(
-            'ecal', 
-            'hcal', 
+            'ecal',
+            'hcal',
             'ho'
         ),
         DepositLabel = cms.untracked.string('Cal'),

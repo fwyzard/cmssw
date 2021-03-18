@@ -3,22 +3,22 @@ import FWCore.ParameterSet.Config as cms
 ecalSeverityLevel = cms.ESProducer("EcalSeverityLevelESProducer",
     dbstatusMask = cms.PSet(
         kBad = cms.vstring(
-            'kNonRespondingIsolated', 
-            'kDeadVFE', 
-            'kDeadFE', 
+            'kNonRespondingIsolated',
+            'kDeadVFE',
+            'kDeadFE',
             'kNoDataNoTP'
         ),
         kGood = cms.vstring('kOk'),
         kProblematic = cms.vstring(
-            'kDAC', 
-            'kNoLaser', 
-            'kNoisy', 
-            'kNNoisy', 
-            'kNNNoisy', 
-            'kNNNNoisy', 
-            'kNNNNNoisy', 
-            'kFixedG6', 
-            'kFixedG1', 
+            'kDAC',
+            'kNoLaser',
+            'kNoisy',
+            'kNNoisy',
+            'kNNNoisy',
+            'kNNNNoisy',
+            'kNNNNNoisy',
+            'kFixedG6',
+            'kFixedG1',
             'kFixedG0'
         ),
         kRecovered = cms.vstring(),
@@ -27,24 +27,24 @@ ecalSeverityLevel = cms.ESProducer("EcalSeverityLevelESProducer",
     ),
     flagMask = cms.PSet(
         kBad = cms.vstring(
-            'kFaultyHardware', 
-            'kDead', 
+            'kFaultyHardware',
+            'kDead',
             'kKilled'
         ),
         kGood = cms.vstring('kGood'),
         kProblematic = cms.vstring(
-            'kPoorReco', 
-            'kPoorCalib', 
-            'kNoisy', 
+            'kPoorReco',
+            'kPoorCalib',
+            'kNoisy',
             'kSaturated'
         ),
         kRecovered = cms.vstring(
-            'kLeadingEdgeRecovered', 
+            'kLeadingEdgeRecovered',
             'kTowerRecovered'
         ),
         kTime = cms.vstring('kOutOfTime'),
         kWeird = cms.vstring(
-            'kWeird', 
+            'kWeird',
             'kDiWeird'
         )
     ),

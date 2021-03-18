@@ -9,8 +9,8 @@ earlyDisplacedMuons = cms.EDProducer("MuonIdProducer",
         DR_Veto_H = cms.double(0.1),
         DR_Veto_HO = cms.double(0.1),
         DepositInstanceLabels = cms.vstring(
-            'ecal', 
-            'hcal', 
+            'ecal',
+            'hcal',
             'ho'
         ),
         DepositLabel = cms.untracked.string('Cal'),
@@ -137,8 +137,8 @@ earlyDisplacedMuons = cms.EDProducer("MuonIdProducer",
             PruneCut = cms.double(9.0),
             ServiceParameters = cms.PSet(
                 Propagators = cms.untracked.vstring(
-                    'SteppingHelixPropagatorAny', 
-                    'PropagatorWithMaterial', 
+                    'SteppingHelixPropagatorAny',
+                    'PropagatorWithMaterial',
                     'PropagatorWithMaterialOpposite'
                 ),
                 RPCLayers = cms.bool(True)
@@ -157,8 +157,8 @@ earlyDisplacedMuons = cms.EDProducer("MuonIdProducer",
             RequireBothProjections = cms.bool(False),
             ServiceParameters = cms.PSet(
                 Propagators = cms.untracked.vstring(
-                    'SteppingHelixPropagatorAny', 
-                    'PropagatorWithMaterial', 
+                    'SteppingHelixPropagatorAny',
+                    'PropagatorWithMaterial',
                     'PropagatorWithMaterialOpposite'
                 ),
                 RPCLayers = cms.bool(True)
@@ -269,7 +269,7 @@ earlyDisplacedMuons = cms.EDProducer("MuonIdProducer",
     hoDepositName = cms.string('ho'),
     inputCollectionLabels = cms.VInputTag(cms.InputTag("earlyGeneralTracks"), cms.InputTag("displacedStandAloneMuons")),
     inputCollectionTypes = cms.vstring(
-        'inner tracks', 
+        'inner tracks',
         'outer tracks'
     ),
     jetDepositName = cms.string('jets'),

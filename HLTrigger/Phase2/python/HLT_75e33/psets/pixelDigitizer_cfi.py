@@ -19,13 +19,13 @@ pixelDigitizer = cms.PSet(
         DeadModules = cms.VPSet(),
         DeadModules_DB = cms.bool(False),
         EfficiencyFactors_Barrel = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999, 0.999, 0.999, 0.999, 0.999
         ),
         EfficiencyFactors_Endcap = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999
         ),
         ElectronPerAdc = cms.double(135.0),
@@ -62,13 +62,13 @@ pixelDigitizer = cms.PSet(
         DeadModules = cms.VPSet(),
         DeadModules_DB = cms.bool(False),
         EfficiencyFactors_Barrel = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999, 0.999, 0.999, 0.999, 0.999
         ),
         EfficiencyFactors_Endcap = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999
         ),
         ElectronPerAdc = cms.double(135.0),
@@ -105,13 +105,13 @@ pixelDigitizer = cms.PSet(
         DeadModules = cms.VPSet(),
         DeadModules_DB = cms.bool(False),
         EfficiencyFactors_Barrel = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999, 0.999, 0.999, 0.999, 0.999
         ),
         EfficiencyFactors_Endcap = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999
         ),
         ElectronPerAdc = cms.double(600.0),
@@ -153,13 +153,13 @@ pixelDigitizer = cms.PSet(
         DeadModules = cms.VPSet(),
         DeadModules_DB = cms.bool(False),
         EfficiencyFactors_Barrel = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999, 0.999, 0.999, 0.999, 0.999
         ),
         EfficiencyFactors_Endcap = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999
         ),
         ElectronPerAdc = cms.double(600.0),
@@ -188,43 +188,43 @@ pixelDigitizer = cms.PSet(
             Curves = cms.VPSet(
                 cms.PSet(
                     charge = cms.vdouble(
-                        1000, 1025, 1050, 1100, 1200, 
-                        1500, 2000, 6000, 10000, 15000, 
+                        1000, 1025, 1050, 1100, 1200,
+                        1500, 2000, 6000, 10000, 15000,
                         20000, 30000
                     ),
                     delay = cms.vdouble(
-                        26.8, 23.73, 21.92, 19.46, 16.52, 
-                        12.15, 8.88, 3.03, 1.69, 0.95, 
+                        26.8, 23.73, 21.92, 19.46, 16.52,
+                        12.15, 8.88, 3.03, 1.69, 0.95,
                         0.56, 0.19
                     )
-                ), 
+                ),
                 cms.PSet(
                     charge = cms.vdouble(
-                        1200, 1225, 1250, 1500, 2000, 
+                        1200, 1225, 1250, 1500, 2000,
                         6000, 10000, 15000, 20000, 30000
                     ),
                     delay = cms.vdouble(
-                        26.28, 23.5, 21.79, 14.92, 10.27, 
+                        26.28, 23.5, 21.79, 14.92, 10.27,
                         3.33, 1.86, 1.07, 0.66, 0.27
                     )
-                ), 
+                ),
                 cms.PSet(
                     charge = cms.vdouble(
-                        1500, 1525, 1550, 1600, 2000, 
+                        1500, 1525, 1550, 1600, 2000,
                         6000, 10000, 15000, 20000, 30000
                     ),
                     delay = cms.vdouble(
-                        25.36, 23.05, 21.6, 19.56, 12.94, 
+                        25.36, 23.05, 21.6, 19.56, 12.94,
                         3.79, 2.14, 1.26, 0.81, 0.39
                     )
-                ), 
+                ),
                 cms.PSet(
                     charge = cms.vdouble(
-                        3000, 3025, 3050, 3100, 3500, 
+                        3000, 3025, 3050, 3100, 3500,
                         6000, 10000, 15000, 20000, 30000
                     ),
                     delay = cms.vdouble(
-                        25.63, 23.63, 22.35, 20.65, 14.92, 
+                        25.63, 23.63, 22.35, 20.65, 14.92,
                         6.7, 3.68, 2.29, 1.62, 1.02
                     )
                 )
@@ -235,9 +235,9 @@ pixelDigitizer = cms.PSet(
         TofUpperCut = cms.double(12.5)
     ),
     ROUList = cms.vstring(
-        'TrackerHitsPixelBarrelLowTof', 
-        'TrackerHitsPixelBarrelHighTof', 
-        'TrackerHitsPixelEndcapLowTof', 
+        'TrackerHitsPixelBarrelLowTof',
+        'TrackerHitsPixelBarrelHighTof',
+        'TrackerHitsPixelEndcapLowTof',
         'TrackerHitsPixelEndcapHighTof'
     ),
     SSDigitizerAlgorithm = cms.PSet(
@@ -254,13 +254,13 @@ pixelDigitizer = cms.PSet(
         DeadModules = cms.VPSet(),
         DeadModules_DB = cms.bool(False),
         EfficiencyFactors_Barrel = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999, 0.999, 0.999, 0.999, 0.999
         ),
         EfficiencyFactors_Endcap = cms.vdouble(
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
-            0.999, 0.999, 0.999, 0.999, 0.999, 
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
+            0.999, 0.999, 0.999, 0.999, 0.999,
             0.999
         ),
         ElectronPerAdc = cms.double(135.0),
@@ -274,7 +274,7 @@ pixelDigitizer = cms.PSet(
         NoiseInElectrons = cms.double(1000),
         Phase2ReadoutMode = cms.int32(0),
         PulseShapeParameters = cms.vdouble(
-            -3.0, 16.043703, 99.999857, 40.57165, 2.0, 
+            -3.0, 16.043703, 99.999857, 40.57165, 2.0,
             1.2459094
         ),
         ReadoutNoiseInElec = cms.double(1000.0),

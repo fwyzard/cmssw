@@ -5,7 +5,7 @@ lowPtQuadStepTrajectoryFilter = cms.PSet(
     filters = cms.VPSet(
         cms.PSet(
             refToPSet_ = cms.string('lowPtQuadStepTrajectoryFilterBase')
-        ), 
+        ),
         cms.PSet(
             refToPSet_ = cms.string('ClusterShapeTrajectoryFilter')
         )

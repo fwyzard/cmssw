@@ -83,7 +83,7 @@ isolationSumsCalculator = cms.PSet(
     longImpactParameterB_Barrel = cms.double(0.2),
     longImpactParameterB_Endcap = cms.double(0.2),
     moduleEtaBoundary = cms.vdouble(
-        0.0, 0.02, 0.43, 0.46, 0.78, 
+        0.0, 0.02, 0.43, 0.46, 0.78,
         0.81, 1.13, 1.15, 1.45, 1.58
     ),
     modulePhiBoundary = cms.double(0.0087),

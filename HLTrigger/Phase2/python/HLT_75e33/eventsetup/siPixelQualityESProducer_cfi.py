@@ -5,7 +5,7 @@ siPixelQualityESProducer = cms.ESProducer("SiPixelQualityESProducer",
         cms.PSet(
             record = cms.string('SiPixelQualityFromDbRcd'),
             tag = cms.string('')
-        ), 
+        ),
         cms.PSet(
             record = cms.string('SiPixelDetVOffRcd'),
             tag = cms.string('')

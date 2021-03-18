@@ -5,7 +5,7 @@ highPtTripletStepTrajectoryFilter = cms.PSet(
     filters = cms.VPSet(
         cms.PSet(
             refToPSet_ = cms.string('highPtTripletStepTrajectoryFilterBase')
-        ), 
+        ),
         cms.PSet(
             refToPSet_ = cms.string('ClusterShapeTrajectoryFilter')
         )

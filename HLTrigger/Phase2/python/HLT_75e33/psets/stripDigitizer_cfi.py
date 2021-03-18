@@ -78,7 +78,7 @@ stripDigitizer = cms.PSet(
     PedestalsOffset = cms.double(128),
     PreMixingMode = cms.bool(False),
     ROUList = cms.vstring(
-        'g4SimHitsTrackerHitsPixelBarrelLowTof', 
+        'g4SimHitsTrackerHitsPixelBarrelLowTof',
         'g4SimHitsTrackerHitsPixelEndcapLowTof'
     ),
     RealPedestals = cms.bool(True),

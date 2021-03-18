@@ -108,23 +108,23 @@ particleFlowTmpBarrel = cms.EDProducer("PFProducer",
     ),
     blocks = cms.InputTag("particleFlowBlock"),
     calibHF_a_EMHAD = cms.vdouble(
-        1, 1, 1, 1, 1, 
+        1, 1, 1, 1, 1,
         1, 1, 1, 1, 1
     ),
     calibHF_a_EMonly = cms.vdouble(
-        1, 1, 1, 1, 1, 
+        1, 1, 1, 1, 1,
         1, 1, 1, 1, 1
     ),
     calibHF_b_EMHAD = cms.vdouble(
-        1, 1, 1, 1, 1, 
+        1, 1, 1, 1, 1,
         1, 1, 1, 1, 1
     ),
     calibHF_b_HADonly = cms.vdouble(
-        1, 1, 1, 1, 1, 
+        1, 1, 1, 1, 1,
         1, 1, 1, 1, 1
     ),
     calibHF_eta_step = cms.vdouble(
-        0, 2.9, 3, 3.2, 4.2, 
+        0, 2.9, 3, 3.2, 4.2,
         4.4, 4.6, 4.8, 5.2, 5.4
     ),
     calibHF_use = cms.bool(False),

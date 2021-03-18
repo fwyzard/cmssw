@@ -2,11 +2,11 @@ import FWCore.ParameterSet.Config as cms
 
 pfMassDecorrelatedParticleNetPreprocessParams = cms.PSet(
     input_names = cms.vstring(
-        'pf_points', 
-        'pf_features', 
-        'pf_mask', 
-        'sv_points', 
-        'sv_features', 
+        'pf_points',
+        'pf_features',
+        'pf_mask',
+        'sv_points',
+        'sv_features',
         'sv_mask'
     ),
     pf_features = cms.PSet(
@@ -115,25 +115,25 @@ pfMassDecorrelatedParticleNetPreprocessParams = cms.PSet(
         ),
         var_length = cms.uint32(100),
         var_names = cms.vstring(
-            'pfcand_pt_log_nopuppi', 
-            'pfcand_e_log_nopuppi', 
-            'pfcand_etarel', 
-            'pfcand_phirel', 
-            'pfcand_abseta', 
-            'pfcand_charge', 
-            'pfcand_VTX_ass', 
-            'pfcand_lostInnerHits', 
-            'pfcand_normchi2', 
-            'pfcand_quality', 
-            'pfcand_dz', 
-            'pfcand_dzsig', 
-            'pfcand_dxy', 
-            'pfcand_dxysig', 
-            'pfcand_btagEtaRel', 
-            'pfcand_btagPtRatio', 
-            'pfcand_btagPParRatio', 
-            'pfcand_btagSip3dVal', 
-            'pfcand_btagSip3dSig', 
+            'pfcand_pt_log_nopuppi',
+            'pfcand_e_log_nopuppi',
+            'pfcand_etarel',
+            'pfcand_phirel',
+            'pfcand_abseta',
+            'pfcand_charge',
+            'pfcand_VTX_ass',
+            'pfcand_lostInnerHits',
+            'pfcand_normchi2',
+            'pfcand_quality',
+            'pfcand_dz',
+            'pfcand_dzsig',
+            'pfcand_dxy',
+            'pfcand_dxysig',
+            'pfcand_btagEtaRel',
+            'pfcand_btagPtRatio',
+            'pfcand_btagPParRatio',
+            'pfcand_btagSip3dVal',
+            'pfcand_btagSip3dSig',
             'pfcand_btagJetDistVal'
         )
     ),
@@ -162,7 +162,7 @@ pfMassDecorrelatedParticleNetPreprocessParams = cms.PSet(
         ),
         var_length = cms.uint32(100),
         var_names = cms.vstring(
-            'pfcand_etarel', 
+            'pfcand_etarel',
             'pfcand_phirel'
         )
     ),
@@ -220,17 +220,17 @@ pfMassDecorrelatedParticleNetPreprocessParams = cms.PSet(
         ),
         var_length = cms.uint32(7),
         var_names = cms.vstring(
-            'sv_pt_log', 
-            'sv_mass', 
-            'sv_phirel', 
-            'sv_etarel', 
-            'sv_abseta', 
-            'sv_ntracks', 
-            'sv_normchi2', 
-            'sv_dxy', 
-            'sv_dxysig', 
-            'sv_d3d', 
-            'sv_d3dsig', 
+            'sv_pt_log',
+            'sv_mass',
+            'sv_phirel',
+            'sv_etarel',
+            'sv_abseta',
+            'sv_ntracks',
+            'sv_normchi2',
+            'sv_dxy',
+            'sv_dxysig',
+            'sv_d3d',
+            'sv_d3dsig',
             'sv_costhetasvpv'
         )
     ),
@@ -259,7 +259,7 @@ pfMassDecorrelatedParticleNetPreprocessParams = cms.PSet(
         ),
         var_length = cms.uint32(7),
         var_names = cms.vstring(
-            'sv_phirel', 
+            'sv_phirel',
             'sv_etarel'
         )
     )

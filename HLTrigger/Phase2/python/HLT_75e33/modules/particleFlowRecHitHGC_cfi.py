@@ -25,7 +25,7 @@ particleFlowRecHitHGC = cms.EDProducer("PFRecHitProducer",
                 thresholdSNR = cms.double(5.0)
             )),
             src = cms.InputTag("HGCalRecHit","HGCEERecHits")
-        ), 
+        ),
         cms.PSet(
             geometryInstance = cms.string('HGCalHESiliconSensitive'),
             name = cms.string('PFHGCalHSiRecHitCreator'),
@@ -34,7 +34,7 @@ particleFlowRecHitHGC = cms.EDProducer("PFRecHitProducer",
                 thresholdSNR = cms.double(5.0)
             )),
             src = cms.InputTag("HGCalRecHit","HGCHEFRecHits")
-        ), 
+        ),
         cms.PSet(
             geometryInstance = cms.string(''),
             name = cms.string('PFHGCalHScRecHitCreator'),

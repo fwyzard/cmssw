@@ -35,7 +35,7 @@ muonSeededTracksInOutSelector = cms.EDProducer("MultiTrackSelector",
             res_par = cms.vdouble(0.003, 0.01),
             vertexCut = cms.string('ndof>=2&!isFake'),
             vtxNumber = cms.int32(-1)
-        ), 
+        ),
         cms.PSet(
             applyAbsCutsIfNoPV = cms.bool(False),
             applyAdaptedPVCuts = cms.bool(False),
@@ -67,7 +67,7 @@ muonSeededTracksInOutSelector = cms.EDProducer("MultiTrackSelector",
             res_par = cms.vdouble(0.003, 0.01),
             vertexCut = cms.string('ndof>=2&!isFake'),
             vtxNumber = cms.int32(-1)
-        ), 
+        ),
         cms.PSet(
             applyAbsCutsIfNoPV = cms.bool(False),
             applyAdaptedPVCuts = cms.bool(False),

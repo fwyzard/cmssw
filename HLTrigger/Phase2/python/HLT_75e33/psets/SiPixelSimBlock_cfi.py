@@ -36,9 +36,9 @@ SiPixelSimBlock = cms.PSet(
     PrintTemplates = cms.bool(False),
     ReadoutNoiseInElec = cms.double(350.0),
     RoutList = cms.vstring(
-        'TrackerHitsPixelBarrelLowTof', 
-        'TrackerHitsPixelBarrelHighTof', 
-        'TrackerHitsPixelEndcapLowTof', 
+        'TrackerHitsPixelBarrelLowTof',
+        'TrackerHitsPixelBarrelHighTof',
+        'TrackerHitsPixelEndcapLowTof',
         'TrackerHitsPixelEndcapHighTof'
     ),
     SiPixelQualityLabel = cms.string('forDigitizer'),

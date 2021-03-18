@@ -11,7 +11,7 @@ particleFlowClusterECALUncorrected = cms.EDProducer("PFClusterProducer",
                 detector = cms.string('ECAL_BARREL'),
                 gatheringThreshold = cms.double(0.175),
                 gatheringThresholdPt = cms.double(0.0)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('ECAL_ENDCAP'),
                 gatheringThreshold = cms.double(0.3),
@@ -90,7 +90,7 @@ particleFlowClusterECALUncorrected = cms.EDProducer("PFClusterProducer",
             cms.PSet(
                 detector = cms.string('ECAL_BARREL'),
                 recHitEnergyNorm = cms.double(0.08)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('ECAL_ENDCAP'),
                 recHitEnergyNorm = cms.double(0.3)
@@ -123,7 +123,7 @@ particleFlowClusterECALUncorrected = cms.EDProducer("PFClusterProducer",
                 detector = cms.string('ECAL_ENDCAP'),
                 seedingThreshold = cms.double(0.6),
                 seedingThresholdPt = cms.double(0.15)
-            ), 
+            ),
             cms.PSet(
                 detector = cms.string('ECAL_BARREL'),
                 seedingThreshold = cms.double(0.4375),

@@ -34,7 +34,7 @@ hltPFPuppiNoLep = cms.EDProducer("PuppiProducer",
                 rmsScaleFactor = cms.double(1.0),
                 useCharged = cms.bool(True)
             ))
-        ), 
+        ),
         cms.PSet(
             EtaMaxExtrap = cms.double(2.0),
             MedEtaSF = cms.vdouble(0.75),

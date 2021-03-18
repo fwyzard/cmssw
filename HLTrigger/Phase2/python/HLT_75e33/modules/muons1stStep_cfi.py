@@ -9,8 +9,8 @@ muons1stStep = cms.EDProducer("MuonIdProducer",
         DR_Veto_H = cms.double(0.1),
         DR_Veto_HO = cms.double(0.1),
         DepositInstanceLabels = cms.vstring(
-            'ecal', 
-            'hcal', 
+            'ecal',
+            'hcal',
             'ho'
         ),
         DepositLabel = cms.untracked.string('Cal'),
@@ -137,8 +137,8 @@ muons1stStep = cms.EDProducer("MuonIdProducer",
             PruneCut = cms.double(9.0),
             ServiceParameters = cms.PSet(
                 Propagators = cms.untracked.vstring(
-                    'SteppingHelixPropagatorAny', 
-                    'PropagatorWithMaterial', 
+                    'SteppingHelixPropagatorAny',
+                    'PropagatorWithMaterial',
                     'PropagatorWithMaterialOpposite'
                 ),
                 RPCLayers = cms.bool(True)
@@ -157,8 +157,8 @@ muons1stStep = cms.EDProducer("MuonIdProducer",
             RequireBothProjections = cms.bool(False),
             ServiceParameters = cms.PSet(
                 Propagators = cms.untracked.vstring(
-                    'SteppingHelixPropagatorAny', 
-                    'PropagatorWithMaterial', 
+                    'SteppingHelixPropagatorAny',
+                    'PropagatorWithMaterial',
                     'PropagatorWithMaterialOpposite'
                 ),
                 RPCLayers = cms.bool(True)
@@ -268,15 +268,15 @@ muons1stStep = cms.EDProducer("MuonIdProducer",
     hcalDepositName = cms.string('hcal'),
     hoDepositName = cms.string('ho'),
     inputCollectionLabels = cms.VInputTag(
-        cms.InputTag("generalTracks"), cms.InputTag("globalMuons"), cms.InputTag("standAloneMuons","UpdatedAtVtx"), cms.InputTag("tevMuons","firstHit"), cms.InputTag("tevMuons","picky"), 
+        cms.InputTag("generalTracks"), cms.InputTag("globalMuons"), cms.InputTag("standAloneMuons","UpdatedAtVtx"), cms.InputTag("tevMuons","firstHit"), cms.InputTag("tevMuons","picky"),
         cms.InputTag("tevMuons","dyt")
     ),
     inputCollectionTypes = cms.vstring(
-        'inner tracks', 
-        'links', 
-        'outer tracks', 
-        'tev firstHit', 
-        'tev picky', 
+        'inner tracks',
+        'links',
+        'outer tracks',
+        'tev firstHit',
+        'tev picky',
         'tev dyt'
     ),
     jetDepositName = cms.string('jets'),

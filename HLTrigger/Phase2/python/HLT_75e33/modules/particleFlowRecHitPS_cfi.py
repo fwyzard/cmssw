@@ -10,7 +10,7 @@ particleFlowRecHitPS = cms.EDProducer("PFRecHitProducer",
             cms.PSet(
                 name = cms.string('PFRecHitQTestThreshold'),
                 threshold = cms.double(0.0)
-            ), 
+            ),
             cms.PSet(
                 cleaningThreshold = cms.double(0.0),
                 name = cms.string('PFRecHitQTestES'),

@@ -15,7 +15,7 @@ CSCSegAlgoRU = cms.PSet(
             enlarge = cms.bool(False),
             minLayersApart = cms.int32(1),
             wideSeg = cms.double(3.0)
-        ), 
+        ),
         cms.PSet(
             chi2Max = cms.double(100.0),
             chi2Norm_2D_ = cms.double(35),
@@ -28,7 +28,7 @@ CSCSegAlgoRU = cms.PSet(
             enlarge = cms.bool(False),
             minLayersApart = cms.int32(1),
             wideSeg = cms.double(3.0)
-        ), 
+        ),
         cms.PSet(
             chi2Max = cms.double(100.0),
             chi2Norm_2D_ = cms.double(35),
@@ -41,7 +41,7 @@ CSCSegAlgoRU = cms.PSet(
             enlarge = cms.bool(False),
             minLayersApart = cms.int32(1),
             wideSeg = cms.double(3.0)
-        ), 
+        ),
         cms.PSet(
             chi2Max = cms.double(60.0),
             chi2Norm_2D_ = cms.double(20),
@@ -54,7 +54,7 @@ CSCSegAlgoRU = cms.PSet(
             enlarge = cms.bool(False),
             minLayersApart = cms.int32(1),
             wideSeg = cms.double(3.0)
-        ), 
+        ),
         cms.PSet(
             chi2Max = cms.double(180.0),
             chi2Norm_2D_ = cms.double(60),
@@ -67,7 +67,7 @@ CSCSegAlgoRU = cms.PSet(
             enlarge = cms.bool(False),
             minLayersApart = cms.int32(1),
             wideSeg = cms.double(3.0)
-        ), 
+        ),
         cms.PSet(
             chi2Max = cms.double(100.0),
             chi2Norm_2D_ = cms.double(35),
@@ -83,19 +83,19 @@ CSCSegAlgoRU = cms.PSet(
         )
     ),
     chamber_types = cms.vstring(
-        'ME1/a', 
-        'ME1/b', 
-        'ME1/2', 
-        'ME1/3', 
-        'ME2/1', 
-        'ME2/2', 
-        'ME3/1', 
-        'ME3/2', 
-        'ME4/1', 
+        'ME1/a',
+        'ME1/b',
+        'ME1/2',
+        'ME1/3',
+        'ME2/1',
+        'ME2/2',
+        'ME3/1',
+        'ME3/2',
+        'ME4/1',
         'ME4/2'
     ),
     parameters_per_chamber_type = cms.vint32(
-        1, 2, 3, 4, 5, 
+        1, 2, 3, 4, 5,
         6, 5, 6, 5, 6
     )
 )
