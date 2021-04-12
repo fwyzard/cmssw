@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from ..sequences.l1tReconstructionSeq_cfi import *
+from ..modules.l1tSlwPFPuppiJets_cfi import *
+from ..modules.l1tSlwPFPuppiJetsCorrected_cfi import *
 
-l1tReconstructionPath = cms.Path(l1tReconstructionSeq)
+l1tReconstructionPath = cms.Path(cms.Task(l1tSlwPFPuppiJets, l1tSlwPFPuppiJetsCorrected))
