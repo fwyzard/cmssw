@@ -2,6 +2,17 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("HLTX")
 
+# offlineBeamSpot
+# -- L1 emulation -- #
+process.load('Configuration.StandardSequences.L1TrackTrigger_cff')
+process.load('Configuration.StandardSequences.SimL1Emulator_cff')
+process.load('Configuration.StandardSequences.EndOfProcess_cff')
+process.L1TrackTrigger_step = cms.Path(process.L1TrackTrigger)
+process.L1simulation_step = cms.Path(process.SimL1Emulator)
+process.L1TkMuons.L1TrackInputTag = cms.InputTag("TTTracksFromTrackletEmulation", "Level1TTTracks", "RECO")
+process.L1TkMuons.applyQualityCuts = cms.bool(True)
+# -- #
+
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     fileNames = cms.untracked.vstring('/store/mc/Phase2HLTTDRSummer20ReRECOMiniAOD/TT_TuneCP5_14TeV-powheg-pythia8/FEVT/PU200_111X_mcRun4_realistic_T15_v1-v2/280000/007CCF38-CBE4-6B4D-A97A-580FA0CA0850.root'),
@@ -30085,4 +30096,54 @@ process.simSiStripDigis = cms.EDAlias(
     )
 )
 
-process.schedule = cms.Schedule(*[ process.l1tReconstructionPath, process.L1T_SinglePFPuppiJet230off, process.L1T_PFPuppiHT450off, process.L1T_PFPuppiMET220off, process.HLT_AK4PFPuppiJet520, process.HLT_PFPuppiHT1070, process.HLT_PFPuppiMETTypeOne140_PFPuppiMHT140, process.L1T_PFHT400PT30_QuadPFPuppiJet_70_55_40_40_2p4, process.L1T_DoublePFPuppiJets112_2p4_DEta1p6, process.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4, process.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepCSV_2p4, process.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepCSV_2p4, process.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepFlavour_2p4, process.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepFlavour_2p4, process.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepFlavour_2p4, process.MC_JME, process.MC_BTV])
+# -- HLTriggerFinalPath -- #
+process.hltTriggerSummaryAOD = cms.EDProducer( "TriggerSummaryProducerAOD",
+    moduleLabelPatternsToSkip = cms.vstring(  ),
+    processName = cms.string( "@" ),
+    moduleLabelPatternsToMatch = cms.vstring( 'hlt*', 'L1Tk*' ),
+    throw = cms.bool( False )
+)
+process.hltTriggerSummaryRAW = cms.EDProducer( "TriggerSummaryProducerRAW",
+    processName = cms.string( "@" )
+)
+
+process.hltBoolFalse = cms.EDFilter("HLTBool",
+    result = cms.bool( False )
+)
+process.HLTriggerFinalPath = cms.Path(
+    process.hltTriggerSummaryAOD+
+    process.hltTriggerSummaryRAW+
+    process.hltBoolFalse
+)
+# -- #
+
+# -- HLT paths -- #
+from HLTrigger.PhaseII.Muon.Customizers.loadPhase2MuonHLTPaths_cfi import loadPhase2MuonHLTPaths
+process = loadPhase2MuonHLTPaths(process, processName="HLTX")
+
+process.hltL1TkSingleMuFiltered22.inputTag = cms.InputTag("L1TkMuons","","HLTX")
+process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions.RegionPSet.input = cms.InputTag("L1TkMuons","","HLTX")
+process.hltL2MuonSeedsFromL1TkMuon.InputObjects = cms.InputTag("L1TkMuons","","HLTX")
+
+# CLEARLY we need to tell this stuff to run
+process.runTheL1P2Task = cms.Task(process.simKBmtfDigis, process.simKBmtfStubs, process.simTwinMuxDigis, process.simOmtfDigis, process.simEmtfDigis, process.L1TkMuons, process.L1TkPrimaryVertex)
+process.runTheL1P2_step = cms.Path(process.runTheL1P2Task)
+
+#simCscTriggerPrimitiveDigis
+#simDtTriggerPrimitiveDigis
+#simEmtfDigis
+#simGmtCaloSumDigis
+#simGmtStage2Digis
+#simGtExtFakeStage2Digis
+#simGtStage2Digis
+#simKBmtfDigis
+#simKBmtfStubs
+#simMuonGEMPadDigiClusters
+#simMuonGEMPadDigis
+#simMuonME0PadDigis
+#simMuonME0PseudoReDigisCoarse
+#simOmtfDigis
+#simTwinMuxDigis
+
+process.schedule = cms.Schedule(*[ process.runTheL1P2_step, process.L1simulation_step, process.l1tReconstructionPath, process.L1T_SinglePFPuppiJet230off, process.L1T_PFPuppiHT450off, process.L1T_PFPuppiMET220off, process.HLT_AK4PFPuppiJet520, process.HLT_PFPuppiHT1070, process.HLT_PFPuppiMETTypeOne140_PFPuppiMHT140, process.L1T_PFHT400PT30_QuadPFPuppiJet_70_55_40_40_2p4, process.L1T_DoublePFPuppiJets112_2p4_DEta1p6, process.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4, process.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepCSV_2p4, process.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepCSV_2p4, process.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepFlavour_2p4, process.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepFlavour_2p4, process.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepFlavour_2p4, process.L1_SingleTkMuon_22, process.L1_DoubleTkMuon_17_8, process.L1_TripleTkMuon_5_3_3, process.HLT_Mu50_FromL1TkMuon, process.MC_JME, process.MC_BTV])
+
