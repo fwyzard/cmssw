@@ -10077,7 +10077,7 @@ process.hltPhase2L3OITrackCandidates = cms.EDProducer("CkfTrackCandidateMaker",
 )
 
 
-process.hltPixelClustersMultiplicity = cms.EDProducer("SiPixelClusterMultiplicityValueProducer",
+process.hltPixelClustersMultiplicity = cms.EDProducer("HLTSiPixelClusterMultiplicityValueProducer",
     defaultValue = cms.double(-1.0),
     mightGet = cms.optional.untracked.vstring,
     src = cms.InputTag("siPixelClusters")
