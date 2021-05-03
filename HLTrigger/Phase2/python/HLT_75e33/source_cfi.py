@@ -13,6 +13,10 @@ source = cms.Source("PoolSource",
         'keep *_l1pfCandidates_*_RECO',
         'keep *_TTTracksFromTrackletEmulation_Level1TTTracks_RECO',
         'keep *_TTTracksFromExtendedTrackletEmulation_Level1TTTracks_RECO',
+        'keep *_TTStubsFromPhase2TrackerDigis_*_RECO',
+        'keep *_TTTrackAssociatorFromPixelDigis_Level1TTTracks_RECO',     
+        'keep *_TTStubAssociatorFromPixelDigis_*_RECO',
+        'keep *_TTClusterAssociatorFromPixelDigis_*_RECO',
         'keep *_L1TkPrimaryVertex__RECO',
         'keep *_l1pfCandidates_Puppi_RECO',
         'keep *_ak4PFL1Calo__RECO',
@@ -32,7 +36,8 @@ source = cms.Source("PoolSource",
         'keep *_slimmedJetsPuppi__RECO',
         'keep *_slimmedJetsAK8*_*_RECO',
         'keep *_slimmedMETs__RECO',
-        'keep *_slimmedMETsPuppi__RECO'
+        'keep *_slimmedMETsPuppi__RECO',
+        'keep *_hgcalBackEndLayer2Producer_*_RECO'
     ),
     secondaryFileNames = cms.untracked.vstring()
 )
