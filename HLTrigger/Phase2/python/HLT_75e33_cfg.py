@@ -5145,7 +5145,7 @@ process.hltCsc2DRecHits = cms.EDProducer("CSCRecHitDProducer",
     CSCStripPeakThreshold = cms.double(10.0),
     CSCStripxtalksOffset = cms.double(0.03),
     CSCUseCalibrations = cms.bool(True),
-    CSCUseGasGainCorrections = cms.bool(True),
+    CSCUseGasGainCorrections = cms.bool(False),
     CSCUseReducedWireTimeWindow = cms.bool(False),
     CSCUseStaticPedestals = cms.bool(False),
     CSCUseTimingCorrections = cms.bool(True),
@@ -5184,7 +5184,7 @@ process.hltCsc2DRecHits = cms.EDProducer("CSCRecHitDProducer",
     XTasymmetry_ME32 = cms.double(0.023),
     XTasymmetry_ME41 = cms.double(0.023),
     readBadChambers = cms.bool(True),
-    readBadChannels = cms.bool(True),
+    readBadChannels = cms.bool(False),
     stripDigiTag = cms.InputTag("simMuonCSCDigis","MuonCSCStripDigi"),
     wireDigiTag = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
 )
@@ -13470,8 +13470,8 @@ process.simCastorTechTrigDigis = cms.EDProducer("CastorTTRecord",
 process.simCscTriggerPrimitiveDigis = cms.EDProducer("CSCTriggerPrimitivesProducer",
     CSCComparatorDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCComparatorDigi"),
     CSCWireDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi"),
-    GEMPadDigiClusterProducer = cms.InputTag(""),
-    GEMPadDigiProducer = cms.InputTag(""),
+    GEMPadDigiClusterProducer = cms.InputTag("simMuonGEMPadDigiClusters"),
+    GEMPadDigiProducer = cms.InputTag("simMuonGEMPadDigis"),
     MaxBX = cms.int32(11),
     MinBX = cms.int32(5),
     alctParam07 = cms.PSet(
@@ -13514,7 +13514,47 @@ process.simCscTriggerPrimitiveDigis = cms.EDProducer("CSCTriggerPrimitivesProduc
         alctUseCorrectedBx = cms.bool(True),
         verbosity = cms.int32(0)
     ),
-    checkBadChambers = cms.bool(True),
+    alctSLHCME21 = cms.PSet(
+        alctAccelMode = cms.uint32(0),
+        alctDriftDelay = cms.uint32(2),
+        alctEarlyTbins = cms.int32(4),
+        alctFifoPretrig = cms.uint32(10),
+        alctFifoTbins = cms.uint32(16),
+        alctGhostCancellationBxDepth = cms.int32(1),
+        alctGhostCancellationSideQuality = cms.bool(True),
+        alctHitPersist = cms.uint32(6),
+        alctL1aWindowWidth = cms.uint32(7),
+        alctNarrowMaskForR1 = cms.bool(True),
+        alctNplanesHitAccelPattern = cms.uint32(4),
+        alctNplanesHitAccelPretrig = cms.uint32(3),
+        alctNplanesHitPattern = cms.uint32(3),
+        alctNplanesHitPretrig = cms.uint32(3),
+        alctPretrigDeadtime = cms.uint32(0),
+        alctTrigMode = cms.uint32(2),
+        alctUseCorrectedBx = cms.bool(True),
+        verbosity = cms.int32(0)
+    ),
+    alctSLHCME3141 = cms.PSet(
+        alctAccelMode = cms.uint32(0),
+        alctDriftDelay = cms.uint32(2),
+        alctEarlyTbins = cms.int32(4),
+        alctFifoPretrig = cms.uint32(10),
+        alctFifoTbins = cms.uint32(16),
+        alctGhostCancellationBxDepth = cms.int32(4),
+        alctGhostCancellationSideQuality = cms.bool(False),
+        alctHitPersist = cms.uint32(6),
+        alctL1aWindowWidth = cms.uint32(7),
+        alctNarrowMaskForR1 = cms.bool(False),
+        alctNplanesHitAccelPattern = cms.uint32(4),
+        alctNplanesHitAccelPretrig = cms.uint32(3),
+        alctNplanesHitPattern = cms.uint32(4),
+        alctNplanesHitPretrig = cms.uint32(3),
+        alctPretrigDeadtime = cms.uint32(4),
+        alctTrigMode = cms.uint32(2),
+        alctUseCorrectedBx = cms.bool(False),
+        verbosity = cms.int32(0)
+    ),
+    checkBadChambers = cms.bool(False),
     clctParam07 = cms.PSet(
         clctDriftDelay = cms.uint32(2),
         clctFifoPretrig = cms.uint32(7),
@@ -13530,6 +13570,44 @@ process.simCscTriggerPrimitiveDigis = cms.EDProducer("CSCTriggerPrimitivesProduc
         verbosity = cms.int32(0)
     ),
     clctSLHC = cms.PSet(
+        clctDriftDelay = cms.uint32(2),
+        clctFifoPretrig = cms.uint32(7),
+        clctFifoTbins = cms.uint32(12),
+        clctHitPersist = cms.uint32(4),
+        clctMinSeparation = cms.uint32(5),
+        clctNplanesHitPattern = cms.uint32(3),
+        clctNplanesHitPretrig = cms.uint32(3),
+        clctPidThreshPretrig = cms.uint32(2),
+        clctPretriggerTriggerZone = cms.uint32(224),
+        clctStartBxShift = cms.int32(0),
+        clctStateMachineZone = cms.uint32(4),
+        clctUseCorrectedBx = cms.bool(False),
+        useComparatorCodes = cms.bool(False),
+        useDeadTimeZoning = cms.bool(True),
+        useDynamicStateMachineZone = cms.bool(True),
+        useRun3Patterns = cms.bool(False),
+        verbosity = cms.int32(0)
+    ),
+    clctSLHCME21 = cms.PSet(
+        clctDriftDelay = cms.uint32(2),
+        clctFifoPretrig = cms.uint32(7),
+        clctFifoTbins = cms.uint32(12),
+        clctHitPersist = cms.uint32(4),
+        clctMinSeparation = cms.uint32(5),
+        clctNplanesHitPattern = cms.uint32(3),
+        clctNplanesHitPretrig = cms.uint32(3),
+        clctPidThreshPretrig = cms.uint32(2),
+        clctPretriggerTriggerZone = cms.uint32(224),
+        clctStartBxShift = cms.int32(0),
+        clctStateMachineZone = cms.uint32(4),
+        clctUseCorrectedBx = cms.bool(False),
+        useComparatorCodes = cms.bool(False),
+        useDeadTimeZoning = cms.bool(True),
+        useDynamicStateMachineZone = cms.bool(False),
+        useRun3Patterns = cms.bool(False),
+        verbosity = cms.int32(0)
+    ),
+    clctSLHCME3141 = cms.PSet(
         clctDriftDelay = cms.uint32(2),
         clctFifoPretrig = cms.uint32(7),
         clctFifoTbins = cms.uint32(12),
@@ -13552,19 +13630,129 @@ process.simCscTriggerPrimitiveDigis = cms.EDProducer("CSCTriggerPrimitivesProduc
         alctClctOffset = cms.uint32(1),
         disableME1a = cms.bool(False),
         disableME42 = cms.bool(False),
-        enableAlctSLHC = cms.bool(False),
-        gangedME1a = cms.bool(True),
-        isSLHC = cms.bool(False),
-        runME11ILT = cms.bool(False),
-        runME11Up = cms.bool(False),
-        runME21ILT = cms.bool(False),
-        runME21Up = cms.bool(False),
-        runME31Up = cms.bool(False),
-        runME41Up = cms.bool(False),
+        enableAlctSLHC = cms.bool(True),
+        gangedME1a = cms.bool(False),
+        isSLHC = cms.bool(True),
+        runME11ILT = cms.bool(True),
+        runME11Up = cms.bool(True),
+        runME21ILT = cms.bool(True),
+        runME21Up = cms.bool(True),
+        runME31Up = cms.bool(True),
+        runME41Up = cms.bool(True),
         useClusters = cms.bool(False),
         verbosity = cms.int32(0)
     ),
-    debugParameters = cms.bool(False),
+    copadParamGE11 = cms.PSet(
+        maxDeltaBX = cms.uint32(0),
+        maxDeltaPad = cms.uint32(2),
+        maxDeltaRoll = cms.uint32(1),
+        verbosity = cms.uint32(0)
+    ),
+    copadParamGE21 = cms.PSet(
+        maxDeltaBX = cms.uint32(0),
+        maxDeltaPad = cms.uint32(2),
+        maxDeltaRoll = cms.uint32(1),
+        verbosity = cms.uint32(0)
+    ),
+    debugParameters = cms.bool(True),
+    me11tmbSLHCGEM = cms.PSet(
+        alctTrigEnable = cms.uint32(0),
+        buildLCTfromALCTandGEM_ME1a = cms.bool(False),
+        buildLCTfromALCTandGEM_ME1b = cms.bool(True),
+        buildLCTfromCLCTandGEM_ME1a = cms.bool(False),
+        buildLCTfromCLCTandGEM_ME1b = cms.bool(True),
+        clctToAlct = cms.bool(False),
+        clctTrigEnable = cms.uint32(0),
+        debugLUTs = cms.bool(False),
+        debugMatching = cms.bool(False),
+        doLCTGhostBustingWithGEMs = cms.bool(False),
+        dropLowQualityALCTsNoGEMs_ME1a = cms.bool(False),
+        dropLowQualityALCTsNoGEMs_ME1b = cms.bool(False),
+        dropLowQualityCLCTsNoGEMs_ME1a = cms.bool(False),
+        dropLowQualityCLCTsNoGEMs_ME1b = cms.bool(True),
+        matchEarliestAlctOnly = cms.bool(False),
+        matchEarliestClctOnly = cms.bool(False),
+        matchTrigEnable = cms.uint32(1),
+        matchTrigWindowSize = cms.uint32(3),
+        maxDeltaBXCoPad = cms.int32(1),
+        maxDeltaBXPad = cms.int32(1),
+        maxDeltaPadL1Even = cms.int32(12),
+        maxDeltaPadL1Odd = cms.int32(24),
+        maxDeltaPadL2Even = cms.int32(12),
+        maxDeltaPadL2Odd = cms.int32(24),
+        maxLCTs = cms.uint32(2),
+        mpcBlockMe1a = cms.uint32(0),
+        promoteALCTGEMpattern = cms.bool(True),
+        promoteALCTGEMquality = cms.bool(True),
+        promoteCLCTGEMquality_ME1a = cms.bool(True),
+        promoteCLCTGEMquality_ME1b = cms.bool(True),
+        tmbCrossBxAlgorithm = cms.uint32(2),
+        tmbDropUsedAlcts = cms.bool(False),
+        tmbDropUsedClcts = cms.bool(False),
+        tmbEarlyTbins = cms.int32(4),
+        tmbL1aWindowSize = cms.uint32(7),
+        tmbReadoutEarliest2 = cms.bool(False),
+        useHighMultiplicityBits = cms.bool(False),
+        useOldLCTDataFormat = cms.bool(True),
+        verbosity = cms.int32(0)
+    ),
+    me21tmbSLHCGEM = cms.PSet(
+        alctTrigEnable = cms.uint32(0),
+        buildLCTfromALCTandGEM = cms.bool(True),
+        buildLCTfromCLCTandGEM = cms.bool(True),
+        clctToAlct = cms.bool(False),
+        clctTrigEnable = cms.uint32(0),
+        debugLUTs = cms.bool(False),
+        debugMatching = cms.bool(False),
+        doLCTGhostBustingWithGEMs = cms.bool(False),
+        dropLowQualityALCTsNoGEMs = cms.bool(True),
+        dropLowQualityCLCTsNoGEMs = cms.bool(True),
+        matchEarliestAlctOnly = cms.bool(False),
+        matchEarliestClctOnly = cms.bool(False),
+        matchTrigEnable = cms.uint32(1),
+        matchTrigWindowSize = cms.uint32(3),
+        maxDeltaBXCoPad = cms.int32(1),
+        maxDeltaBXPad = cms.int32(1),
+        maxDeltaPadL1Even = cms.int32(12),
+        maxDeltaPadL1Odd = cms.int32(24),
+        maxDeltaPadL2Even = cms.int32(12),
+        maxDeltaPadL2Odd = cms.int32(24),
+        maxLCTs = cms.uint32(2),
+        mpcBlockMe1a = cms.uint32(0),
+        promoteALCTGEMpattern = cms.bool(True),
+        promoteALCTGEMquality = cms.bool(True),
+        promoteCLCTGEMquality = cms.bool(True),
+        tmbCrossBxAlgorithm = cms.uint32(2),
+        tmbDropUsedAlcts = cms.bool(False),
+        tmbDropUsedClcts = cms.bool(False),
+        tmbEarlyTbins = cms.int32(4),
+        tmbL1aWindowSize = cms.uint32(7),
+        tmbReadoutEarliest2 = cms.bool(False),
+        useHighMultiplicityBits = cms.bool(False),
+        useOldLCTDataFormat = cms.bool(True),
+        verbosity = cms.int32(0)
+    ),
+    meX1tmbSLHC = cms.PSet(
+        alctTrigEnable = cms.uint32(0),
+        clctToAlct = cms.bool(False),
+        clctTrigEnable = cms.uint32(0),
+        debugLUTs = cms.bool(False),
+        debugMatching = cms.bool(False),
+        matchEarliestAlctOnly = cms.bool(False),
+        matchEarliestClctOnly = cms.bool(False),
+        matchTrigEnable = cms.uint32(1),
+        matchTrigWindowSize = cms.uint32(3),
+        maxLCTs = cms.uint32(2),
+        mpcBlockMe1a = cms.uint32(0),
+        tmbCrossBxAlgorithm = cms.uint32(2),
+        tmbDropUsedAlcts = cms.bool(False),
+        tmbDropUsedClcts = cms.bool(False),
+        tmbEarlyTbins = cms.int32(4),
+        tmbL1aWindowSize = cms.uint32(7),
+        tmbReadoutEarliest2 = cms.bool(False),
+        useHighMultiplicityBits = cms.bool(False),
+        verbosity = cms.int32(0)
+    ),
     mpcRun2 = cms.PSet(
         dropInvalidStubs = cms.bool(False),
         dropLowQualityStubs = cms.bool(False),
@@ -13592,7 +13780,7 @@ process.simCscTriggerPrimitiveDigis = cms.EDProducer("CSCTriggerPrimitivesProduc
         clctTrigEnable = cms.uint32(0),
         debugLUTs = cms.bool(False),
         debugMatching = cms.bool(False),
-        ignoreAlctCrossClct = cms.bool(True),
+        ignoreAlctCrossClct = cms.bool(False),
         matchEarliestAlctOnly = cms.bool(False),
         matchEarliestClctOnly = cms.bool(False),
         matchTrigEnable = cms.uint32(1),
@@ -13646,7 +13834,7 @@ process.simCsctfTrackDigis = cms.EDProducer("CSCTFTrackProducer",
         MinBX = cms.int32(5),
         PTLUT = cms.PSet(
             LowQualityFlag = cms.untracked.uint32(4),
-            PtMethod = cms.untracked.uint32(32),
+            PtMethod = cms.untracked.uint32(34),
             ReadPtLUT = cms.bool(False)
         ),
         PreTrigger = cms.uint32(2),
@@ -13674,9 +13862,9 @@ process.simCsctfTrackDigis = cms.EDProducer("CSCTFTrackProducer",
         curvedp = cms.uint32(15),
         firmwareDD = cms.uint32(20091026),
         firmwareFA = cms.uint32(20091026),
-        firmwareSP = cms.uint32(20120319),
+        firmwareSP = cms.uint32(20140515),
         firmwareVM = cms.uint32(20091026),
-        gangedME1a = cms.untracked.bool(True),
+        gangedME1a = cms.untracked.bool(False),
         initializeFromPSet = cms.bool(False),
         isCoreVerbose = cms.bool(False),
         kill_fiber = cms.uint32(0),
@@ -22015,10 +22203,14 @@ process.hgcalTriggerGeometryESProducer = cms.ESProducer("HGCalTriggerGeometryESP
         L1TCellNeighborsMapping = cms.FileInPath('L1Trigger/L1THGCal/data/triggercell_neighbor_mapping_8inch_aligned_192_432_0.txt'),
         L1TCellsBHMapping = cms.FileInPath('L1Trigger/L1THGCal/data/triggercell_mapping_BH_3x3_30deg_0.txt'),
         L1TCellsMapping = cms.FileInPath('L1Trigger/L1THGCal/data/triggercell_mapping_8inch_aligned_192_432_V8_0.txt'),
-        L1TModulesMapping = cms.FileInPath('L1Trigger/L1THGCal/data/panel_mapping_tdr_0.txt'),
-        TriggerGeometryName = cms.string('HGCalTriggerGeometryHexLayerBasedImp1')
+        L1TLinksMapping = cms.FileInPath('L1Trigger/L1THGCal/data/links_mapping_V11_decentralized_signaldriven_0.txt'),
+        L1TModulesMapping = cms.FileInPath('L1Trigger/L1THGCal/data/panel_mapping_V11_decentralized_march20_1.txt'),
+        ScintillatorLinksPerModule = cms.uint32(2),
+        ScintillatorModuleSize = cms.uint32(6),
+        ScintillatorTriggerCellSize = cms.uint32(2),
+        TriggerGeometryName = cms.string('HGCalTriggerGeometryV9Imp2')
     ),
-    isV9Geometry = cms.bool(False)
+    isV9Geometry = cms.bool(True)
 )
 
 
@@ -25156,6 +25348,9 @@ process.HLTBtagDeepFlavourSequencePFPuppi = cms.Sequence(process.hltDeepBLifetim
 process.pfClusterRefsForJets_step = cms.Sequence(process.pfClusterRefsForJets_stepTask)
 
 
+process.HLTEndSequence = cms.Sequence(process.hltBoolEnd)
+
+
 process.HLTPFJetsCHSReconstruction = cms.Sequence(process.particleFlowPtrs+process.goodOfflinePrimaryVertices+process.pfPileUpJME+process.pfNoPileUpJME+process.hltAK4PFCHSJets+process.hltAK4PFCHSJetCorrectorL1+process.hltAK4PFCHSJetCorrectorL2+process.hltAK4PFCHSJetCorrectorL3+process.hltAK4PFCHSJetCorrector+process.hltAK4PFCHSJetsCorrected+process.hltAK8PFCHSJets+process.hltAK8PFCHSJetCorrectorL1+process.hltAK8PFCHSJetCorrectorL2+process.hltAK8PFCHSJetCorrectorL3+process.hltAK8PFCHSJetCorrector+process.hltAK8PFCHSJetsCorrected)
 
 
@@ -25168,7 +25363,13 @@ process.HLTPFPuppiMETReconstruction = cms.Sequence(process.goodOfflinePrimaryVer
 process.HLTPFMETsReconstruction = cms.Sequence(process.hltPFMET+process.hltPFMETJetCorrectorL1+process.hltPFMETJetCorrectorL2+process.hltPFMETJetCorrectorL3+process.hltPFMETJetCorrector+process.hltPFMETTypeOneCorrector+process.hltPFMETTypeOne)
 
 
+process.HLTBeamSpot = cms.Sequence(process.hltScalersRawToDigi+process.offlineBeamSpot)
+
+
 process.HLTCaloMETReconstruction = cms.Sequence(process.hltCaloMET)
+
+
+process.HLTBeginSequence = cms.Sequence(process.hltTriggerType+process.HLTBeamSpot)
 
 
 process.HLTAK8PFJetsReconstruction = cms.Sequence(process.hltAK8PFJets+process.hltAK8PFJetCorrectorL1+process.hltAK8PFJetCorrectorL2+process.hltAK8PFJetCorrectorL3+process.hltAK8PFJetCorrector+process.hltAK8PFJetsCorrected)
@@ -25183,73 +25384,73 @@ process.HLTPFClusterJMEReconstruction = cms.Sequence(process.pfClusterRefsForJet
 process.HLTJMESequence = cms.Sequence(process.HLTCaloMETReconstruction+process.HLTPFClusterJMEReconstruction+process.HLTAK4PFJetsReconstruction+process.HLTAK8PFJetsReconstruction+process.HLTPFJetsCHSReconstruction+process.HLTPFMETsReconstruction+process.HLTPFSoftKillerMETReconstruction+process.HLTPFPuppiJMEReconstruction)
 
 
-process.HLT_AK4PFPuppiJet520 = cms.Path(process.l1tSinglePFPuppiJet230off+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltSingleAK4PFPuppiJet520)
+process.HLT_AK4PFPuppiJet520 = cms.Path(process.HLTBeginSequence+process.l1tSinglePFPuppiJet230off+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltSingleAK4PFPuppiJet520+process.HLTEndSequence)
 
 
-process.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepCSV_2p4 = cms.Path(process.l1tDoublePFPuppiJet112offMaxEta2p4+process.l1tDoublePFPuppiJets112offMaxDeta1p6+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltDoublePFPuppiJets128MaxEta2p4+process.hltDoublePFPuppiJets128Eta2p4MaxDeta1p6+process.HLTBtagDeepCSVSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepCSV0p865DoubleEta2p4)
+process.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepCSV_2p4 = cms.Path(process.HLTBeginSequence+process.l1tDoublePFPuppiJet112offMaxEta2p4+process.l1tDoublePFPuppiJets112offMaxDeta1p6+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltDoublePFPuppiJets128MaxEta2p4+process.hltDoublePFPuppiJets128Eta2p4MaxDeta1p6+process.HLTBtagDeepCSVSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepCSV0p865DoubleEta2p4+process.HLTEndSequence)
 
 
-process.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepFlavour_2p4 = cms.Path(process.l1tDoublePFPuppiJet112offMaxEta2p4+process.l1tDoublePFPuppiJets112offMaxDeta1p6+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltDoublePFPuppiJets128MaxEta2p4+process.hltDoublePFPuppiJets128Eta2p4MaxDeta1p6+process.HLTBtagDeepFlavourSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepFlavour0p935DoubleEta2p4)
+process.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepFlavour_2p4 = cms.Path(process.HLTBeginSequence+process.l1tDoublePFPuppiJet112offMaxEta2p4+process.l1tDoublePFPuppiJets112offMaxDeta1p6+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltDoublePFPuppiJets128MaxEta2p4+process.hltDoublePFPuppiJets128Eta2p4MaxDeta1p6+process.HLTBtagDeepFlavourSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepFlavour0p935DoubleEta2p4+process.HLTEndSequence)
 
 
-process.HLT_IsoMu24_FromL1TkMuon = cms.Path(process.hltTriggerType+process.hltL1TkSingleMuFiltered22+process.hltL3fL1TkSingleMu22L3Filtered24Q+process.hltL3crIsoL1TkSingleMu22L3f24QL3pfecalIsoFiltered0p41+process.hltL3crIsoL1TkSingleMu22L3f24QL3pfhcalIsoFiltered0p40+process.hltL3crIsoL1TkSingleMu22L3f24QL3pfhgcalIsoFiltered4p70+process.hltL3crIsoL1TkSingleMu22L3f24QL3trkIsoRegionalNewFiltered0p07EcalHcalHgcalTrk+process.hltBoolEnd, cms.Task(process.HGCalRecHit, process.HGCalUncalibRecHit, process.MeasurementTrackerEvent, process.bunchSpacingProducer, process.hgcalDigis, process.hgcalLayerClusters, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltEcalDetIdToBeRecovered, process.hltEcalDigis, process.hltEcalPreshowerDigis, process.hltEcalPreshowerRecHit, process.hltEcalRecHit, process.hltEcalUncalibRecHit, process.hltFixedGridRhoFastjetAllCaloForMuons, process.hltGemRecHits, process.hltGemSegments, process.hltHbhereco, process.hltHcalDigis, process.hltHfprereco, process.hltHfreco, process.hltHoreco, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltParticleFlowClusterECALUncorrectedUnseeded, process.hltParticleFlowClusterECALUnseeded, process.hltParticleFlowClusterHBHEForMuons, process.hltParticleFlowClusterHCALForMuons, process.hltParticleFlowClusterPSUnseeded, process.hltParticleFlowRecHitECALUnseeded, process.hltParticleFlowRecHitHBHEForMuons, process.hltParticleFlowRecHitPSUnseeded, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonGeneralTracks, process.hltPhase2L3MuonHighPtTripletStepClusters, process.hltPhase2L3MuonHighPtTripletStepHitDoublets, process.hltPhase2L3MuonHighPtTripletStepHitTriplets, process.hltPhase2L3MuonHighPtTripletStepSeedLayers, process.hltPhase2L3MuonHighPtTripletStepSeeds, process.hltPhase2L3MuonHighPtTripletStepTrackCandidates, process.hltPhase2L3MuonHighPtTripletStepTrackCutClassifier, process.hltPhase2L3MuonHighPtTripletStepTrackingRegions, process.hltPhase2L3MuonHighPtTripletStepTracks, process.hltPhase2L3MuonHighPtTripletStepTracksSelectionHighPurity, process.hltPhase2L3MuonInitialStepSeeds, process.hltPhase2L3MuonInitialStepTrackCandidates, process.hltPhase2L3MuonInitialStepTrackCutClassifier, process.hltPhase2L3MuonInitialStepTracks, process.hltPhase2L3MuonInitialStepTracksSelectionHighPurity, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelFitterByHelixProjections, process.hltPhase2L3MuonPixelTrackFilterByKinematics, process.hltPhase2L3MuonPixelTracks, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonPixelTracksHitDoublets, process.hltPhase2L3MuonPixelTracksHitQuadruplets, process.hltPhase2L3MuonPixelTracksSeedLayers, process.hltPhase2L3MuonPixelTracksTrackingRegions, process.hltPhase2L3MuonPixelVertices, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsEcalIsodR0p3dRVeto0p000, process.hltPhase2L3MuonsHcalIsodR0p3dRVeto0p000, process.hltPhase2L3MuonsHgcalLCIsodR0p2dRVetoEM0p00dRVetoHad0p02minEEM0p00minEHad0p00, process.hltPhase2L3MuonsNoID, process.hltPhase2L3MuonsTrkIsoRegionalNewdR0p3dRVeto0p005dz0p25dr0p20ChisqInfPtMin0p0Cut0p07, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.hltScalersRawToDigi, process.hltTowerMakerForAll, process.offlineBeamSpot, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits, process.trackerClusterCheck))
+process.HLT_IsoMu24_FromL1TkMuon = cms.Path(process.HLTBeginSequence+process.hltL1TkSingleMuFiltered22+process.hltL3fL1TkSingleMu22L3Filtered24Q+process.hltL3crIsoL1TkSingleMu22L3f24QL3pfecalIsoFiltered0p41+process.hltL3crIsoL1TkSingleMu22L3f24QL3pfhcalIsoFiltered0p40+process.hltL3crIsoL1TkSingleMu22L3f24QL3pfhgcalIsoFiltered4p70+process.hltL3crIsoL1TkSingleMu22L3f24QL3trkIsoRegionalNewFiltered0p07EcalHcalHgcalTrk+process.HLTEndSequence, cms.Task(process.HGCalRecHit, process.HGCalUncalibRecHit, process.MeasurementTrackerEvent, process.bunchSpacingProducer, process.hgcalDigis, process.hgcalLayerClusters, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltEcalDetIdToBeRecovered, process.hltEcalDigis, process.hltEcalPreshowerDigis, process.hltEcalPreshowerRecHit, process.hltEcalRecHit, process.hltEcalUncalibRecHit, process.hltFixedGridRhoFastjetAllCaloForMuons, process.hltGemRecHits, process.hltGemSegments, process.hltHbhereco, process.hltHcalDigis, process.hltHfprereco, process.hltHfreco, process.hltHoreco, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltParticleFlowClusterECALUncorrectedUnseeded, process.hltParticleFlowClusterECALUnseeded, process.hltParticleFlowClusterHBHEForMuons, process.hltParticleFlowClusterHCALForMuons, process.hltParticleFlowClusterPSUnseeded, process.hltParticleFlowRecHitECALUnseeded, process.hltParticleFlowRecHitHBHEForMuons, process.hltParticleFlowRecHitPSUnseeded, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonGeneralTracks, process.hltPhase2L3MuonHighPtTripletStepClusters, process.hltPhase2L3MuonHighPtTripletStepHitDoublets, process.hltPhase2L3MuonHighPtTripletStepHitTriplets, process.hltPhase2L3MuonHighPtTripletStepSeedLayers, process.hltPhase2L3MuonHighPtTripletStepSeeds, process.hltPhase2L3MuonHighPtTripletStepTrackCandidates, process.hltPhase2L3MuonHighPtTripletStepTrackCutClassifier, process.hltPhase2L3MuonHighPtTripletStepTrackingRegions, process.hltPhase2L3MuonHighPtTripletStepTracks, process.hltPhase2L3MuonHighPtTripletStepTracksSelectionHighPurity, process.hltPhase2L3MuonInitialStepSeeds, process.hltPhase2L3MuonInitialStepTrackCandidates, process.hltPhase2L3MuonInitialStepTrackCutClassifier, process.hltPhase2L3MuonInitialStepTracks, process.hltPhase2L3MuonInitialStepTracksSelectionHighPurity, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelFitterByHelixProjections, process.hltPhase2L3MuonPixelTrackFilterByKinematics, process.hltPhase2L3MuonPixelTracks, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonPixelTracksHitDoublets, process.hltPhase2L3MuonPixelTracksHitQuadruplets, process.hltPhase2L3MuonPixelTracksSeedLayers, process.hltPhase2L3MuonPixelTracksTrackingRegions, process.hltPhase2L3MuonPixelVertices, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsEcalIsodR0p3dRVeto0p000, process.hltPhase2L3MuonsHcalIsodR0p3dRVeto0p000, process.hltPhase2L3MuonsHgcalLCIsodR0p2dRVetoEM0p00dRVetoHad0p02minEEM0p00minEHad0p00, process.hltPhase2L3MuonsNoID, process.hltPhase2L3MuonsTrkIsoRegionalNewdR0p3dRVeto0p005dz0p25dr0p20ChisqInfPtMin0p0Cut0p07, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.hltTowerMakerForAll, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits, process.trackerClusterCheck))
 
 
-process.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_FromL1TkMuon = cms.Path(process.hltTriggerType+process.hltL1TkDoubleMuFiltered7+process.hltL1TkSingleMuFiltered15+process.hltDoubleMuon7DZ1p0+process.hltL3fL1DoubleMu155fPreFiltered8+process.hltL3fL1DoubleMu155fFiltered17+process.hltDiMuon178RelTrkIsoFiltered0p4+process.hltDiMuon178RelTrkIsoFiltered0p4DzFiltered0p2+process.hltBoolEnd, cms.Task(process.MeasurementTrackerEvent, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltGemRecHits, process.hltGemSegments, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonGeneralTracks, process.hltPhase2L3MuonHighPtTripletStepClusters, process.hltPhase2L3MuonHighPtTripletStepHitDoublets, process.hltPhase2L3MuonHighPtTripletStepHitTriplets, process.hltPhase2L3MuonHighPtTripletStepSeedLayers, process.hltPhase2L3MuonHighPtTripletStepSeeds, process.hltPhase2L3MuonHighPtTripletStepTrackCandidates, process.hltPhase2L3MuonHighPtTripletStepTrackCutClassifier, process.hltPhase2L3MuonHighPtTripletStepTrackingRegions, process.hltPhase2L3MuonHighPtTripletStepTracks, process.hltPhase2L3MuonHighPtTripletStepTracksSelectionHighPurity, process.hltPhase2L3MuonInitialStepSeeds, process.hltPhase2L3MuonInitialStepTrackCandidates, process.hltPhase2L3MuonInitialStepTrackCutClassifier, process.hltPhase2L3MuonInitialStepTracks, process.hltPhase2L3MuonInitialStepTracksSelectionHighPurity, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelFitterByHelixProjections, process.hltPhase2L3MuonPixelTrackFilterByKinematics, process.hltPhase2L3MuonPixelTracks, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonPixelTracksHitDoublets, process.hltPhase2L3MuonPixelTracksHitQuadruplets, process.hltPhase2L3MuonPixelTracksSeedLayers, process.hltPhase2L3MuonPixelTracksTrackingRegions, process.hltPhase2L3MuonPixelVertices, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsNoID, process.hltPhase2L3MuonsTrkIsoRegionalNewdR0p3dRVeto0p005dz0p25dr0p20ChisqInfPtMin0p0Cut0p4, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.hltScalersRawToDigi, process.offlineBeamSpot, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits, process.trackerClusterCheck))
+process.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_FromL1TkMuon = cms.Path(process.HLTBeginSequence+process.hltL1TkDoubleMuFiltered7+process.hltL1TkSingleMuFiltered15+process.hltDoubleMuon7DZ1p0+process.hltL3fL1DoubleMu155fPreFiltered8+process.hltL3fL1DoubleMu155fFiltered17+process.hltDiMuon178RelTrkIsoFiltered0p4+process.hltDiMuon178RelTrkIsoFiltered0p4DzFiltered0p2+process.HLTEndSequence, cms.Task(process.MeasurementTrackerEvent, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltGemRecHits, process.hltGemSegments, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonGeneralTracks, process.hltPhase2L3MuonHighPtTripletStepClusters, process.hltPhase2L3MuonHighPtTripletStepHitDoublets, process.hltPhase2L3MuonHighPtTripletStepHitTriplets, process.hltPhase2L3MuonHighPtTripletStepSeedLayers, process.hltPhase2L3MuonHighPtTripletStepSeeds, process.hltPhase2L3MuonHighPtTripletStepTrackCandidates, process.hltPhase2L3MuonHighPtTripletStepTrackCutClassifier, process.hltPhase2L3MuonHighPtTripletStepTrackingRegions, process.hltPhase2L3MuonHighPtTripletStepTracks, process.hltPhase2L3MuonHighPtTripletStepTracksSelectionHighPurity, process.hltPhase2L3MuonInitialStepSeeds, process.hltPhase2L3MuonInitialStepTrackCandidates, process.hltPhase2L3MuonInitialStepTrackCutClassifier, process.hltPhase2L3MuonInitialStepTracks, process.hltPhase2L3MuonInitialStepTracksSelectionHighPurity, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelFitterByHelixProjections, process.hltPhase2L3MuonPixelTrackFilterByKinematics, process.hltPhase2L3MuonPixelTracks, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonPixelTracksHitDoublets, process.hltPhase2L3MuonPixelTracksHitQuadruplets, process.hltPhase2L3MuonPixelTracksSeedLayers, process.hltPhase2L3MuonPixelTracksTrackingRegions, process.hltPhase2L3MuonPixelVertices, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsNoID, process.hltPhase2L3MuonsTrkIsoRegionalNewdR0p3dRVeto0p005dz0p25dr0p20ChisqInfPtMin0p0Cut0p4, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits, process.trackerClusterCheck))
 
 
-process.HLT_Mu37_Mu27_FromL1TkMuon = cms.Path(process.hltTriggerType+process.hltL1TkDoubleMuFiltered7+process.hltL1TkSingleMuFiltered15+process.hltDoubleMuon7DZ1p0+process.hltL3fL1DoubleMu155fPreFiltered27+process.hltL3fL1DoubleMu155fFiltered37+process.hltBoolEnd, cms.Task(process.MeasurementTrackerEvent, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltGemRecHits, process.hltGemSegments, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsNoID, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.hltScalersRawToDigi, process.offlineBeamSpot, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits))
+process.HLT_Mu37_Mu27_FromL1TkMuon = cms.Path(process.HLTBeginSequence+process.hltL1TkDoubleMuFiltered7+process.hltL1TkSingleMuFiltered15+process.hltDoubleMuon7DZ1p0+process.hltL3fL1DoubleMu155fPreFiltered27+process.hltL3fL1DoubleMu155fFiltered37+process.HLTEndSequence, cms.Task(process.MeasurementTrackerEvent, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltGemRecHits, process.hltGemSegments, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsNoID, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits))
 
 
-process.HLT_Mu50_FromL1TkMuon = cms.Path(process.hltTriggerType+process.hltL1TkSingleMuFiltered22+process.hltL3fL1TkSingleMu22L3Filtered50Q+process.hltBoolEnd, cms.Task(process.MeasurementTrackerEvent, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltGemRecHits, process.hltGemSegments, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsNoID, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.hltScalersRawToDigi, process.offlineBeamSpot, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits))
+process.HLT_Mu50_FromL1TkMuon = cms.Path(process.HLTBeginSequence+process.hltL1TkSingleMuFiltered22+process.hltL3fL1TkSingleMu22L3Filtered50Q+process.HLTEndSequence, cms.Task(process.MeasurementTrackerEvent, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltGemRecHits, process.hltGemSegments, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsNoID, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits))
 
 
-process.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepCSV_2p4 = cms.Path(process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiCentralJetQuad30MaxEta2p4+process.hlt1PFPuppiCentralJet70MaxEta2p4+process.hlt2PFPuppiCentralJet40MaxEta2p4+process.hltHtMhtPFPuppiCentralJetsQuadC30MaxEta2p4+process.hltPFPuppiCentralJetsQuad30HT200MaxEta2p4+process.HLTBtagDeepCSVSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepCSV0p38Eta2p4TripleEta2p4)
+process.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepCSV_2p4 = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiCentralJetQuad30MaxEta2p4+process.hlt1PFPuppiCentralJet70MaxEta2p4+process.hlt2PFPuppiCentralJet40MaxEta2p4+process.hltHtMhtPFPuppiCentralJetsQuadC30MaxEta2p4+process.hltPFPuppiCentralJetsQuad30HT200MaxEta2p4+process.HLTBtagDeepCSVSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepCSV0p38Eta2p4TripleEta2p4+process.HLTEndSequence)
 
 
-process.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepFlavour_2p4 = cms.Path(process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiCentralJetQuad30MaxEta2p4+process.hlt1PFPuppiCentralJet70MaxEta2p4+process.hlt2PFPuppiCentralJet40MaxEta2p4+process.hltPFPuppiCentralJetsQuad30HT200MaxEta2p4+process.HLTBtagDeepFlavourSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepFlavour0p375Eta2p4TripleEta2p4)
+process.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepFlavour_2p4 = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiCentralJetQuad30MaxEta2p4+process.hlt1PFPuppiCentralJet70MaxEta2p4+process.hlt2PFPuppiCentralJet40MaxEta2p4+process.hltPFPuppiCentralJetsQuad30HT200MaxEta2p4+process.HLTBtagDeepFlavourSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepFlavour0p375Eta2p4TripleEta2p4+process.HLTEndSequence)
 
 
-process.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4 = cms.Path(process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiCentralJetQuad30MaxEta2p4+process.hlt1PFPuppiCentralJet75MaxEta2p4+process.hlt2PFPuppiCentralJet60MaxEta2p4+process.hlt3PFPuppiCentralJet45MaxEta2p4+process.hlt4PFPuppiCentralJet40MaxEta2p4+process.hltHtMhtPFPuppiCentralJetsQuadC30MaxEta2p4+process.hltPFPuppiCentralJetsQuad30HT330MaxEta2p4+process.HLTBtagDeepCSVSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepCSV0p31Eta2p4TripleEta2p4)
+process.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4 = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiCentralJetQuad30MaxEta2p4+process.hlt1PFPuppiCentralJet75MaxEta2p4+process.hlt2PFPuppiCentralJet60MaxEta2p4+process.hlt3PFPuppiCentralJet45MaxEta2p4+process.hlt4PFPuppiCentralJet40MaxEta2p4+process.hltHtMhtPFPuppiCentralJetsQuadC30MaxEta2p4+process.hltPFPuppiCentralJetsQuad30HT330MaxEta2p4+process.HLTBtagDeepCSVSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepCSV0p31Eta2p4TripleEta2p4+process.HLTEndSequence)
 
 
-process.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepFlavour_2p4 = cms.Path(process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiCentralJetQuad30MaxEta2p4+process.hlt1PFPuppiCentralJet75MaxEta2p4+process.hlt2PFPuppiCentralJet60MaxEta2p4+process.hlt3PFPuppiCentralJet45MaxEta2p4+process.hlt4PFPuppiCentralJet40MaxEta2p4+process.hltHtMhtPFPuppiCentralJetsQuadC30MaxEta2p4+process.hltPFPuppiCentralJetsQuad30HT330MaxEta2p4+process.HLTBtagDeepFlavourSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepFlavour0p275Eta2p4TripleEta2p4)
+process.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepFlavour_2p4 = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiCentralJetQuad30MaxEta2p4+process.hlt1PFPuppiCentralJet75MaxEta2p4+process.hlt2PFPuppiCentralJet60MaxEta2p4+process.hlt3PFPuppiCentralJet45MaxEta2p4+process.hlt4PFPuppiCentralJet40MaxEta2p4+process.hltHtMhtPFPuppiCentralJetsQuadC30MaxEta2p4+process.hltPFPuppiCentralJetsQuad30HT330MaxEta2p4+process.HLTBtagDeepFlavourSequencePFPuppiModEta2p4+process.hltBTagPFPuppiDeepFlavour0p275Eta2p4TripleEta2p4+process.HLTEndSequence)
 
 
-process.HLT_PFPuppiHT1070 = cms.Path(process.l1tPFPuppiHT+process.l1tPFPuppiHT450off+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiHT+process.hltPFPuppiHT1070)
+process.HLT_PFPuppiHT1070 = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiHT+process.l1tPFPuppiHT450off+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.hltPFPuppiHT+process.hltPFPuppiHT1070+process.HLTEndSequence)
 
 
-process.HLT_PFPuppiMETTypeOne140_PFPuppiMHT140 = cms.Path(process.l1tPFPuppiMET220off+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.HLTPFPuppiMETReconstruction+process.hltPFPuppiMETTypeOneCorrector+process.hltPFPuppiMETTypeOne+process.hltPFPuppiMETTypeOne140+process.hltPFPuppiMHT+process.hltPFPuppiMHT140)
+process.HLT_PFPuppiMETTypeOne140_PFPuppiMHT140 = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiMET220off+process.HLTParticleFlowSequence+process.HLTAK4PFPuppiJetsReconstruction+process.HLTPFPuppiMETReconstruction+process.hltPFPuppiMETTypeOneCorrector+process.hltPFPuppiMETTypeOne+process.hltPFPuppiMETTypeOne140+process.hltPFPuppiMHT+process.hltPFPuppiMHT140+process.HLTEndSequence)
 
 
-process.HLT_TriMu_10_5_5_DZ_FromL1TkMuon = cms.Path(process.hltTriggerType+process.hltL1TripleMuFiltered3+process.hltL1SingleMuFiltered5+process.hltTripleMuon3DZ1p0+process.hltTripleMuon3DR0+process.hltL3fL1TkTripleMu533PreFiltered555+process.hltL3fL1TkTripleMu533L3Filtered1055+process.hltL3fL1TkTripleMu533L31055DZFiltered0p2+process.hltBoolEnd, cms.Task(process.MeasurementTrackerEvent, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltGemRecHits, process.hltGemSegments, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsNoID, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.hltScalersRawToDigi, process.offlineBeamSpot, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits))
+process.HLT_TriMu_10_5_5_DZ_FromL1TkMuon = cms.Path(process.HLTBeginSequence+process.hltL1TripleMuFiltered3+process.hltL1SingleMuFiltered5+process.hltTripleMuon3DZ1p0+process.hltTripleMuon3DR0+process.hltL3fL1TkTripleMu533PreFiltered555+process.hltL3fL1TkTripleMu533L3Filtered1055+process.hltL3fL1TkTripleMu533L31055DZFiltered0p2+process.HLTEndSequence, cms.Task(process.MeasurementTrackerEvent, process.hltCsc2DRecHits, process.hltCscSegments, process.hltDt1DRecHits, process.hltDt4DSegments, process.hltGemRecHits, process.hltGemSegments, process.hltIter0Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter0Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter0Phase2L3FromL1TkMuonPixelSeedsFromPixelTracks, process.hltIter0Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter0Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltIter2Phase2L3FromL1TkMuonCkfTrackCandidates, process.hltIter2Phase2L3FromL1TkMuonClustersRefRemoval, process.hltIter2Phase2L3FromL1TkMuonCtfWithMaterialTracks, process.hltIter2Phase2L3FromL1TkMuonMaskedMeasurementTrackerEvent, process.hltIter2Phase2L3FromL1TkMuonMerged, process.hltIter2Phase2L3FromL1TkMuonPixelClusterCheck, process.hltIter2Phase2L3FromL1TkMuonPixelHitDoublets, process.hltIter2Phase2L3FromL1TkMuonPixelHitTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelLayerTriplets, process.hltIter2Phase2L3FromL1TkMuonPixelSeeds, process.hltIter2Phase2L3FromL1TkMuonTrackCutClassifier, process.hltIter2Phase2L3FromL1TkMuonTrackSelectionHighPurity, process.hltL2MuonFromL1TkMuonCandidates, process.hltL2MuonSeedsFromL1TkMuon, process.hltL2MuonsFromL1TkMuon, process.hltL2OfflineMuonSeeds, process.hltL3MuonsPhase2L3Links, process.hltL3MuonsPhase2L3OI, process.hltMe0RecHits, process.hltMe0Segments, process.hltPhase2L3FromL1TkMuonPixelLayerQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracks, process.hltPhase2L3FromL1TkMuonPixelTracksHitDoublets, process.hltPhase2L3FromL1TkMuonPixelTracksHitQuadruplets, process.hltPhase2L3FromL1TkMuonPixelTracksTrackingRegions, process.hltPhase2L3FromL1TkMuonPixelVertices, process.hltPhase2L3FromL1TkMuonTrimmedPixelVertices, process.hltPhase2L3GlbMuon, process.hltPhase2L3MuonCandidates, process.hltPhase2L3MuonMerged, process.hltPhase2L3MuonPixelTracksFilter, process.hltPhase2L3MuonPixelTracksFitter, process.hltPhase2L3MuonTracks, process.hltPhase2L3Muons, process.hltPhase2L3MuonsNoID, process.hltPhase2L3OIL3MuonCandidates, process.hltPhase2L3OIL3Muons, process.hltPhase2L3OIL3MuonsLinksCombination, process.hltPhase2L3OIMuCtfWithMaterialTracks, process.hltPhase2L3OIMuonTrackCutClassifier, process.hltPhase2L3OIMuonTrackSelectionHighPurity, process.hltPhase2L3OISeedsFromL2Muons, process.hltPhase2L3OITrackCandidates, process.hltRpcRecHits, process.siPhase2Clusters, process.siPixelClusterShapeCache, process.siPixelClusters, process.siPixelRecHits))
 
 
-process.L1_DoubleTkMuon_17_8 = cms.Path(process.hltTriggerType+process.hltL1TkDoubleMuFiltered7+process.hltL1TkSingleMuFiltered15+process.hltDoubleMuon7DZ1p0+process.hltBoolEnd, cms.Task(process.hltScalersRawToDigi, process.offlineBeamSpot))
+process.L1_DoubleTkMuon_17_8 = cms.Path(process.HLTBeginSequence+process.hltL1TkDoubleMuFiltered7+process.hltL1TkSingleMuFiltered15+process.hltDoubleMuon7DZ1p0+process.HLTEndSequence)
 
 
-process.L1_SingleTkMuon_22 = cms.Path(process.hltTriggerType+process.hltL1TkSingleMuFiltered22+process.hltBoolEnd, cms.Task(process.hltScalersRawToDigi, process.offlineBeamSpot))
+process.L1_SingleTkMuon_22 = cms.Path(process.HLTBeginSequence+process.hltL1TkSingleMuFiltered22+process.HLTEndSequence)
 
 
-process.L1_TripleTkMuon_5_3_3 = cms.Path(process.hltTriggerType+process.hltL1TripleMuFiltered3+process.hltL1SingleMuFiltered5+process.hltTripleMuon3DZ1p0+process.hltTripleMuon3DR0+process.hltBoolEnd, cms.Task(process.hltScalersRawToDigi, process.offlineBeamSpot))
+process.L1_TripleTkMuon_5_3_3 = cms.Path(process.HLTBeginSequence+process.hltL1TripleMuFiltered3+process.hltL1SingleMuFiltered5+process.hltTripleMuon3DZ1p0+process.hltTripleMuon3DR0+process.HLTEndSequence)
 
 
 process.L1simulation_step = cms.Path(cms.Task(process.simBscDigis, process.simCastorTechTrigDigis, process.simCscTriggerPrimitiveDigis, process.simCsctfDigis, process.simCsctfTrackDigis, process.simDtTriggerPrimitiveDigis, process.simDttfDigis, process.simGctDigis, process.simGmtDigis, process.simGtDigis, process.simHcalTechTrigDigis, process.simRctDigis, process.simRpcTechTrigDigis, process.simRpcTriggerDigis))
 
 
-process.L1T_DoublePFPuppiJets112_2p4_DEta1p6 = cms.Path(process.l1tDoublePFPuppiJet112offMaxEta2p4+process.l1tDoublePFPuppiJets112offMaxDeta1p6)
+process.L1T_DoublePFPuppiJets112_2p4_DEta1p6 = cms.Path(process.HLTBeginSequence+process.l1tDoublePFPuppiJet112offMaxEta2p4+process.l1tDoublePFPuppiJets112offMaxDeta1p6+process.HLTEndSequence)
 
 
-process.L1T_PFHT400PT30_QuadPFPuppiJet_70_55_40_40_2p4 = cms.Path(process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4)
+process.L1T_PFHT400PT30_QuadPFPuppiJet_70_55_40_40_2p4 = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiHT+process.l1tPFPuppiHT400offMaxEta2p4+process.l1t1PFPuppiJet70offMaxEta2p4+process.l1t2PFPuppiJet55offMaxEta2p4+process.l1t4PFPuppiJet40offMaxEta2p4+process.l1t4PFPuppiJet25OnlineMaxEta2p4+process.HLTEndSequence)
 
 
-process.L1T_PFPuppiHT450off = cms.Path(process.l1tPFPuppiHT+process.l1tPFPuppiHT450off)
+process.L1T_PFPuppiHT450off = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiHT+process.l1tPFPuppiHT450off+process.HLTEndSequence)
 
 
-process.L1T_PFPuppiMET220off = cms.Path(process.l1tPFPuppiMET220off)
+process.L1T_PFPuppiMET220off = cms.Path(process.HLTBeginSequence+process.l1tPFPuppiMET220off+process.HLTEndSequence)
 
 
-process.L1T_SinglePFPuppiJet230off = cms.Path(process.l1tSinglePFPuppiJet230off)
+process.L1T_SinglePFPuppiJet230off = cms.Path(process.HLTBeginSequence+process.l1tSinglePFPuppiJet230off+process.HLTEndSequence)
 
 
 process.l1tReconstructionPath = cms.Path(process.l1tReconstructionTask)
