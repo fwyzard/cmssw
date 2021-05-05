@@ -4572,40 +4572,6 @@ process.highPtTripletStepTracks = cms.EDProducer("TrackProducer",
 )
 
 
-process.hltAK4CaloJets = cms.EDProducer("FastjetJetProducer",
-    Active_Area_Repeats = cms.int32(1),
-    GhostArea = cms.double(0.01),
-    Ghost_EtaMax = cms.double(5.0),
-    Rho_EtaMax = cms.double(4.4),
-    applyWeight = cms.bool(False),
-    doAreaDiskApprox = cms.bool(True),
-    doAreaFastjet = cms.bool(False),
-    doPUOffsetCorr = cms.bool(False),
-    doPVCorrection = cms.bool(False),
-    doRhoFastjet = cms.bool(False),
-    inputEMin = cms.double(0.0),
-    inputEtMin = cms.double(0.3),
-    jetAlgorithm = cms.string('AntiKt'),
-    jetPtMin = cms.double(10.0),
-    jetType = cms.string('CaloJet'),
-    maxBadEcalCells = cms.uint32(9999999),
-    maxBadHcalCells = cms.uint32(9999999),
-    maxProblematicEcalCells = cms.uint32(9999999),
-    maxProblematicHcalCells = cms.uint32(9999999),
-    maxRecoveredEcalCells = cms.uint32(9999999),
-    maxRecoveredHcalCells = cms.uint32(9999999),
-    minSeed = cms.uint32(14327),
-    nSigmaPU = cms.double(1.0),
-    puPtMin = cms.double(10),
-    rParam = cms.double(0.4),
-    radiusPU = cms.double(0.5),
-    src = cms.InputTag("towerMaker"),
-    srcPVs = cms.InputTag("NotUsed"),
-    useDeterministicSeed = cms.bool(True),
-    voronoiRfact = cms.double(-0.9)
-)
-
-
 process.hltAK4PFCHSJetCorrector = cms.EDProducer("ChainedJetCorrectorProducer",
     correctors = cms.VInputTag("hltAK4PFCHSJetCorrectorL1", "hltAK4PFCHSJetCorrectorL2", "hltAK4PFCHSJetCorrectorL3")
 )
@@ -34588,7 +34554,7 @@ process.calolocalrecoTask = cms.Task(process.ecalLocalRecoTask, process.hcalLoca
 process.localrecoTask = cms.Task(process.bunchSpacingProducer, process.calolocalrecoTask, process.muonlocalrecoTask, process.trackerlocalrecoTask)
 
 
-process.HLTParticleFlowTask = cms.Task(process.RawToDigiTask, process.caloTowersRecTask, process.ecalClustersTask, process.generalTracks, process.hcalGlobalRecoTask, process.hgcalLocalRecoTask, process.highPtTripletStepTask, process.highlevelrecoTask, process.hltAK4CaloJets, process.initialStepTask, process.itLocalRecoTask, process.iterTICLTask, process.localrecoTask, process.offlineBeamSpot, process.otLocalRecoTask, process.particleFlowClusterTask, process.pixelTracksTask, process.pixelVertices, process.trackerClusterCheck, process.vertexRecoTask)
+process.HLTParticleFlowTask = cms.Task(process.RawToDigiTask, process.caloTowersRecTask, process.ecalClustersTask, process.generalTracks, process.hcalGlobalRecoTask, process.hgcalLocalRecoTask, process.highPtTripletStepTask, process.highlevelrecoTask, process.initialStepTask, process.itLocalRecoTask, process.iterTICLTask, process.localrecoTask, process.offlineBeamSpot, process.otLocalRecoTask, process.particleFlowClusterTask, process.pixelTracksTask, process.pixelVertices, process.trackerClusterCheck, process.vertexRecoTask)
 
 
 process.HLTPFClusteringForEgammaUnseeded = cms.Sequence(process.HLTPFClusteringForEgammaUnseededTask)

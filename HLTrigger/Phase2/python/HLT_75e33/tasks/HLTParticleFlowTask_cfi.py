@@ -1,7 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
 from ..modules.generalTracks_cfi import *
-from ..modules.hltAK4CaloJets_cfi import *
 from ..modules.offlineBeamSpot_cfi import *
 from ..modules.pixelVertices_cfi import *
 from ..modules.trackerClusterCheck_cfi import *
@@ -30,7 +29,6 @@ HLTParticleFlowTask = cms.Task(
     hgcalLocalRecoTask,
     highPtTripletStepTask,
     highlevelrecoTask,
-    hltAK4CaloJets,
     initialStepTask,
     itLocalRecoTask,
     iterTICLTask,
