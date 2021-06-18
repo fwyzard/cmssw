@@ -632,6 +632,7 @@ void PFRecoTauDiscriminationByIsolation::fillDescriptions(edm::ConfigurationDesc
     pset_signalQualityCuts.add<double>("minNeutralHadronEt", 30.0);
     pset_signalQualityCuts.add<double>("maxTransverseImpactParameter", 0.1);
     pset_signalQualityCuts.addOptional<bool>("useTracksInsteadOfPFHadrons");
+    pset_signalQualityCuts.add<double>("maxDeltaZToLeadTrack", -1.0);
 
     edm::ParameterSetDescription pset_vxAssocQualityCuts;
     pset_vxAssocQualityCuts.add<double>("minTrackPt", 0.5);
@@ -653,6 +654,7 @@ void PFRecoTauDiscriminationByIsolation::fillDescriptions(edm::ConfigurationDesc
     pset_isolationQualityCuts.add<unsigned int>("minTrackHits", 8);
     pset_isolationQualityCuts.add<double>("maxTransverseImpactParameter", 0.03);
     pset_isolationQualityCuts.addOptional<bool>("useTracksInsteadOfPFHadrons");
+    pset_isolationQualityCuts.add<double>("maxDeltaZToLeadTrack", -1.0);
 
     edm::ParameterSetDescription pset_qualityCuts;
     pset_qualityCuts.add<edm::ParameterSetDescription>("signalQualityCuts", pset_signalQualityCuts);

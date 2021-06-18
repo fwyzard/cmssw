@@ -14,5 +14,6 @@
 <use name="DataFormats/HLTReco"/>
 <use name="HLTrigger/HLTcore"/>
 <use name="RecoTracker/TkTrackingRegions"/>
+<use name="DataFormats/Phase2HLTPFTaus"/>
 <use name="root"/>
 <flags EDM_PLUGIN="1"/>

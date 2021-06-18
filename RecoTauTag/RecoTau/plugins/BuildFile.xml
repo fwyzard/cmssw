@@ -36,5 +36,6 @@
   <use name="MagneticField/Records"/>
   <use name="CommonTools/BaseParticlePropagator"/>
   <use name="PhysicsTools/TensorFlow"/>
+  <use name="DataFormats/Phase2HLTPFTaus"/>
   <use name="root"/>
 </library>

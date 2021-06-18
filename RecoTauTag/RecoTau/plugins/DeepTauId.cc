@@ -9,6 +9,7 @@
 
 #include "RecoTauTag/RecoTau/interface/DeepTauBase.h"
 #include "FWCore/Utilities/interface/isFinite.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/TauReco/interface/PFTauTransverseImpactParameterAssociation.h"
 
 #include <fstream>
@@ -447,17 +448,25 @@ namespace {
     std::map<BasicDiscr, size_t> indexMap;
     std::map<BasicDiscr, size_t> indexMapdR03;
 
-    const float getChargedIsoPtSum(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
+    const float getChargedIsoPtSum(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref, bool phase2HLT) const {
       return (*basicTauDiscriminatorCollection)[tau_ref].rawValues.at(indexMap.at(BasicDiscr::ChargedIsoPtSum));
     }
-    const float getChargedIsoPtSum(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
-      return getTauID(tau, "chargedIsoPtSum");
+    const float getChargedIsoPtSum(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref, bool phase2HLT) const {
+      if (phase2HLT) {
+        return getTauID(tau, "chargedIsoPtSumHGCalFix");
+      } else {
+        return getTauID(tau, "chargedIsoPtSum");
+      }
     }
-    const float getChargedIsoPtSumdR03(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
+    const float getChargedIsoPtSumdR03(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref, bool phase2HLT) const {
       return (*basicTauDiscriminatordR03Collection)[tau_ref].rawValues.at(indexMapdR03.at(BasicDiscr::ChargedIsoPtSum));
     }
-    const float getChargedIsoPtSumdR03(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
-      return getTauID(tau, "chargedIsoPtSumdR03");
+    const float getChargedIsoPtSumdR03(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref, bool phase2HLT) const {
+      if (phase2HLT) {
+        return getTauID(tau, "chargedIsoPtSumdR03HGCalFix");
+      } else {
+        return getTauID(tau, "chargedIsoPtSumdR03");
+      }
     }
     const float getFootprintCorrectiondR03(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
       return (*basicTauDiscriminatordR03Collection)[tau_ref].rawValues.at(
@@ -466,17 +475,25 @@ namespace {
     const float getFootprintCorrectiondR03(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
       return getTauID(tau, "footprintCorrectiondR03");
     }
-    const float getNeutralIsoPtSum(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
+    const float getNeutralIsoPtSum(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref, bool phase2HLT) const {
       return (*basicTauDiscriminatorCollection)[tau_ref].rawValues.at(indexMap.at(BasicDiscr::NeutralIsoPtSum));
     }
-    const float getNeutralIsoPtSum(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
-      return getTauID(tau, "neutralIsoPtSum");
+    const float getNeutralIsoPtSum(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref, bool phase2HLT) const {
+      if (phase2HLT) {
+	return getTauID(tau, "neutralIsoPtSumHGCalFix");
+      } else {
+        return getTauID(tau, "neutralIsoPtSum");
+      }
     }
-    const float getNeutralIsoPtSumdR03(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
+    const float getNeutralIsoPtSumdR03(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref, bool phase2HLT) const {
       return (*basicTauDiscriminatordR03Collection)[tau_ref].rawValues.at(indexMapdR03.at(BasicDiscr::NeutralIsoPtSum));
     }
-    const float getNeutralIsoPtSumdR03(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
-      return getTauID(tau, "neutralIsoPtSumdR03");
+    const float getNeutralIsoPtSumdR03(const pat::Tau& tau, const edm::RefToBase<reco::BaseTau> tau_ref, bool phase2HLT) const {
+      if (phase2HLT) {
+        return getTauID(tau, "neutralIsoPtSumdR03HGCalFix");
+      } else {
+        return getTauID(tau, "neutralIsoPtSumdR03");
+      }
     }
     const float getNeutralIsoPtSumWeight(const reco::PFTau& tau, const edm::RefToBase<reco::BaseTau> tau_ref) const {
       return (*basicTauDiscriminatorCollection)[tau_ref].rawValues.at(indexMap.at(BasicDiscr::NeutralIsoPtSumWeight));
@@ -1120,7 +1137,7 @@ public:
     auto const aProv = aHandle.provenance();
     if (aProv == nullptr)
       aHandle.whyFailed()->raise();
-    const auto& psetsFromProvenance = edm::parameterSet(*aProv, event.processHistory());
+    const auto& psetsFromProvenance = edm::parameterSet(aProv->stable(), event.processHistory());
     auto const idlist = psetsFromProvenance.getParameter<std::vector<edm::ParameterSet>>("IDdefinitions");
     for (size_t j = 0; j < idlist.size(); ++j) {
       std::string idname = idlist[j].getParameter<std::string>("IDname");
@@ -1159,6 +1176,7 @@ public:
     desc.add<bool>("disable_dxy_pca", false);
     desc.add<bool>("disable_hcalFraction_workaround", false);
     desc.add<bool>("disable_CellIndex_workaround", false);
+    desc.add<bool>("disable_FlightLengthSig_workaround", false);
     desc.add<bool>("save_inputs", false);
     desc.add<bool>("is_online", false);
 
@@ -1182,6 +1200,8 @@ public:
       desc.add<edm::ParameterSetDescription>("Prediscriminants", pset_Prediscriminants);
     }
 
+    desc.add<bool>("is_phase2HLT", false);
+
     descriptions.add("DeepTau", desc);
   }
 
@@ -1203,9 +1223,11 @@ public:
         disable_dxy_pca_(cfg.getParameter<bool>("disable_dxy_pca")),
         disable_hcalFraction_workaround_(cfg.getParameter<bool>("disable_hcalFraction_workaround")),
         disable_CellIndex_workaround_(cfg.getParameter<bool>("disable_CellIndex_workaround")),
+        disable_FlightLengthSig_workaround_(cfg.getParameter<bool>("disable_FlightLengthSig_workaround")),
         save_inputs_(cfg.getParameter<bool>("save_inputs")),
         json_file_(nullptr),
-        file_counter_(0) {
+        file_counter_(0),
+        is_phase2HLT_(cfg.getParameter<bool>("is_phase2HLT")) {
     if (version_ == 1) {
       input_layer_ = cache_->getGraph().node(0).name();
       output_layer_ = cache_->getGraph().node(cache_->getGraph().node_size() - 1).name();
@@ -1214,8 +1236,10 @@ public:
         throw cms::Exception("DeepTauId")
             << "number of inputs does not match the expected inputs for the given version";
     } else if (version_ == 2) {
+      int TauBlockInputs_NumberOfInputs_tmp = dnn_inputs_2017_v2::TauBlockInputs::NumberOfInputs;
+      if (is_phase2HLT_) TauBlockInputs_NumberOfInputs_tmp -= (dnn_inputs_2017_v2::TauBlockInputs::tau_dxy_pca_z - dnn_inputs_2017_v2::TauBlockInputs::tau_dxy_pca_x + 1);
       tauBlockTensor_ = std::make_unique<tensorflow::Tensor>(
-          tensorflow::DT_FLOAT, tensorflow::TensorShape{1, dnn_inputs_2017_v2::TauBlockInputs::NumberOfInputs});
+          tensorflow::DT_FLOAT, tensorflow::TensorShape{1, TauBlockInputs_NumberOfInputs_tmp});
       for (size_t n = 0; n < 2; ++n) {
         const bool is_inner = n == 0;
         const auto n_cells =
@@ -1582,7 +1606,9 @@ private:
     createTauBlockInputs<CandidateCastType>(
         dynamic_cast<const TauCastType&>(tau), tau_index, tau_ref, pv, rho, tau_funcs);
     using namespace dnn_inputs_2017_v2;
-    checkInputs(*tauBlockTensor_, "input_tau", TauBlockInputs::NumberOfInputs);
+    int TauBlockInputs_NumberOfInputs_tmp = TauBlockInputs::NumberOfInputs;
+    if (is_phase2HLT_) TauBlockInputs_NumberOfInputs_tmp -= (TauBlockInputs::tau_dxy_pca_z - TauBlockInputs::tau_dxy_pca_x + 1);
+    checkInputs(*tauBlockTensor_, "input_tau", TauBlockInputs_NumberOfInputs_tmp);
     createConvFeatures<CandidateCastType>(dynamic_cast<const TauCastType&>(tau),
                                           tau_index,
                                           tau_ref,
@@ -1614,10 +1640,11 @@ private:
 
     if (save_inputs_) {
       std::string json_file_name = "DeepTauId_" + std::to_string(file_counter_) + ".json";
-      json_file_ = new std::ofstream(json_file_name.data());
+      //json_file_ = new std::ofstream(json_file_name.data());
+      json_file_ = new std::ofstream(std::string("newDeepTauId_") + json_file_name.data());
       is_first_block_ = true;
       (*json_file_) << "{";
-      saveInputs(*tauBlockTensor_, "input_tau", dnn_inputs_2017_v2::TauBlockInputs::NumberOfInputs);
+      saveInputs(*tauBlockTensor_, "input_tau", TauBlockInputs_NumberOfInputs_tmp);
       saveInputs(*eGammaTensor_[true],
                  "input_inner_egamma",
                  dnn_inputs_2017_v2::EgammaBlockInputs::NumberOfInputs,
@@ -1836,7 +1863,15 @@ private:
     tensorflow::Tensor& inputs = *tauBlockTensor_;
     inputs.flat<float>().setZero();
 
-    const auto& get = [&](int var_index) -> float& { return inputs.matrix<float>()(0, var_index); };
+    float foo = 0.;
+    const auto& get = [&](int var_index) -> float& { 
+      int var_index_tmp = var_index;
+      if (is_phase2HLT_ && var_index >= dnn::tau_dxy_pca_x) {
+        if (var_index <= dnn::tau_dxy_pca_z) return foo;
+        var_index_tmp -= (dnn::tau_dxy_pca_z - dnn::tau_dxy_pca_x + 1);
+      }
+      return inputs.matrix<float>()(0, var_index_tmp);
+    };
 
     auto leadChargedHadrCand = dynamic_cast<const CandidateCastType*>(tau.leadChargedHadrCand().get());
 
@@ -1849,17 +1884,17 @@ private:
     get(dnn::tau_charge) = getValue(tau.charge());
     get(dnn::tau_n_charged_prongs) = getValueLinear(tau.decayMode() / 5 + 1, 1, 3, true);
     get(dnn::tau_n_neutral_prongs) = getValueLinear(tau.decayMode() % 5, 0, 2, true);
-    get(dnn::chargedIsoPtSum) = getValueNorm(tau_funcs.getChargedIsoPtSum(tau, tau_ref), 47.78f, 123.5f);
+    get(dnn::chargedIsoPtSum) = getValueNorm(tau_funcs.getChargedIsoPtSum(tau, tau_ref, is_phase2HLT_), 47.78f, 123.5f);
     get(dnn::chargedIsoPtSumdR03_over_dR05) =
-        getValue(tau_funcs.getChargedIsoPtSumdR03(tau, tau_ref) / tau_funcs.getChargedIsoPtSum(tau, tau_ref));
+        getValue(tau_funcs.getChargedIsoPtSumdR03(tau, tau_ref, is_phase2HLT_) / tau_funcs.getChargedIsoPtSum(tau, tau_ref, is_phase2HLT_));
     get(dnn::footprintCorrection) = getValueNorm(tau_funcs.getFootprintCorrectiondR03(tau, tau_ref), 9.029f, 26.42f);
-    get(dnn::neutralIsoPtSum) = getValueNorm(tau_funcs.getNeutralIsoPtSum(tau, tau_ref), 57.59f, 155.3f);
+    get(dnn::neutralIsoPtSum) = getValueNorm(tau_funcs.getNeutralIsoPtSum(tau, tau_ref, is_phase2HLT_), 57.59f, 155.3f);
     get(dnn::neutralIsoPtSumWeight_over_neutralIsoPtSum) =
-        getValue(tau_funcs.getNeutralIsoPtSumWeight(tau, tau_ref) / tau_funcs.getNeutralIsoPtSum(tau, tau_ref));
+      getValue(tau_funcs.getNeutralIsoPtSumWeight(tau, tau_ref) / tau_funcs.getNeutralIsoPtSum(tau, tau_ref, false));
     get(dnn::neutralIsoPtSumWeightdR03_over_neutralIsoPtSum) =
-        getValue(tau_funcs.getNeutralIsoPtSumdR03Weight(tau, tau_ref) / tau_funcs.getNeutralIsoPtSum(tau, tau_ref));
+      getValue(tau_funcs.getNeutralIsoPtSumdR03Weight(tau, tau_ref) / tau_funcs.getNeutralIsoPtSum(tau, tau_ref, false));
     get(dnn::neutralIsoPtSumdR03_over_dR05) =
-        getValue(tau_funcs.getNeutralIsoPtSumdR03(tau, tau_ref) / tau_funcs.getNeutralIsoPtSum(tau, tau_ref));
+        getValue(tau_funcs.getNeutralIsoPtSumdR03(tau, tau_ref, is_phase2HLT_) / tau_funcs.getNeutralIsoPtSum(tau, tau_ref, is_phase2HLT_));
     get(dnn::photonPtSumOutsideSignalCone) =
         getValueNorm(tau_funcs.getPhotonPtSumOutsideSignalCone(tau, tau_ref), 1.731f, 6.846f);
     get(dnn::puCorrPtSum) = getValueNorm(tau_funcs.getPuCorrPtSum(tau, tau_ref), 22.38f, 16.34f);
@@ -1904,7 +1939,11 @@ private:
     get(dnn::tau_flightLength_x) = getValueNorm(tau_funcs.getFlightLength(tau, tau_index).x(), -0.0003f, 0.7362f);
     get(dnn::tau_flightLength_y) = getValueNorm(tau_funcs.getFlightLength(tau, tau_index).y(), -0.0009f, 0.7354f);
     get(dnn::tau_flightLength_z) = getValueNorm(tau_funcs.getFlightLength(tau, tau_index).z(), -0.0022f, 1.993f);
-    get(dnn::tau_flightLength_sig) = 0.55756444;  //This value is set due to a bug in the training
+    if  (disable_FlightLengthSig_workaround_) {
+      get(dnn::tau_flightLength_sig) = getValueNorm(tau_funcs.getFlightLengthSig(tau, tau_index), -4.78f, 9.573f); 
+    } else {
+      get (dnn :: tau_flightLength_sig) = 0.55756444; // KA: This value is set due to a bug in the training  
+    }
     get(dnn::tau_pt_weighted_deta_strip) =
         getValueLinear(reco::tau::pt_weighted_deta_strip(tau, tau.decayMode()), 0, 1, true);
 
@@ -2364,6 +2403,7 @@ private:
       get(dnn::pfCand_chHad_pvAssociationQuality) =
           getValueLinear<int>(candFunc::getPvAssocationQuality(chH_cand), 0, 7, true);
       get(dnn::pfCand_chHad_fromPV) = getValueLinear<int>(candFunc::getFromPV(chH_cand), 0, 3, true);
+
       const float default_chH_pw_inner = 0.7614090f;
       const float default_chH_pw_outer = 0.1974930f;
       get(dnn::pfCand_chHad_puppiWeight) = is_inner
@@ -2374,6 +2414,7 @@ private:
                    : getValue(candFunc::getPuppiWeightNoLep(chH_cand, default_chH_pw_outer));
       get(dnn::pfCand_chHad_charge) = getValue(chH_cand.charge());
       get(dnn::pfCand_chHad_lostInnerHits) = getValue<int>(candFunc::getLostInnerHits(chH_cand, 0));
+
       get(dnn::pfCand_chHad_numberOfPixelHits) =
           getValueLinear(candFunc::getNumberOfPixelHits(chH_cand, 0), 0, 12, true);
       get(dnn::pfCand_chHad_vertex_dx) =
@@ -2466,8 +2507,8 @@ private:
     get(dnn::eta) = tau.p4().eta();
     get(dnn::mass) = tau.p4().mass();
     get(dnn::decayMode) = tau.decayMode();
-    get(dnn::chargedIsoPtSum) = tau_funcs.getChargedIsoPtSum(tau, tau_ref);
-    get(dnn::neutralIsoPtSum) = tau_funcs.getNeutralIsoPtSum(tau, tau_ref);
+    get(dnn::chargedIsoPtSum) = tau_funcs.getChargedIsoPtSum(tau, tau_ref, is_phase2HLT_);
+    get(dnn::neutralIsoPtSum) = tau_funcs.getNeutralIsoPtSum(tau, tau_ref, is_phase2HLT_);
     get(dnn::neutralIsoPtSumWeight) = tau_funcs.getNeutralIsoPtSumWeight(tau, tau_ref);
     get(dnn::photonPtSumOutsideSignalCone) = tau_funcs.getPhotonPtSumOutsideSignalCone(tau, tau_ref);
     get(dnn::puCorrPtSum) = tau_funcs.getPuCorrPtSum(tau, tau_ref);
@@ -2805,6 +2846,7 @@ private:
   const bool disable_dxy_pca_;
   const bool disable_hcalFraction_workaround_;
   const bool disable_CellIndex_workaround_;
+  const bool disable_FlightLengthSig_workaround_;
   std::unique_ptr<tensorflow::Tensor> tauBlockTensor_;
   std::array<std::unique_ptr<tensorflow::Tensor>, 2> eGammaTensor_, muonTensor_, hadronsTensor_, convTensor_,
       zeroOutputTensor_;
@@ -2817,6 +2859,9 @@ private:
   bool discrIndicesMapped_ = false;
   std::map<BasicDiscriminator, size_t> basicDiscrIndexMap_;
   std::map<BasicDiscriminator, size_t> basicDiscrdR03IndexMap_;
+
+  // flag to enable customization for Phase-2 HLT
+  bool is_phase2HLT_;
 };
 
 #include "FWCore/Framework/interface/MakerMacros.h"
