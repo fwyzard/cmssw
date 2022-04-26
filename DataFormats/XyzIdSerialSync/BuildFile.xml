@@ -1,0 +1,9 @@
+<use name="alpaka-serial"/>
+<use name="rootcore"/>
+<use name="DataFormats/Common"/>
+<use name="DataFormats/XyzId"/>
+<flags LCG_DICT_HEADER="classes_serial.h"/>
+<flags LCG_DICT_XML="classes_serial_def.xml"/>
+<export>
+  <lib name="1"/>
+</export>

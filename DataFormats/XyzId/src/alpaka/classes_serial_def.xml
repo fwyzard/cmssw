@@ -1,0 +1,4 @@
+<lcgdict>
+  <class name="alpaka_serial_sync::XyzIdDeviceCollection"/>
+  <class name="edm::Wrapper<alpaka_serial_sync::XyzIdDeviceCollection>" splitLevel="0"/>
+</lcgdict>

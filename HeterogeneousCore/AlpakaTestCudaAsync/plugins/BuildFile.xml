@@ -1,0 +1,11 @@
+<library file="*.cc *.cu" name="HeterogeneousCoreAlpakaTestCudaAsyncPlugins">
+  <use name="alpaka-cuda"/>
+  <use name="DataFormats/XyzId"/>
+  <use name="DataFormats/XyzIdCudaAsync"/>
+  <use name="FWCore/Framework"/>
+  <use name="FWCore/ParameterSet"/>
+  <use name="FWCore/Utilities"/>
+  <use name="HeterogeneousCore/AlpakaCore" source_only="1"/>
+  <use name="HeterogeneousCore/AlpakaInterface" source_only="1"/>
+  <flags EDM_PLUGIN="1"/>
+</library>

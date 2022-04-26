@@ -1,0 +1,12 @@
+<library file="*.cc" name="HeterogeneousCoreAlpakaServicesSerialSyncPlugins">
+  <use name="alpaka-serial"/>
+  <use name="FWCore/ServiceRegistry"/>
+  <use name="HeterogeneousCore/AlpakaCore" source_only="1"/>
+  <!--
+  The dependency on "HeterogeneousCore/AlpakaServices" should automatically expand to
+  "HeterogeneousCore/AlpakaServices" and "HeterogeneousCore/AlpakaServicesSerialSync"
+  (if they exist)
+  -->
+  <use name="HeterogeneousCore/AlpakaServicesSerialSync"/>
+  <flags EDM_PLUGIN="1"/>
+</library>

@@ -1,0 +1,9 @@
+<use name="alpaka-serial"/>
+<use name="boost"/>
+<use name="FWCore/MessageLogger"/>
+<use name="FWCore/ParameterSet"/>
+<use name="HeterogeneousCore/AlpakaCore" source_only="1"/>
+<use name="HeterogeneousCore/AlpakaInterface" source_only="1"/>
+<export>
+  <lib name="1"/>
+</export>
