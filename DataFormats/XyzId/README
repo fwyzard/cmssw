@@ -1,0 +1,9 @@
+## Define the alpaka-based SoA data formats
+
+Notes:
+  - do not define a dictionary for `XyzIdAlpakaHostCollection`, because it is the
+    same class as `alpaka_serial_sync::XyzIdAlpakaDeviceCollection`;
+  - define the dictionary for `alpaka_cuda_async::XyzIdAlpakaDeviceCollection` as
+    _transient_ only;
+  - the dictionary for `alpaka_cuda_async::XyzIdAlpakaDeviceCollection` should be
+    defined in a separate library, to factor out the CUDA dependency.
