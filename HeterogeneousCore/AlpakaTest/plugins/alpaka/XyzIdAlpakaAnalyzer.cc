@@ -27,9 +27,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     void analyze(edm::Event const& event, edm::EventSetup const&) override {
       XyzIdAlpakaHostCollection const& product = event.get(token_);
 
-      for (size_t i = 0; i < product->size(); ++i) {
+      for (int32_t i = 0; i < product->size(); ++i) {
         //std::cout << source_ << "[" << i << "] = " << product->id(i) << std ::endl;
-        assert(product->id(i) == static_cast<int32_t>(i));
+        assert(product->id(i) == i);
       }
       std::cout << "XyzIdAlpakaAnalyzer:\n"
                 << source_.encode() << ".size() = " << product->size() << '\n'

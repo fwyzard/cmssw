@@ -7,6 +7,8 @@
 #include <iostream>
 #endif
 
+#include "FWCore/Utilities/interface/typedefs.h"
+
 // SoA layout with x, y, z, id fields
 class XyzIdSoA {
 public:
@@ -19,13 +21,14 @@ public:
 #endif
   }
 
-  XyzIdSoA(size_t size, void *buffer)
+  XyzIdSoA(int32_t size, void *buffer)
       : size_(size),
         buffer_(buffer),
         x_(reinterpret_cast<double *>(reinterpret_cast<intptr_t>(buffer_))),
         y_(reinterpret_cast<double *>(reinterpret_cast<intptr_t>(x_) + pad(size * sizeof(double)))),
         z_(reinterpret_cast<double *>(reinterpret_cast<intptr_t>(y_) + pad(size * sizeof(double)))),
         id_(reinterpret_cast<int32_t *>(reinterpret_cast<intptr_t>(z_) + pad(size * sizeof(double)))) {
+    assert(size == 0 or (size > 0 and buffer != nullptr));
 #ifdef DEBUG_SOA_CTOR_DTOR
     std::cout << "XyzIdSoA constructor with " << size_ << " elements at 0x" << buffer_ << std::endl;
 #endif
@@ -72,9 +75,9 @@ public:
 #endif
 
   // global accessors
-  size_t size() const { return size_; }
+  int32_t size() const { return size_; }
 
-  size_t extent() const { return compute_size(size_); }
+  uint32_t extent() const { return compute_size(size_); }
 
   void *data() { return buffer_; }
   void const *data() const { return buffer_; }
@@ -82,51 +85,60 @@ public:
   // element-wise accessors are not implemented for simplicity
 
   // field-wise accessors
-  double const &x(size_t i) const {
+  double const &x(int32_t i) const {
+    assert(i >= 0);
     assert(i < size_);
     return x_[i];
   }
 
-  double &x(size_t i) {
+  double &x(int32_t i) {
+    assert(i >= 0);
     assert(i < size_);
     return x_[i];
   }
 
-  double const &y(size_t i) const {
+  double const &y(int32_t i) const {
+    assert(i >= 0);
     assert(i < size_);
     return y_[i];
   }
 
-  double &y(size_t i) {
+  double &y(int32_t i) {
+    assert(i >= 0);
     assert(i < size_);
     return y_[i];
   }
 
-  double const &z(size_t i) const {
+  double const &z(int32_t i) const {
+    assert(i >= 0);
     assert(i < size_);
     return z_[i];
   }
 
-  double &z(size_t i) {
+  double &z(int32_t i) {
+    assert(i >= 0);
     assert(i < size_);
     return z_[i];
   }
 
-  int32_t const &id(size_t i) const {
+  int32_t const &id(int32_t i) const {
+    assert(i >= 0);
     assert(i < size_);
     return id_[i];
   }
 
-  int32_t &id(size_t i) {
+  int32_t &id(int32_t i) {
+    assert(i >= 0);
     assert(i < size_);
     return id_[i];
   }
 
-  // utilities
-  static constexpr size_t pad(size_t size) { return ((size + alignment - 1) / alignment * alignment); }
+  // pad a size (in bytes) to the next multiple of the alignment
+  static constexpr uint32_t pad(size_t size) { return ((size + alignment - 1) / alignment * alignment); }
 
   // takes the size in elements, returns the size in bytes
-  static constexpr size_t compute_size(size_t elements) {
+  static constexpr uint32_t compute_size(int32_t elements) {
+    assert(elements >= 0);
     return pad(elements * sizeof(double)) +  // x
            pad(elements * sizeof(double)) +  // y
            pad(elements * sizeof(double)) +  // z
@@ -135,12 +147,12 @@ public:
 
 private:
   // non-owned memory
-  size_t size_;
-  void *buffer_;
+  cms_int32_t size_;  // must be the same as ROOT's Int_t
+  void *buffer_;      //!
 
   // layout
-  double *x_;
-  double *y_;
-  double *z_;
-  int32_t *id_;
+  double *x_;    //[size_]
+  double *y_;    //[size_]
+  double *z_;    //[size_]
+  int32_t *id_;  //[size_]
 };

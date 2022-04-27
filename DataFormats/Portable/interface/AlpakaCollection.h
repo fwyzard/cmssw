@@ -12,7 +12,7 @@ public:
 
   AlpakaCollection() : buffer_{}, layout_{} {}
 
-  AlpakaCollection(size_t elements, TDev const &device)
+  AlpakaCollection(int32_t elements, TDev const &device)
       : buffer_{alpaka::allocBuf<std::byte, uint32_t>(
             device, alpaka::Vec<alpaka::DimInt<1u>, uint32_t>{T::compute_size(elements)})},
         layout_{elements, buffer_->data()} {
@@ -44,6 +44,6 @@ public:
   Buffer const &buffer() const { return *buffer_; }
 
 private:
-  std::optional<Buffer> buffer_;
+  std::optional<Buffer> buffer_;  //!
   T layout_;
 };

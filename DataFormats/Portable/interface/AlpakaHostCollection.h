@@ -15,7 +15,7 @@ public:
 
   AlpakaCollection() : buffer_{}, layout_{} {}
 
-  AlpakaCollection(size_t elements, alpaka_common::DevHost const &host)
+  AlpakaCollection(int32_t elements, alpaka_common::DevHost const &host)
       : buffer_{alpaka::allocBuf<std::byte, uint32_t>(
             host, alpaka::Vec<alpaka::DimInt<1u>, uint32_t>{T::compute_size(elements)})},
         layout_{elements, buffer_->data()} {
@@ -24,7 +24,7 @@ public:
   }
 
   template <typename TDev>
-  AlpakaCollection(size_t elements, alpaka_common::DevHost const &host, TDev const &device)
+  AlpakaCollection(int32_t elements, alpaka_common::DevHost const &host, TDev const &device)
       : buffer_{alpaka::allocMappedBuf<std::byte, uint32_t>(
             host, device, alpaka::Vec<alpaka::DimInt<1u>, uint32_t>{T::compute_size(elements)})},
         layout_{elements, buffer_->data()} {
@@ -55,7 +55,7 @@ public:
   Buffer const &buffer() const { return *buffer_; }
 
 private:
-  std::optional<Buffer> buffer_;
+  std::optional<Buffer> buffer_;  //!
   T layout_;
 };
 

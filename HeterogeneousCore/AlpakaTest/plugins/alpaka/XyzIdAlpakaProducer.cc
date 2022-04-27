@@ -22,13 +22,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class XyzIdAlpakaProducer : public edm::stream::EDProducer<> {
   public:
     XyzIdAlpakaProducer(edm::ParameterSet const& config)
-        : deviceToken_{produces<XyzIdAlpakaDeviceCollection>()}, size_{config.getParameter<uint32_t>("size")} {}
+        : deviceToken_{produces<XyzIdAlpakaDeviceCollection>()}, size_{config.getParameter<int32_t>("size")} {}
 
     void produce(edm::Event& event, edm::EventSetup const&) override {
       XyzIdAlpakaDeviceCollection deviceProduct{size_, device};
-      for (size_t i = 0; i < size_; ++i) {
+      for (int32_t i = 0; i < size_; ++i) {
         // write values to the device buffer one at a time
-        int32_t value = static_cast<int32_t>(i);
+        int32_t value = i;
         auto hostView = alpaka::createView(host, &value, Vec1D{1});
         auto deviceView = alpaka::createView(device, &deviceProduct->id(i), Vec1D{1});
         alpaka::memcpy(queue, deviceView, hostView);
@@ -38,13 +38,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
       edm::ParameterSetDescription desc;
-      desc.add<uint32_t>("size");
+      desc.add<int32_t>("size");
       descriptions.addWithDefaultLabel(desc);
     }
 
   private:
     const edm::EDPutTokenT<XyzIdAlpakaDeviceCollection> deviceToken_;
-    const uint32_t size_;
+    const int32_t size_;
   };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

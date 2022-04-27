@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("Test")
+process = cms.Process("Writer")
 
 process.source = cms.Source("EmptySource")
 
@@ -8,7 +8,7 @@ process.source = cms.Source("EmptySource")
 #process.load("FWCore.Services.Tracer_cfi")
 
 process.xyzIdAlpakaProducerCuda = cms.EDProducer('alpaka_cuda_async::XyzIdAlpakaProducer',
-    size = cms.uint32(42)
+    size = cms.int32(42)
 )
 
 process.xyzIdAlpakaTranscriberFromCuda = cms.EDProducer('alpaka_cuda_async::XyzIdAlpakaTranscriber',
@@ -20,7 +20,7 @@ process.xyzIdAlpakaAnalyzerFromCuda = cms.EDAnalyzer('alpaka_serial_sync::XyzIdA
 )
 
 process.xyzIdAlpakaProducerSerial = cms.EDProducer('alpaka_serial_sync::XyzIdAlpakaProducer',
-    size = cms.uint32(42)
+    size = cms.int32(42)
 )
 
 process.xyzIdAlpakaAnalyzerSerial = cms.EDAnalyzer('alpaka_serial_sync::XyzIdAlpakaAnalyzer',
@@ -28,7 +28,7 @@ process.xyzIdAlpakaAnalyzerSerial = cms.EDAnalyzer('alpaka_serial_sync::XyzIdAlp
 )
 
 process.output = cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string("alpaka.root"),
+    fileName = cms.untracked.string("xyzid.root"),
     outputCommands = cms.untracked.vstring(
         'drop *',
         'keep *_xyzIdAlpakaTranscriberFromCuda_*_*',
@@ -45,6 +45,6 @@ process.serial_path = cms.Path(
     process.xyzIdAlpakaProducerSerial +
     process.xyzIdAlpakaAnalyzerSerial)
 
-#process.output_path = cms.EndPath(process.output)
+process.output_path = cms.EndPath(process.output)
 
 process.maxEvents.input = 10
