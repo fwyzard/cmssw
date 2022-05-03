@@ -15,6 +15,7 @@
   <use name="FWCore/ParameterSet"/>
   <use name="FWCore/Utilities"/>
   <use name="HeterogeneousCore/AlpakaCore" source_only="1"/>
+  <flags CXXFLAGS="-Wno-missing-braces"/>
   <flags EDM_PLUGIN="1"/>
 </library>
 
