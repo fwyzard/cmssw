@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DataFormats_XyzId_interface_alpaka_XyzIdAlpakaDeviceCollection_h
+#define DataFormats_XyzId_interface_alpaka_XyzIdAlpakaDeviceCollection_h
 
 #include "DataFormats/Portable/interface/alpaka/AlpakaDeviceCollection.h"
 #include "DataFormats/XyzId/interface/XyzIdSoA.h"
@@ -10,3 +11,5 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using XyzIdAlpakaDeviceCollection = AlpakaDeviceCollection<XyzIdSoA>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
+
+#endif  // DataFormats_XyzId_interface_alpaka_XyzIdAlpakaDeviceCollection_h

@@ -1,6 +1,8 @@
-#pragma once
+#ifndef DataFormats_XyzId_interface_XyzIdSoA_h
+#define DataFormats_XyzId_interface_XyzIdSoA_h
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 
 #ifdef DEBUG_SOA_CTOR_DTOR
@@ -156,3 +158,5 @@ private:
   double *z_;    //[size_]
   int32_t *id_;  //[size_]
 };
+
+#endif  // DataFormats_XyzId_interface_XyzIdSoA_h

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DataFormats_Portable_interface_AlpakaCollection_h
+#define DataFormats_Portable_interface_AlpakaCollection_h
 
 #include <optional>
 
@@ -47,3 +48,5 @@ private:
   std::optional<Buffer> buffer_;  //!
   T layout_;
 };
+
+#endif  // DataFormats_Portable_interface_AlpakaCollection_h

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_config_h
+#define HeterogeneousCore_AlpakaCore_interface_alpaka_config_h
 
 #include <type_traits>
 
@@ -135,6 +136,8 @@ namespace alpaka_tbb_async {
 
 #endif  // ALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED
 
-#if not defined ALPAKA_ACCELERATOR_NAMESPACE or defined ALPAKA_DUPLICATE_NAMESPACE
-#error Exactly one must be defined among: ALPAKA_ACC_GPU_CUDA_ENABLED, ALPAKA_ACC_GPU_HIP_ENABLED, ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED, ALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED.
+#if defined ALPAKA_DUPLICATE_NAMESPACE
+#error Only one alpaka backend symbol can be defined at the same time: ALPAKA_ACC_GPU_CUDA_ENABLED, ALPAKA_ACC_GPU_HIP_ENABLED, ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED, ALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED.
 #endif
+
+#endif  // HeterogeneousCore_AlpakaCore_interface_alpaka_config_h

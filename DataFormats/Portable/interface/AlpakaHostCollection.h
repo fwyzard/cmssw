@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DataFormats_Portable_interface_AlpakaHostCollection_h
+#define DataFormats_Portable_interface_AlpakaHostCollection_h
 
 #include <optional>
 
@@ -61,3 +62,5 @@ private:
 
 template <typename T>
 using AlpakaHostCollection = AlpakaCollection<T, alpaka_common::DevHost>;
+
+#endif  // DataFormats_Portable_interface_AlpakaHostCollection_h
