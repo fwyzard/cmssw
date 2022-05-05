@@ -1,4 +1,15 @@
 <lcgdict>
   <class name="alpaka_serial_sync::XyzIdAlpakaDeviceCollection"/>
+  <read
+    sourceClass="alpaka_serial_sync::XyzIdAlpakaDeviceCollection"
+    targetClass="alpaka_serial_sync::XyzIdAlpakaDeviceCollection"
+    version="[1-]"
+    source="XyzIdSoA layout_;"
+    target="buffer_"
+    embed="false">
+  <![CDATA[
+    alpaka_serial_sync::XyzIdAlpakaDeviceCollection::ROOTReadStreamer(newObj, onfile);
+  ]]>
+  </read>
   <class name="edm::Wrapper<alpaka_serial_sync::XyzIdAlpakaDeviceCollection>" splitLevel="0"/>
 </lcgdict>

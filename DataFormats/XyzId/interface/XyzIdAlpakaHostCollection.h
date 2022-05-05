@@ -7,4 +7,8 @@
 // SoA with x, y, z, id fields in pinned host memory
 using XyzIdAlpakaHostCollection = AlpakaHostCollection<XyzIdSoA>;
 
+//class XyzIdAlpakaHostCollection : public AlpakaHostCollection<XyzIdSoA> {
+//  using AlpakaHostCollection<XyzIdSoA>::AlpakaHostCollection;
+//};
+
 #endif  // DataFormats_XyzId_interface_XyzIdAlpakaHostCollection_h

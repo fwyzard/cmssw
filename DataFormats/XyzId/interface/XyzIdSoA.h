@@ -147,6 +147,15 @@ public:
            elements * sizeof(int32_t);       // id - no need to pad the last field
   }
 
+  template <typename T>
+  void ROOTReadStreamer(T onfile) {
+    auto size=onfile.layout_.size();
+    memcpy(x_, &onfile.layout_.x(0), size * sizeof(*x_));
+    memcpy(y_, &onfile.layout_.y(0), size * sizeof(*y_));
+    memcpy(z_, &onfile.layout_.z(0), size * sizeof(*z_));
+    memcpy(id_, &onfile.layout_.id(0), size * sizeof(*id_));
+  }
+
 private:
   // non-owned memory
   cms_int32_t size_;  // must be the same as ROOT's Int_t

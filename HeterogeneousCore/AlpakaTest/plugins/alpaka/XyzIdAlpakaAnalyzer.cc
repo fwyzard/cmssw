@@ -32,8 +32,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         assert(product->id(i) == i);
       }
       std::cout << "XyzIdAlpakaAnalyzer:\n"
-                << source_.encode() << ".size() = " << product->size() << '\n'
+                << source_.encode() << ".size() = " << product->size()
                 << std ::endl;
+      std::cout << "data=" << product->data()
+              << " x=" << &product->x(0)
+              << " y=" << &product->y(0)
+              << " z=" << &product->z(0)
+              << " id=" << &product->id(0) << std::endl;
+      std::cout << "[y - x]=" << std::hex << reinterpret_cast<intptr_t>(&product->y(0)) - reinterpret_cast<intptr_t>(&product->x(0))
+              << " [z - y]=" << reinterpret_cast<intptr_t>(&product->z(0)) - reinterpret_cast<intptr_t>(&product->y(0))
+              << " [id - z]=" << reinterpret_cast<intptr_t>(&product->id(0)) - reinterpret_cast<intptr_t>(&product->z(0))
+              << std::dec << std::endl << std::endl;
     }
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {

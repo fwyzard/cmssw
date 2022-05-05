@@ -22,6 +22,7 @@ public:
         layout_{elements, buffer_->data()} {
     // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
     assert(reinterpret_cast<uintptr_t>(buffer_->data()) % T::alignment == 0);
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
   }
 
   template <typename TDev>
