@@ -8,39 +8,67 @@
 #include "DataFormats/Portable/interface/PortableCollection.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
 
-// generic SoA-based product in pinned host memory
+// generic SoA-based product in host memory
 template <typename T>
 class PortableCollection<T, alpaka_common::DevHost> {
 public:
   using Buffer = alpaka::Buf<alpaka_common::DevHost, std::byte, alpaka::DimInt<1u>, uint32_t>;
 
-  PortableCollection() : buffer_{}, layout_{} {}
+  PortableCollection() : buffer_{}, layout_{} {
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+    std::cout << "[partial template specialisation]" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
+  }
 
   PortableCollection(int32_t elements, alpaka_common::DevHost const &host)
+      // allocate pageable host memory
       : buffer_{alpaka::allocBuf<std::byte, uint32_t>(
             host, alpaka::Vec<alpaka::DimInt<1u>, uint32_t>{T::compute_size(elements)})},
         layout_{elements, buffer_->data()} {
     // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
     assert(reinterpret_cast<uintptr_t>(buffer_->data()) % T::alignment == 0);
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+    std::cout << "[partial template specialisation]" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
   }
 
   template <typename TDev>
   PortableCollection(int32_t elements, alpaka_common::DevHost const &host, TDev const &device)
+      // allocate pinned host memory, accessible by the given device
       : buffer_{alpaka::allocMappedBuf<std::byte, uint32_t>(
             host, device, alpaka::Vec<alpaka::DimInt<1u>, uint32_t>{T::compute_size(elements)})},
         layout_{elements, buffer_->data()} {
     // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
     assert(reinterpret_cast<uintptr_t>(buffer_->data()) % T::alignment == 0);
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+    std::cout << "[partial template specialisation]" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
   }
 
-  ~PortableCollection() {}
+  ~PortableCollection() {
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+    std::cout << "[partial template specialisation]" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
+  }
 
   // non-copyable
   PortableCollection(PortableCollection const &) = delete;
   PortableCollection &operator=(PortableCollection const &) = delete;
 
   // movable
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+  PortableCollection(PortableCollection &&other)
+      : buffer_{std::move(other.buffer_)}, layout_{std::move(other.layout_)} {
+    std::cout << "[partial template specialisation]" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+  }
+#else
   PortableCollection(PortableCollection &&other) = default;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
   PortableCollection &operator=(PortableCollection &&other) = default;
 
   T &operator*() { return layout_; }

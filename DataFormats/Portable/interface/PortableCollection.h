@@ -13,7 +13,11 @@ class PortableCollection {
 public:
   using Buffer = alpaka::Buf<TDev, std::byte, alpaka::DimInt<1u>, uint32_t>;
 
-  PortableCollection() : buffer_{}, layout_{} {}
+  PortableCollection() : buffer_{}, layout_{} {
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
+  }
 
   PortableCollection(int32_t elements, TDev const &device)
       : buffer_{alpaka::allocBuf<std::byte, uint32_t>(
@@ -22,16 +26,30 @@ public:
     // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
     assert(reinterpret_cast<uintptr_t>(buffer_->data()) % T::alignment == 0);
     alpaka::pin(*buffer_);
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
   }
 
-  ~PortableCollection() {}
+  ~PortableCollection() {
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
+  }
 
   // non-copyable
   PortableCollection(PortableCollection const &) = delete;
   PortableCollection &operator=(PortableCollection const &) = delete;
 
   // movable
+#ifdef DEBUG_COLLECTION_CTOR_DTOR
+  PortableCollection(PortableCollection &&other)
+      : buffer_{std::move(other.buffer_)}, layout_{std::move(other.layout_)} {
+    std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
+  }
+#else
   PortableCollection(PortableCollection &&other) = default;
+#endif  // DEBUG_COLLECTION_CTOR_DTOR
   PortableCollection &operator=(PortableCollection &&other) = default;
 
   T &operator*() { return layout_; }
@@ -45,6 +63,15 @@ public:
   Buffer &buffer() { return *buffer_; }
 
   Buffer const &buffer() const { return *buffer_; }
+
+#if defined ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+  template <typename U>
+  static void ROOTReadStreamer(PortableCollection *newObj, U onfile) {
+    newObj->~PortableCollection();
+    new (newObj) PortableCollection(onfile.layout_.size(), host);
+    newObj->layout_.ROOTReadStreamer(onfile);
+  }
+#endif
 
 private:
   std::optional<Buffer> buffer_;  //!
