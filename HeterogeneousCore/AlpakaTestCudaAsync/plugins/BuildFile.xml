@@ -1,5 +1,9 @@
 <library file="*.cc *.cu" name="HeterogeneousCoreAlpakaTestCudaAsyncPlugins">
   <use name="alpaka-cuda"/>
+  <!-- host comiplation should run with ALPAKA_HOST_ONLY defined -->
+  <flags CXXFLAGS="-DALPAKA_ACC_GPU_CUDA_ENABLED -DALPAKA_HOST_ONLY"/>
+  <!-- device comiplation should run without ALPAKA_HOST_ONLY defined -->
+  <flags CUDA_FLAGS="-DALPAKA_ACC_GPU_CUDA_ENABLED -UALPAKA_HOST_ONLY"/>
   <use name="DataFormats/XyzId"/>
   <use name="DataFormats/XyzIdCudaAsync"/>
   <use name="FWCore/Framework"/>

@@ -1,2 +1,1 @@
-#define ALPAKA_ACC_GPU_CUDA_ENABLED
-#include "alpaka/XyzIdAlgo.dev.cc"
+../../AlpakaTest/plugins/alpaka/XyzIdAlgo.dev.cc

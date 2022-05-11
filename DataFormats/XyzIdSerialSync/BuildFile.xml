@@ -1,4 +1,6 @@
 <use name="alpaka-serial"/>
+<flags CXXFLAGS="-DALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED"/>
+<flags GENREFLEX_ARGS="-DALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED"/>
 <use name="rootcore"/>
 <use name="DataFormats/Common"/>
 <use name="DataFormats/XyzId"/>
