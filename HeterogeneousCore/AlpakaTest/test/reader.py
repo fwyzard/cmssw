@@ -11,11 +11,11 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.AlpakaServiceSerialSync = cms.Service("AlpakaServiceSerialSync")
 process.MessageLogger.AlpakaService = cms.untracked.PSet()
 
-process.xyzIdAlpakaAnalyzerFromCuda = cms.EDAnalyzer('alpaka_serial_sync::XyzIdAlpakaAnalyzer',
+process.xyzIdAlpakaAnalyzerFromCuda = cms.EDAnalyzer('XyzIdAlpakaAnalyzer',
     source = cms.InputTag('xyzIdAlpakaTranscriberFromCuda')
 )
 
-process.xyzIdAlpakaAnalyzerSerial = cms.EDAnalyzer('alpaka_serial_sync::XyzIdAlpakaAnalyzer',
+process.xyzIdAlpakaAnalyzerSerial = cms.EDAnalyzer('XyzIdAlpakaAnalyzer',
     source = cms.InputTag('xyzIdAlpakaProducerSerial')
 )
 

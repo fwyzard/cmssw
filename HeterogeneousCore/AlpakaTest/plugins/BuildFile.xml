@@ -1,0 +1,13 @@
+<library file="*.cc" name="HeterogeneousCoreAlpakaTestPlugins">
+  <use name="alpaka"/>
+  <use name="DataFormats/XyzId"/>
+  <!--
+  <use name="DataFormats/XyzIdSerialSync"/>
+  -->
+  <use name="FWCore/Framework"/>
+  <use name="FWCore/ParameterSet"/>
+  <use name="FWCore/Utilities"/>
+  <use name="HeterogeneousCore/AlpakaCore" source_only="1"/>
+  <use name="HeterogeneousCore/AlpakaInterface" source_only="1"/>
+  <flags EDM_PLUGIN="1"/>
+</library>

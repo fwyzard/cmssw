@@ -21,7 +21,7 @@ process.xyzIdAlpakaTranscriberFromCuda = cms.EDProducer('alpaka_cuda_async::XyzI
     source = cms.InputTag('xyzIdAlpakaProducerCuda')
 )
 
-process.xyzIdAlpakaAnalyzerFromCuda = cms.EDAnalyzer('alpaka_serial_sync::XyzIdAlpakaAnalyzer',
+process.xyzIdAlpakaAnalyzerFromCuda = cms.EDAnalyzer('XyzIdAlpakaAnalyzer',
     source = cms.InputTag('xyzIdAlpakaTranscriberFromCuda')
 )
 
@@ -29,7 +29,7 @@ process.xyzIdAlpakaProducerSerial = cms.EDProducer('alpaka_serial_sync::XyzIdAlp
     size = cms.int32(42)
 )
 
-process.xyzIdAlpakaAnalyzerSerial = cms.EDAnalyzer('alpaka_serial_sync::XyzIdAlpakaAnalyzer',
+process.xyzIdAlpakaAnalyzerSerial = cms.EDAnalyzer('XyzIdAlpakaAnalyzer',
     source = cms.InputTag('xyzIdAlpakaProducerSerial')
 )
 
