@@ -2,7 +2,7 @@
 #define DataFormats_Portable_interface_PortableCollection_h
 
 namespace traits {
-
+  
   // trait for a generic SoA-based product
   template <typename T, typename TDev>
   class PortableCollectionTrait;

@@ -15,4 +15,17 @@
   ]]>
   </read>
   <class name="edm::Wrapper<alpaka_serial_sync::XyzIdDeviceCollection>" splitLevel="0"/>
+  <class name="SoAViewTemplate<128l,false,cms::soa::RestrictQualify::Disabled,cms::soa::RangeChecking::Disabled>"/>
+  <class name="SoALayoutTemplate<128l, cms::soa::AlignmentEnforcement::Relaxed>">
+    <field name="mem_" comment="!"/> 
+    <field name="optionallyOwnedMem_" comment="!"/> 
+    <field name="byteSize_" comment="!"/>
+    <field name="x_"   comment="[nElements_]"/> 
+    <field name="y_"   comment="[nElements_]"/> 
+    <field name="z_"   comment="[nElements_]"/>
+    <field name="id_"   comment="[nElements_]"/>
+    <field name="soaMetadata()" comment="!"/>
+  </class>
+  <class name="cms::soa::ByteBuffer"/>
+  <class name="cms::soa::BaseLayout"/>
 </lcgdict>
