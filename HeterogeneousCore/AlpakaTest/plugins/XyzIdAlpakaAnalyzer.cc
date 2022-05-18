@@ -12,7 +12,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 class XyzIdAlpakaAnalyzer : public edm::stream::EDAnalyzer<> {
 public:

@@ -5,8 +5,8 @@
 
 #include <alpaka/alpaka.hpp>
 
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/host.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/host.h"
 
 // generic SoA-based product in host memory
 template <typename T>
@@ -82,7 +82,7 @@ public:
   template <typename U>
   static void ROOTReadStreamer(PortableHostCollection *newObj, U onfile) {
     newObj->~PortableHostCollection();
-    // use the global "host" object defined in HeterogeneousCore/AlpakaInterface/interface/alpaka/host.h
+    // use the global "host" object defined in HeterogeneousCore/AlpakaInterface/interface/host.h
     new (newObj) PortableHostCollection(onfile.layout_.size(), host);
     newObj->layout_.ROOTReadStreamer(onfile);
   }

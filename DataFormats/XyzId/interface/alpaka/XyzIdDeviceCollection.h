@@ -3,7 +3,7 @@
 
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "DataFormats/XyzId/interface/XyzIdSoA.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 

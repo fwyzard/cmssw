@@ -5,7 +5,7 @@
 
 #include <alpaka/alpaka.hpp>
 
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 namespace edm {
   class ActivityRegistry;

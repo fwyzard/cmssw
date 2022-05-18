@@ -15,8 +15,8 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/Utilities/interface/StreamID.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/host.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/host.h"
 #include "HeterogeneousCore/AlpakaServices/interface/alpaka/AlpakaService.h"
 
 #include "XyzIdAlgo.h"

@@ -6,7 +6,7 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/XyzId/interface/alpaka/XyzIdDeviceCollection.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 #include "XyzIdAlgo.h"
 

@@ -8,8 +8,8 @@
 #include "DataFormats/Portable/interface/PortableCollection.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
 #include "DataFormats/Portable/interface/PortableDeviceCollection.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/host.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/host.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 

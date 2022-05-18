@@ -6,7 +6,7 @@
 
 #include <alpaka/alpaka.hpp>
 
-#include "HeterogeneousCore/AlpakaInterface/interface/alpaka/config.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 // generic SoA-based product in device memory
 template <typename T, typename TDev>

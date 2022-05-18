@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaInterface_interface_alpaka_config_h
-#define HeterogeneousCore_AlpakaInterface_interface_alpaka_config_h
+#ifndef HeterogeneousCore_AlpakaInterface_interface_config_h
+#define HeterogeneousCore_AlpakaInterface_interface_config_h
 
 #include <type_traits>
 
@@ -161,4 +161,4 @@ namespace alpaka_tbb_async {
 
 #endif  // ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // HeterogeneousCore_AlpakaInterface_interface_alpaka_config_h
+#endif  // HeterogeneousCore_AlpakaInterface_interface_config_h
