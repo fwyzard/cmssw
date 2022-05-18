@@ -77,6 +77,8 @@ public:
   Buffer &buffer() { return *buffer_; }
 
   Buffer const &buffer() const { return *buffer_; }
+  
+  bool hasBuffer() const { return buffer_.operator bool(); }
 
   // part of the ROOT read streamer
   template <typename U>

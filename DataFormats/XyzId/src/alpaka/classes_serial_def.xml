@@ -1,5 +1,8 @@
 <lcgdict>
-  <class name="alpaka_serial_sync::XyzIdDeviceCollection"/>
+
+  <class name="alpaka_serial_sync::XyzIdDeviceCollection">
+    <field name="view_" comment="!"/> 
+  </class>
   <read
     sourceClass="alpaka_serial_sync::XyzIdDeviceCollection"
     targetClass="alpaka_serial_sync::XyzIdDeviceCollection"

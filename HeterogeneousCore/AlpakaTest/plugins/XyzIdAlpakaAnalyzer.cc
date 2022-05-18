@@ -28,8 +28,8 @@ public:
     }
     std::cout << "XyzIdAlpakaAnalyzer:\n" << source_.encode() << ".size() = " << product->size() << std::endl;
     /**/
-    std::cout << "data = " << product->data() << " x = " << &product->x(0) << " y = " << &product->y(0)
-              << " z = " << &product->z(0) << " id = " << &product->id(0) << std::endl;
+    std::cout << "data = " << (product.hasBuffer()? product.buffer().data(): nullptr) << " x = " << product->x() << " y = " << product->y()
+              << " z = " << product->z() << " id = " << product->id() << std::endl;
     std::cout << "[y - x] = " << std::hex
               << reinterpret_cast<intptr_t>(&product->y(0)) - reinterpret_cast<intptr_t>(&product->x(0))
               << " [z - y] = "
