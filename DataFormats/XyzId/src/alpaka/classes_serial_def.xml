@@ -26,6 +26,5 @@
     <field name="id_"   comment="[nElements_]"/>
     <field name="soaMetadata()" comment="!"/>
   </class>
-  <class name="cms::soa::ByteBuffer"/>
   <class name="cms::soa::BaseLayout"/>
 </lcgdict>

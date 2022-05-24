@@ -43,6 +43,12 @@
 #define _VALUE_TYPE_EIGEN_COLUMN 2
 
 namespace cms::soa {
+  
+  // XXX Addition of typedef for index types.
+  // size_type for indices. Compatible with ROOT, but limited to 2G entries
+  typedef int32_t size_type;
+  // byte_size_type for byte counts. Not creating an artificial limit (and not ROOT serialized).
+  typedef size_t byte_size_type;
 
   enum class SoAColumnType {
     scalar = _VALUE_TYPE_SCALAR,

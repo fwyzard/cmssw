@@ -15,8 +15,8 @@
  * Example:
  * GENERATE_SOA_LAYOUT(SoA,
  *   // predefined static scalars
- *   // cms_int32_t size;
- *   // cms_int32_t alignment;
+ *   // size_t size;
+ *   // size_t alignment;
  *
  *   // columns: one value per element
  *   SOA_COLUMN(double, x),
@@ -58,12 +58,14 @@
 
 namespace cms::soa {
   // A helper unique_ptr like class holding aligned
+  // XXX disabled for use with collections
+  /*
   class ByteBuffer {
   public:
     ~ByteBuffer() {
       free(buffer_);
     }
-    void allocate(cms_int32_t alignment, cms_int32_t bytes) {
+    void allocate(byte_size_type alignment, byte_size_type bytes) {
       if (buffer_) throw std::runtime_error("In ByteBuffer::allocate(): reallocating an already allocated buffer.");
       if (bytes % alignment) throw std::runtime_error("In ByteBuffer::allocate(): size should be aligned.");
       buffer_ = reinterpret_cast<std::byte *>(aligned_alloc(alignment, bytes));
@@ -75,6 +77,7 @@ namespace cms::soa {
   private:
     std::byte * buffer_ = nullptr;
   };
+  */
 }
 
 // clang-format off
@@ -115,7 +118,7 @@ namespace cms::soa {
 #define _DEFINE_METADATA_MEMBERS_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                                    \
   _SWITCH_ON_TYPE(VALUE_TYPE,                                                                                        \
       /* Scalar */                                                                                                   \
-      cms_int32_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
+      size_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
         return (((sizeof(CPP_TYPE) - 1) / ParentClass::byteAlignment) + 1) * ParentClass::byteAlignment;             \
       }                                                                                                              \
       typedef CPP_TYPE BOOST_PP_CAT(TypeOf_, NAME);                                                                  \
@@ -150,7 +153,7 @@ namespace cms::soa {
         return parent_.soaMetadata().BOOST_PP_CAT(parametersOf_, NAME)().addr_;                                      \
       }                                                                                                              \
       SOA_HOST_DEVICE_INLINE                                                                                         \
-      cms_int32_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
+      size_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
         return (((parent_.nElements_ * sizeof(CPP_TYPE) - 1) / ParentClass::byteAlignment) + 1) *                    \
                    ParentClass::byteAlignment;                                                                       \
       }                                                                                                              \
@@ -166,7 +169,7 @@ namespace cms::soa {
          parent_.BOOST_PP_CAT(NAME, Stride_));                                                                       \
       }                                                                                                              \
       SOA_HOST_DEVICE_INLINE                                                                                         \
-      cms_int32_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
+      size_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
         return (((parent_.nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / ParentClass::byteAlignment) + 1) *            \
                ParentClass::byteAlignment * CPP_TYPE::RowsAtCompileTime * CPP_TYPE::ColsAtCompileTime;               \
       } typedef CPP_TYPE BOOST_PP_CAT(TypeOf_, NAME);                                                                \
@@ -244,7 +247,7 @@ namespace cms::soa {
       SOA_HOST_DEVICE_INLINE CPP_TYPE& NAME() { return *BOOST_PP_CAT(NAME, _); }, /* Column */                     \
       SOA_HOST_DEVICE_INLINE CPP_TYPE* NAME() {                                                                    \
         return BOOST_PP_CAT(NAME, _);                                                                              \
-      } SOA_HOST_DEVICE_INLINE CPP_TYPE& NAME(cms_int32_t index) { return BOOST_PP_CAT(NAME, _)[index]; },              \
+      } SOA_HOST_DEVICE_INLINE CPP_TYPE& NAME(size_t index) { return BOOST_PP_CAT(NAME, _)[index]; },              \
       /* Eigen column */ /* Unsupported for the moment TODO */                                                     \
       BOOST_PP_EMPTY())
 // clang-format on
@@ -260,10 +263,10 @@ namespace cms::soa {
       VALUE_TYPE,                                                                                     /* Scalar */ \
       SOA_HOST_DEVICE_INLINE CPP_TYPE NAME() const { return *(BOOST_PP_CAT(NAME, _)); },              /* Column */ \
       SOA_HOST_DEVICE_INLINE CPP_TYPE const* NAME()                                                                \
-          const { return BOOST_PP_CAT(NAME, _); } SOA_HOST_DEVICE_INLINE CPP_TYPE NAME(cms_int32_t index)               \
+          const { return BOOST_PP_CAT(NAME, _); } SOA_HOST_DEVICE_INLINE CPP_TYPE NAME(size_t index)               \
               const { return *(BOOST_PP_CAT(NAME, _) + index); }, /* Eigen column */                               \
       SOA_HOST_DEVICE_INLINE CPP_TYPE::Scalar const* NAME()                                                        \
-          const { return BOOST_PP_CAT(NAME, _); } SOA_HOST_DEVICE_INLINE cms_int32_t BOOST_PP_CAT(                      \
+          const { return BOOST_PP_CAT(NAME, _); } SOA_HOST_DEVICE_INLINE size_t BOOST_PP_CAT(                      \
               NAME, Stride)() { return BOOST_PP_CAT(NAME, Stride_); })
 // clang-format on
 
@@ -295,7 +298,7 @@ namespace cms::soa {
                   CPP_TYPE * BOOST_PP_CAT(NAME, _) = nullptr;         \
                   , /* Eigen column */                                \
                   CPP_TYPE::Scalar * BOOST_PP_CAT(NAME, _) = nullptr; \
-                  cms_int32_t BOOST_PP_CAT(NAME, Stride_) = 0;)
+                  size_t BOOST_PP_CAT(NAME, Stride_) = 0;)
 // clang-format on
 
 #define _DECLARE_SOA_DATA_MEMBER(R, DATA, TYPE_NAME) BOOST_PP_EXPAND(_DECLARE_SOA_DATA_MEMBER_IMPL TYPE_NAME)
@@ -311,7 +314,7 @@ namespace cms::soa {
  */
 // clang-format off
 #define GENERATE_SOA_LAYOUT(CLASS, ...)                                                                                                   \
-  template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize,                                                                      \
+  template <size_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize,                                                                      \
             bool ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed>                               \
   struct CLASS: public cms::soa::BaseLayout {                                                                                             \
     /* these could be moved to an external type trait to free up the symbol names */                                                      \
@@ -322,10 +325,10 @@ namespace cms::soa {
    * See https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#global-memory-3-0 this is still valid                           \
    * up to compute capability 8.X.                                                                                                        \
    */                                                                                                                                     \
-    constexpr static cms_int32_t defaultAlignment = 128;                                                                                       \
-    constexpr static cms_int32_t byteAlignment = ALIGNMENT;                                                                                    \
+    constexpr static size_t defaultAlignment = 128;                                                                                       \
+    constexpr static size_t byteAlignment = ALIGNMENT;                                                                                    \
     constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;                                                   \
-    constexpr static cms_int32_t conditionalAlignment =                                                                                        \
+    constexpr static size_t conditionalAlignment =                                                                                        \
         alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced ? byteAlignment : 0;                                                       \
     /* Those typedefs avoid having commas in macros (which is problematic) */                                                             \
     template <cms::soa::SoAColumnType COLUMN_TYPE, class C>                                                                               \
@@ -339,7 +342,7 @@ namespace cms::soa {
     void toStream(std::ostream & os) const {                                                                                              \
       os << #CLASS "(" << nElements_ << " elements, byte alignement= " << byteAlignment << ", @"<< mem_ <<"): " << std::endl;             \
       os << "  sizeof(" #CLASS "): " << sizeof(CLASS) << std::endl;                                                                       \
-      cms_int32_t offset = 0;                                                                                                                  \
+      size_t offset = 0;                                                                                                                  \
       _ITERATE_ON_ALL(_DECLARE_SOA_STREAM_INFO, ~, __VA_ARGS__)                                                                           \
       os << "Final offset = " << offset << " computeDataSize(...): " << computeDataSize(nElements_)                                       \
               << std::endl;                                                                                                               \
@@ -347,8 +350,8 @@ namespace cms::soa {
     }                                                                                                                                     \
                                                                                                                                           \
     /* Helper function used by caller to externally allocate the storage */                                                               \
-    static cms_int32_t computeDataSize(cms_int32_t nElements) {                                                                                     \
-      cms_int32_t ret = 0;                                                                                                                     \
+    static size_t computeDataSize(size_t nElements) {                                                                                     \
+      size_t ret = 0;                                                                                                                     \
       _ITERATE_ON_ALL(_ACCUMULATE_SOA_ELEMENT, ~, __VA_ARGS__)                                                                            \
       return ret;                                                                                                                         \
     }                                                                                                                                     \
@@ -358,9 +361,9 @@ namespace cms::soa {
    */                                                                                                                                     \
     struct SoAMetadata {                                                                                                                  \
       friend CLASS;                                                                                                                       \
-      SOA_HOST_DEVICE_INLINE cms_int32_t size() const { return parent_.nElements_; }                                                           \
-      SOA_HOST_DEVICE_INLINE cms_int32_t byteSize() const { return parent_.byteSize_; }                                                        \
-      SOA_HOST_DEVICE_INLINE cms_int32_t byteAlignment() const { return CLASS::byteAlignment; }                                                \
+      SOA_HOST_DEVICE_INLINE size_t size() const { return parent_.nElements_; }                                                           \
+      SOA_HOST_DEVICE_INLINE size_t byteSize() const { return parent_.byteSize_; }                                                        \
+      SOA_HOST_DEVICE_INLINE size_t byteAlignment() const { return CLASS::byteAlignment; }                                                \
       SOA_HOST_DEVICE_INLINE std::byte* data() { return parent_.mem_; }                                                                   \
       SOA_HOST_DEVICE_INLINE const std::byte* data() const { return parent_.mem_; }                                                       \
       SOA_HOST_DEVICE_INLINE std::byte* nextByte() const { return parent_.mem_ + parent_.byteSize_; }                                     \
@@ -389,7 +392,7 @@ namespace cms::soa {
           _ITERATE_ON_ALL_COMMA(_DECLARE_MEMBER_TRIVIAL_CONSTRUCTION, ~, __VA_ARGS__) {}                                                  \
                                                                                                                                           \
     /* Constructor relying on user provided storage (implementation shared with ROOT streamer) */                                                                                    \
-    SOA_HOST_ONLY CLASS(std::byte* mem, cms_int32_t nElements) : mem_(mem), nElements_(nElements), byteSize_(0) {                              \
+    SOA_HOST_ONLY CLASS(std::byte* mem, size_t nElements) : mem_(mem), nElements_(nElements), byteSize_(0) {                              \
       organizeColumnsFromBuffer(); \
     } \
                                                                                                                                           \
@@ -408,7 +411,7 @@ namespace cms::soa {
                                                                                                                                           \
   public: \
     /* Constructor relying on user provided storage */                                                                                    \
-    SOA_DEVICE_ONLY CLASS(bool devConstructor, std::byte* mem, cms_int32_t nElements) : mem_(mem), nElements_(nElements) {                     \
+    SOA_DEVICE_ONLY CLASS(bool devConstructor, std::byte* mem, size_t nElements) : mem_(mem), nElements_(nElements) {                     \
       auto curMem = mem_;                                                                                                                 \
       _ITERATE_ON_ALL(_ASSIGN_SOA_COLUMN_OR_SCALAR, ~, __VA_ARGS__)                                                                       \
     }                                                                                                                                     \
@@ -450,7 +453,7 @@ namespace cms::soa {
   private:                                                                                                                                \
     /* Range checker conditional to the macro _DO_RANGECHECK */                                                                           \
     SOA_HOST_DEVICE_INLINE                                                                                                                \
-    void rangeCheck(cms_int32_t index) const {                                                                                                 \
+    void rangeCheck(size_t index) const {                                                                                                 \
       if constexpr (_DO_RANGECHECK) {                                                                                                     \
         if (index >= nElements_) {                                                                                                        \
           printf("In " #CLASS "::rangeCheck(): index out of range: %zu with nElements: %zu\n", index, nElements_);                        \
@@ -463,7 +466,7 @@ namespace cms::soa {
     std::byte* mem_;    /*!*/                                                                                                             \
     cms::soa::ByteBuffer optionallyOwnedMem_; \
     cms_int32_t nElements_;                                                                                                               \
-    cms_int32_t byteSize_;                                                                                                                     \
+    size_t byteSize_;                                                                                                                     \
     _ITERATE_ON_ALL(_DECLARE_SOA_DATA_MEMBER, ~, __VA_ARGS__)                                                                             \
   };
 // clang-format on

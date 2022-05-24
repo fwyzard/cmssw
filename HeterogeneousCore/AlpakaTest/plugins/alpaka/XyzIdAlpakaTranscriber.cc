@@ -47,7 +47,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       Queue queue{*device};
       XyzIdDeviceCollection const& deviceProduct = event.get(deviceToken_);
 
-      XyzIdHostCollection hostProduct{deviceProduct->size(), host, *device};
+      XyzIdHostCollection hostProduct{deviceProduct->soaMetadata().size(), host, *device};
       alpaka::memcpy(queue, hostProduct.buffer(), deviceProduct.buffer());
 
       // wait for any async work to complete

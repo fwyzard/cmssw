@@ -17,11 +17,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     uint32_t maxThreadsPerBlock = deviceProperties.m_blockThreadExtentMax[0];
 
     uint32_t threadsPerBlock = maxThreadsPerBlock;
-    uint32_t blocksPerGrid = (collection->size() + threadsPerBlock - 1) / threadsPerBlock;
+    uint32_t blocksPerGrid = (collection->soaMetadata().size() + threadsPerBlock - 1) / threadsPerBlock;
     uint32_t elementsPerThread = 1;
     auto workDiv = WorkDiv1D{blocksPerGrid, threadsPerBlock, elementsPerThread};
 
-    alpaka::exec<Acc1D>(queue, workDiv, XyzIdAlgoKernel{}, &collection->id(0), collection->size());
+    alpaka::exec<Acc1D>(queue, workDiv, XyzIdAlgoKernel{}, &collection->id(0), collection->soaMetadata().size());
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

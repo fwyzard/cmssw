@@ -1,32 +1,39 @@
 #ifndef DataFormats_XyzId_interface_XyzIdSoA_h
 #define DataFormats_XyzId_interface_XyzIdSoA_h
 
-#include <cassert>
-#include <cstddef>
-#include <cstdint>
+#include "DataFormats/XyzId/interface/SoACommon.h"
+#include "DataFormats/XyzId/interface/SoALayout.h"
+#include "DataFormats/XyzId/interface/SoAView.h"
 
 #ifdef DEBUG_SOA_CTOR_DTOR
 #include <iostream>
 #endif
 
 
-// XXX Addition: forward declaration of trivial view
-template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed, bool RESTRICT_QUALIFY = cms::soa::RestrictQualify::Disabled, bool RANGE_CHECKING = cms::soa::RangeChecking::Disabled> 
+// XXX Addition: forward declaration of trivial view, new size type
+// XXX translation of typedef in template for ROOT (cms::soa::byte_size_type = size_t)
+template <size_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed, bool RESTRICT_QUALIFY = cms::soa::RestrictQualify::Disabled, bool RANGE_CHECKING = cms::soa::RangeChecking::Disabled> 
 struct SoAViewTemplate;
 
-template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed> struct SoALayoutTemplate : public cms::soa::BaseLayout {
+// XXX new size type.
+template <size_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed> struct SoALayoutTemplate : public cms::soa::BaseLayout {
   using self_type = SoALayoutTemplate ;
+  
+  // XXX size types,
+  typedef cms::soa::size_type size_type;
+  typedef cms::soa::byte_size_type byte_size_type;
   typedef cms::soa::AlignmentEnforcement AlignmentEnforcement;
-  constexpr static cms_int32_t defaultAlignment = 128;
-  constexpr static cms_int32_t byteAlignment = ALIGNMENT;
+  constexpr static byte_size_type defaultAlignment = 128;
+  constexpr static byte_size_type byteAlignment = ALIGNMENT;
   constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;
-  constexpr static cms_int32_t conditionalAlignment = alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced ? byteAlignment : 0;
+  constexpr static byte_size_type conditionalAlignment = alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced ? byteAlignment : 0;
   template <cms::soa::SoAColumnType COLUMN_TYPE, class C> using SoAValueWithConf = cms::soa::SoAValue<COLUMN_TYPE, C, conditionalAlignment>;
   template <cms::soa::SoAColumnType COLUMN_TYPE, class C> using SoAConstValueWithConf = cms::soa::SoAConstValue<COLUMN_TYPE, C, conditionalAlignment>;
   void toStream(std::ostream & os) const {
     os << "SoALayoutTemplate" "(" << nElements_ << " elements, byte alignement= " << byteAlignment << ", @"<< mem_ <<"): " << std::endl;
     os << "  sizeof(" "SoALayoutTemplate" "): " << sizeof( SoALayoutTemplate ) << std::endl;
-    cms_int32_t offset = 0;
+    // XXX size types,
+    byte_size_type offset = 0;
     os << " Column " "x" " at offset " << offset << " has size " << sizeof ( double ) * nElements_ << " and padding " << ( ( ( nElements_ * sizeof ( double ) - 1 ) / byteAlignment ) + 1 ) * byteAlignment - ( sizeof ( double ) * nElements_ ) << std :: endl ;
     offset += ( ( ( nElements_ * sizeof ( double ) - 1 ) / byteAlignment ) + 1 ) * byteAlignment ;
     os << " Column " "y" " at offset " << offset << " has size " << sizeof ( double ) * nElements_ << " and padding " << ( ( ( nElements_ * sizeof ( double ) - 1 ) / byteAlignment ) + 1 ) * byteAlignment - ( sizeof ( double ) * nElements_ ) << std :: endl ;
@@ -40,8 +47,10 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
   }
   // Size type
   // XXX move from size_t to cms_uint32_t.
-  static cms_int32_t computeDataSize(cms_uint32_t nElements) {
-    cms_int32_t ret = 0;
+  // XXX size types,
+  static byte_size_type computeDataSize(size_type nElements) {
+    // XXX size types,
+    byte_size_type ret = 0;
     ret += ( ( ( nElements * sizeof ( double ) - 1 ) / byteAlignment ) + 1 ) * byteAlignment ;
     ret += ( ( ( nElements * sizeof ( double ) - 1 ) / byteAlignment ) + 1 ) * byteAlignment ;
     ret += ( ( ( nElements * sizeof ( double ) - 1 ) / byteAlignment ) + 1 ) * byteAlignment ;
@@ -50,13 +59,16 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
   }
   struct SoAMetadata {
     friend SoALayoutTemplate ;
-    inline cms_int32_t size() const {
+    // XXX size types,
+    inline size_type size() const {
       return parent_.nElements_;
     }
-    inline cms_int32_t byteSize() const {
+    // XXX size types,
+    inline byte_size_type byteSize() const {
       return parent_.byteSize_;
     }
-    inline cms_int32_t byteAlignment() const {
+    // XXX size types,
+    inline byte_size_type byteAlignment() const {
       return SoALayoutTemplate ::byteAlignment;
     }
     inline std::byte* data() {
@@ -81,7 +93,8 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
     inline double * addressOf_x ( ) {
       return parent_ . soaMetadata ( ) . parametersOf_x ( ) . addr_ ;
     }
-    inline cms_int32_t xPitch ( ) const {
+    // XXX size types,
+    inline byte_size_type xPitch ( ) const {
       return ( ( ( parent_ . nElements_ * sizeof ( double ) - 1 ) / ParentClass :: byteAlignment ) + 1 ) * ParentClass :: byteAlignment ;
     }
     typedef double TypeOf_x ;
@@ -96,7 +109,8 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
     inline double * addressOf_y ( ) {
       return parent_ . soaMetadata ( ) . parametersOf_y ( ) . addr_ ;
     }
-    inline cms_int32_t yPitch ( ) const {
+    // XXX size types,
+    inline byte_size_type yPitch ( ) const {
       return ( ( ( parent_ . nElements_ * sizeof ( double ) - 1 ) / ParentClass :: byteAlignment ) + 1 ) * ParentClass :: byteAlignment ;
     }
     typedef double TypeOf_y ;
@@ -111,7 +125,8 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
     inline double * addressOf_z ( ) {
       return parent_ . soaMetadata ( ) . parametersOf_z ( ) . addr_ ;
     }
-    inline cms_int32_t zPitch ( ) const {
+    // XXX size types,
+    inline byte_size_type zPitch ( ) const {
       return ( ( ( parent_ . nElements_ * sizeof ( double ) - 1 ) / ParentClass :: byteAlignment ) + 1 ) * ParentClass :: byteAlignment ;
     }
     typedef double TypeOf_z ;
@@ -126,7 +141,8 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
     inline int32_t * addressOf_id ( ) {
       return parent_ . soaMetadata ( ) . parametersOf_id ( ) . addr_ ;
     }
-    inline cms_int32_t idPitch ( ) const {
+    // XXX size types,
+    inline byte_size_type idPitch ( ) const {
       return ( ( ( parent_ . nElements_ * sizeof ( int32_t ) - 1 ) / ParentClass :: byteAlignment ) + 1 ) * ParentClass :: byteAlignment ;
     }
     typedef int32_t TypeOf_id ;
@@ -147,7 +163,8 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
   }
   SoALayoutTemplate () : mem_(nullptr), nElements_(0), byteSize_(0), x_ ( nullptr ) , y_ ( nullptr ) , z_ ( nullptr ) , id_ ( nullptr ) {
   }
-  SoALayoutTemplate (std::byte* mem, cms_int32_t nElements) : mem_(mem), nElements_(nElements), byteSize_(0) {
+  // XXX size types,
+  SoALayoutTemplate (std::byte* mem, size_type nElements) : mem_(mem), nElements_(nElements), byteSize_(0) {
     organizeColumnsFromBuffer();
   }
   private: void organizeColumnsFromBuffer() {
@@ -168,7 +185,8 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
     byteSize_ = computeDataSize(nElements_);
     if (mem_ + byteSize_ != curMem) throw std::out_of_range("In " "SoALayoutTemplate" "::" "SoALayoutTemplate" ": unexpected end pointer.");
   }
-  public: SoALayoutTemplate (bool devConstructor, std::byte* mem, cms_int32_t nElements) : mem_(mem), nElements_(nElements) {
+  // XXX size types,
+  public: SoALayoutTemplate (bool devConstructor, std::byte* mem, size_type nElements) : mem_(mem), nElements_(nElements) {
     auto curMem = mem_;
     x_ = reinterpret_cast < double * > ( curMem ) ;
     curMem += ( ( ( nElements_ * sizeof ( double ) - 1 ) / byteAlignment ) + 1 ) * byteAlignment ;
@@ -183,28 +201,24 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
     curMem += ( ( ( nElements_ * sizeof ( int32_t ) - 1 ) / byteAlignment ) + 1 ) * byteAlignment ;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced) if (reinterpret_cast<intptr_t>( id_ ) % byteAlignment) throw std::out_of_range("In layout constructor: misaligned column: " "id" );
   }
-  template <typename T> void AllocateAndIoRead(T & onfile) {
+  template <typename T> void AllocateAndIoReaToDo(T & onfile) {
     nElements_ = onfile.nElements_;
     std::cout << "AllocateAndIoRead begin" << std::endl;
     auto buffSize=computeDataSize(nElements_);
-    optionallyOwnedMem_.allocate(byteAlignment, buffSize);
-    mem_ = optionallyOwnedMem_.get();
-    std::cout << "Buffer=" << optionallyOwnedMem_.get() << " Buffer first byte after (alloc) =" << optionallyOwnedMem_.get() + buffSize << std::endl;
-    organizeColumnsFromBuffer();
+    //std::cout << "Buffer=" << optionallyOwnedMem_.get() << " Buffer first byte after (alloc) =" << optionallyOwnedMem_.get() + buffSize << std::endl;
+    //organizeColumnsFromBuffer();
     memcpy ( x_ , onfile . x_ , sizeof ( double ) * onfile . nElements_ ) ;
     memcpy ( y_ , onfile . y_ , sizeof ( double ) * onfile . nElements_ ) ;
     memcpy ( z_ , onfile . z_ , sizeof ( double ) * onfile . nElements_ ) ;
     memcpy ( id_ , onfile . id_ , sizeof ( int32_t ) * onfile . nElements_ ) ;
     std::cout << "AllocateAndIoRead end" << std::endl;
   }
-  template <typename T> void AllocateAndIoReadRaw(T & onfile) {
+  template <typename T> void AllocateAndIoReadRawToDo(T & onfile) {
     nElements_ = onfile.nElements_;
     std::cout << "AllocateAndIoRead begin" << std::endl;
     auto buffSize=computeDataSize(nElements_);
-    optionallyOwnedMem_.allocate(byteAlignment, buffSize);
-    mem_ = optionallyOwnedMem_.get();
-    std::cout << "Buffer=" << optionallyOwnedMem_.get() << " Buffer first byte after (alloc) =" << optionallyOwnedMem_.get() + buffSize << std::endl;
-    organizeColumnsFromBuffer();
+    //std::cout << "Buffer=" << optionallyOwnedMem_.get() << " Buffer first byte after (alloc) =" << optionallyOwnedMem_.get() + buffSize << std::endl;
+    //organizeColumnsFromBuffer();
     memcpy ( x_ , onfile . x_ , sizeof ( double ) * onfile . nElements_ ) ;
     memcpy ( y_ , onfile . y_ , sizeof ( double ) * onfile . nElements_ ) ;
     memcpy ( z_ , onfile . z_ , sizeof ( double ) * onfile . nElements_ ) ;
@@ -212,7 +226,8 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
     std::cout << "AllocateAndIoRead end" << std::endl;
   }
   template <typename T> friend void dump();
-  private: inline void rangeCheck(cms_int32_t index) const {
+  // XXX size types,
+  private: inline void rangeCheck(size_type index) const {
     if constexpr ( false ) {
       if (index >= nElements_) {
         printf("In " "SoALayoutTemplate" "::rangeCheck(): index out of range: %zu with nElements: %zu\n", index, nElements_);
@@ -221,9 +236,9 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
     }
   }
   std::byte* mem_;
-  cms::soa::ByteBuffer optionallyOwnedMem_;
-  cms_int32_t nElements_;
-  cms_int32_t byteSize_;
+  size_type nElements_;
+  // XXX size types,
+  byte_size_type byteSize_;
   double * x_ = nullptr ;
   double * y_ = nullptr ;
   double * z_ = nullptr ;
@@ -232,29 +247,36 @@ template <cms_int32_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize, bool ALI
   // XXX Addition: trivial view:
   // XXX Changed enum class to bare bool + const values in class.
 public:
-  template <cms_int32_t ALIGNMENT2 = cms::soa::CacheLineSize::defaultSize, bool ALIGNMENT_ENFORCEMENT2 = cms::soa::AlignmentEnforcement::Relaxed, bool RESTRICT_QUALIFY2 = cms::soa::RestrictQualify::Disabled, bool RANGE_CHECKING2 = cms::soa::RangeChecking::Disabled> 
+  // XXX size types,
+  template <size_type ALIGNMENT2 = cms::soa::CacheLineSize::defaultSize, bool ALIGNMENT_ENFORCEMENT2 = cms::soa::AlignmentEnforcement::Relaxed, bool RESTRICT_QUALIFY2 = cms::soa::RestrictQualify::Disabled, bool RANGE_CHECKING2 = cms::soa::RangeChecking::Disabled> 
   using TrivialView = SoAViewTemplate<ALIGNMENT2, ALIGNMENT_ENFORCEMENT2 ,RESTRICT_QUALIFY2 ,RANGE_CHECKING2>;
   
   // XXX Addition: streamer
   template <typename T>
   void ROOTReadStreamer(T onfile) {
-    auto size = onfile.layout_.size();
-    memcpy(x_, &onfile.layout_.x(0), size * sizeof(*x_));
-    memcpy(y_, &onfile.layout_.y(0), size * sizeof(*y_));
-    memcpy(z_, &onfile.layout_.z(0), size * sizeof(*z_));
-    memcpy(id_, &onfile.layout_.id(0), size * sizeof(*id_));
+    auto size = onfile.layout_.soaMetadata().size();
+    memcpy(x_, onfile.layout_.x_, size * sizeof(*x_));
+    memcpy(y_, onfile.layout_.y_, size * sizeof(*y_));
+    memcpy(z_, onfile.layout_.z_, size * sizeof(*z_));
+    memcpy(id_, onfile.layout_.id_, size * sizeof(*id_));
   }
 };
 ;
 using SoALayoutTemplate_default = SoALayoutTemplate <>;
 // XXX Removal of defaults due to forward declaration, switch to bool RESTRICT_QUALIFY and RANGE_CHECKING
-template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALIFY, bool RANGE_CHECKING> struct SoAViewTemplate {
+// XXX size types,
+// XXX translation of typedef in template for ROOT (cms::soa::byte_size_type = size_t)
+template <size_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALIFY, bool RANGE_CHECKING> struct SoAViewTemplate {
   using self_type = SoAViewTemplate ;
+    
+  // XXX szie types,
+  typedef cms::soa::size_type size_type;
+  typedef cms::soa::byte_size_type byte_size_type;
   typedef cms::soa::AlignmentEnforcement AlignmentEnforcement;
-  constexpr static cms_int32_t defaultAlignment = cms::soa::CacheLineSize::defaultSize;
-  constexpr static cms_int32_t byteAlignment = ALIGNMENT;
+  constexpr static byte_size_type defaultAlignment = cms::soa::CacheLineSize::defaultSize;
+  constexpr static byte_size_type byteAlignment = ALIGNMENT;
   constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;
-  constexpr static cms_int32_t conditionalAlignment = alignmentEnforcement == AlignmentEnforcement::Enforced ? byteAlignment : 0;
+  constexpr static byte_size_type conditionalAlignment = alignmentEnforcement == AlignmentEnforcement::Enforced ? byteAlignment : 0;
   // XXX Changed enum class to bare bool + const values in class.
   constexpr static bool restrictQualify = RESTRICT_QUALIFY;
   // XXX Changed enum class to bare bool + const values in class.
@@ -263,7 +285,8 @@ template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALI
   template <cms::soa::SoAColumnType COLUMN_TYPE, class C> using SoAConstValueWithConf = cms::soa::SoAConstValue<COLUMN_TYPE, C, conditionalAlignment, restrictQualify>;
   struct SoAMetadata {
     friend SoAViewTemplate ;
-    inline cms_int32_t size() const {
+    // XXX size types,
+    inline size_type size() const {
       return parent_.nElements_;
     }
     typedef SoALayoutTemplate_default TypeOf_instance_SoALayoutTemplate ;
@@ -318,9 +341,11 @@ template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALI
   }
   SoAViewTemplate () {
   }
-  SoAViewTemplate ( SoALayoutTemplate_default & instance_SoALayoutTemplate ) : nElements_([&]() -> cms_int32_t {
+  // XXX size types,
+  SoAViewTemplate ( SoALayoutTemplate_default & instance_SoALayoutTemplate ) : nElements_([&]() -> size_type {
     bool set = false;
-    cms_int32_t ret = 0;
+    // XXX size types,
+    size_type ret = 0;
     if ( set ) {
       if ( ret != instance_SoALayoutTemplate . soaMetadata ( ) . size ( ) ) throw std :: out_of_range ( "In constructor by layout: different sizes from layouts." ) ;
     }
@@ -352,7 +377,8 @@ template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALI
   }
   ( ) ) {
   }
-  SoAViewTemplate (cms_int32_t nElements, typename SoAMetadata :: ParametersTypeOf_x :: TupleOrPointerType x , typename SoAMetadata :: ParametersTypeOf_y :: TupleOrPointerType y , typename SoAMetadata :: ParametersTypeOf_z :: TupleOrPointerType z , typename SoAMetadata :: ParametersTypeOf_id :: TupleOrPointerType id ) : nElements_(nElements), xParameters_ ( [ & ] ( ) -> auto {
+  // XXX size types,
+  SoAViewTemplate (size_type nElements, typename SoAMetadata :: ParametersTypeOf_x :: TupleOrPointerType x , typename SoAMetadata :: ParametersTypeOf_y :: TupleOrPointerType y , typename SoAMetadata :: ParametersTypeOf_z :: TupleOrPointerType z , typename SoAMetadata :: ParametersTypeOf_id :: TupleOrPointerType id ) : nElements_(nElements), xParameters_ ( [ & ] ( ) -> auto {
     if constexpr ( alignmentEnforcement == AlignmentEnforcement :: Enforced ) if ( SoAMetadata :: ParametersTypeOf_x :: checkAlignment ( x , byteAlignment ) ) throw std :: out_of_range ( "In constructor by column: misaligned column: " "x" ) ;
     return x ;
   }
@@ -371,7 +397,8 @@ template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALI
   ( ) ) {
   }
   struct const_element {
-    inline const_element(cms_int32_t index, const typename SoAMetadata :: ParametersTypeOf_x x , const typename SoAMetadata :: ParametersTypeOf_y y , const typename SoAMetadata :: ParametersTypeOf_z z , const typename SoAMetadata :: ParametersTypeOf_id id ) : x_ ( index , x ) , y_ ( index , y ) , z_ ( index , z ) , id_ ( index , id ) {
+    // XXX size types,
+    inline const_element(size_type index, const typename SoAMetadata :: ParametersTypeOf_x x , const typename SoAMetadata :: ParametersTypeOf_y y , const typename SoAMetadata :: ParametersTypeOf_z z , const typename SoAMetadata :: ParametersTypeOf_id id ) : x_ ( index , x ) , y_ ( index , y ) , z_ ( index , z ) , id_ ( index , id ) {
     }
     inline typename SoAConstValueWithConf< SoAMetadata :: ColumnTypeOf_x , typename SoAMetadata :: TypeOf_x >::RefToConst x () const {
       return x_ ();
@@ -391,7 +418,8 @@ template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALI
     const cms::soa::ConstValueTraits<SoAConstValueWithConf< SoAMetadata :: ColumnTypeOf_id , typename SoAMetadata :: TypeOf_id >, SoAMetadata :: ColumnTypeOf_id > id_ ;
   };
   struct element {
-    inline element(cms_int32_t index, typename SoAMetadata :: ParametersTypeOf_x x , typename SoAMetadata :: ParametersTypeOf_y y , typename SoAMetadata :: ParametersTypeOf_z z , typename SoAMetadata :: ParametersTypeOf_id id ) : x ( index , x ) , y ( index , y ) , z ( index , z ) , id ( index , id ) {
+    // XXX size types,
+    inline element(size_type index, typename SoAMetadata :: ParametersTypeOf_x x , typename SoAMetadata :: ParametersTypeOf_y y , typename SoAMetadata :: ParametersTypeOf_z z , typename SoAMetadata :: ParametersTypeOf_id id ) : x ( index , x ) , y ( index , y ) , z ( index , z ) , id ( index , id ) {
     }
     inline element& operator=(const element& other) {
       if constexpr ( SoAMetadata :: ColumnTypeOf_x != cms :: soa :: SoAColumnType :: scalar ) x ( ) = other . x ( ) ;
@@ -405,7 +433,8 @@ template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALI
     SoAValueWithConf< SoAMetadata :: ColumnTypeOf_z , typename SoAMetadata :: TypeOf_z > z ;
     SoAValueWithConf< SoAMetadata :: ColumnTypeOf_id , typename SoAMetadata :: TypeOf_id > id ;
   };
-  inline element operator[](cms_int32_t index) {
+  // XXX size types,
+  inline element operator[](size_type index) {
     if constexpr (rangeChecking == cms::soa::RangeChecking::Enabled) {
       if (index >= nElements_) {
         throw std::out_of_range( "Out of range index in " "SoAViewTemplate" "::operator[]" );
@@ -413,7 +442,8 @@ template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALI
     }
     return element(index, xParameters_ , yParameters_ , zParameters_ , idParameters_ );
   }
-  inline const_element operator[](cms_int32_t index) const {
+  // XXX size types,
+  inline const_element operator[](size_type index) const {
     if constexpr (rangeChecking == cms::soa::RangeChecking::Enabled) {
       if (index >= nElements_) {
         throw std::out_of_range( "Out of range index in " "SoAViewTemplate" "::operator[]" );
@@ -424,57 +454,68 @@ template <cms_int32_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALI
   inline typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_x > :: template ColumnType < SoAMetadata :: ColumnTypeOf_x > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > :: NoParamReturnType x ( ) {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_x > :: template ColumnType < SoAMetadata :: ColumnTypeOf_x > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > ( xParameters_ ) ( ) ;
   }
-  inline auto & x ( cms_int32_t index ) {
+  // XXX size types,
+  inline auto & x ( size_type index ) {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_x > :: template ColumnType < SoAMetadata :: ColumnTypeOf_x > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > ( xParameters_ ) ( index ) ;
   }
   inline typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_y > :: template ColumnType < SoAMetadata :: ColumnTypeOf_y > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > :: NoParamReturnType y ( ) {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_y > :: template ColumnType < SoAMetadata :: ColumnTypeOf_y > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > ( yParameters_ ) ( ) ;
   }
-  inline auto & y ( cms_int32_t index ) {
+  // XXX size types,
+  inline auto & y ( size_type index ) {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_y > :: template ColumnType < SoAMetadata :: ColumnTypeOf_y > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > ( yParameters_ ) ( index ) ;
   }
   inline typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_z > :: template ColumnType < SoAMetadata :: ColumnTypeOf_z > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > :: NoParamReturnType z ( ) {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_z > :: template ColumnType < SoAMetadata :: ColumnTypeOf_z > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > ( zParameters_ ) ( ) ;
   }
-  inline auto & z ( cms_int32_t index ) {
+  // XXX size types,
+  inline auto & z ( size_type index ) {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_z > :: template ColumnType < SoAMetadata :: ColumnTypeOf_z > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > ( zParameters_ ) ( index ) ;
   }
   inline typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_id > :: template ColumnType < SoAMetadata :: ColumnTypeOf_id > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > :: NoParamReturnType id ( ) {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_id > :: template ColumnType < SoAMetadata :: ColumnTypeOf_id > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > ( idParameters_ ) ( ) ;
   }
-  inline auto & id ( cms_int32_t index ) {
+  // XXX size types,
+  inline auto & id ( size_type index ) {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_id > :: template ColumnType < SoAMetadata :: ColumnTypeOf_id > :: template AccessType < cms :: soa :: SoAAccessType :: mutableAccess > ( idParameters_ ) ( index ) ;
   }
   inline auto x ( ) const {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_x > :: template ColumnType < SoAMetadata :: ColumnTypeOf_x > :: template AccessType < cms :: soa :: SoAAccessType :: constAccess > ( xParameters_ ) ( ) ;
   }
-  inline auto x ( cms_int32_t index ) const {
+  // XXX size types,
+  inline auto x ( size_type index ) const {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_x > :: template ColumnType < SoAMetadata :: ColumnTypeOf_x > :: template AccessType < cms :: soa :: SoAAccessType :: constAccess > ( xParameters_ ) ( index ) ;
   }
   inline auto y ( ) const {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_y > :: template ColumnType < SoAMetadata :: ColumnTypeOf_y > :: template AccessType < cms :: soa :: SoAAccessType :: constAccess > ( yParameters_ ) ( ) ;
   }
-  inline auto y ( cms_int32_t index ) const {
+  // XXX size types,
+  inline auto y ( size_type index ) const {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_y > :: template ColumnType < SoAMetadata :: ColumnTypeOf_y > :: template AccessType < cms :: soa :: SoAAccessType :: constAccess > ( yParameters_ ) ( index ) ;
   }
   inline auto z ( ) const {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_z > :: template ColumnType < SoAMetadata :: ColumnTypeOf_z > :: template AccessType < cms :: soa :: SoAAccessType :: constAccess > ( zParameters_ ) ( ) ;
   }
-  inline auto z ( cms_int32_t index ) const {
+  // XXX size types,
+  inline auto z ( size_type index ) const {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_z > :: template ColumnType < SoAMetadata :: ColumnTypeOf_z > :: template AccessType < cms :: soa :: SoAAccessType :: constAccess > ( zParameters_ ) ( index ) ;
   }
   inline auto id ( ) const {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_id > :: template ColumnType < SoAMetadata :: ColumnTypeOf_id > :: template AccessType < cms :: soa :: SoAAccessType :: constAccess > ( idParameters_ ) ( ) ;
   }
-  inline auto id ( cms_int32_t index ) const {
+  // XXX size types,
+  inline auto id ( size_type index ) const {
     return typename cms :: soa :: SoAAccessors < typename SoAMetadata :: TypeOf_id > :: template ColumnType < SoAMetadata :: ColumnTypeOf_id > :: template AccessType < cms :: soa :: SoAAccessType :: constAccess > ( idParameters_ ) ( index ) ;
   }
   template <typename T> friend void dump();
-  private: cms_int32_t nElements_ = 0;
+  // XXX size types,
+  private: size_type nElements_ = 0;
   typename SoAMetadata::ParametersTypeOf_x xParameters_ ;
   typename SoAMetadata::ParametersTypeOf_y yParameters_ ;
   typename SoAMetadata::ParametersTypeOf_z zParameters_ ;
   typename SoAMetadata::ParametersTypeOf_id idParameters_ ;
 };
+
+using XyzIdSoA = SoALayoutTemplate<>;
 
 #endif  // DataFormats_XyzId_interface_XyzIdSoA_h
