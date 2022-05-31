@@ -1,3 +1,14 @@
 <lcgdict>
-  <class name="XyzIdSoA"/>
+  <class name="XyzIdSoA">
+    <field name="mem_" comment="!"/>
+    <field name="optionallyOwnedMem_" comment="!"/>
+    <field name="byteSize_" comment="!"/>
+    <field name="x_" comment="[nElements_]"/>
+    <field name="y_" comment="[nElements_]"/>
+    <field name="z_" comment="[nElements_]"/>
+    <field name="id_" comment="[nElements_]"/>
+    <field name="soaMetadata()" comment="!"/>
+  </class>
+  <class name="SoAViewTemplate<128ul, false, cms::soa::RestrictQualify::Disabled, cms::soa::RangeChecking::Disabled>"/>
+  <class name="cms::soa::BaseLayout"/>
 </lcgdict>
