@@ -10,5 +10,4 @@
     <field name="soaMetadata()" comment="!"/>
   </class>
   <class name="SoAViewTemplate<128ul, false, cms::soa::RestrictQualify::Disabled, cms::soa::RangeChecking::Disabled>"/>
-  <class name="cms::soa::BaseLayout"/>
 </lcgdict>

@@ -20,7 +20,7 @@ struct SoAViewTemplate;
 // XXX new size type.
 template <size_t ALIGNMENT = cms::soa::CacheLineSize::defaultSize,
           bool ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed>
-struct SoALayoutTemplate : public cms::soa::BaseLayout {
+struct SoALayoutTemplate {
   using self_type = SoALayoutTemplate;
 
   // XXX size types,
@@ -36,7 +36,7 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
   using SoAValueWithConf = cms::soa::SoAValue<COLUMN_TYPE, C, conditionalAlignment>;
   template <cms::soa::SoAColumnType COLUMN_TYPE, class C>
   using SoAConstValueWithConf = cms::soa::SoAConstValue<COLUMN_TYPE, C, conditionalAlignment>;
-  void toStream(std::ostream& os) const {
+  void soaToStreamInternal(std::ostream& os) const {
     os << "SoALayoutTemplate"
           "("
        << nElements_ << " elements, byte alignement= " << alignment << ", @" << mem_ << "): " << std::endl;

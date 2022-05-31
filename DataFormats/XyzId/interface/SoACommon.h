@@ -5,11 +5,14 @@
 #ifndef DataStructures_SoACommon_h
 #define DataStructures_SoACommon_h
 
-#include "boost/preprocessor.hpp"
 #include <cstdint>
 #include <cassert>
 #include <ostream>
 #include <tuple>
+#include <type_traits>
+
+#include <boost/preprocessor.hpp>
+
 #include "FWCore/Utilities/interface/typedefs.h"
 
 // CUDA attributes
@@ -591,15 +594,14 @@ namespace cms::soa {
     static constexpr cms_int32_t defaultSize = NvidiaGPU;
   };
 
-  // An empty shell class to restrict the scope of tempalted operator<<(ostream, soa).
-  struct BaseLayout {};
 }  // namespace cms::soa
 
 // Small wrapper for stream insertion of SoA printing
 template <typename SOA,
-          typename SOACHECKED = typename std::enable_if<std::is_base_of<cms::soa::BaseLayout, SOA>::value, SOA>::type>
+          typename SFINAE =
+              typename std::enable_if_t<std::is_invocable_v<decltype(&SOA::soaToStreamInternal), SOA&, std::ostream&>>>
 SOA_HOST_ONLY std::ostream& operator<<(std::ostream& os, const SOA& soa) {
-  soa.toStream(os);
+  soa.soaToStreamInternal(os);
   return os;
 }
 #endif  // ndef DataStructures_SoACommon_h
