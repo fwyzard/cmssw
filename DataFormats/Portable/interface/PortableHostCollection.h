@@ -17,7 +17,7 @@ public:
   typedef typename T::size_type size_type;
   // byte_size_type for byte counts. Not creating an artificial limit (and not ROOT serialized).
   typedef typename T::byte_size_type byte_size_type;
-  
+
   using Buffer = alpaka::Buf<alpaka_common::DevHost, std::byte, alpaka::DimInt<1u>, byte_size_type>;
 
   PortableHostCollection() : buffer_{}, layout_{}, view_{} {
@@ -72,18 +72,18 @@ public:
 #endif  // DEBUG_COLLECTION_CTOR_DTOR
   PortableHostCollection &operator=(PortableHostCollection &&other) = default;
 
-  typename T:: template TrivialView<>   &operator*() { return view_; }
+  typename T::template TrivialView<> &operator*() { return view_; }
 
-  typename T:: template TrivialView<>   const &operator*() const { return view_; }
+  typename T::template TrivialView<> const &operator*() const { return view_; }
 
-  typename T:: template TrivialView<>   *operator->() { return &view_; }
+  typename T::template TrivialView<> *operator->() { return &view_; }
 
-  typename T:: template TrivialView<>   const *operator->() const { return &view_; }
+  typename T::template TrivialView<> const *operator->() const { return &view_; }
 
   Buffer &buffer() { return *buffer_; }
 
   Buffer const &buffer() const { return *buffer_; }
-  
+
   bool hasBuffer() const { return buffer_.operator bool(); }
 
   // part of the ROOT read streamer
@@ -98,7 +98,7 @@ public:
 private:
   std::optional<Buffer> buffer_;  //!
   T layout_;
-  using View = typename T:: template TrivialView<>;
+  using View = typename T::template TrivialView<>;
   View view_;
 };
 

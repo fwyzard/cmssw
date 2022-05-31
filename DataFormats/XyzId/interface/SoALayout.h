@@ -78,7 +78,7 @@ namespace cms::soa {
     std::byte * buffer_ = nullptr;
   };
   */
-}
+}  // namespace cms::soa
 
 // clang-format off
 #define _DECLARE_SOA_STREAM_INFO_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                                         \
@@ -285,7 +285,8 @@ namespace cms::soa {
                   /* TODO */ )
 // clang-format on
 
-#define _STREAMER_READ_SOA_DATA_MEMBER(R, DATA, TYPE_NAME) BOOST_PP_EXPAND(_STREAMER_READ_SOA_DATA_MEMBER_IMPL TYPE_NAME)
+#define _STREAMER_READ_SOA_DATA_MEMBER(R, DATA, TYPE_NAME) \
+  BOOST_PP_EXPAND(_STREAMER_READ_SOA_DATA_MEMBER_IMPL TYPE_NAME)
 
 /**
  * SoA class member declaration (column pointers).

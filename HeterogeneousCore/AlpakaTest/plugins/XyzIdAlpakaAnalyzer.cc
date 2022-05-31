@@ -26,23 +26,22 @@ public:
       //std::cout << source_ << "[" << i << "] = " << product->id(i) << std::endl;
       assert(product->id(i) == i);
     }
-    std::cout << "XyzIdAlpakaAnalyzer:\n" << source_.encode() << ".size() = " << product->soaMetadata().size() << std::endl;
+    std::cout << "XyzIdAlpakaAnalyzer:\n"
+              << source_.encode() << ".size() = " << product->soaMetadata().size() << std::endl;
     /**/
-    std::cout << "data = " << (product.hasBuffer()? product.buffer().data(): nullptr) << " x = " << product->x() << " y = " << product->y()
-              << " z = " << product->z() << " id = " << product->id() << std::endl;
+    std::cout << "data = " << (product.hasBuffer() ? product.buffer().data() : nullptr) << " x = " << product->x()
+              << " y = " << product->y() << " z = " << product->z() << " id = " << product->id() << std::endl;
     std::cout << "[y - x] = " << std::hex
               << reinterpret_cast<intptr_t>(product->y()) - reinterpret_cast<intptr_t>(product->x())
-              << " [z - y] = "
-              << reinterpret_cast<intptr_t>(product->z()) - reinterpret_cast<intptr_t>(product->y())
-              << " [id - z] = "
-              << reinterpret_cast<intptr_t>(product->id()) - reinterpret_cast<intptr_t>(product->z()) << std::dec
-              << std::endl
+              << " [z - y] = " << reinterpret_cast<intptr_t>(product->z()) - reinterpret_cast<intptr_t>(product->y())
+              << " [id - z] = " << reinterpret_cast<intptr_t>(product->id()) - reinterpret_cast<intptr_t>(product->z())
+              << std::dec << std::endl
               << std::endl;
     /**/
   }
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-    edm::ParameterSetDescription desc;  
+    edm::ParameterSetDescription desc;
     desc.add<edm::InputTag>("source");
     descriptions.addWithDefaultLabel(desc);
   }

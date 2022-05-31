@@ -14,7 +14,7 @@ class PortableDeviceCollection {
   static_assert(not std::is_same_v<TDev, alpaka_common::DevHost>,
                 "Use PortableHostCollection<T> instead of PortableDeviceCollection<T, DevHost>");
 
-public:  
+public:
   // XXX Addition of typedef for index types.
   // size_type for indices. Compatible with ROOT, but limited to 2G entries
   typedef typename T::size_type size_type;
@@ -22,7 +22,7 @@ public:
   typedef typename T::byte_size_type byte_size_type;
 
   using Buffer = alpaka::Buf<TDev, std::byte, alpaka::DimInt<1u>, byte_size_type>;
-  
+
   PortableDeviceCollection() : buffer_{}, layout_{} {
 #ifdef DEBUG_COLLECTION_CTOR_DTOR
     std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;
@@ -63,13 +63,13 @@ public:
 #endif  // DEBUG_COLLECTION_CTOR_DTOR
   PortableDeviceCollection &operator=(PortableDeviceCollection &&other) = default;
 
-  typename T:: template TrivialView<>   &operator*() { return view_; }
+  typename T::template TrivialView<> &operator*() { return view_; }
 
-  typename T:: template TrivialView<>   const &operator*() const { return view_; }
+  typename T::template TrivialView<> const &operator*() const { return view_; }
 
-  typename T:: template TrivialView<>   *operator->() { return &view_; }
+  typename T::template TrivialView<> *operator->() { return &view_; }
 
-  typename T:: template TrivialView<>   const *operator->() const { return &view_; }
+  typename T::template TrivialView<> const *operator->() const { return &view_; }
 
   Buffer &buffer() { return *buffer_; }
 
@@ -78,7 +78,7 @@ public:
 private:
   std::optional<Buffer> buffer_;  //!
   T layout_;
-  using View = typename T:: template TrivialView<>;
+  using View = typename T::template TrivialView<>;
   View view_;
 };
 

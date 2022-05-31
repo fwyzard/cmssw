@@ -26,7 +26,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class XyzIdAlpakaProducer : public edm::stream::EDProducer<> {
   public:
     XyzIdAlpakaProducer(edm::ParameterSet const& config)
-        : deviceToken_{produces<XyzIdDeviceCollection>()}, size_{config.getParameter<XyzIdDeviceCollection::size_type>("size")} {}
+        : deviceToken_{produces<XyzIdDeviceCollection>()},
+          size_{config.getParameter<XyzIdDeviceCollection::size_type>("size")} {}
 
     void beginStream(edm::StreamID sid) override {
       // choose a device based on the EDM stream number

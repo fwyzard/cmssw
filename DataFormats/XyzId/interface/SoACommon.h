@@ -43,7 +43,7 @@
 #define _VALUE_TYPE_EIGEN_COLUMN 2
 
 namespace cms::soa {
-  
+
   // XXX Addition of typedef for index types.
   // size_type for indices. Compatible with ROOT, but limited to 2G entries
   typedef int32_t size_type;
@@ -55,21 +55,21 @@ namespace cms::soa {
     column = _VALUE_TYPE_COLUMN,
     eigen = _VALUE_TYPE_EIGEN_COLUMN
   };
-  
+
   // XXX Changed enum class to bare bool + const values in class.
   struct RestrictQualify {
     static const bool Enabled = true;
-    static const bool Disabled = false;    
-    static const bool Default = Disabled;    
+    static const bool Disabled = false;
+    static const bool Default = Disabled;
   };
-  
+
   //enum class RestrictQualify : bool { Enabled, Disabled, Default = Disabled };
 
   // XXX Changed enum class to bare bool + const values in class.
   struct RangeChecking {
     static const bool Enabled = true;
-    static const bool Disabled = false;    
-    static const bool Default = Disabled;    
+    static const bool Disabled = false;
+    static const bool Default = Disabled;
   };
 
   //enum class RangeChecking : bool { Enabled, Disabled, Default = Disabled };
@@ -233,7 +233,8 @@ namespace cms::soa {
     typedef typename Restr::PointerToConst PtrToConst;
     typedef typename Restr::ReferenceToConst RefToConst;
     SOA_HOST_DEVICE_INLINE SoAValue(cms_int32_t i, T* col) : idx_(i), col_(col) {}
-    SOA_HOST_DEVICE_INLINE SoAValue(cms_int32_t i, SoAParametersImpl<COLUMN_TYPE, T> params) : idx_(i), col_(params.addr_) {}
+    SOA_HOST_DEVICE_INLINE SoAValue(cms_int32_t i, SoAParametersImpl<COLUMN_TYPE, T> params)
+        : idx_(i), col_(params.addr_) {}
     /* SOA_HOST_DEVICE_INLINE operator T&() { return col_[idx_]; } */
     SOA_HOST_DEVICE_INLINE Ref operator()() {
       // Ptr type will add the restrict qualifyer if needed
@@ -317,7 +318,7 @@ namespace cms::soa {
     cms_int32_t stride_;
   };
 #else
-  // XXX Changed enum class to bare bool + const values in class. 
+  // XXX Changed enum class to bare bool + const values in class.
   template <class C, cms_int32_t ALIGNMENT, bool RESTRICT_QUALIFY>
   class SoAValue<SoAColumnType::eigen, C, ALIGNMENT, RESTRICT_QUALIFY> {
     // Eigen/Core should be pre-included before the SoA headers to enable support for Eigen columns.
@@ -579,7 +580,7 @@ namespace cms::soa {
  * hints the compiler that it can expect column pointers to be aligned */
   struct AlignmentEnforcement {
     static constexpr bool Relaxed = false;
-    static constexpr bool Enforced = true;    
+    static constexpr bool Enforced = true;
   };
 
   struct CacheLineSize {
