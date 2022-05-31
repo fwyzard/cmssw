@@ -302,11 +302,9 @@ private:
   // XXX Changed enum class to bare bool + const values in class.
 public:
   // XXX size types,
-  template <size_type ALIGNMENT2 = cms::soa::CacheLineSize::defaultSize,
-            bool ALIGNMENT_ENFORCEMENT2 = cms::soa::AlignmentEnforcement::Relaxed,
-            bool RESTRICT_QUALIFY2 = cms::soa::RestrictQualify::Disabled,
-            bool RANGE_CHECKING2 = cms::soa::RangeChecking::Disabled>
-  using TrivialView = SoAViewTemplate<ALIGNMENT2, ALIGNMENT_ENFORCEMENT2, RESTRICT_QUALIFY2, RANGE_CHECKING2>;
+  template <bool RESTRICT_QUALIFY = cms::soa::RestrictQualify::Disabled,
+            bool RANGE_CHECKING = cms::soa::RangeChecking::Disabled>
+  using TrivialView = SoAViewTemplate<ALIGNMENT, ALIGNMENT_ENFORCEMENT, RESTRICT_QUALIFY, RANGE_CHECKING>;
 
   // XXX Addition: streamer
   template <typename T>
