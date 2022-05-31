@@ -24,9 +24,9 @@ struct SoALayoutTemplate {
   using self_type = SoALayoutTemplate;
 
   // XXX size types,
-  typedef cms::soa::size_type size_type;
-  typedef cms::soa::byte_size_type byte_size_type;
-  typedef cms::soa::AlignmentEnforcement AlignmentEnforcement;
+  using size_type = cms::soa::size_type;
+  using byte_size_type = cms::soa::byte_size_type;
+  using AlignmentEnforcement = cms::soa::AlignmentEnforcement;
   constexpr static byte_size_type defaultAlignment = 128;
   constexpr static byte_size_type alignment = ALIGNMENT;
   constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;
@@ -112,7 +112,7 @@ struct SoALayoutTemplate {
     inline byte_size_type xPitch() const {
       return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;
     }
-    typedef double TypeOf_x;
+    using TypeOf_x = double;
     constexpr static cms ::soa ::SoAColumnType ColumnTypeOf_x = cms ::soa ::SoAColumnType ::column;
     typedef cms ::soa ::SoAParameters_ColumnType<cms ::soa ::SoAColumnType ::column>::DataType<double>
         ParametersTypeOf_y;
@@ -123,7 +123,7 @@ struct SoALayoutTemplate {
     inline byte_size_type yPitch() const {
       return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;
     }
-    typedef double TypeOf_y;
+    using TypeOf_y = double;
     constexpr static cms ::soa ::SoAColumnType ColumnTypeOf_y = cms ::soa ::SoAColumnType ::column;
     typedef cms ::soa ::SoAParameters_ColumnType<cms ::soa ::SoAColumnType ::column>::DataType<double>
         ParametersTypeOf_z;
@@ -134,7 +134,7 @@ struct SoALayoutTemplate {
     inline byte_size_type zPitch() const {
       return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;
     }
-    typedef double TypeOf_z;
+    using TypeOf_z = double;
     constexpr static cms ::soa ::SoAColumnType ColumnTypeOf_z = cms ::soa ::SoAColumnType ::column;
     typedef cms ::soa ::SoAParameters_ColumnType<cms ::soa ::SoAColumnType ::column>::DataType<int32_t>
         ParametersTypeOf_id;
@@ -145,7 +145,7 @@ struct SoALayoutTemplate {
     inline byte_size_type idPitch() const {
       return (((parent_.nElements_ * sizeof(int32_t) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;
     }
-    typedef int32_t TypeOf_id;
+    using TypeOf_id = int32_t;
     constexpr static cms ::soa ::SoAColumnType ColumnTypeOf_id = cms ::soa ::SoAColumnType ::column;
     SoAMetadata& operator=(const SoAMetadata&) = delete;
     SoAMetadata(const SoAMetadata&) = delete;
@@ -153,7 +153,7 @@ struct SoALayoutTemplate {
   private:
     inline SoAMetadata(const SoALayoutTemplate& parent) : parent_(parent) {}
     const SoALayoutTemplate& parent_;
-    typedef SoALayoutTemplate ParentClass;
+    using ParentClass = SoALayoutTemplate;
   };
   friend SoAMetadata;
   inline const SoAMetadata soaMetadata() const { return SoAMetadata(*this); }
@@ -318,19 +318,19 @@ public:
     memcpy(id_, onfile.layout_.id_, size * sizeof(*id_));
   }
 };
-;
-using SoALayoutTemplate_default = SoALayoutTemplate<>;
+
 // XXX Removal of defaults due to forward declaration, switch to bool RESTRICT_QUALIFY and RANGE_CHECKING
 // XXX size types,
 // XXX translation of typedef in template for ROOT (cms::soa::byte_size_type = size_t)
 template <size_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALIFY, bool RANGE_CHECKING>
 struct SoAViewTemplate {
   using self_type = SoAViewTemplate;
+  using layout_type = SoALayoutTemplate<ALIGNMENT, ALIGNMENT_ENFORCEMENT>;
 
   // XXX szie types,
-  typedef cms::soa::size_type size_type;
-  typedef cms::soa::byte_size_type byte_size_type;
-  typedef cms::soa::AlignmentEnforcement AlignmentEnforcement;
+  using size_type = cms::soa::size_type;
+  using byte_size_type = cms::soa::byte_size_type;
+  using AlignmentEnforcement = cms::soa::AlignmentEnforcement;
   constexpr static byte_size_type defaultAlignment = cms::soa::CacheLineSize::defaultSize;
   constexpr static byte_size_type alignment = ALIGNMENT;
   constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;
@@ -348,29 +348,24 @@ struct SoAViewTemplate {
     friend SoAViewTemplate;
     // XXX size types,
     inline size_type size() const { return parent_.nElements_; }
-    typedef SoALayoutTemplate_default TypeOf_instance_SoALayoutTemplate;
-    typedef typename TypeOf_instance_SoALayoutTemplate ::SoAMetadata::TypeOf_x TypeOf_x;
-    typedef typename TypeOf_instance_SoALayoutTemplate ::SoAMetadata::ParametersTypeOf_x ParametersTypeOf_x;
-    constexpr static cms::soa::SoAColumnType ColumnTypeOf_x =
-        TypeOf_instance_SoALayoutTemplate ::SoAMetadata::ColumnTypeOf_x;
+    using TypeOf_x = typename layout_type ::SoAMetadata::TypeOf_x;
+    using ParametersTypeOf_x = typename layout_type ::SoAMetadata::ParametersTypeOf_x;
+    constexpr static cms::soa::SoAColumnType ColumnTypeOf_x = layout_type ::SoAMetadata::ColumnTypeOf_x;
     inline auto* addressOf_x() const { return parent_.soaMetadata().parametersOf_x().addr_; };
     inline ParametersTypeOf_x parametersOf_x() const { return parent_.xParameters_; };
-    typedef typename TypeOf_instance_SoALayoutTemplate ::SoAMetadata::TypeOf_y TypeOf_y;
-    typedef typename TypeOf_instance_SoALayoutTemplate ::SoAMetadata::ParametersTypeOf_y ParametersTypeOf_y;
-    constexpr static cms::soa::SoAColumnType ColumnTypeOf_y =
-        TypeOf_instance_SoALayoutTemplate ::SoAMetadata::ColumnTypeOf_y;
+    using TypeOf_y = typename layout_type ::SoAMetadata::TypeOf_y;
+    using ParametersTypeOf_y = typename layout_type ::SoAMetadata::ParametersTypeOf_y;
+    constexpr static cms::soa::SoAColumnType ColumnTypeOf_y = layout_type ::SoAMetadata::ColumnTypeOf_y;
     inline auto* addressOf_y() const { return parent_.soaMetadata().parametersOf_y().addr_; };
     inline ParametersTypeOf_y parametersOf_y() const { return parent_.yParameters_; };
-    typedef typename TypeOf_instance_SoALayoutTemplate ::SoAMetadata::TypeOf_z TypeOf_z;
-    typedef typename TypeOf_instance_SoALayoutTemplate ::SoAMetadata::ParametersTypeOf_z ParametersTypeOf_z;
-    constexpr static cms::soa::SoAColumnType ColumnTypeOf_z =
-        TypeOf_instance_SoALayoutTemplate ::SoAMetadata::ColumnTypeOf_z;
+    using TypeOf_z = typename layout_type ::SoAMetadata::TypeOf_z;
+    using ParametersTypeOf_z = typename layout_type ::SoAMetadata::ParametersTypeOf_z;
+    constexpr static cms::soa::SoAColumnType ColumnTypeOf_z = layout_type ::SoAMetadata::ColumnTypeOf_z;
     inline auto* addressOf_z() const { return parent_.soaMetadata().parametersOf_z().addr_; };
     inline ParametersTypeOf_z parametersOf_z() const { return parent_.zParameters_; };
-    typedef typename TypeOf_instance_SoALayoutTemplate ::SoAMetadata::TypeOf_id TypeOf_id;
-    typedef typename TypeOf_instance_SoALayoutTemplate ::SoAMetadata::ParametersTypeOf_id ParametersTypeOf_id;
-    constexpr static cms::soa::SoAColumnType ColumnTypeOf_id =
-        TypeOf_instance_SoALayoutTemplate ::SoAMetadata::ColumnTypeOf_id;
+    using TypeOf_id = typename layout_type ::SoAMetadata::TypeOf_id;
+    using ParametersTypeOf_id = typename layout_type ::SoAMetadata::ParametersTypeOf_id;
+    constexpr static cms::soa::SoAColumnType ColumnTypeOf_id = layout_type ::SoAMetadata::ColumnTypeOf_id;
     inline auto* addressOf_id() const { return parent_.soaMetadata().parametersOf_id().addr_; };
     inline ParametersTypeOf_id parametersOf_id() const { return parent_.idParameters_; };
     SoAMetadata& operator=(const SoAMetadata&) = delete;
@@ -385,7 +380,7 @@ struct SoAViewTemplate {
   inline SoAMetadata soaMetadata() { return SoAMetadata(*this); }
   SoAViewTemplate() {}
   // XXX size types,
-  SoAViewTemplate(SoALayoutTemplate_default& instance_SoALayoutTemplate)
+  SoAViewTemplate(layout_type& instance_SoALayoutTemplate)
       : nElements_([&]() -> size_type {
           bool set = false;
           // XXX size types,
