@@ -28,10 +28,10 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
   typedef cms::soa::byte_size_type byte_size_type;
   typedef cms::soa::AlignmentEnforcement AlignmentEnforcement;
   constexpr static byte_size_type defaultAlignment = 128;
-  constexpr static byte_size_type byteAlignment = ALIGNMENT;
+  constexpr static byte_size_type alignment = ALIGNMENT;
   constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;
   constexpr static byte_size_type conditionalAlignment =
-      alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced ? byteAlignment : 0;
+      alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced ? alignment : 0;
   template <cms::soa::SoAColumnType COLUMN_TYPE, class C>
   using SoAValueWithConf = cms::soa::SoAValue<COLUMN_TYPE, C, conditionalAlignment>;
   template <cms::soa::SoAColumnType COLUMN_TYPE, class C>
@@ -39,7 +39,7 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
   void toStream(std::ostream& os) const {
     os << "SoALayoutTemplate"
           "("
-       << nElements_ << " elements, byte alignement= " << byteAlignment << ", @" << mem_ << "): " << std::endl;
+       << nElements_ << " elements, byte alignement= " << alignment << ", @" << mem_ << "): " << std::endl;
     os << "  sizeof("
           "SoALayoutTemplate"
           "): "
@@ -50,30 +50,30 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
           "x"
           " at offset "
        << offset << " has size " << sizeof(double) * nElements_ << " and padding "
-       << (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment - (sizeof(double) * nElements_)
+       << (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment - (sizeof(double) * nElements_)
        << std ::endl;
-    offset += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    offset += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     os << " Column "
           "y"
           " at offset "
        << offset << " has size " << sizeof(double) * nElements_ << " and padding "
-       << (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment - (sizeof(double) * nElements_)
+       << (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment - (sizeof(double) * nElements_)
        << std ::endl;
-    offset += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    offset += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     os << " Column "
           "z"
           " at offset "
        << offset << " has size " << sizeof(double) * nElements_ << " and padding "
-       << (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment - (sizeof(double) * nElements_)
+       << (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment - (sizeof(double) * nElements_)
        << std ::endl;
-    offset += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    offset += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     os << " Column "
           "id"
           " at offset "
        << offset << " has size " << sizeof(int32_t) * nElements_ << " and padding "
-       << (((nElements_ * sizeof(int32_t) - 1) / byteAlignment) + 1) * byteAlignment - (sizeof(int32_t) * nElements_)
+       << (((nElements_ * sizeof(int32_t) - 1) / alignment) + 1) * alignment - (sizeof(int32_t) * nElements_)
        << std ::endl;
-    offset += (((nElements_ * sizeof(int32_t) - 1) / byteAlignment) + 1) * byteAlignment;
+    offset += (((nElements_ * sizeof(int32_t) - 1) / alignment) + 1) * alignment;
     os << "Final offset = " << offset << " computeDataSize(...): " << computeDataSize(nElements_) << std::endl;
     os << std::endl;
   }
@@ -83,10 +83,10 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
   static byte_size_type computeDataSize(size_type nElements) {
     // XXX size types,
     byte_size_type ret = 0;
-    ret += (((nElements * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
-    ret += (((nElements * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
-    ret += (((nElements * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
-    ret += (((nElements * sizeof(int32_t) - 1) / byteAlignment) + 1) * byteAlignment;
+    ret += (((nElements * sizeof(double) - 1) / alignment) + 1) * alignment;
+    ret += (((nElements * sizeof(double) - 1) / alignment) + 1) * alignment;
+    ret += (((nElements * sizeof(double) - 1) / alignment) + 1) * alignment;
+    ret += (((nElements * sizeof(int32_t) - 1) / alignment) + 1) * alignment;
     return ret;
   }
   struct SoAMetadata {
@@ -96,7 +96,7 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
     // XXX size types,
     inline byte_size_type byteSize() const { return parent_.byteSize_; }
     // XXX size types,
-    inline byte_size_type byteAlignment() const { return SoALayoutTemplate ::byteAlignment; }
+    inline byte_size_type alignment() const { return SoALayoutTemplate::alignment; }
     inline std::byte* data() { return parent_.mem_; }
     inline const std::byte* data() const { return parent_.mem_; }
     inline std::byte* nextByte() const { return parent_.mem_ + parent_.byteSize_; }
@@ -110,8 +110,7 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
     inline double* addressOf_x() { return parent_.soaMetadata().parametersOf_x().addr_; }
     // XXX size types,
     inline byte_size_type xPitch() const {
-      return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass ::byteAlignment) + 1) *
-             ParentClass ::byteAlignment;
+      return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;
     }
     typedef double TypeOf_x;
     constexpr static cms ::soa ::SoAColumnType ColumnTypeOf_x = cms ::soa ::SoAColumnType ::column;
@@ -122,8 +121,7 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
     inline double* addressOf_y() { return parent_.soaMetadata().parametersOf_y().addr_; }
     // XXX size types,
     inline byte_size_type yPitch() const {
-      return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass ::byteAlignment) + 1) *
-             ParentClass ::byteAlignment;
+      return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;
     }
     typedef double TypeOf_y;
     constexpr static cms ::soa ::SoAColumnType ColumnTypeOf_y = cms ::soa ::SoAColumnType ::column;
@@ -134,8 +132,7 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
     inline double* addressOf_z() { return parent_.soaMetadata().parametersOf_z().addr_; }
     // XXX size types,
     inline byte_size_type zPitch() const {
-      return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass ::byteAlignment) + 1) *
-             ParentClass ::byteAlignment;
+      return (((parent_.nElements_ * sizeof(double) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;
     }
     typedef double TypeOf_z;
     constexpr static cms ::soa ::SoAColumnType ColumnTypeOf_z = cms ::soa ::SoAColumnType ::column;
@@ -146,8 +143,7 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
     inline int32_t* addressOf_id() { return parent_.soaMetadata().parametersOf_id().addr_; }
     // XXX size types,
     inline byte_size_type idPitch() const {
-      return (((parent_.nElements_ * sizeof(int32_t) - 1) / ParentClass ::byteAlignment) + 1) *
-             ParentClass ::byteAlignment;
+      return (((parent_.nElements_ * sizeof(int32_t) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;
     }
     typedef int32_t TypeOf_id;
     constexpr static cms ::soa ::SoAColumnType ColumnTypeOf_id = cms ::soa ::SoAColumnType ::column;
@@ -172,7 +168,7 @@ struct SoALayoutTemplate : public cms::soa::BaseLayout {
 private:
   void organizeColumnsFromBuffer() {
     if constexpr (alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(mem_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(mem_) % alignment)
         throw std::out_of_range(
             "In "
             "SoALayoutTemplate"
@@ -181,30 +177,30 @@ private:
             ": misaligned buffer");
     auto curMem = mem_;
     x_ = reinterpret_cast<double*>(curMem);
-    curMem += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(x_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(x_) % alignment)
         throw std::out_of_range(
             "In layout constructor: misaligned column: "
             "x");
     y_ = reinterpret_cast<double*>(curMem);
-    curMem += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(y_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(y_) % alignment)
         throw std::out_of_range(
             "In layout constructor: misaligned column: "
             "y");
     z_ = reinterpret_cast<double*>(curMem);
-    curMem += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(z_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(z_) % alignment)
         throw std::out_of_range(
             "In layout constructor: misaligned column: "
             "z");
     id_ = reinterpret_cast<int32_t*>(curMem);
-    curMem += (((nElements_ * sizeof(int32_t) - 1) / byteAlignment) + 1) * byteAlignment;
+    curMem += (((nElements_ * sizeof(int32_t) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(id_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(id_) % alignment)
         throw std::out_of_range(
             "In layout constructor: misaligned column: "
             "id");
@@ -222,30 +218,30 @@ public:
   SoALayoutTemplate(bool devConstructor, std::byte* mem, size_type nElements) : mem_(mem), nElements_(nElements) {
     auto curMem = mem_;
     x_ = reinterpret_cast<double*>(curMem);
-    curMem += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(x_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(x_) % alignment)
         throw std::out_of_range(
             "In layout constructor: misaligned column: "
             "x");
     y_ = reinterpret_cast<double*>(curMem);
-    curMem += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(y_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(y_) % alignment)
         throw std::out_of_range(
             "In layout constructor: misaligned column: "
             "y");
     z_ = reinterpret_cast<double*>(curMem);
-    curMem += (((nElements_ * sizeof(double) - 1) / byteAlignment) + 1) * byteAlignment;
+    curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(z_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(z_) % alignment)
         throw std::out_of_range(
             "In layout constructor: misaligned column: "
             "z");
     id_ = reinterpret_cast<int32_t*>(curMem);
-    curMem += (((nElements_ * sizeof(int32_t) - 1) / byteAlignment) + 1) * byteAlignment;
+    curMem += (((nElements_ * sizeof(int32_t) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
-      if (reinterpret_cast<intptr_t>(id_) % byteAlignment)
+      if (reinterpret_cast<intptr_t>(id_) % alignment)
         throw std::out_of_range(
             "In layout constructor: misaligned column: "
             "id");
@@ -336,10 +332,10 @@ struct SoAViewTemplate {
   typedef cms::soa::byte_size_type byte_size_type;
   typedef cms::soa::AlignmentEnforcement AlignmentEnforcement;
   constexpr static byte_size_type defaultAlignment = cms::soa::CacheLineSize::defaultSize;
-  constexpr static byte_size_type byteAlignment = ALIGNMENT;
+  constexpr static byte_size_type alignment = ALIGNMENT;
   constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;
   constexpr static byte_size_type conditionalAlignment =
-      alignmentEnforcement == AlignmentEnforcement::Enforced ? byteAlignment : 0;
+      alignmentEnforcement == AlignmentEnforcement::Enforced ? alignment : 0;
   // XXX Changed enum class to bare bool + const values in class.
   constexpr static bool restrictQualify = RESTRICT_QUALIFY;
   // XXX Changed enum class to bare bool + const values in class.
@@ -406,7 +402,7 @@ struct SoAViewTemplate {
         xParameters_([&]() -> auto {
           auto params = instance_SoALayoutTemplate.soaMetadata().parametersOf_x();
           if constexpr (alignmentEnforcement == AlignmentEnforcement ::Enforced)
-            if (reinterpret_cast<intptr_t>(params.addr_) % byteAlignment)
+            if (reinterpret_cast<intptr_t>(params.addr_) % alignment)
               throw std ::out_of_range(
                   "In constructor by layout: misaligned column: "
                   "x");
@@ -415,7 +411,7 @@ struct SoAViewTemplate {
         yParameters_([&]() -> auto {
           auto params = instance_SoALayoutTemplate.soaMetadata().parametersOf_y();
           if constexpr (alignmentEnforcement == AlignmentEnforcement ::Enforced)
-            if (reinterpret_cast<intptr_t>(params.addr_) % byteAlignment)
+            if (reinterpret_cast<intptr_t>(params.addr_) % alignment)
               throw std ::out_of_range(
                   "In constructor by layout: misaligned column: "
                   "y");
@@ -424,7 +420,7 @@ struct SoAViewTemplate {
         zParameters_([&]() -> auto {
           auto params = instance_SoALayoutTemplate.soaMetadata().parametersOf_z();
           if constexpr (alignmentEnforcement == AlignmentEnforcement ::Enforced)
-            if (reinterpret_cast<intptr_t>(params.addr_) % byteAlignment)
+            if (reinterpret_cast<intptr_t>(params.addr_) % alignment)
               throw std ::out_of_range(
                   "In constructor by layout: misaligned column: "
                   "z");
@@ -433,7 +429,7 @@ struct SoAViewTemplate {
         idParameters_([&]() -> auto {
           auto params = instance_SoALayoutTemplate.soaMetadata().parametersOf_id();
           if constexpr (alignmentEnforcement == AlignmentEnforcement ::Enforced)
-            if (reinterpret_cast<intptr_t>(params.addr_) % byteAlignment)
+            if (reinterpret_cast<intptr_t>(params.addr_) % alignment)
               throw std ::out_of_range(
                   "In constructor by layout: misaligned column: "
                   "id");
@@ -448,7 +444,7 @@ struct SoAViewTemplate {
       : nElements_(nElements),
         xParameters_([&]() -> auto {
           if constexpr (alignmentEnforcement == AlignmentEnforcement ::Enforced)
-            if (SoAMetadata ::ParametersTypeOf_x ::checkAlignment(x, byteAlignment))
+            if (SoAMetadata ::ParametersTypeOf_x ::checkAlignment(x, alignment))
               throw std ::out_of_range(
                   "In constructor by column: misaligned column: "
                   "x");
@@ -456,7 +452,7 @@ struct SoAViewTemplate {
         }()),
         yParameters_([&]() -> auto {
           if constexpr (alignmentEnforcement == AlignmentEnforcement ::Enforced)
-            if (SoAMetadata ::ParametersTypeOf_y ::checkAlignment(y, byteAlignment))
+            if (SoAMetadata ::ParametersTypeOf_y ::checkAlignment(y, alignment))
               throw std ::out_of_range(
                   "In constructor by column: misaligned column: "
                   "y");
@@ -464,7 +460,7 @@ struct SoAViewTemplate {
         }()),
         zParameters_([&]() -> auto {
           if constexpr (alignmentEnforcement == AlignmentEnforcement ::Enforced)
-            if (SoAMetadata ::ParametersTypeOf_z ::checkAlignment(z, byteAlignment))
+            if (SoAMetadata ::ParametersTypeOf_z ::checkAlignment(z, alignment))
               throw std ::out_of_range(
                   "In constructor by column: misaligned column: "
                   "z");
@@ -472,7 +468,7 @@ struct SoAViewTemplate {
         }()),
         idParameters_([&]() -> auto {
           if constexpr (alignmentEnforcement == AlignmentEnforcement ::Enforced)
-            if (SoAMetadata ::ParametersTypeOf_id ::checkAlignment(id, byteAlignment))
+            if (SoAMetadata ::ParametersTypeOf_id ::checkAlignment(id, alignment))
               throw std ::out_of_range(
                   "In constructor by column: misaligned column: "
                   "id");

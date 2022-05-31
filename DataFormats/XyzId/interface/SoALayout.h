@@ -86,15 +86,15 @@ namespace cms::soa {
       VALUE_TYPE,                                                                                                         \
       /* Dump scalar */                                                                                                   \
       os << " Scalar " BOOST_PP_STRINGIZE(NAME) " at offset " << offset << " has size " << sizeof(CPP_TYPE)               \
-         << " and padding " << ((sizeof(CPP_TYPE) - 1) / byteAlignment + 1) * byteAlignment - sizeof(CPP_TYPE)            \
+         << " and padding " << ((sizeof(CPP_TYPE) - 1) / alignment + 1) * alignment - sizeof(CPP_TYPE)            \
          << std::endl;                                                                                                    \
-      offset += ((sizeof(CPP_TYPE) - 1) / byteAlignment + 1) * byteAlignment;                                             \
+      offset += ((sizeof(CPP_TYPE) - 1) / alignment + 1) * alignment;                                             \
       , /* Dump column */                                                                                                 \
       os << " Column " BOOST_PP_STRINGIZE(NAME) " at offset " << offset << " has size " << sizeof(CPP_TYPE) * nElements_  \
          << " and padding "                                                                                               \
-         << (((nElements_ * sizeof(CPP_TYPE) - 1) / byteAlignment) + 1) * byteAlignment - (sizeof(CPP_TYPE) * nElements_) \
+         << (((nElements_ * sizeof(CPP_TYPE) - 1) / alignment) + 1) * alignment - (sizeof(CPP_TYPE) * nElements_) \
          << std::endl;                                                                                                    \
-      offset += (((nElements_ * sizeof(CPP_TYPE) - 1) / byteAlignment) + 1) * byteAlignment;                              \
+      offset += (((nElements_ * sizeof(CPP_TYPE) - 1) / alignment) + 1) * alignment;                              \
       , /* Dump Eigen column */                                                                                           \
       os << " Eigen value " BOOST_PP_STRINGIZE(NAME) " at offset " << offset << " has dimension ("                        \
          << CPP_TYPE::RowsAtCompileTime << " x " << CPP_TYPE::ColsAtCompileTime                                           \
@@ -102,10 +102,10 @@ namespace cms::soa {
          << " and per column size "                                                                                       \
          << sizeof(CPP_TYPE::Scalar) * nElements_                                                                         \
          << " and padding "                                                                                               \
-         << (((nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / byteAlignment) + 1) * byteAlignment -                         \
+         << (((nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / alignment) + 1) * alignment -                         \
                 (sizeof(CPP_TYPE::Scalar) * nElements_)                                                                   \
          << std::endl;                                                                                                    \
-      offset += (((nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / byteAlignment) + 1) * byteAlignment *                     \
+      offset += (((nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / alignment) + 1) * alignment *                     \
                                  CPP_TYPE::RowsAtCompileTime * CPP_TYPE::ColsAtCompileTime;)
 // clang-format on
 
@@ -119,7 +119,7 @@ namespace cms::soa {
   _SWITCH_ON_TYPE(VALUE_TYPE,                                                                                        \
       /* Scalar */                                                                                                   \
       size_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
-        return (((sizeof(CPP_TYPE) - 1) / ParentClass::byteAlignment) + 1) * ParentClass::byteAlignment;             \
+        return (((sizeof(CPP_TYPE) - 1) / ParentClass::alignment) + 1) * ParentClass::alignment;             \
       }                                                                                                              \
       typedef CPP_TYPE BOOST_PP_CAT(TypeOf_, NAME);                                                                  \
       constexpr static cms::soa::SoAColumnType BOOST_PP_CAT(ColumnTypeOf_, NAME) = cms::soa::SoAColumnType::scalar;  \
@@ -154,8 +154,8 @@ namespace cms::soa {
       }                                                                                                              \
       SOA_HOST_DEVICE_INLINE                                                                                         \
       size_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
-        return (((parent_.nElements_ * sizeof(CPP_TYPE) - 1) / ParentClass::byteAlignment) + 1) *                    \
-                   ParentClass::byteAlignment;                                                                       \
+        return (((parent_.nElements_ * sizeof(CPP_TYPE) - 1) / ParentClass::alignment) + 1) *                    \
+                   ParentClass::alignment;                                                                       \
       }                                                                                                              \
       typedef CPP_TYPE BOOST_PP_CAT(TypeOf_, NAME);                                                                  \
       constexpr static cms::soa::SoAColumnType BOOST_PP_CAT(ColumnTypeOf_, NAME) = cms::soa::SoAColumnType::column;, \
@@ -170,8 +170,8 @@ namespace cms::soa {
       }                                                                                                              \
       SOA_HOST_DEVICE_INLINE                                                                                         \
       size_t BOOST_PP_CAT(NAME, Pitch()) const {                                                                     \
-        return (((parent_.nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / ParentClass::byteAlignment) + 1) *            \
-               ParentClass::byteAlignment * CPP_TYPE::RowsAtCompileTime * CPP_TYPE::ColsAtCompileTime;               \
+        return (((parent_.nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / ParentClass::alignment) + 1) *            \
+               ParentClass::alignment * CPP_TYPE::RowsAtCompileTime * CPP_TYPE::ColsAtCompileTime;               \
       } typedef CPP_TYPE BOOST_PP_CAT(TypeOf_, NAME);                                                                \
       constexpr static cms::soa::SoAColumnType BOOST_PP_CAT(ColumnTypeOf_, NAME) = cms::soa::SoAColumnType::eigen;   \
       SOA_HOST_DEVICE_INLINE                                                                                         \
@@ -204,18 +204,18 @@ namespace cms::soa {
 #define _ASSIGN_SOA_COLUMN_OR_SCALAR_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                                 \
   _SWITCH_ON_TYPE(VALUE_TYPE, /* Scalar */                                                                            \
                   BOOST_PP_CAT(NAME, _) = reinterpret_cast<CPP_TYPE*>(curMem);                                        \
-                  curMem += (((sizeof(CPP_TYPE) - 1) / byteAlignment) + 1) * byteAlignment;                           \
+                  curMem += (((sizeof(CPP_TYPE) - 1) / alignment) + 1) * alignment;                           \
                   , /* Column */                                                                                      \
                   BOOST_PP_CAT(NAME, _) = reinterpret_cast<CPP_TYPE*>(curMem);                                        \
-                  curMem += (((nElements_ * sizeof(CPP_TYPE) - 1) / byteAlignment) + 1) * byteAlignment;              \
+                  curMem += (((nElements_ * sizeof(CPP_TYPE) - 1) / alignment) + 1) * alignment;              \
                   , /* Eigen column */                                                                                \
                   BOOST_PP_CAT(NAME, _) = reinterpret_cast<CPP_TYPE::Scalar*>(curMem);                                \
-                  curMem += (((nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / byteAlignment) + 1) * byteAlignment *     \
+                  curMem += (((nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / alignment) + 1) * alignment *     \
                             CPP_TYPE::RowsAtCompileTime * CPP_TYPE::ColsAtCompileTime;                                \
-                  BOOST_PP_CAT(NAME, Stride_) = (((nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / byteAlignment) + 1) * \
-                                                byteAlignment / sizeof(CPP_TYPE::Scalar);)                            \
+                  BOOST_PP_CAT(NAME, Stride_) = (((nElements_ * sizeof(CPP_TYPE::Scalar) - 1) / alignment) + 1) * \
+                                                alignment / sizeof(CPP_TYPE::Scalar);)                            \
   if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)                                               \
-    if (reinterpret_cast<intptr_t>(BOOST_PP_CAT(NAME, _)) % byteAlignment)                                            \
+    if (reinterpret_cast<intptr_t>(BOOST_PP_CAT(NAME, _)) % alignment)                                            \
       throw std::out_of_range("In layout constructor: misaligned column: " #NAME);
 // clang-format on
 
@@ -227,11 +227,11 @@ namespace cms::soa {
 // clang-format off
 #define _ACCUMULATE_SOA_ELEMENT_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                              \
   _SWITCH_ON_TYPE(VALUE_TYPE, /* Scalar */                                                                    \
-                  ret += (((sizeof(CPP_TYPE) - 1) / byteAlignment) + 1) * byteAlignment;                      \
+                  ret += (((sizeof(CPP_TYPE) - 1) / alignment) + 1) * alignment;                      \
                   , /* Column */                                                                              \
-                  ret += (((nElements * sizeof(CPP_TYPE) - 1) / byteAlignment) + 1) * byteAlignment;          \
+                  ret += (((nElements * sizeof(CPP_TYPE) - 1) / alignment) + 1) * alignment;          \
                   , /* Eigen column */                                                                        \
-                  ret += (((nElements * sizeof(CPP_TYPE::Scalar) - 1) / byteAlignment) + 1) * byteAlignment * \
+                  ret += (((nElements * sizeof(CPP_TYPE::Scalar) - 1) / alignment) + 1) * alignment * \
                          CPP_TYPE::RowsAtCompileTime * CPP_TYPE::ColsAtCompileTime;)
 // clang-format on
 
@@ -327,10 +327,10 @@ namespace cms::soa {
    * up to compute capability 8.X.                                                                                                        \
    */                                                                                                                                     \
     constexpr static size_t defaultAlignment = 128;                                                                                       \
-    constexpr static size_t byteAlignment = ALIGNMENT;                                                                                    \
+    constexpr static size_t alignment = ALIGNMENT;                                                                                    \
     constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;                                                   \
     constexpr static size_t conditionalAlignment =                                                                                        \
-        alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced ? byteAlignment : 0;                                                       \
+        alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced ? alignment : 0;                                                       \
     /* Those typedefs avoid having commas in macros (which is problematic) */                                                             \
     template <cms::soa::SoAColumnType COLUMN_TYPE, class C>                                                                               \
     using SoAValueWithConf = cms::soa::SoAValue<COLUMN_TYPE, C, conditionalAlignment>;                                                    \
@@ -341,7 +341,7 @@ namespace cms::soa {
     /* dump the SoA internal structure */                                                                                                 \
     SOA_HOST_ONLY                                                                                                                         \
     void toStream(std::ostream & os) const {                                                                                              \
-      os << #CLASS "(" << nElements_ << " elements, byte alignement= " << byteAlignment << ", @"<< mem_ <<"): " << std::endl;             \
+      os << #CLASS "(" << nElements_ << " elements, byte alignement= " << alignment << ", @"<< mem_ <<"): " << std::endl;             \
       os << "  sizeof(" #CLASS "): " << sizeof(CLASS) << std::endl;                                                                       \
       size_t offset = 0;                                                                                                                  \
       _ITERATE_ON_ALL(_DECLARE_SOA_STREAM_INFO, ~, __VA_ARGS__)                                                                           \
@@ -364,7 +364,7 @@ namespace cms::soa {
       friend CLASS;                                                                                                                       \
       SOA_HOST_DEVICE_INLINE size_t size() const { return parent_.nElements_; }                                                           \
       SOA_HOST_DEVICE_INLINE size_t byteSize() const { return parent_.byteSize_; }                                                        \
-      SOA_HOST_DEVICE_INLINE size_t byteAlignment() const { return CLASS::byteAlignment; }                                                \
+      SOA_HOST_DEVICE_INLINE size_t alignment() const { return CLASS::alignment; }                                                \
       SOA_HOST_DEVICE_INLINE std::byte* data() { return parent_.mem_; }                                                                   \
       SOA_HOST_DEVICE_INLINE const std::byte* data() const { return parent_.mem_; }                                                       \
       SOA_HOST_DEVICE_INLINE std::byte* nextByte() const { return parent_.mem_ + parent_.byteSize_; }                                     \
@@ -400,7 +400,7 @@ namespace cms::soa {
   private: \
     void organizeColumnsFromBuffer() { \
       if constexpr (alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced)                                                               \
-        if (reinterpret_cast<intptr_t>(mem_) % byteAlignment)                                                                              \
+        if (reinterpret_cast<intptr_t>(mem_) % alignment)                                                                              \
           throw std::out_of_range("In " #CLASS "::" #CLASS ": misaligned buffer");                                                        \
       auto curMem = mem_;                                                                                                                 \
       _ITERATE_ON_ALL(_ASSIGN_SOA_COLUMN_OR_SCALAR, ~, __VA_ARGS__)                                                                       \
@@ -424,7 +424,7 @@ namespace cms::soa {
       std::cout << "AllocateAndIoRead begin" << std::endl;                                                                                \
       auto buffSize=computeDataSize(nElements_);                         \
       /* aligned_alloc requires an size that is an multiple of the alignment, which computeDataSize provides */ \
-      optionallyOwnedMem_.allocate(byteAlignment, buffSize); \
+      optionallyOwnedMem_.allocate(alignment, buffSize); \
       mem_ = optionallyOwnedMem_.get(); \
       std::cout << "Buffer=" << optionallyOwnedMem_.get()  << " Buffer first byte after (alloc) =" << optionallyOwnedMem_.get() + buffSize << std::endl; \
       organizeColumnsFromBuffer(); \
@@ -439,7 +439,7 @@ namespace cms::soa {
       std::cout << "AllocateAndIoRead begin" << std::endl;                                                                                \
       auto buffSize=computeDataSize(nElements_);                         \
       /* aligned_alloc requires an size that is an multiple of the alignment, which computeDataSize provides */ \
-      optionallyOwnedMem_.allocate(byteAlignment, buffSize); \
+      optionallyOwnedMem_.allocate(alignment, buffSize); \
       mem_ = optionallyOwnedMem_.get(); \
       std::cout << "Buffer=" << optionallyOwnedMem_.get()  << " Buffer first byte after (alloc) =" << optionallyOwnedMem_.get() + buffSize << std::endl; \
       organizeColumnsFromBuffer(); \

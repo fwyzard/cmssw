@@ -113,8 +113,8 @@ namespace cms::soa {
       addr_ = o.addr_;
     }
     SOA_HOST_DEVICE_INLINE SoAConstParametersImpl() {}
-    static bool checkAlignement(ValueType* addr, cms_int32_t byteAlignment) {
-      return reinterpret_cast<intptr_t>(addr) % byteAlignment;
+    static bool checkAlignement(ValueType* addr, cms_int32_t alignment) {
+      return reinterpret_cast<intptr_t>(addr) % alignment;
     }
   };
 
@@ -146,9 +146,9 @@ namespace cms::soa {
       stride_ = o.stride_;
     }
     SOA_HOST_DEVICE_INLINE SoAConstParametersImpl() {}
-    static bool checkAlignement(const TupleOrPointerType tuple, cms_int32_t byteAlignment) {
+    static bool checkAlignement(const TupleOrPointerType tuple, cms_int32_t alignment) {
       const auto& [addr, stride] = tuple;
-      return reinterpret_cast<intptr_t>(addr) % byteAlignment;
+      return reinterpret_cast<intptr_t>(addr) % alignment;
     }
   };
 
@@ -172,8 +172,8 @@ namespace cms::soa {
     ValueType* addr_ = nullptr;
     SOA_HOST_DEVICE_INLINE SoAParametersImpl(ValueType* addr) : addr_(addr) {}
     SOA_HOST_DEVICE_INLINE SoAParametersImpl() {}
-    static bool checkAlignement(ValueType* addr, cms_int32_t byteAlignment) {
-      return reinterpret_cast<intptr_t>(addr) % byteAlignment;
+    static bool checkAlignement(ValueType* addr, cms_int32_t alignment) {
+      return reinterpret_cast<intptr_t>(addr) % alignment;
     }
   };
 
@@ -198,9 +198,9 @@ namespace cms::soa {
       stride_ = stride;
       return *this;
     }
-    static bool checkAlignement(const TupleOrPointerType tuple, cms_int32_t byteAlignment) {
+    static bool checkAlignement(const TupleOrPointerType tuple, cms_int32_t alignment) {
       const auto& [addr, stride] = tuple;
-      return reinterpret_cast<intptr_t>(addr) % byteAlignment;
+      return reinterpret_cast<intptr_t>(addr) % alignment;
     }
   };
 

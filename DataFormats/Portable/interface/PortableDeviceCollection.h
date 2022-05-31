@@ -35,7 +35,7 @@ public:
         layout_{buffer_->data(), elements},
         view_{layout_} {
     // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
-    assert(reinterpret_cast<uintptr_t>(buffer_->data()) % T::byteAlignment == 0);
+    assert(reinterpret_cast<uintptr_t>(buffer_->data()) % T::alignment == 0);
     alpaka::pin(*buffer_);
 #ifdef DEBUG_COLLECTION_CTOR_DTOR
     std::cout << __PRETTY_FUNCTION__ << " [this=" << this << "]" << std::endl;

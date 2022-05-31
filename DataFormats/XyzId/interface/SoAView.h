@@ -122,7 +122,7 @@ namespace cms::soa {
   (BOOST_PP_CAT(NAME, Parameters_)([&]() -> auto {                                      \
     auto params = LAYOUT.soaMetadata().BOOST_PP_CAT(parametersOf_, MEMBER)();           \
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)               \
-      if (reinterpret_cast<intptr_t>(params.addr_) % byteAlignment)                     \
+      if (reinterpret_cast<intptr_t>(params.addr_) % alignment)                     \
         throw std::out_of_range("In constructor by layout: misaligned column: " #NAME); \
     return params;                                                                      \
   }()))
@@ -157,7 +157,7 @@ namespace cms::soa {
   (                                                                                                       \
     BOOST_PP_CAT(NAME, Parameters_)([&]() -> auto {                                                       \
       if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)                               \
-        if (SoAMetadata:: BOOST_PP_CAT(ParametersTypeOf_, NAME)::checkAlignment(NAME, byteAlignment))     \
+        if (SoAMetadata:: BOOST_PP_CAT(ParametersTypeOf_, NAME)::checkAlignment(NAME, alignment))     \
           throw std::out_of_range("In constructor by column: misaligned column: " #NAME);                 \
       return NAME;                                                                                        \
     }())                                                                                                  \
@@ -352,10 +352,10 @@ namespace cms::soa {
    * up to compute capability 8.X.                                                                                                          \
    */                                                                                                                                       \
     constexpr static cms_int32_t defaultAlignment = cms::soa::CacheLineSize::defaultSize;                                                        \
-    constexpr static cms_int32_t byteAlignment = ALIGNMENT;                                                                                      \
+    constexpr static cms_int32_t alignment = ALIGNMENT;                                                                                      \
     constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;                                                     \
     constexpr static cms_int32_t conditionalAlignment =                                                                                          \
-        alignmentEnforcement == AlignmentEnforcement::Enforced ? byteAlignment : 0;                                                         \
+        alignmentEnforcement == AlignmentEnforcement::Enforced ? alignment : 0;                                                         \
     constexpr static cms::soa::RestrictQualify restrictQualify = RESTRICT_QUALIFY;                                                          \
     constexpr static cms::soa::RangeChecking rangeChecking = RANGE_CHECKING;                                                                \
     /* Those typedefs avoid having commas in macros (which is problematic) */                                                               \
@@ -484,10 +484,10 @@ namespace cms::soa {
    * up to compute capability 8.X.                                                                                                        \
    */                                                                                                                                     \
     constexpr static cms_int32_t defaultAlignment = cms::soa::CacheLineSize::defaultSize;                                                      \
-    constexpr static cms_int32_t byteAlignment = ALIGNMENT;                                                                                    \
+    constexpr static cms_int32_t alignment = ALIGNMENT;                                                                                    \
     constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;                                                   \
     constexpr static cms_int32_t conditionalAlignment =                                                                                        \
-        alignmentEnforcement == AlignmentEnforcement::Enforced ? byteAlignment : 0;                                                       \
+        alignmentEnforcement == AlignmentEnforcement::Enforced ? alignment : 0;                                                       \
     constexpr static cms::soa::RestrictQualify restrictQualify = RESTRICT_QUALIFY;                                                        \
     constexpr static cms::soa::RangeChecking rangeChecking = RANGE_CHECKING;                                                              \
     /* Those typedefs avoid having commas in macros (which is problematic) */                                                             \
