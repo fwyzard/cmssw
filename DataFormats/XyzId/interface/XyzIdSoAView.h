@@ -77,7 +77,7 @@ struct SoAViewTemplate {
           size_type ret = 0;
           if (set) {
             if (ret != instance_SoALayoutTemplate.soaMetadata().size())
-              throw std::out_of_range("In constructor by layout: different sizes from layouts.");
+              throw std::runtime_error("In constructor by layout: different sizes from layouts.");
           } else {
             ret = instance_SoALayoutTemplate.soaMetadata().size();
             set = true;
@@ -88,7 +88,7 @@ struct SoAViewTemplate {
           auto params = instance_SoALayoutTemplate.soaMetadata().parametersOf_x();
           if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
             if (reinterpret_cast<intptr_t>(params.addr_) % alignment)
-              throw std::out_of_range(
+              throw std::runtime_error(
                   "In constructor by layout: misaligned column: "
                   "x");
           return params;
@@ -97,7 +97,7 @@ struct SoAViewTemplate {
           auto params = instance_SoALayoutTemplate.soaMetadata().parametersOf_y();
           if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
             if (reinterpret_cast<intptr_t>(params.addr_) % alignment)
-              throw std::out_of_range(
+              throw std::runtime_error(
                   "In constructor by layout: misaligned column: "
                   "y");
           return params;
@@ -106,7 +106,7 @@ struct SoAViewTemplate {
           auto params = instance_SoALayoutTemplate.soaMetadata().parametersOf_z();
           if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
             if (reinterpret_cast<intptr_t>(params.addr_) % alignment)
-              throw std::out_of_range(
+              throw std::runtime_error(
                   "In constructor by layout: misaligned column: "
                   "z");
           return params;
@@ -115,7 +115,7 @@ struct SoAViewTemplate {
           auto params = instance_SoALayoutTemplate.soaMetadata().parametersOf_id();
           if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
             if (reinterpret_cast<intptr_t>(params.addr_) % alignment)
-              throw std::out_of_range(
+              throw std::runtime_error(
                   "In constructor by layout: misaligned column: "
                   "id");
           return params;
@@ -130,7 +130,7 @@ struct SoAViewTemplate {
         xParameters_([&]() -> auto {
           if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
             if (SoAMetadata::ParametersTypeOf_x::checkAlignment(x, alignment))
-              throw std::out_of_range(
+              throw std::runtime_error(
                   "In constructor by column: misaligned column: "
                   "x");
           return x;
@@ -138,7 +138,7 @@ struct SoAViewTemplate {
         yParameters_([&]() -> auto {
           if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
             if (SoAMetadata::ParametersTypeOf_y::checkAlignment(y, alignment))
-              throw std::out_of_range(
+              throw std::runtime_error(
                   "In constructor by column: misaligned column: "
                   "y");
           return y;
@@ -146,7 +146,7 @@ struct SoAViewTemplate {
         zParameters_([&]() -> auto {
           if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
             if (SoAMetadata::ParametersTypeOf_z::checkAlignment(z, alignment))
-              throw std::out_of_range(
+              throw std::runtime_error(
                   "In constructor by column: misaligned column: "
                   "z");
           return z;
@@ -154,7 +154,7 @@ struct SoAViewTemplate {
         idParameters_([&]() -> auto {
           if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
             if (SoAMetadata::ParametersTypeOf_id::checkAlignment(id, alignment))
-              throw std::out_of_range(
+              throw std::runtime_error(
                   "In constructor by column: misaligned column: "
                   "id");
           return id;

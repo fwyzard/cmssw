@@ -145,7 +145,7 @@ private:
   void organizeColumnsFromBuffer() {
     if constexpr (alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(mem_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In "
             "SoALayoutTemplate"
             "::"
@@ -156,33 +156,33 @@ private:
     curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(x_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In layout constructor: misaligned column: "
             "x");
     y_ = reinterpret_cast<double*>(curMem);
     curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(y_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In layout constructor: misaligned column: "
             "y");
     z_ = reinterpret_cast<double*>(curMem);
     curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(z_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In layout constructor: misaligned column: "
             "z");
     id_ = reinterpret_cast<int32_t*>(curMem);
     curMem += (((nElements_ * sizeof(int32_t) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(id_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In layout constructor: misaligned column: "
             "id");
     byteSize_ = computeDataSize(nElements_);
     if (mem_ + byteSize_ != curMem)
-      throw std::out_of_range(
+      throw std::runtime_error(
           "In "
           "SoALayoutTemplate"
           "::"
@@ -198,28 +198,28 @@ public:
     curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(x_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In layout constructor: misaligned column: "
             "x");
     y_ = reinterpret_cast<double*>(curMem);
     curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(y_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In layout constructor: misaligned column: "
             "y");
     z_ = reinterpret_cast<double*>(curMem);
     curMem += (((nElements_ * sizeof(double) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(z_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In layout constructor: misaligned column: "
             "z");
     id_ = reinterpret_cast<int32_t*>(curMem);
     curMem += (((nElements_ * sizeof(int32_t) - 1) / alignment) + 1) * alignment;
     if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)
       if (reinterpret_cast<intptr_t>(id_) % alignment)
-        throw std::out_of_range(
+        throw std::runtime_error(
             "In layout constructor: misaligned column: "
             "id");
   }
