@@ -14,9 +14,9 @@
 // XXX size types,
 // XXX translation of typedef in template for ROOT (cms::soa::byte_size_type = size_t)
 template <size_t ALIGNMENT, bool ALIGNMENT_ENFORCEMENT, bool RESTRICT_QUALIFY, bool RANGE_CHECKING>
-struct SoAViewTemplate {
-  using self_type = SoAViewTemplate;
-  using layout_type = SoALayoutTemplate<ALIGNMENT, ALIGNMENT_ENFORCEMENT>;
+struct XyzIdSoAView {
+  using self_type = XyzIdSoAView;
+  using layout_type = XyzIdSoALayout<ALIGNMENT, ALIGNMENT_ENFORCEMENT>;
 
   // XXX szie types,
   using size_type = cms::soa::size_type;
@@ -35,7 +35,7 @@ struct SoAViewTemplate {
   template <cms::soa::SoAColumnType COLUMN_TYPE, class C>
   using SoAConstValueWithConf = cms::soa::SoAConstValue<COLUMN_TYPE, C, conditionalAlignment, restrictQualify>;
   struct SoAMetadata {
-    friend SoAViewTemplate;
+    friend XyzIdSoAView;
     // XXX size types,
     inline size_type size() const { return parent_.nElements_; }
     using TypeOf_x = typename layout_type::SoAMetadata::TypeOf_x;
@@ -62,15 +62,15 @@ struct SoAViewTemplate {
     SoAMetadata(const SoAMetadata&) = delete;
 
   private:
-    inline SoAMetadata(const SoAViewTemplate& parent) : parent_(parent) {}
-    const SoAViewTemplate& parent_;
+    inline SoAMetadata(const XyzIdSoAView& parent) : parent_(parent) {}
+    const XyzIdSoAView& parent_;
   };
   friend SoAMetadata;
   inline const SoAMetadata soaMetadata() const { return SoAMetadata(*this); }
   inline SoAMetadata soaMetadata() { return SoAMetadata(*this); }
-  SoAViewTemplate() {}
+  XyzIdSoAView() {}
   // XXX size types,
-  SoAViewTemplate(layout_type& instance_SoALayoutTemplate)
+  XyzIdSoAView(layout_type& instance_SoALayoutTemplate)
       : nElements_([&]() -> size_type {
           bool set = false;
           // XXX size types,
@@ -121,7 +121,7 @@ struct SoAViewTemplate {
           return params;
         }()) {}
   // XXX size types,
-  SoAViewTemplate(size_type nElements,
+  XyzIdSoAView(size_type nElements,
                   typename SoAMetadata::ParametersTypeOf_x::TupleOrPointerType x,
                   typename SoAMetadata::ParametersTypeOf_y::TupleOrPointerType y,
                   typename SoAMetadata::ParametersTypeOf_z::TupleOrPointerType z,
@@ -205,7 +205,7 @@ struct SoAViewTemplate {
       if (index >= nElements_) {
         throw std::out_of_range(
             "Out of range index in "
-            "SoAViewTemplate"
+            "XyzIdSoAView"
             "::operator[]");
       }
     }
@@ -217,7 +217,7 @@ struct SoAViewTemplate {
       if (index >= nElements_) {
         throw std::out_of_range(
             "Out of range index in "
-            "SoAViewTemplate"
+            "XyzIdSoAView"
             "::operator[]");
       }
     }
@@ -283,6 +283,6 @@ private:
   typename SoAMetadata::ParametersTypeOf_id idParameters_;
 };
 
-using XyzIdSoAView = XyzIdSoA::TrivialView<>;
+using XyzIdSoA = XyzIdSoALayout<>;
 
 #endif  // DataFormats_XyzId_interface_XyzIdSoAView_h

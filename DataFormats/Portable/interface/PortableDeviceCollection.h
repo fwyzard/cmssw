@@ -63,13 +63,13 @@ public:
 #endif  // DEBUG_COLLECTION_CTOR_DTOR
   PortableDeviceCollection &operator=(PortableDeviceCollection &&other) = default;
 
-  typename T::template TrivialView<> &operator*() { return view_; }
+  typename T:: TrivialView   &operator*() { return view_; }
 
-  typename T::template TrivialView<> const &operator*() const { return view_; }
+  typename T:: TrivialView   const &operator*() const { return view_; }
 
-  typename T::template TrivialView<> *operator->() { return &view_; }
+  typename T:: TrivialView   *operator->() { return &view_; }
 
-  typename T::template TrivialView<> const *operator->() const { return &view_; }
+  typename T:: TrivialView   const *operator->() const { return &view_; }
 
   Buffer &buffer() { return *buffer_; }
 
@@ -78,7 +78,7 @@ public:
 private:
   std::optional<Buffer> buffer_;  //!
   T layout_;
-  using View = typename T::template TrivialView<>;
+  using View = typename T:: TrivialView;
   View view_;
 };
 
