@@ -92,7 +92,7 @@ public:
     newObj->~PortableHostCollection();
     // use the global "host" object defined in HeterogeneousCore/AlpakaInterface/interface/host.h
     new (newObj) PortableHostCollection(onfile.layout_.soaMetadata().size(), host);
-    newObj->layout_.ROOTReadStreamer(onfile);
+    newObj->layout_.ROOTReadStreamer(onfile.layout_);
   }
 
 private:

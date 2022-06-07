@@ -45,13 +45,16 @@
 #define _VALUE_TYPE_COLUMN 1
 #define _VALUE_TYPE_EIGEN_COLUMN 2
 
+/* The size type need to be "hardcoded" in the template parameters for classes serialized by ROOT */
+#define CMS_SOA_BYTE_SIZE_TYPE size_t
+
 namespace cms::soa {
 
   // XXX Addition of typedef for index types.
   // size_type for indices. Compatible with ROOT, but limited to 2G entries
-  typedef int32_t size_type;
+  using size_type = int32_t;
   // byte_size_type for byte counts. Not creating an artificial limit (and not ROOT serialized).
-  typedef size_t byte_size_type;
+  using byte_size_type = CMS_SOA_BYTE_SIZE_TYPE;
 
   enum class SoAColumnType {
     scalar = _VALUE_TYPE_SCALAR,
@@ -116,7 +119,7 @@ namespace cms::soa {
       addr_ = o.addr_;
     }
     SOA_HOST_DEVICE_INLINE SoAConstParametersImpl() {}
-    static bool checkAlignement(ValueType* addr, cms_int32_t alignment) {
+    static bool checkAlignement(ValueType* addr, byte_size_type alignment) {
       return reinterpret_cast<intptr_t>(addr) % alignment;
     }
   };
@@ -126,17 +129,17 @@ namespace cms::soa {
     static const SoAColumnType columnType = SoAColumnType::eigen;
     typedef T ValueType;
     typedef typename T::Scalar ScalarType;
-    typedef std::tuple<ScalarType*, cms_int32_t> TupleOrPointerType;
+    typedef std::tuple<ScalarType*, byte_size_type> TupleOrPointerType;
     const ScalarType* addr_ = nullptr;
-    cms_int32_t stride_ = 0;
-    SOA_HOST_DEVICE_INLINE SoAConstParametersImpl(const ScalarType* addr, cms_int32_t stride)
+    byte_size_type stride_ = 0;
+    SOA_HOST_DEVICE_INLINE SoAConstParametersImpl(const ScalarType* addr, byte_size_type stride)
         : addr_(addr), stride_(stride) {}
     SOA_HOST_DEVICE_INLINE SoAConstParametersImpl(const TupleOrPointerType tuple)
         : addr_(std::get<0>(tuple)), stride_(std::get<1>(tuple)) {}
     SOA_HOST_DEVICE_INLINE SoAConstParametersImpl(const ScalarType* addr) : addr_(addr) {}
     // Trick setter + return self-reference allowing commat-free 2-stage construction in macro contexts (in combination with the
     // addr-only constructor.
-    SoAConstParametersImpl& setStride(cms_int32_t stride) {
+    SoAConstParametersImpl& setStride(byte_size_type stride) {
       stride_ = stride;
       return *this;
     }
@@ -149,7 +152,7 @@ namespace cms::soa {
       stride_ = o.stride_;
     }
     SOA_HOST_DEVICE_INLINE SoAConstParametersImpl() {}
-    static bool checkAlignement(const TupleOrPointerType tuple, cms_int32_t alignment) {
+    static bool checkAlignement(const TupleOrPointerType tuple, byte_size_type alignment) {
       const auto& [addr, stride] = tuple;
       return reinterpret_cast<intptr_t>(addr) % alignment;
     }
@@ -175,7 +178,7 @@ namespace cms::soa {
     ValueType* addr_ = nullptr;
     SOA_HOST_DEVICE_INLINE SoAParametersImpl(ValueType* addr) : addr_(addr) {}
     SOA_HOST_DEVICE_INLINE SoAParametersImpl() {}
-    static bool checkAlignement(ValueType* addr, cms_int32_t alignment) {
+    static bool checkAlignement(ValueType* addr, byte_size_type alignment) {
       return reinterpret_cast<intptr_t>(addr) % alignment;
     }
   };
@@ -187,21 +190,21 @@ namespace cms::soa {
     typedef SoAConstParametersImpl<columnType, ValueType> ConstType;
     friend ConstType;
     typedef typename T::Scalar ScalarType;
-    typedef std::tuple<ScalarType*, cms_int32_t> TupleOrPointerType;
+    typedef std::tuple<ScalarType*, byte_size_type> TupleOrPointerType;
     ScalarType* addr_ = nullptr;
     size_t stride_ = 0;
-    SOA_HOST_DEVICE_INLINE SoAParametersImpl(ScalarType* addr, cms_int32_t stride) : addr_(addr), stride_(stride) {}
+    SOA_HOST_DEVICE_INLINE SoAParametersImpl(ScalarType* addr, byte_size_type stride) : addr_(addr), stride_(stride) {}
     SOA_HOST_DEVICE_INLINE SoAParametersImpl(const TupleOrPointerType tuple)
         : addr_(std::get<0>(tuple)), stride_(std::get<1>(tuple)) {}
     SOA_HOST_DEVICE_INLINE SoAParametersImpl() {}
     SOA_HOST_DEVICE_INLINE SoAParametersImpl(ScalarType* addr) : addr_(addr) {}
     // Trick setter + return self-reference allowing commat-free 2-stage construction in macro contexts (in combination with the
     // addr-only constructor.
-    SoAParametersImpl& setStride(cms_int32_t stride) {
+    SoAParametersImpl& setStride(byte_size_type stride) {
       stride_ = stride;
       return *this;
     }
-    static bool checkAlignement(const TupleOrPointerType tuple, cms_int32_t alignment) {
+    static bool checkAlignement(const TupleOrPointerType tuple, byte_size_type alignment) {
       const auto& [addr, stride] = tuple;
       return reinterpret_cast<intptr_t>(addr) % alignment;
     }
@@ -221,7 +224,7 @@ namespace cms::soa {
   // compiler of alignment (enforced by caller).
   template <SoAColumnType COLUMN_TYPE,
             typename T,
-            cms_int32_t ALIGNMENT,
+            byte_size_type ALIGNMENT,
             // XXX Changed enum class to bare bool + const values in class.
             bool RESTRICT_QUALIFY = RestrictQualify::Disabled>
   class SoAValue {
@@ -235,8 +238,8 @@ namespace cms::soa {
     typedef typename Restr::Reference Ref;
     typedef typename Restr::PointerToConst PtrToConst;
     typedef typename Restr::ReferenceToConst RefToConst;
-    SOA_HOST_DEVICE_INLINE SoAValue(cms_int32_t i, T* col) : idx_(i), col_(col) {}
-    SOA_HOST_DEVICE_INLINE SoAValue(cms_int32_t i, SoAParametersImpl<COLUMN_TYPE, T> params)
+    SOA_HOST_DEVICE_INLINE SoAValue(size_type i, T* col) : idx_(i), col_(col) {}
+    SOA_HOST_DEVICE_INLINE SoAValue(size_type i, SoAParametersImpl<COLUMN_TYPE, T> params)
         : idx_(i), col_(params.addr_) {}
     /* SOA_HOST_DEVICE_INLINE operator T&() { return col_[idx_]; } */
     SOA_HOST_DEVICE_INLINE Ref operator()() {
@@ -265,14 +268,14 @@ namespace cms::soa {
       }
       return reinterpret_cast<Ptr>(col_);
     }
-    cms_int32_t idx_;
+    size_type idx_;
     T* col_;
   };
 
   // Helper template managing the value within it column
   // TODO Create a const variant to avoid leaking mutable access.
 #ifdef EIGEN_WORLD_VERSION
-  template <class C, cms_int32_t ALIGNMENT, RestrictQualify RESTRICT_QUALIFY>
+  template <class C, byte_size_type ALIGNMENT, RestrictQualify RESTRICT_QUALIFY>
   class SoAValue<SoAColumnType::eigen, C, ALIGNMENT, RESTRICT_QUALIFY> {
   public:
     typedef C Type;
@@ -284,12 +287,12 @@ namespace cms::soa {
     typedef typename Restr::Reference Ref;
     typedef typename Restr::PointerToConst PtrToConst;
     typedef typename Restr::ReferenceToConst RefToConst;
-    SOA_HOST_DEVICE_INLINE SoAValue(cms_int32_t i, typename C::Scalar* col, cms_int32_t stride)
+    SOA_HOST_DEVICE_INLINE SoAValue(size_type i, typename C::Scalar* col, byte_size_type stride)
         : val_(col + i, C::RowsAtCompileTime, C::ColsAtCompileTime, Eigen::InnerStride<Eigen::Dynamic>(stride)),
           crCol_(col),
           cVal_(crCol_ + i, C::RowsAtCompileTime, C::ColsAtCompileTime, Eigen::InnerStride<Eigen::Dynamic>(stride)),
           stride_(stride) {}
-    SOA_HOST_DEVICE_INLINE SoAValue(cms_int32_t i, SoAParametersImpl<SoAColumnType::eigen, C> params)
+    SOA_HOST_DEVICE_INLINE SoAValue(size_type i, SoAParametersImpl<SoAColumnType::eigen, C> params)
         : val_(params.addr_ + i,
                C::RowsAtCompileTime,
                C::ColsAtCompileTime,
@@ -312,17 +315,17 @@ namespace cms::soa {
     }
     typedef typename C::Scalar ValueType;
     static constexpr auto valueSize = sizeof(C::Scalar);
-    SOA_HOST_DEVICE_INLINE cms_int32_t stride() const { return stride_; }
+    SOA_HOST_DEVICE_INLINE byte_size_type stride() const { return stride_; }
 
   private:
     MapType val_;
     const Ptr crCol_;
     CMapType cVal_;
-    cms_int32_t stride_;
+    byte_size_type stride_;
   };
 #else
   // XXX Changed enum class to bare bool + const values in class.
-  template <class C, cms_int32_t ALIGNMENT, bool RESTRICT_QUALIFY>
+  template <class C, byte_size_type ALIGNMENT, bool RESTRICT_QUALIFY>
   class SoAValue<SoAColumnType::eigen, C, ALIGNMENT, RESTRICT_QUALIFY> {
     // Eigen/Core should be pre-included before the SoA headers to enable support for Eigen columns.
     static_assert(!sizeof(C),
@@ -332,7 +335,7 @@ namespace cms::soa {
   // Helper template managing the value within it column
   template <SoAColumnType COLUMN_TYPE,
             typename T,
-            cms_int32_t ALIGNMENT,
+            byte_size_type ALIGNMENT,
             // XXX Changed enum class to bare bool + const values in class.
             bool RESTRICT_QUALIFY = RestrictQualify::Disabled>
   class SoAConstValue {
@@ -348,10 +351,10 @@ namespace cms::soa {
     typedef typename Restr::ReferenceToConst RefToConst;
     typedef SoAParametersImpl<COLUMN_TYPE, T> Params;
     typedef SoAConstParametersImpl<COLUMN_TYPE, T> ConstParams;
-    SOA_HOST_DEVICE_INLINE SoAConstValue(cms_int32_t i, const T* col) : idx_(i), col_(col) {}
-    SOA_HOST_DEVICE_INLINE SoAConstValue(cms_int32_t i, SoAParametersImpl<COLUMN_TYPE, T> params)
+    SOA_HOST_DEVICE_INLINE SoAConstValue(size_type i, const T* col) : idx_(i), col_(col) {}
+    SOA_HOST_DEVICE_INLINE SoAConstValue(size_type i, SoAParametersImpl<COLUMN_TYPE, T> params)
         : idx_(i), col_(params.addr_) {}
-    SOA_HOST_DEVICE_INLINE SoAConstValue(cms_int32_t i, SoAConstParametersImpl<COLUMN_TYPE, T> params)
+    SOA_HOST_DEVICE_INLINE SoAConstValue(size_type i, SoAConstParametersImpl<COLUMN_TYPE, T> params)
         : idx_(i), col_(params.addr_) {}
     /* SOA_HOST_DEVICE_INLINE operator T&() { return col_[idx_]; } */
     SOA_HOST_DEVICE_INLINE RefToConst operator()() const {
@@ -370,25 +373,25 @@ namespace cms::soa {
       }
       return reinterpret_cast<PtrToConst>(col_);
     }
-    cms_int32_t idx_;
+    size_type idx_;
     const T* col_;
   };
 
 #ifdef EIGEN_WORLD_VERSION
   // Helper template managing the value within it column
   // TODO Create a const variant to avoid leaking mutable access.
-  template <class C, cms_int32_t ALIGNMENT, RestrictQualify RESTRICT_QUALIFY>
+  template <class C, byte_size_type ALIGNMENT, RestrictQualify RESTRICT_QUALIFY>
   class SoAConstValue<SoAColumnType::eigen, C, ALIGNMENT, RESTRICT_QUALIFY> {
   public:
     typedef C Type;
     typedef Eigen::Map<const C, 0, Eigen::InnerStride<Eigen::Dynamic>> CMapType;
     typedef CMapType& RefToConst;
     typedef SoAConstParametersImpl<SoAColumnType::eigen, C> ConstParams;
-    SOA_HOST_DEVICE_INLINE SoAConstValue(cms_int32_t i, typename C::Scalar* col, cms_int32_t stride)
+    SOA_HOST_DEVICE_INLINE SoAConstValue(size_type i, typename C::Scalar* col, byte_size_type stride)
         : crCol_(col),
           cVal_(crCol_ + i, C::RowsAtCompileTime, C::ColsAtCompileTime, Eigen::InnerStride<Eigen::Dynamic>(stride)),
           stride_(stride) {}
-    SOA_HOST_DEVICE_INLINE SoAConstValue(cms_int32_t i, SoAConstParametersImpl<SoAColumnType::eigen, C> params)
+    SOA_HOST_DEVICE_INLINE SoAConstValue(size_type i, SoAConstParametersImpl<SoAColumnType::eigen, C> params)
         : crCol_(params.addr_),
           cVal_(crCol_ + i,
                 C::RowsAtCompileTime,
@@ -400,16 +403,16 @@ namespace cms::soa {
     SOA_HOST_DEVICE_INLINE const C* operator&() const { return &cVal_; }
     typedef typename C::Scalar ValueType;
     static constexpr auto valueSize = sizeof(C::Scalar);
-    SOA_HOST_DEVICE_INLINE cms_int32_t stride() const { return stride_; }
+    SOA_HOST_DEVICE_INLINE byte_size_type stride() const { return stride_; }
 
   private:
     const typename C::Scalar* __restrict__ crCol_;
     CMapType cVal_;
-    cms_int32_t stride_;
+    byte_size_type stride_;
   };
 #else
   // XXX Changed enum class to bare bool + const values in class.
-  template <class C, cms_int32_t ALIGNMENT, bool RESTRICT_QUALIFY>
+  template <class C, byte_size_type ALIGNMENT, bool RESTRICT_QUALIFY>
   class SoAConstValue<SoAColumnType::eigen, C, ALIGNMENT, RESTRICT_QUALIFY> {
     // Eigen/Core should be pre-included before the SoA headers to enable support for Eigen columns.
     static_assert(!sizeof(C),
@@ -425,7 +428,7 @@ namespace cms::soa {
     class DataHolder {
     public:
       DataHolder(const typename C::Scalar* data) : data_(data) {}
-      EigenConstMapMaker::Type withStride(cms_int32_t stride) {
+      EigenConstMapMaker::Type withStride(byte_size_type stride) {
         return EigenConstMapMaker::Type(
             data_, C::RowsAtCompileTime, C::ColsAtCompileTime, Eigen::InnerStride<Eigen::Dynamic>(stride));
       }
@@ -444,7 +447,7 @@ namespace cms::soa {
   };
 #endif
   // Helper function to compute aligned size
-  inline cms_int32_t alignSize(cms_int32_t size, cms_int32_t alignment = 128) {
+  inline byte_size_type alignSize(byte_size_type size, byte_size_type alignment = 128) {
     if (size)
       return ((size - 1) / alignment + 1) * alignment;
     else
@@ -491,7 +494,7 @@ namespace cms::soa {
         : params_(params) {}
     SOA_HOST_DEVICE_INLINE T* operator()() { return params_.addr_; }
     typedef T* NoParamReturnType;
-    SOA_HOST_DEVICE_INLINE T& operator()(cms_int32_t index) { return params_.addr_[index]; }
+    SOA_HOST_DEVICE_INLINE T& operator()(size_type index) { return params_.addr_[index]; }
 
   private:
     SoAParametersImpl<SoAColumnType::column, T> params_;
@@ -504,7 +507,7 @@ namespace cms::soa {
     SoAColumnAccessorsImpl(const SoAConstParametersImpl<SoAColumnType::column, T>& params) : params_(params) {}
     SOA_HOST_DEVICE_INLINE const T* operator()() const { return params_.addr_; }
     typedef T* NoParamReturnType;
-    SOA_HOST_DEVICE_INLINE T operator()(cms_int32_t index) const { return params_.addr_[index]; }
+    SOA_HOST_DEVICE_INLINE T operator()(size_type index) const { return params_.addr_[index]; }
 
   private:
     SoAConstParametersImpl<SoAColumnType::column, T> params_;
@@ -517,7 +520,7 @@ namespace cms::soa {
         : params_(params) {}
     SOA_HOST_DEVICE_INLINE T& operator()() { return *params_.addr_; }
     typedef T& NoParamReturnType;
-    SOA_HOST_DEVICE_INLINE void operator()(cms_int32_t index) const {
+    SOA_HOST_DEVICE_INLINE void operator()(size_type index) const {
       assert(false && "Indexed access impossible for SoA scalars.");
     }
 
@@ -532,7 +535,7 @@ namespace cms::soa {
     SoAColumnAccessorsImpl(const SoAConstParametersImpl<SoAColumnType::scalar, T>& params) : params_(params) {}
     SOA_HOST_DEVICE_INLINE T operator()() const { return *params_.addr_; }
     typedef T NoParamReturnType;
-    SOA_HOST_DEVICE_INLINE void operator()(cms_int32_t index) const {
+    SOA_HOST_DEVICE_INLINE void operator()(size_type index) const {
       assert(false && "Indexed access impossible for SoA scalars.");
     }
 
@@ -547,7 +550,7 @@ namespace cms::soa {
         : params_(params) {}
     SOA_HOST_DEVICE_INLINE typename T::Scalar* operator()() { return params_.addr_; }
     typedef typename T::Scalar* NoParamReturnType;
-    //SOA_HOST_DEVICE_INLINE T& operator()(cms_int32_t index) { return params_.addr_[index]; }
+    //SOA_HOST_DEVICE_INLINE T& operator()(size_type index) { return params_.addr_[index]; }
 
   private:
     SoAParametersImpl<SoAColumnType::eigen, T> params_;
@@ -560,7 +563,7 @@ namespace cms::soa {
     SoAColumnAccessorsImpl(const SoAConstParametersImpl<SoAColumnType::eigen, T>& params) : params_(params) {}
     SOA_HOST_DEVICE_INLINE const typename T::Scalar* operator()() const { return params_.addr_; }
     typedef typename T::Scalar* NoParamReturnType;
-    //SOA_HOST_DEVICE_INLINE T operator()(cms_int32_t index) const { return params_.addr_[index]; }
+    //SOA_HOST_DEVICE_INLINE T operator()(size_type index) const { return params_.addr_[index]; }
 
   private:
     SoAConstParametersImpl<SoAColumnType::eigen, T> params_;
@@ -587,11 +590,11 @@ namespace cms::soa {
   };
 
   struct CacheLineSize {
-    static constexpr cms_int32_t NvidiaGPU = 128;
-    static constexpr cms_int32_t IntelCPU = 64;
-    static constexpr cms_int32_t AMDCPU = 64;
-    static constexpr cms_int32_t ARMCPU = 64;
-    static constexpr cms_int32_t defaultSize = NvidiaGPU;
+    static constexpr byte_size_type NvidiaGPU = 128;
+    static constexpr byte_size_type IntelCPU = 64;
+    static constexpr byte_size_type AMDCPU = 64;
+    static constexpr byte_size_type ARMCPU = 64;
+    static constexpr byte_size_type defaultSize = NvidiaGPU;
   };
 
 }  // namespace cms::soa
