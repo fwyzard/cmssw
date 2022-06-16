@@ -8,10 +8,10 @@
 
 
 #if 1
-GENERATE_SOA_LAYOUT_AND_VIEW(XyzIdSoALayout, 
-                             XyzIdSoAView,
+GENERATE_SOA_LAYOUT(XyzIdSoALayout, 
+                             /*XyzIdSoAView,*/
                              // columns: one value per element
-                             SOA_COLUMN(double, x),
+                             SOA_COLUMN(double, x),  
                              SOA_COLUMN(double, y),
                              SOA_COLUMN(double, z),
                              SOA_COLUMN(int32_t, id))
