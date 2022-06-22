@@ -290,6 +290,7 @@ namespace cms::soa {
 
   // Helper template managing the value within it column
   // TODO Create a const variant to avoid leaking mutable access.
+//#define EIGEN_WORLD_VERSION
 #ifdef EIGEN_WORLD_VERSION
   template <class C, byte_size_type ALIGNMENT, bool RESTRICT_QUALIFY>
   class SoAValue<SoAColumnType::eigen, C, ALIGNMENT, RESTRICT_QUALIFY> {

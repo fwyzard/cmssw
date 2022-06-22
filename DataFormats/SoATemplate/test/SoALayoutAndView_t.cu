@@ -31,7 +31,7 @@ GENERATE_SOA_LAYOUT(SoAHostDeviceLayoutTemplate,
                     // scalars: one value for the whole structure
                     SOA_SCALAR(const char*, description),
                     SOA_SCALAR(uint32_t, someNumber))
-
+        
 using SoAHostDeviceLayout = SoAHostDeviceLayoutTemplate<>;
 using SoAHostDeviceView = SoAHostDeviceLayout::View;
 using SoAHostDeviceConstView = SoAHostDeviceLayout::ConstView;
