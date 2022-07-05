@@ -52,7 +52,7 @@ namespace gpuClustering {
     auto firstModule = blockIdx.x;
     auto endModule = moduleStart[0];
 
-    constexpr int nMaxModules = isPhase2 ? phase2PixelTopology::numberOfModules : phase1PixelTopology::numberOfModules;
+    [[maybe_unused]] constexpr int nMaxModules = isPhase2 ? phase2PixelTopology::numberOfModules : phase1PixelTopology::numberOfModules;
     assert(nMaxModules < maxNumModules);
 
     for (auto module = firstModule; module < endModule; module += gridDim.x) {

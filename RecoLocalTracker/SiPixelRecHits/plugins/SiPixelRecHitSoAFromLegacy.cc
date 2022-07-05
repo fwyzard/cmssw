@@ -226,15 +226,11 @@ void SiPixelRecHitSoAFromLegacy::produce(edm::StreamID streamID, edm::Event& iEv
     assert(clus.size() == ndigi);
     numberOfHits += nclus;
     // filled creates view
-    SiPixelDigisCUDASOAView digiView;
-    digiView.xx_ = xx.data();
-    digiView.yy_ = yy.data();
-    digiView.adc_ = adc.data();
-    digiView.moduleInd_ = moduleInd.data();
-    digiView.clus_ = clus.data();
-    digiView.pdigi_ = nullptr;
-    digiView.rawIdArr_ = nullptr;
-    assert(digiView.adc(0) != 0);
+    // We use the per column constructor
+    // Column order is: clus, pdigi, rawIdArr, adc, xx, yy, moduleInd
+
+    SiPixelDigisCUDASOAConstView digiView(ndigi, clus.data(), nullptr, nullptr, adc.data(), xx.data(), yy.data(), moduleInd.data()); /* XXX */ 
+    assert(digiView[0].adc() != 0);
     // we run on blockId.x==0
     gpuPixelRecHits::getHits(&cpeView, &bsHost, digiView, ndigi, &clusterView, output->view());
     for (auto h = fc; h < lc; ++h)

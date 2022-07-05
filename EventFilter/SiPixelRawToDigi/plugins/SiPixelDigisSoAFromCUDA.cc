@@ -27,7 +27,7 @@ private:
   edm::EDGetTokenT<cms::cuda::Product<SiPixelDigisCUDA>> digiGetToken_;
   edm::EDPutTokenT<SiPixelDigisSoA> digiPutToken_;
 
-  cms::cuda::host::unique_ptr<uint16_t[]> store_;
+  cms::cuda::host::unique_ptr<std::byte[]> store_;
 
   int nDigis_;
 };
@@ -66,8 +66,10 @@ void SiPixelDigisSoAFromCUDA::produce(edm::Event& iEvent, const edm::EventSetup&
   // - What if a CPU algorithm would produce the same SoA? We can't
   //   use cudaMallocHost without a GPU...
 
-  auto tmp_view = SiPixelDigisCUDASOAView(store_, nDigis_, SiPixelDigisCUDASOAView::StorageLocationHost::kMAX);
-
+  // store_ is a buffer containing the columns for the host-device part only: create layout and view.
+  SiPixelDigisCUDASOA_H_D tmp_layout(store_.get(), nDigis_);
+  SiPixelDigisCUDASOA_H_D::View tmp_view(tmp_layout);
+  
   iEvent.emplace(digiPutToken_, nDigis_, tmp_view.pdigi(), tmp_view.rawIdArr(), tmp_view.adc(), tmp_view.clus());
 
   store_.reset();
