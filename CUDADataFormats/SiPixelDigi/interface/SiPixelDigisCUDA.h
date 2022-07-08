@@ -9,6 +9,8 @@
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
+#include "DataFormats/Portable/interface/PortableCUDADeviceCollection.h"
+
 // Host and device layout: data used on both sides and transferred from device to host.
 GENERATE_SOA_LAYOUT(SiPixelDigisCUDASOA_H_D_Template,
   SOA_COLUMN(int32_t, clus),
@@ -67,20 +69,13 @@ GENERATE_SOA_CONST_VIEW(SiPixelDigisCUDASOA_D_View_ConstTemplate,
 
 using SiPixelDigisCUDASOAConstView = SiPixelDigisCUDASOA_D_View_ConstTemplate<>;
 
-//using SiPixelDigisCUDA = PortableCUDAHostCollection<SiPixelDigisCUDASOA>;
-
-class SiPixelDigisCUDA {
+// While porting from previous code, we decorate the base PortableCollection. XXX/TODO: improve if possible...
+class SiPixelDigisCUDA: public PortableCUDADeviceCollection_2layouts<SiPixelDigisCUDASOA_H_D, SiPixelDigisCUDASOA_DO, 
+          SiPixelDigisCUDASOAView, SiPixelDigisCUDASOAConstView> {
 public:
-  //using StoreType = uint16_t;
-  SiPixelDigisCUDA() = default;
-  explicit SiPixelDigisCUDA(size_t maxFedWords, cudaStream_t stream);
-  ~SiPixelDigisCUDA() = default;
-
-  SiPixelDigisCUDA(const SiPixelDigisCUDA &) = delete;
-  SiPixelDigisCUDA &operator=(const SiPixelDigisCUDA &) = delete;
-  SiPixelDigisCUDA(SiPixelDigisCUDA &&) = default;
-  SiPixelDigisCUDA &operator=(SiPixelDigisCUDA &&) = default;
-
+  using PortableCUDADeviceCollection_2layouts<SiPixelDigisCUDASOA_H_D, SiPixelDigisCUDASOA_DO, 
+          SiPixelDigisCUDASOAView, SiPixelDigisCUDASOAConstView>::PortableCUDADeviceCollection_2layouts;
+  
   void setNModulesDigis(uint32_t nModules, uint32_t nDigis) {
     nModules_h = nModules;
     nDigis_h = nDigis;
@@ -88,21 +83,20 @@ public:
 
   uint32_t nModules() const { return nModules_h; }
   uint32_t nDigis() const { return nDigis_h; }
-
-  cms::cuda::host::unique_ptr<std::byte[]> copyAllToHostAsync(cudaStream_t stream) const;
-
-  SiPixelDigisCUDASOAView view() { return m_view; }
-  SiPixelDigisCUDASOAConstView const view() const { return m_constView; }
+  
+  cms::cuda::host::unique_ptr<std::byte[]> copyAllToHostAsync(
+    cudaStream_t stream) const {
+    // Copy to a host buffer the host-device shared part (m_hostDeviceLayout).
+    auto ret = cms::cuda::make_host_unique<std::byte[]>(layout0().metadata().byteSize(), stream);
+    cudaCheck(cudaMemcpyAsync(ret.get(),
+                              layout0().metadata().data(),
+                              layout0().metadata().byteSize(),
+                              cudaMemcpyDeviceToHost,
+                              stream));
+    return ret;
+}
 
 private:
-  // These are consumed by downstream device code
-  cms::cuda::device::unique_ptr<std::byte[]> m_buffer;
-  SiPixelDigisCUDASOA_H_D m_hostDeviceLayout;
-  SiPixelDigisCUDASOA_DO  m_deviceOnlyLayout;
-  SiPixelDigisCUDASOAView m_view;
-  SiPixelDigisCUDASOAConstView m_constView;
-  
-
   uint32_t nModules_h = 0;
   uint32_t nDigis_h = 0;
 };
