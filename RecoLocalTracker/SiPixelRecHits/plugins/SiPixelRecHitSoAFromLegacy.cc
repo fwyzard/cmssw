@@ -229,7 +229,8 @@ void SiPixelRecHitSoAFromLegacy::produce(edm::StreamID streamID, edm::Event& iEv
     // We use the per column constructor
     // Column order is: clus, pdigi, rawIdArr, adc, xx, yy, moduleInd
 
-    SiPixelDigisCUDASOAConstView digiView(ndigi, clus.data(), nullptr, nullptr, adc.data(), xx.data(), yy.data(), moduleInd.data()); /* XXX */ 
+    SiPixelDigisCUDASOAConstView digiView(
+        ndigi, clus.data(), nullptr, nullptr, adc.data(), xx.data(), yy.data(), moduleInd.data()); /* XXX */
     assert(digiView[0].adc() != 0);
     // we run on blockId.x==0
     gpuPixelRecHits::getHits(&cpeView, &bsHost, digiView, ndigi, &clusterView, output->view());

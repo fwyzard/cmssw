@@ -9,7 +9,6 @@
 // generic SoA-based product in device memory
 template <typename T>
 class PortableCUDADeviceCollection {
-
 public:
   using Layout = T;
   using View = typename Layout::View;
@@ -22,7 +21,7 @@ public:
       : buffer_{cms::cuda::make_device_unique<std::byte[]>(Layout::computeDataSize(elements), stream)},
         layout_{buffer_.get(), elements},
         view_{layout_},
-        constView_{layout_}{
+        constView_{layout_} {
     // CUDA device memory uses a default alignment of at least 128 bytes
     assert(reinterpret_cast<uintptr_t>(buffer_.get()) % Layout::alignment == 0);
   }
@@ -39,8 +38,8 @@ public:
   ~PortableCUDADeviceCollection() = default;
 
   // access the View
-  View &view() { return view_; } 
-  ConstView const &view() const { return constView_; } 
+  View &view() { return view_; }
+  ConstView const &view() const { return constView_; }
 
   View &operator*() { return view_; }
   ConstView const &operator*() const { return constView_; }
@@ -72,11 +71,12 @@ public:
 
   PortableCUDADeviceCollection_2layouts(int32_t elements)
       // allocate pageable host memory
-      : buffer_{cms::cuda::make_host_unique<std::byte[]>(Layout0::computeDataSize(elements)+Layout1::computeDataSize(elements))},
+      : buffer_{cms::cuda::make_host_unique<std::byte[]>(Layout0::computeDataSize(elements) +
+                                                         Layout1::computeDataSize(elements))},
         layout0_{buffer_.get(), elements},
         layout1_{layout0_.metadate().nextByte(), elements},
         view_{layout0_, layout1_},
-        constView_ {layout0_, layout1_} {
+        constView_{layout0_, layout1_} {
     // make_host_unique for pageable host memory uses a default alignment of 128 bytes
     assert(reinterpret_cast<uintptr_t>(buffer_.get()) % Layout0::alignment == 0);
     assert(reinterpret_cast<uintptr_t>(layout0_.metadata().nextByte()) % Layout1::alignment == 0);
@@ -84,7 +84,8 @@ public:
 
   PortableCUDADeviceCollection_2layouts(int32_t elements, cudaStream_t stream)
       // allocate pinned host memory, accessible by the current device
-      : buffer_{cms::cuda::make_host_unique<std::byte[]>(Layout0::computeDataSize(elements)+Layout1::computeDataSize(elements), stream)},
+      : buffer_{cms::cuda::make_host_unique<std::byte[]>(
+            Layout0::computeDataSize(elements) + Layout1::computeDataSize(elements), stream)},
         layout0_{buffer_.get(), elements},
         layout1_{layout0_.metadata().nextByte(), elements},
         view_{layout0_, layout1_},
@@ -106,8 +107,8 @@ public:
   ~PortableCUDADeviceCollection_2layouts() = default;
 
   // access the View
-  View &view() { return view_; } 
-  ConstView const &view() const { return constView_; } 
+  View &view() { return view_; }
+  ConstView const &view() const { return constView_; }
 
   View &operator*() { return view_; }
   ConstView const &operator*() const { return constView_; }
@@ -116,15 +117,15 @@ public:
   ConstView const *operator->() const { return &constView_; }
 
   Buffer &buffer() { return buffer_; }
-  Buffer const &buffer() const { return buffer_; }  
-  
+  Buffer const &buffer() const { return buffer_; }
+
   Layout0 &layout0() { return layout0_; }
   Layout0 const &layout0() const { return layout0_; }
 
   Layout0 &layout1() { return layout1_; }
   Layout0 const &layout1() const { return layout1_; }
 
-  private:
+private:
   Buffer buffer_;
   Layout0 layout0_;
   Layout1 layout1_;
@@ -132,6 +133,4 @@ public:
   ConstView constView_;
 };
 
-
 #endif  // DataFormats_Portable_interface_PortableCUDADeviceCollection_h
-

@@ -21,7 +21,7 @@ public:
       : buffer_{cms::cuda::make_host_unique<std::byte[]>(Layout::computeDataSize(elements))},
         layout_{buffer_.get(), elements},
         view_{layout_},
-        constView {layout_} {
+        constView{layout_} {
     // make_host_unique for pageable host memory uses a default alignment of 128 bytes
     assert(reinterpret_cast<uintptr_t>(buffer_.get()) % Layout::alignment == 0);
   }
@@ -31,7 +31,7 @@ public:
       : buffer_{cms::cuda::make_host_unique<std::byte[]>(Layout::computeDataSize(elements), stream)},
         layout_{buffer_.get(), elements},
         view_{layout_},
-        constView_{layout_}{
+        constView_{layout_} {
     // CUDA pinned host memory uses a default alignment of at least 128 bytes
     assert(reinterpret_cast<uintptr_t>(buffer_.get()) % Layout::alignment == 0);
   }
@@ -48,8 +48,8 @@ public:
   ~PortableCUDAHostCollection() = default;
 
   // access the View
-  View &view() { return view_; } 
-  View const &view() const { return constView_; } 
+  View &view() { return view_; }
+  View const &view() const { return constView_; }
 
   View &operator*() { return view_; }
   View const &operator*() const { return constView_; }
@@ -81,11 +81,12 @@ public:
 
   PortableCUDAHostCollection(int32_t elements)
       // allocate pageable host memory
-      : buffer_{cms::cuda::make_host_unique<std::byte[]>(Layout0::computeDataSize(elements)+Layout1::computeDataSize(elements))},
+      : buffer_{cms::cuda::make_host_unique<std::byte[]>(Layout0::computeDataSize(elements) +
+                                                         Layout1::computeDataSize(elements))},
         layout0_{buffer_.get(), elements},
         layout1_{layout0_.metadate().nextByte(), elements},
         view_{layout0_, layout1_},
-        constView_ {layout0_, layout1_} {
+        constView_{layout0_, layout1_} {
     // make_host_unique for pageable host memory uses a default alignment of 128 bytes
     assert(reinterpret_cast<uintptr_t>(buffer_.get()) % Layout0::alignment == 0);
     assert(reinterpret_cast<uintptr_t>(layout0_.metadata().nextByte()) % Layout1::alignment == 0);
@@ -115,8 +116,8 @@ public:
   ~PortableCUDAHostCollection() = default;
 
   // access the View
-  View &view() { return view_; } 
-  ConstView const &view() const { return constView_; } 
+  View &view() { return view_; }
+  ConstView const &view() const { return constView_; }
 
   View &operator*() { return view_; }
   ConstView const &operator*() const { return constView_; }
@@ -136,4 +137,3 @@ private:
 };
 
 #endif  // DataFormats_Portable_interface_PortableCUDAHostCollection_h
-
