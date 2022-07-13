@@ -131,8 +131,11 @@ void SiPixelRecHitSoAFromLegacy::produce(edm::StreamID streamID, edm::Event& iEv
   uint32_t moduleId_;
   moduleStart_[1] = 0;  // we run sequentially....
 
-  SiPixelClustersCUDA::SiPixelClustersCUDASOAView clusterView{
-      moduleStart_.data(), clusInModule_.data(), &moduleId_, hitsModuleStart};
+  // We create a view directly form the pointers. The moduleId_ "array" only has one element, but this is fine are
+  // we are running the kernel in CPU compatibility mode (re-compilaiton for CPU), and there will be only one thread
+  // moduleId being indexed by threadId in the kernel, we are fine.
+  SiPixelClustersCUDA::RestrictConstView clusterView{
+      gpuClustering::maxNumModules + 1, moduleStart_.data(), clusInModule_.data(), &moduleId_, hitsModuleStart};
 
   // fill cluster arrays
   int numberOfClusters = 0;
@@ -228,12 +231,11 @@ void SiPixelRecHitSoAFromLegacy::produce(edm::StreamID streamID, edm::Event& iEv
     // filled creates view
     // We use the per column constructor
     // Column order is: clus, pdigi, rawIdArr, adc, xx, yy, moduleInd
-
     SiPixelDigisCUDASOAConstView digiView(
-        ndigi, clus.data(), nullptr, nullptr, adc.data(), xx.data(), yy.data(), moduleInd.data()); /* XXX */
+        ndigi, clus.data(), nullptr, nullptr, adc.data(), xx.data(), yy.data(), moduleInd.data());
     assert(digiView[0].adc() != 0);
     // we run on blockId.x==0
-    gpuPixelRecHits::getHits(&cpeView, &bsHost, digiView, ndigi, &clusterView, output->view());
+    gpuPixelRecHits::getHits(&cpeView, &bsHost, digiView, ndigi, clusterView, output->view());
     for (auto h = fc; h < lc; ++h)
       if (h - fc < maxHitsInModule)
         assert(gind == output->view()->detectorIndex(h));
