@@ -531,7 +531,7 @@ namespace cms::soa {
 
 // clang-format off
 #define _GENERATE_SOA_CONST_VIEW_PART_1(CLASS, LAYOUTS_LIST, VALUE_LIST)                                               \
-    typedef cms::soa::AlignmentEnforcement AlignmentEnforcement;                                                       \
+    using AlignmentEnforcement = cms::soa::AlignmentEnforcement;                                                       \
                                                                                                                        \
     /* For CUDA applications, we align to the 128 bytes of the cache lines.                                            \
    * See https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#global-memory-3-0 this is still valid        \
