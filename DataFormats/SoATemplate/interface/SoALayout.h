@@ -374,7 +374,6 @@ namespace cms::soa {
     template <cms::soa::SoAColumnType COLUMN_TYPE, class C>                                                            \
     using SoAConstValueWithConf = cms::soa::SoAConstValue<COLUMN_TYPE, C, conditionalAlignment>;                       \
                                                                                                                        \
-                                                                                                                       \
     template <CMS_SOA_BYTE_SIZE_TYPE VIEW_ALIGNMENT = cms::soa::CacheLineSize::defaultSize,                            \
             bool VIEW_ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed,                                 \
             bool RESTRICT_QUALIFY = cms::soa::RestrictQualify::Disabled,                                               \
@@ -402,8 +401,8 @@ namespace cms::soa {
     }                                                                                                                  \
                                                                                                                        \
     /**                                                                                                                \
-   * Helper/friend class allowing SoA introspection.                                                                   \
-   */                                                                                                                  \
+     * Helper/friend class allowing SoA introspection.                                                                 \
+     */                                                                                                                \
     struct Metadata {                                                                                                  \
       friend CLASS;                                                                                                    \
       SOA_HOST_DEVICE SOA_INLINE size_type size() const { return parent_.nElements_; }                                 \
