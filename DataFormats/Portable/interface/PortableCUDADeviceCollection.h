@@ -37,6 +37,10 @@ public:
   // default destructor
   ~PortableCUDADeviceCollection() = default;
 
+  // access the Layout
+  Layout &layout() { return layout_; }
+  Layout const &layout() const { return layout_; }
+
   // access the View
   View &view() { return view_; }
   ConstView const &view() const { return constView_; }
@@ -106,6 +110,13 @@ public:
   // default destructor
   ~PortableCUDADeviceCollection_2layouts() = default;
 
+  // access the Layouts
+  Layout0 &layout0() { return layout0_; }
+  Layout0 const &layout0() const { return layout0_; }
+
+  Layout1 &layout1() { return layout1_; }
+  Layout1 const &layout1() const { return layout1_; }
+
   // access the View
   View &view() { return view_; }
   ConstView const &view() const { return constView_; }
@@ -118,12 +129,6 @@ public:
 
   Buffer &buffer() { return buffer_; }
   Buffer const &buffer() const { return buffer_; }
-
-  Layout0 &layout0() { return layout0_; }
-  Layout0 const &layout0() const { return layout0_; }
-
-  Layout0 &layout1() { return layout1_; }
-  Layout0 const &layout1() const { return layout1_; }
 
 private:
   Buffer buffer_;
