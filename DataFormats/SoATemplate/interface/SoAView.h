@@ -488,17 +488,18 @@ namespace cms::soa {
                                               VALUE_LIST))                                                             \
         : nElements_(nElements), _ITERATE_ON_ALL_COMMA(_DECLARE_VIEW_MEMBER_INITIALIZERS_BYCOLUMN, ~, VALUE_LIST) {}   \
                                                                                                                        \
-    struct const_element {                                                                                             \
-      SOA_HOST_DEVICE SOA_INLINE                                                                                       \
-      const_element(size_type index, /* Declare parameters */                                                          \
-                    _ITERATE_ON_ALL_COMMA(_DECLARE_VIEW_ELEMENT_VALUE_ARG, const, VALUE_LIST))                         \
-          : _ITERATE_ON_ALL_COMMA(_DECLARE_VIEW_CONST_ELEM_MEMBER_INIT, index, VALUE_LIST) {}                          \
-      _ITERATE_ON_ALL(_DECLARE_VIEW_CONST_ELEMENT_ACCESSOR, ~, VALUE_LIST)                                             \
+    /* Copiable */                                                                                                     \
+    VIEW(VIEW const&) = default;                                                                                       \
+    VIEW& operator=(VIEW const&) = default;                                                                            \
                                                                                                                        \
-    private:                                                                                                           \
-      _ITERATE_ON_ALL(_DECLARE_VIEW_CONST_ELEMENT_VALUE_MEMBER, ~, VALUE_LIST)                                         \
-    };                                                                                                                 \
+    /* Movable */                                                                                                      \
+    VIEW(VIEW &&) = default;                                                                                            \
+    VIEW& operator=(VIEW &&) = default;                                                                                 \
                                                                                                                        \
+    /* Trivial destuctor */                                                                                            \
+    ~VIEW() = default;                                                                                                 \
+                                                                                                                       \
+    /* AoS-like accessor (mutable) */                                                                                  \
     struct element {                                                                                                   \
       SOA_HOST_DEVICE SOA_INLINE                                                                                       \
       element(size_type index, /* Declare parameters */                                                                \
@@ -512,7 +513,6 @@ namespace cms::soa {
       _ITERATE_ON_ALL(_DECLARE_VIEW_ELEMENT_VALUE_MEMBER, ~, VALUE_LIST)                                               \
     };                                                                                                                 \
                                                                                                                        \
-    /* AoS-like accessor (non-const) */                                                                                \
     SOA_HOST_DEVICE SOA_INLINE                                                                                         \
     element operator[](size_type index) {                                                                              \
       if constexpr (rangeChecking == cms::soa::RangeChecking::enabled) {                                               \
@@ -523,6 +523,17 @@ namespace cms::soa {
     }                                                                                                                  \
                                                                                                                        \
     /* AoS-like accessor (const) */                                                                                    \
+    struct const_element {                                                                                             \
+      SOA_HOST_DEVICE SOA_INLINE                                                                                       \
+      const_element(size_type index, /* Declare parameters */                                                          \
+                    _ITERATE_ON_ALL_COMMA(_DECLARE_VIEW_ELEMENT_VALUE_ARG, const, VALUE_LIST))                         \
+          : _ITERATE_ON_ALL_COMMA(_DECLARE_VIEW_CONST_ELEM_MEMBER_INIT, index, VALUE_LIST) {}                          \
+      _ITERATE_ON_ALL(_DECLARE_VIEW_CONST_ELEMENT_ACCESSOR, ~, VALUE_LIST)                                             \
+                                                                                                                       \
+    private:                                                                                                           \
+      _ITERATE_ON_ALL(_DECLARE_VIEW_CONST_ELEMENT_VALUE_MEMBER, ~, VALUE_LIST)                                         \
+    };                                                                                                                 \
+                                                                                                                       \
     SOA_HOST_DEVICE SOA_INLINE                                                                                         \
     const_element operator[](size_type index) const {                                                                  \
       if constexpr (rangeChecking == cms::soa::RangeChecking::enabled) {                                               \
@@ -638,25 +649,18 @@ namespace cms::soa {
                         _ITERATE_ON_ALL_COMMA(_DECLARE_VIEW_CONSTRUCTION_BYCOLUMN_PARAMETERS, const, VALUE_LIST))      \
         : nElements_(nElements), _ITERATE_ON_ALL_COMMA(_DECLARE_VIEW_MEMBER_INITIALIZERS_BYCOLUMN, ~, VALUE_LIST) {}   \
                                                                                                                        \
-    /* Copy constructors */                                                                                            \
+    /* Copiable */                                                                                                     \
     CONST_VIEW(CONST_VIEW const&) = default;                                                                           \
-                                                                                                                       \
-    template <size_t VIEW_ALIGNMENT_, bool VIEW_ALIGNMENT_ENFORCEMENT_, bool RESTRICT_QUALIFY_, bool RANGE_CHECKING_>  \
-    CONST_VIEW(VIEW<VIEW_ALIGNMENT_, VIEW_ALIGNMENT_ENFORCEMENT_, RESTRICT_QUALIFY_, RANGE_CHECKING_> const& other)    \
-        : nElements_{other.nElements_},                                                                                \
-          _ITERATE_ON_ALL_COMMA(_DECLARE_VIEW_MEMBER_INITIALIZERS_FROM_OTHER, other, VALUE_LIST)                       \
-          {}                                                                                                           \
-                                                                                                                       \
-    /* Assignment operator */                                                                                          \
     CONST_VIEW& operator=(CONST_VIEW const&) = default;                                                                \
                                                                                                                        \
-    template <size_t VIEW_ALIGNMENT_, bool VIEW_ALIGNMENT_ENFORCEMENT_, bool RESTRICT_QUALIFY_, bool RANGE_CHECKING_>  \
-    CONST_VIEW& operator=(                                                                                             \
-        VIEW<VIEW_ALIGNMENT_, VIEW_ALIGNMENT_ENFORCEMENT_, RESTRICT_QUALIFY_, RANGE_CHECKING_> const& other) {         \
-      nElements_ = other.nElements_;                                                                                   \
-      _ITERATE_ON_ALL(_DECLARE_VIEW_MEMBER_ASSIGNMENT_FROM_OTHER, other, VALUE_LIST)                                   \
-    }                                                                                                                  \
+    /* Movable */                                                                                                      \
+    CONST_VIEW(CONST_VIEW &&) = default;                                                                               \
+    CONST_VIEW& operator=(CONST_VIEW &&) = default;                                                                    \
                                                                                                                        \
+    /* Trivial destuctor */                                                                                            \
+    ~CONST_VIEW() = default;                                                                                           \
+                                                                                                                       \
+    /* AoS-like accessor (const) */                                                                                    \
     struct const_element {                                                                                             \
       SOA_HOST_DEVICE SOA_INLINE                                                                                       \
       const_element(size_type index, /* Declare parameters */                                                          \
@@ -668,7 +672,6 @@ namespace cms::soa {
       _ITERATE_ON_ALL(_DECLARE_VIEW_CONST_ELEMENT_VALUE_MEMBER, ~, VALUE_LIST)                                         \
     };                                                                                                                 \
                                                                                                                        \
-    /* AoS-like accessor (const) */                                                                                    \
     SOA_HOST_DEVICE SOA_INLINE                                                                                         \
     const_element operator[](size_type index) const {                                                                  \
       if constexpr (rangeChecking == cms::soa::RangeChecking::enabled) {                                               \
