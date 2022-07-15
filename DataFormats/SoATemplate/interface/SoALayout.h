@@ -471,26 +471,28 @@
     /* So instead we make the code unconditional with paceholder names which are protected by a private protection. */ \
     /* This will be handled later as we handle the integration of the view as a subclass of the layout.             */ \
   public:                                                                                                              \
-  _GENERATE_SOA_TRIVIAL_VIEW(CLASS,                                                                                    \
-                    SOA_VIEW_LAYOUT_LIST(                                                                              \
-                        SOA_VIEW_LAYOUT(BOOST_PP_CAT(CLASS, _parametrized), BOOST_PP_CAT(instance_, CLASS))),          \
-                    SOA_VIEW_VALUE_LIST(_ITERATE_ON_ALL_COMMA(                                                         \
-                    _VIEW_FIELD_FROM_LAYOUT, BOOST_PP_CAT(instance_, CLASS), __VA_ARGS__)))                            \
-    template <bool RESTRICT_QUALIFY, bool RANGE_CHECKING>                                                              \
-    using ViewTemplate = ViewTemplateFreeParams<ALIGNMENT, ALIGNMENT_ENFORCEMENT, RESTRICT_QUALIFY, RANGE_CHECKING>;   \
-                                                                                                                       \
-    using View = ViewTemplate<cms::soa::RestrictQualify::enabled, cms::soa::RangeChecking::disabled>;                  \
                                                                                                                        \
   _GENERATE_SOA_TRIVIAL_CONST_VIEW(CLASS,                                                                              \
                     SOA_VIEW_LAYOUT_LIST(                                                                              \
                         SOA_VIEW_LAYOUT(BOOST_PP_CAT(CLASS, _parametrized) , BOOST_PP_CAT(instance_, CLASS))),         \
                     SOA_VIEW_VALUE_LIST(_ITERATE_ON_ALL_COMMA(                                                         \
                     _VIEW_FIELD_FROM_LAYOUT, BOOST_PP_CAT(instance_, CLASS), __VA_ARGS__)))                            \
+                                                                                                                       \
     template <bool RESTRICT_QUALIFY, bool RANGE_CHECKING>                                                              \
     using ConstViewTemplate = ConstViewTemplateFreeParams<ALIGNMENT, ALIGNMENT_ENFORCEMENT, RESTRICT_QUALIFY,          \
       RANGE_CHECKING>;                                                                                                 \
                                                                                                                        \
+  _GENERATE_SOA_TRIVIAL_VIEW(CLASS,                                                                                    \
+                    SOA_VIEW_LAYOUT_LIST(                                                                              \
+                        SOA_VIEW_LAYOUT(BOOST_PP_CAT(CLASS, _parametrized), BOOST_PP_CAT(instance_, CLASS))),          \
+                    SOA_VIEW_VALUE_LIST(_ITERATE_ON_ALL_COMMA(                                                         \
+                    _VIEW_FIELD_FROM_LAYOUT, BOOST_PP_CAT(instance_, CLASS), __VA_ARGS__)))                            \
+                                                                                                                       \
+    template <bool RESTRICT_QUALIFY, bool RANGE_CHECKING>                                                              \
+    using ViewTemplate = ViewTemplateFreeParams<ALIGNMENT, ALIGNMENT_ENFORCEMENT, RESTRICT_QUALIFY, RANGE_CHECKING>;   \
+                                                                                                                       \
     using ConstView = ConstViewTemplate<cms::soa::RestrictQualify::enabled, cms::soa::RangeChecking::disabled>;        \
+    using View = ViewTemplate<cms::soa::RestrictQualify::enabled, cms::soa::RangeChecking::disabled>;                  \
   };
 // clang-format on
 
