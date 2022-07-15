@@ -62,30 +62,23 @@ namespace cms::soa {
     eigen = _VALUE_TYPE_EIGEN_COLUMN
   };
 
-  // XXX Changed enum class to bare bool + const values in class.
-  struct RestrictQualify {
-    static const bool Enabled = true;
-    static const bool Disabled = false;
-    static const bool Default = Disabled;
-  };
+  namespace RestrictQualify {
+    constexpr bool enabled = true;
+    constexpr bool disabled = false;
+    constexpr bool Default = disabled;
+  }
 
-  //enum class RestrictQualify : bool { Enabled, Disabled, Default = Disabled };
+  namespace RangeChecking {
+    constexpr bool enabled = true;
+    constexpr bool disabled = false;
+    constexpr bool Default = disabled;
+  }
 
-  // XXX Changed enum class to bare bool + const values in class.
-  struct RangeChecking {
-    static const bool Enabled = true;
-    static const bool Disabled = false;
-    static const bool Default = Disabled;
-  };
-
-  //enum class RangeChecking : bool { Enabled, Disabled, Default = Disabled };
-
-  // XXX Changed enum class to bare bool + const values in class.
   template <typename T, bool RESTRICT_QUALIFY>
   struct add_restrict {};
 
   template <typename T>
-  struct add_restrict<T, RestrictQualify::Enabled> {
+  struct add_restrict<T, RestrictQualify::enabled> {
     using Value = T;
     using Pointer = T* __restrict__;
     using Reference = T& __restrict__;
@@ -95,7 +88,7 @@ namespace cms::soa {
   };
 
   template <typename T>
-  struct add_restrict<T, RestrictQualify::Disabled> {
+  struct add_restrict<T, RestrictQualify::disabled> {
     using Value = T;
     using Pointer = T*;
     using Reference = T&;
@@ -236,8 +229,7 @@ namespace cms::soa {
   template <SoAColumnType COLUMN_TYPE,
             typename T,
             byte_size_type ALIGNMENT,
-            // XXX Changed enum class to bare bool + const values in class.
-            bool RESTRICT_QUALIFY = RestrictQualify::Disabled>
+            bool RESTRICT_QUALIFY = RestrictQualify::disabled>
   class SoAValue {
     // Eigen is implemented in a specialization
     static_assert(COLUMN_TYPE != SoAColumnType::eigen);
@@ -358,7 +350,6 @@ namespace cms::soa {
     byte_size_type stride_;
   };
 #else
-  // XXX Changed enum class to bare bool + const values in class.
   template <class C, byte_size_type ALIGNMENT, bool RESTRICT_QUALIFY>
   class SoAValue<SoAColumnType::eigen, C, ALIGNMENT, RESTRICT_QUALIFY> {
     // Eigen/Core should be pre-included before the SoA headers to enable support for Eigen columns.
@@ -371,8 +362,7 @@ namespace cms::soa {
   template <SoAColumnType COLUMN_TYPE,
             typename T,
             byte_size_type ALIGNMENT,
-            // XXX Changed enum class to bare bool + const values in class.
-            bool RESTRICT_QUALIFY = RestrictQualify::Disabled>
+            bool RESTRICT_QUALIFY = RestrictQualify::disabled>
   class SoAConstValue {
     // Eigen is implemented in a specialization
     static_assert(COLUMN_TYPE != SoAColumnType::eigen);
@@ -463,7 +453,6 @@ namespace cms::soa {
     byte_size_type stride_;
   };
 #else
-  // XXX Changed enum class to bare bool + const values in class.
   template <class C, byte_size_type ALIGNMENT, bool RESTRICT_QUALIFY>
   class SoAConstValue<SoAColumnType::eigen, C, ALIGNMENT, RESTRICT_QUALIFY> {
     // Eigen/Core should be pre-included before the SoA headers to enable support for Eigen columns.
@@ -639,8 +628,8 @@ namespace cms::soa {
   /* Alignement enforcement verifies every column is aligned, and
    * hints the compiler that it can expect column pointers to be aligned */
   struct AlignmentEnforcement {
-    static constexpr bool Relaxed = false;
-    static constexpr bool Enforced = true;
+    static constexpr bool relaxed = false;
+    static constexpr bool enforced = true;
   };
 
   struct CacheLineSize {

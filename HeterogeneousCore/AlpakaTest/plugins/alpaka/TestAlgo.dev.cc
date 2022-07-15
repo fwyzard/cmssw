@@ -10,22 +10,18 @@
 
 #include "TestAlgo.h"
 
-namespace {
+namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   class TestAlgoKernel {
   public:
     template <typename TAcc>
-    ALPAKA_FN_ACC void operator()(TAcc const& acc, portabletest::TestSoA::View view, int32_t size) const {
+    ALPAKA_FN_ACC void operator()(TAcc const& acc, portabletest::TestDeviceCollection::View view, int32_t size) const {
       int32_t idx = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
       if (idx < size) {
         view[idx].id() = idx;
       }
     }
   };
-
-}  // namespace
-
-namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   void TestAlgo::fill(Queue& queue, portabletest::TestDeviceCollection& collection) const {
     auto const& deviceProperties = alpaka::getAccDevProps<Acc1D>(alpaka::getDev(queue));

@@ -18,6 +18,7 @@ class PortableDeviceCollection {
 public:
   using Layout = T;
   using View = typename Layout::View;
+  using ConstView = typename Layout::ConstView;
   using Buffer = alpaka::Buf<TDev, std::byte, alpaka::DimInt<1u>, uint32_t>;
   using ConstBuffer = alpaka::ViewConst<Buffer>;
 

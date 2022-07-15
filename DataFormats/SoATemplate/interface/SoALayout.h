@@ -57,30 +57,6 @@
  *
  */
 
-namespace cms::soa {
-  // A helper unique_ptr like class holding aligned
-  // XXX disabled for use with collections
-  /*
-  class ByteBuffer {
-  public:
-    ~ByteBuffer() {
-      free(buffer_);
-    }
-    void allocate(byte_size_type alignment, byte_size_type bytes) {
-      if (buffer_) throw std::runtime_error("In ByteBuffer::allocate(): reallocating an already allocated buffer.");
-      if (bytes % alignment) throw std::runtime_error("In ByteBuffer::allocate(): size should be aligned.");
-      buffer_ = reinterpret_cast<std::byte *>(aligned_alloc(alignment, bytes));
-      if (!buffer_) throw std::runtime_error("In ByteBuffer::allocate(): failed to allocated buffer.");
-    }
-    std::byte * get() {
-      return buffer_;
-    }
-  private:
-    std::byte * buffer_ = nullptr;
-  };
-  */
-}  // namespace cms::soa
-
 // clang-format off
 #define _DECLARE_SOA_STREAM_INFO_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                                      \
   _SWITCH_ON_TYPE(                                                                                                     \
@@ -229,7 +205,7 @@ namespace cms::soa {
       BOOST_PP_CAT(NAME, Stride_) = cms::soa::alignSize(nElements_ * sizeof(CPP_TYPE::Scalar), alignment)              \
         / sizeof(CPP_TYPE::Scalar);                                                                                    \
   )                                                                                                                    \
-  if constexpr (alignmentEnforcement == AlignmentEnforcement::Enforced)                                                \
+  if constexpr (alignmentEnforcement == AlignmentEnforcement::enforced)                                                \
     if (reinterpret_cast<intptr_t>(BOOST_PP_CAT(NAME, _)) % alignment)                                                 \
       throw std::runtime_error("In layout constructor: misaligned column: " #NAME);
 // clang-format on
@@ -350,7 +326,7 @@ namespace cms::soa {
 // clang-format off
 #define GENERATE_SOA_LAYOUT(CLASS, ...)                                                                                \
   template <CMS_SOA_BYTE_SIZE_TYPE ALIGNMENT = cms::soa::CacheLineSize::defaultSize,                                   \
-            bool ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed>                                      \
+            bool ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::relaxed>                                      \
   struct CLASS {                                                                                                       \
     /* these could be moved to an external type trait to free up the symbol names */                                   \
     using self_type = CLASS;                                                                                           \
@@ -366,7 +342,7 @@ namespace cms::soa {
     constexpr static byte_size_type alignment = ALIGNMENT;                                                             \
     constexpr static bool alignmentEnforcement = ALIGNMENT_ENFORCEMENT;                                                \
     constexpr static byte_size_type conditionalAlignment =                                                             \
-        alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced ? alignment : 0;                              \
+        alignmentEnforcement == cms::soa::AlignmentEnforcement::enforced ? alignment : 0;                              \
     /* Those typedefs avoid having commas in macros (which is problematic) */                                          \
     template <cms::soa::SoAColumnType COLUMN_TYPE, class C>                                                            \
     using SoAValueWithConf = cms::soa::SoAValue<COLUMN_TYPE, C, conditionalAlignment>;                                 \
@@ -375,9 +351,9 @@ namespace cms::soa {
     using SoAConstValueWithConf = cms::soa::SoAConstValue<COLUMN_TYPE, C, conditionalAlignment>;                       \
                                                                                                                        \
     template <CMS_SOA_BYTE_SIZE_TYPE VIEW_ALIGNMENT = cms::soa::CacheLineSize::defaultSize,                            \
-            bool VIEW_ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::Relaxed,                                 \
-            bool RESTRICT_QUALIFY = cms::soa::RestrictQualify::Disabled,                                               \
-            bool RANGE_CHECKING = cms::soa::RangeChecking::Disabled>                                                   \
+            bool VIEW_ALIGNMENT_ENFORCEMENT = cms::soa::AlignmentEnforcement::relaxed,                                 \
+            bool RESTRICT_QUALIFY = cms::soa::RestrictQualify::enabled,                                                \
+            bool RANGE_CHECKING = cms::soa::RangeChecking::disabled>                                                   \
     struct ViewTemplateFreeParams;                                                                                     \
                                                                                                                        \
     /* dump the SoA internal structure */                                                                              \
@@ -442,7 +418,7 @@ namespace cms::soa {
                                                                                                                        \
   private:                                                                                                             \
     void organizeColumnsFromBuffer() {                                                                                 \
-      if constexpr (alignmentEnforcement == cms::soa::AlignmentEnforcement::Enforced)                                  \
+      if constexpr (alignmentEnforcement == cms::soa::AlignmentEnforcement::enforced)                                  \
         if (reinterpret_cast<intptr_t>(mem_) % alignment)                                                              \
           throw std::runtime_error("In " #CLASS "::" #CLASS ": misaligned buffer");                                    \
       auto curMem = mem_;                                                                                              \
@@ -503,7 +479,7 @@ namespace cms::soa {
     template <bool RESTRICT_QUALIFY, bool RANGE_CHECKING>                                                              \
     using ViewTemplate = ViewTemplateFreeParams<ALIGNMENT, ALIGNMENT_ENFORCEMENT, RESTRICT_QUALIFY, RANGE_CHECKING>;   \
                                                                                                                        \
-    using View = ViewTemplate<cms::soa::RestrictQualify::Disabled, cms::soa::RangeChecking::Disabled>;                 \
+    using View = ViewTemplate<cms::soa::RestrictQualify::enabled, cms::soa::RangeChecking::disabled>;                  \
                                                                                                                        \
   _GENERATE_SOA_TRIVIAL_CONST_VIEW(CLASS,                                                                              \
                     SOA_VIEW_LAYOUT_LIST(                                                                              \
@@ -514,7 +490,7 @@ namespace cms::soa {
     using ConstViewTemplate = ConstViewTemplateFreeParams<ALIGNMENT, ALIGNMENT_ENFORCEMENT, RESTRICT_QUALIFY,          \
       RANGE_CHECKING>;                                                                                                 \
                                                                                                                        \
-    using ConstView = ConstViewTemplate<cms::soa::RestrictQualify::Disabled, cms::soa::RangeChecking::Disabled>;       \
+    using ConstView = ConstViewTemplate<cms::soa::RestrictQualify::enabled, cms::soa::RangeChecking::disabled>;        \
   };
 // clang-format on
 

@@ -5,6 +5,7 @@
 
 #include <alpaka/alpaka.hpp>
 
+#include "DataFormats/SoATemplate/interface/SoACommon.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
