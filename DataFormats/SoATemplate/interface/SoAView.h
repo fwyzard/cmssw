@@ -720,6 +720,7 @@ namespace cms::soa {
    _GENERATE_SOA_CONST_VIEW_PART_1(ConstViewTemplateFreeParams, ViewTemplateFreeParams,                                \
      SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))
 // clang-format on
+
 /**
  * Helper macro turning layout field declaration into view field declaration.
  */
@@ -727,34 +728,5 @@ namespace cms::soa {
 
 #define _VIEW_FIELD_FROM_LAYOUT(R, DATA, VALUE_TYPE_NAME) \
   BOOST_PP_EXPAND((_VIEW_FIELD_FROM_LAYOUT_IMPL BOOST_PP_TUPLE_PUSH_BACK(VALUE_TYPE_NAME, DATA)))
-
-/**
- * A macro defining both layout and view(s) in one go.
- */
-// clang-format off
-#define GENERATE_SOA_LAYOUT_VIEW_AND_CONST_VIEW(LAYOUT_NAME, VIEW_NAME, CONST_VIEW_NAME, ...)                          \
-  GENERATE_SOA_LAYOUT(LAYOUT_NAME, __VA_ARGS__)                                                                        \
-  using BOOST_PP_CAT(LAYOUT_NAME, _default) = LAYOUT_NAME<>;                                                           \
-  GENERATE_SOA_VIEW(CONST_VIEW_NAME, VIEW_NAME,                                                                        \
-    SOA_VIEW_LAYOUT_LIST((BOOST_PP_CAT(LAYOUT_NAME, _default), BOOST_PP_CAT(instance_, LAYOUT_NAME))),                 \
-    SOA_VIEW_VALUE_LIST(_ITERATE_ON_ALL_COMMA(                                                                         \
-    _VIEW_FIELD_FROM_LAYOUT, BOOST_PP_CAT(instance_, LAYOUT_NAME), __VA_ARGS__)))                                      \
-  GENERATE_SOA_CONST_VIEW(CONST_VIEW_NAME, VIEW_NAME,                                                                  \
-    SOA_VIEW_LAYOUT_LIST((BOOST_PP_CAT(LAYOUT_NAME, _default), BOOST_PP_CAT(instance_, LAYOUT_NAME))),                 \
-    SOA_VIEW_VALUE_LIST(                                                                                               \
-      _ITERATE_ON_ALL_COMMA(_VIEW_FIELD_FROM_LAYOUT, BOOST_PP_CAT(instance_, LAYOUT_NAME), __VA_ARGS__)))
-// clang-format on
-
-// clang-format off
-#define GENERATE_SOA_LAYOUT_AND_CONST_VIEW(LAYOUT_NAME, CONST_VIEW_NAME, ...)                                          \
-  GENERATE_SOA_LAYOUT(LAYOUT_NAME, __VA_ARGS__)                                                                        \
-  using BOOST_PP_CAT(LAYOUT_NAME, _default) = LAYOUT_NAME<>;                                                           \
-  GENERATE_SOA_CONST_VIEW(                                                                                             \
-    CONST_VIEW_NAME,                                                                                                   \
-    SOA_VIEW_LAYOUT_LIST((BOOST_PP_CAT(LAYOUT_NAME, _default), BOOST_PP_CAT(instance_, LAYOUT_NAME))),                 \
-    SOA_VIEW_VALUE_LIST(                                                                                               \
-      _ITERATE_ON_ALL_COMMA(_VIEW_FIELD_FROM_LAYOUT,                                                                   \
-        BOOST_PP_CAT(instance_, LAYOUT_NAME), __VA_ARGS__)))
-// clang-format on
 
 #endif  // DataFormats_SoATemplate_interface_SoAView_h
