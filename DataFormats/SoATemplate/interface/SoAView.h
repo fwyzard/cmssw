@@ -86,24 +86,47 @@ namespace cms::soa {
  * Member types aliasing for referencing by name
  */
 // clang-format off
-#define _DECLARE_VIEW_MEMBER_TYPE_ALIAS_IMPL(LAYOUT_NAME, LAYOUT_MEMBER, LOCAL_NAME, DATA)                             \
+#define _DECLARE_VIEW_MEMBER_TYPE_ALIAS_IMPL(LAYOUT_NAME, LAYOUT_MEMBER, LOCAL_NAME)                                   \
   using BOOST_PP_CAT(TypeOf_, LOCAL_NAME) =                                                                            \
       typename BOOST_PP_CAT(TypeOf_, LAYOUT_NAME)::Metadata::BOOST_PP_CAT(TypeOf_, LAYOUT_MEMBER);                     \
   using BOOST_PP_CAT(ParametersTypeOf_, LOCAL_NAME) =                                                                  \
       typename BOOST_PP_CAT(TypeOf_, LAYOUT_NAME)::Metadata::BOOST_PP_CAT(ParametersTypeOf_, LAYOUT_MEMBER);           \
   constexpr static cms::soa::SoAColumnType BOOST_PP_CAT(ColumnTypeOf_, LOCAL_NAME) =                                   \
       BOOST_PP_CAT(TypeOf_, LAYOUT_NAME)::Metadata::BOOST_PP_CAT(ColumnTypeOf_, LAYOUT_MEMBER);                        \
-  SOA_HOST_DEVICE SOA_INLINE DATA auto* BOOST_PP_CAT(addressOf_, LOCAL_NAME)() const {                                 \
-    return parent_.metadata().BOOST_PP_CAT(parametersOf_, LOCAL_NAME)().addr_;                                         \
-  };                                                                                                                   \
   SOA_HOST_DEVICE SOA_INLINE                                                                                           \
-  DATA BOOST_PP_CAT(ParametersTypeOf_, LOCAL_NAME) BOOST_PP_CAT(parametersOf_, LOCAL_NAME)() const {                   \
+  const BOOST_PP_CAT(ParametersTypeOf_, LOCAL_NAME) BOOST_PP_CAT(parametersOf_, LOCAL_NAME)() const {                  \
     return parent_.BOOST_PP_CAT(LOCAL_NAME, Parameters_);                                                              \
   };
 // clang-format on
 
 #define _DECLARE_VIEW_MEMBER_TYPE_ALIAS(R, DATA, LAYOUT_MEMBER_NAME) \
-  BOOST_PP_EXPAND(_DECLARE_VIEW_MEMBER_TYPE_ALIAS_IMPL BOOST_PP_TUPLE_PUSH_BACK(LAYOUT_MEMBER_NAME, DATA))
+  BOOST_PP_EXPAND(_DECLARE_VIEW_MEMBER_TYPE_ALIAS_IMPL LAYOUT_MEMBER_NAME)
+
+/**
+ * Member type pointers for referencing by name
+ */
+// clang-format off
+#define _DECLARE_VIEW_MEMBER_POINTERS_IMPL(LAYOUT_NAME, LAYOUT_MEMBER, LOCAL_NAME)                                     \
+  SOA_HOST_DEVICE SOA_INLINE auto* BOOST_PP_CAT(addressOf_, LOCAL_NAME)() {                                            \
+    return BOOST_PP_CAT(parametersOf_, LOCAL_NAME)().addr_;                                                            \
+  };
+// clang-format on
+
+#define _DECLARE_VIEW_MEMBER_POINTERS(R, DATA, LAYOUT_MEMBER_NAME) \
+  BOOST_PP_EXPAND(_DECLARE_VIEW_MEMBER_POINTERS_IMPL LAYOUT_MEMBER_NAME)
+
+/**
+ * Member type const pointers for referencing by name
+ */
+// clang-format off
+#define _DECLARE_VIEW_MEMBER_CONST_POINTERS_IMPL(LAYOUT_NAME, LAYOUT_MEMBER, LOCAL_NAME)                               \
+  SOA_HOST_DEVICE SOA_INLINE auto const* BOOST_PP_CAT(addressOf_, LOCAL_NAME)() const {                                \
+    return BOOST_PP_CAT(parametersOf_, LOCAL_NAME)().addr_;                                                            \
+  };
+// clang-format on
+
+#define _DECLARE_VIEW_MEMBER_CONST_POINTERS(R, DATA, LAYOUT_MEMBER_NAME) \
+  BOOST_PP_EXPAND(_DECLARE_VIEW_MEMBER_CONST_POINTERS_IMPL LAYOUT_MEMBER_NAME)
 
 /**
  * Generator of parameters (layouts/views) for constructor by layouts/views.
@@ -428,7 +451,9 @@ namespace cms::soa {
       _ITERATE_ON_ALL(_DECLARE_VIEW_LAYOUT_TYPE_ALIAS, ~, LAYOUTS_LIST)                                                \
                                                                                                                        \
       /* Alias member types to name-derived identifyer to allow simpler definitions */                                 \
-      _ITERATE_ON_ALL(_DECLARE_VIEW_MEMBER_TYPE_ALIAS, BOOST_PP_EMPTY(), VALUE_LIST)                                   \
+      _ITERATE_ON_ALL(_DECLARE_VIEW_MEMBER_TYPE_ALIAS, ~, VALUE_LIST)                                                  \
+      _ITERATE_ON_ALL(_DECLARE_VIEW_MEMBER_POINTERS, ~, VALUE_LIST)                                                    \
+      _ITERATE_ON_ALL(_DECLARE_VIEW_MEMBER_CONST_POINTERS, ~, VALUE_LIST)                                              \
                                                                                                                        \
       /* Forbid copying to avoid const correctness evasion */                                                          \
       Metadata& operator=(const Metadata&) = delete;                                                                   \
@@ -438,6 +463,7 @@ namespace cms::soa {
       SOA_HOST_DEVICE SOA_INLINE Metadata(const VIEW& parent) : parent_(parent) {}                                     \
       const VIEW& parent_;                                                                                             \
     };                                                                                                                 \
+                                                                                                                       \
     friend Metadata;                                                                                                   \
     SOA_HOST_DEVICE SOA_INLINE const Metadata metadata() const { return Metadata(*this); }                             \
     SOA_HOST_DEVICE SOA_INLINE Metadata metadata() { return Metadata(*this); }                                         \
@@ -568,18 +594,21 @@ namespace cms::soa {
                                                                                                                        \
     template <cms::soa::SoAColumnType COLUMN_TYPE, class C>                                                            \
     using SoAConstValueWithConf = cms::soa::SoAConstValue<COLUMN_TYPE, C, conditionalAlignment, restrictQualify>;      \
+                                                                                                                       \
     /**                                                                                                                \
      * Helper/friend class allowing SoA introspection.                                                                 \
      */                                                                                                                \
     struct Metadata {                                                                                                  \
       friend CONST_VIEW;                                                                                               \
       SOA_HOST_DEVICE SOA_INLINE size_type size() const { return parent_.nElements_; }                                 \
-      /* Alias layout/view types to name-derived identifyer to allow simpler definitions */                            \
+      /* Alias layout or view types to name-derived identifyer to allow simpler definitions */                         \
       _ITERATE_ON_ALL(_DECLARE_VIEW_LAYOUT_TYPE_ALIAS, ~, LAYOUTS_LIST)                                                \
                                                                                                                        \
       /* Alias member types to name-derived identifyer to allow simpler definitions */                                 \
-      _ITERATE_ON_ALL(_DECLARE_VIEW_MEMBER_TYPE_ALIAS, const, VALUE_LIST)                                              \
+      _ITERATE_ON_ALL(_DECLARE_VIEW_MEMBER_TYPE_ALIAS, ~, VALUE_LIST)                                                  \
+      _ITERATE_ON_ALL(_DECLARE_VIEW_MEMBER_CONST_POINTERS, ~, VALUE_LIST)                                              \
                                                                                                                        \
+      /* Forbid copying to avoid const correctness evasion */                                                          \
       Metadata& operator=(const Metadata&) = delete;                                                                   \
       Metadata(const Metadata&) = delete;                                                                              \
                                                                                                                        \
