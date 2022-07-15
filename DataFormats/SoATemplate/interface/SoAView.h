@@ -586,12 +586,14 @@ namespace cms::soa {
 
 // clang-format off
 #define _GENERATE_SOA_CONST_VIEW_PART_1(CONST_VIEW, VIEW, LAYOUTS_LIST, VALUE_LIST)                                    \
+    using size_type = cms::soa::size_type;                                                                             \
+    using byte_size_type = cms::soa::byte_size_type;                                                                   \
     using AlignmentEnforcement = cms::soa::AlignmentEnforcement;                                                       \
                                                                                                                        \
     /* For CUDA applications, we align to the 128 bytes of the cache lines.                                            \
-   * See https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#global-memory-3-0 this is still valid        \
-   * up to compute capability 8.X.                                                                                     \
-   */                                                                                                                  \
+     * See https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#global-memory-3-0 this is still valid      \
+     * up to compute capability 8.X.                                                                                   \
+     */                                                                                                                \
     constexpr static byte_size_type defaultAlignment = cms::soa::CacheLineSize::defaultSize;                           \
     constexpr static byte_size_type alignment = VIEW_ALIGNMENT;                                                        \
     constexpr static bool alignmentEnforcement = VIEW_ALIGNMENT_ENFORCEMENT;                                           \
