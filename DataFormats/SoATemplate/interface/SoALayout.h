@@ -370,7 +370,7 @@
     }                                                                                                                  \
                                                                                                                        \
     /* Helper function used by caller to externally allocate the storage */                                            \
-    static byte_size_type computeDataSize(size_type nElements) {                                                       \
+    static constexpr byte_size_type computeDataSize(size_type nElements) {                                             \
       byte_size_type ret = 0;                                                                                          \
       _ITERATE_ON_ALL(_ACCUMULATE_SOA_ELEMENT, ~, __VA_ARGS__)                                                         \
       return ret;                                                                                                      \
