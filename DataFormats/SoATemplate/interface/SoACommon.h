@@ -223,7 +223,7 @@ namespace cms::soa {
     };
   };
 
-  // Helper template managing the value within it column
+  // Helper template managing the value at index idx within a column.
   // The optional compile time alignment parameter enables informing the
   // compiler of alignment (enforced by caller).
   template <SoAColumnType COLUMN_TYPE,
@@ -358,7 +358,7 @@ namespace cms::soa {
   };
 #endif
 
-  // Helper template managing the value within it column
+  // Helper template managing a const value at index idx within a column.
   template <SoAColumnType COLUMN_TYPE,
             typename T,
             byte_size_type ALIGNMENT,

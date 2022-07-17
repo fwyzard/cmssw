@@ -59,9 +59,8 @@ namespace cms::soa {
 
 }  // namespace cms::soa
 
-#include <memory_resource>
 /*
- * Members definitions macros for viewa
+ * Members definitions macros for views
  */
 
 /**
