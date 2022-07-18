@@ -48,19 +48,20 @@ using SoADeviceOnlyLayout = SoADeviceOnlyLayoutTemplate<>;
 using SoADeviceOnlyView = SoADeviceOnlyLayout::View;
 
 // A 1 to 1 view of the store (except for unsupported types).
-GENERATE_SOA_VIEW(SoAFullDeviceConstViewTemplate, SoAFullDeviceViewTemplate,
+GENERATE_SOA_VIEW(SoAFullDeviceConstViewTemplate,
+                  SoAFullDeviceViewTemplate,
                   SOA_VIEW_LAYOUT_LIST(SOA_VIEW_LAYOUT(SoAHostDeviceLayout, soaHD),
                                        SOA_VIEW_LAYOUT(SoADeviceOnlyLayout, soaDO)),
-                  SOA_VIEW_LAYOUT_LIST(SOA_VIEW_VALUE(soaHD, x),
-                                       SOA_VIEW_VALUE(soaHD, y),
-                                       SOA_VIEW_VALUE(soaHD, z),
-                                       SOA_VIEW_VALUE(soaDO, color),
-                                       SOA_VIEW_VALUE(soaDO, value),
-                                       SOA_VIEW_VALUE(soaDO, py),
-                                       SOA_VIEW_VALUE(soaDO, count),
-                                       SOA_VIEW_VALUE(soaDO, anotherCount),
-                                       SOA_VIEW_VALUE(soaHD, description),
-                                       SOA_VIEW_VALUE(soaHD, someNumber)))
+                  SOA_VIEW_VALUE_LIST(SOA_VIEW_VALUE(soaHD, x),
+                                      SOA_VIEW_VALUE(soaHD, y),
+                                      SOA_VIEW_VALUE(soaHD, z),
+                                      SOA_VIEW_VALUE(soaDO, color),
+                                      SOA_VIEW_VALUE(soaDO, value),
+                                      SOA_VIEW_VALUE(soaDO, py),
+                                      SOA_VIEW_VALUE(soaDO, count),
+                                      SOA_VIEW_VALUE(soaDO, anotherCount),
+                                      SOA_VIEW_VALUE(soaHD, description),
+                                      SOA_VIEW_VALUE(soaHD, someNumber)))
 
 using SoAFullDeviceView =
     SoAFullDeviceViewTemplate<cms::soa::CacheLineSize::NvidiaGPU, cms::soa::AlignmentEnforcement::enforced>;
@@ -188,9 +189,18 @@ int main(void) {
   std::memset(h_soahdLayout.metadata().data(), 0, hostDeviceSize);
   for (size_t i = 0; i < numElements; ++i) {
     auto si = h_soahd[i];
-    si.x() = si.a()(0) = si.b()(2) = 1.0 * i + 1.0;
-    si.y() = si.a()(1) = si.b()(1) = 2.0 * i;
-    si.z() = si.a()(2) = si.b()(0) = 3.0 * i - 1.0;
+    // Tuple assignment...
+    // elements are: x, y, z, a, b, r
+    auto v1 = 1.0 * i + 1.0;
+    auto v2 = 2.0 * i;
+    auto v3 = 3.0 * i - 1.0;
+    if (i % 2) {
+      si = {v1, v2, v3, {v1, v2, v3}, {v3, v2, v1}, {0, 0, 0}};
+    } else {
+      si.x() = si.a()(0) = si.b()(2) = v1;
+      si.y() = si.a()(1) = si.b()(1) = v2;
+      si.z() = si.a()(2) = si.b()(0) = v3;
+    }
   }
   auto& sn = h_soahd.someNumber();
   sn = numElements + 2;

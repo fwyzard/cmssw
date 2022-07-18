@@ -30,7 +30,7 @@ public:
 
   // Restrict view
   using RestrictConstView =
-      Layout::ConstViewTemplate<cms::soa::RestrictQualify::Enabled, cms::soa::RangeChecking::Disabled>;
+      Layout::ConstViewTemplate<cms::soa::RestrictQualify::enabled, cms::soa::RangeChecking::disabled>;
 
   RestrictConstView restrictConstView() const { return RestrictConstView(layout()); }
   void setNClusters(uint32_t nClusters, int32_t offsetBPIX2) {

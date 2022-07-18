@@ -31,7 +31,8 @@ using SiPixelDigisCUDASOA_H_D = SiPixelDigisCUDASOA_H_D_Template<>;
 using SiPixelDigisCUDASOA_DO = SiPixelDigisCUDASOA_DO_Template<>;
 
 // Device view joining the 2 previous layouts in a single place.
-GENERATE_SOA_VIEW(SiPixelDigisCUDASOA_D_View_Template,
+GENERATE_SOA_VIEW(SiPixelDigisCUDASOA_D_View_ConstTemplate,
+                  SiPixelDigisCUDASOA_D_View_Template,
                   SOA_VIEW_LAYOUT_LIST(SOA_VIEW_LAYOUT(SiPixelDigisCUDASOA_H_D, hostDevice),
                                        SOA_VIEW_LAYOUT(SiPixelDigisCUDASOA_DO, deviceOnly)),
                   SOA_VIEW_VALUE_LIST(SOA_VIEW_VALUE(hostDevice, clus),
@@ -46,6 +47,7 @@ using SiPixelDigisCUDASOAView = SiPixelDigisCUDASOA_D_View_Template<>;
 
 // Device view joining the 2 previous layouts in a single place.
 GENERATE_SOA_CONST_VIEW(SiPixelDigisCUDASOA_D_View_ConstTemplate,
+                        SiPixelDigisCUDASOA_D_View_Template,
                         SOA_VIEW_LAYOUT_LIST(SOA_VIEW_LAYOUT(SiPixelDigisCUDASOA_H_D, hostDevice),
                                              SOA_VIEW_LAYOUT(SiPixelDigisCUDASOA_DO, deviceOnly)),
                         SOA_VIEW_VALUE_LIST(SOA_VIEW_VALUE(hostDevice, clus),

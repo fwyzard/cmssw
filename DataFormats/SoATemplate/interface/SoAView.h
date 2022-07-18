@@ -385,6 +385,26 @@ namespace cms::soa {
 #define _DECLARE_CONST_VIEW_SOA_MEMBER(R, DATA, LAYOUT_MEMBER_NAME) \
   BOOST_PP_EXPAND(_DECLARE_CONST_VIEW_SOA_MEMBER_IMPL BOOST_PP_TUPLE_PUSH_BACK(LAYOUT_MEMBER_NAME, DATA))
 
+/**
+  * Element members for trivial mutable view only (listing only the column elements at macro time thanks to the
+  * layout list of elements.
+  */
+
+// clang-format off
+#define _TRIVIAL_VIEW_COLUMN_ELEMENT_TIE_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                              \
+  _SWITCH_ON_TYPE(VALUE_TYPE,                                                                                          \
+      /* Scalar (empty) */                                                                                             \
+      ,                                                                                                                \
+      /* Column */                                                                                                     \
+      (NAME())                                                                                                         \
+      ,                                                                                                                \
+      /* Eigen column */                                                                                               \
+      (NAME())                                                                                                         \
+)
+// clang-format on
+
+#define _TRIVIAL_VIEW_COLUMN_ELEMENT_TIE(R, DATA, TYPE_NAME) _TRIVIAL_VIEW_COLUMN_ELEMENT_TIE_IMPL TYPE_NAME
+
 /* ---- MUTABLE VIEW ------------------------------------------------------------------------------------------------ */
 // clang-format off
 #define _GENERATE_SOA_VIEW_PART_0(CONST_VIEW, VIEW, LAYOUTS_LIST, VALUE_LIST)                                          \
@@ -492,8 +512,8 @@ namespace cms::soa {
     VIEW& operator=(VIEW const&) = default;                                                                            \
                                                                                                                        \
     /* Movable */                                                                                                      \
-    VIEW(VIEW &&) = default;                                                                                            \
-    VIEW& operator=(VIEW &&) = default;                                                                                 \
+    VIEW(VIEW &&) = default;                                                                                           \
+    VIEW& operator=(VIEW &&) = default;                                                                                \
                                                                                                                        \
     /* Trivial destuctor */                                                                                            \
     ~VIEW() = default;                                                                                                 \
@@ -508,7 +528,11 @@ namespace cms::soa {
       element& operator=(const element& other) {                                                                       \
         _ITERATE_ON_ALL(_DECLARE_VIEW_ELEMENT_VALUE_COPY, ~, VALUE_LIST)                                               \
         return *this;                                                                                                  \
-      }                                                                                                                \
+      }
+// clang-format on
+
+// clang-format off
+#define _GENERATE_SOA_VIEW_PART_2(CONST_VIEW, VIEW, LAYOUTS_LIST, VALUE_LIST)                                          \
       _ITERATE_ON_ALL(_DECLARE_VIEW_ELEMENT_VALUE_MEMBER, ~, VALUE_LIST)                                               \
     };                                                                                                                 \
                                                                                                                        \
@@ -699,20 +723,31 @@ namespace cms::soa {
 // MAJOR caveat: in order to propagate the LAYOUTS_LIST and VALUE_LIST
 #define GENERATE_SOA_VIEW(CONST_VIEW, VIEW, LAYOUTS_LIST, VALUE_LIST)                                                  \
    _GENERATE_SOA_VIEW_PART_0(CONST_VIEW, VIEW, SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))    \
-   _GENERATE_SOA_VIEW_PART_1(CONST_VIEW, VIEW, SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))
+   _GENERATE_SOA_VIEW_PART_1(CONST_VIEW, VIEW, SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))    \
+   _GENERATE_SOA_VIEW_PART_2(CONST_VIEW, VIEW, SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))   
 
-#define _GENERATE_SOA_TRIVIAL_VIEW(CLASS, LAYOUTS_LIST, VALUE_LIST)                                                    \
+#define _GENERATE_SOA_TRIVIAL_VIEW(CLASS, LAYOUTS_LIST, VALUE_LIST, ...)                                               \
    _GENERATE_SOA_VIEW_PART_0_NO_DEFAULTS(ConstViewTemplateFreeParams, ViewTemplateFreeParams,                          \
      SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))                                              \
    using  BOOST_PP_CAT(CLASS, _parametrized) = CLASS<VIEW_ALIGNMENT, VIEW_ALIGNMENT_ENFORCEMENT>;                      \
    _GENERATE_SOA_VIEW_PART_1(ConstViewTemplateFreeParams, ViewTemplateFreeParams,                                      \
+     SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))                                              \
+   /* Extra operator=() for mutable element */                                                                         \
+   element & operator=(const typename                                                                                  \
+       BOOST_PP_CAT(CLASS, _parametrized)::Metadata::RowInitializer & val) {                                           \
+     std::tie(                                                                                                         \
+       _ITERATE_ON_ALL_COMMA(_TRIVIAL_VIEW_COLUMN_ELEMENT_TIE, BOOST_PP_EMPTY(), __VA_ARGS__)                          \
+     ) = val;                                                                                                          \
+     return *this;                                                                                                     \
+   }                                                                                                                   \
+   _GENERATE_SOA_VIEW_PART_2(ConstViewTemplateFreeParams, ViewTemplateFreeParams,                                      \
      SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))
 
 #define GENERATE_SOA_CONST_VIEW(CONST_VIEW, VIEW, LAYOUTS_LIST, VALUE_LIST)                                            \
    _GENERATE_SOA_CONST_VIEW_PART_0(CONST_VIEW, VIEW, SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST)) \
    _GENERATE_SOA_CONST_VIEW_PART_1(CONST_VIEW, VIEW, SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))
 
-#define _GENERATE_SOA_TRIVIAL_CONST_VIEW(CLASS, LAYOUTS_LIST, VALUE_LIST)                                              \
+ #define _GENERATE_SOA_TRIVIAL_CONST_VIEW(CLASS, LAYOUTS_LIST, VALUE_LIST)                                             \
    _GENERATE_SOA_CONST_VIEW_PART_0_NO_DEFAULTS(ConstViewTemplateFreeParams, ViewTemplateFreeParams,                    \
      SOA_VIEW_LAYOUT_LIST(LAYOUTS_LIST), SOA_VIEW_VALUE_LIST(VALUE_LIST))                                              \
    using  BOOST_PP_CAT(CLASS, _parametrized) = CLASS<VIEW_ALIGNMENT, VIEW_ALIGNMENT_ENFORCEMENT>;                      \

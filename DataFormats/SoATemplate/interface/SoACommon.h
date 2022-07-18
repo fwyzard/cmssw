@@ -66,13 +66,13 @@ namespace cms::soa {
     constexpr bool enabled = true;
     constexpr bool disabled = false;
     constexpr bool Default = disabled;
-  }
+  }  // namespace RestrictQualify
 
   namespace RangeChecking {
     constexpr bool enabled = true;
     constexpr bool disabled = false;
     constexpr bool Default = disabled;
-  }
+  }  // namespace RangeChecking
 
   template <typename T, bool RESTRICT_QUALIFY>
   struct add_restrict {};
