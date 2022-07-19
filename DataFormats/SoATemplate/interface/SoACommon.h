@@ -25,7 +25,7 @@
 #define SOA_HOST_ONLY
 #define SOA_DEVICE_ONLY
 #define SOA_HOST_DEVICE
-#define SOA_INLINE inline
+#define SOA_INLINE inline __attribute__((always_inline))
 #endif
 
 // Exception throwing (or willful crash in kernels)
