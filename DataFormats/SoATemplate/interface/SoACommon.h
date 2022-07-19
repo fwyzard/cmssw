@@ -167,9 +167,7 @@ namespace cms::soa {
   template <SoAColumnType COLUMN_TYPE>
   struct SoAConstParameters_ColumnType {
     template <typename T>
-    struct DataType : public SoAConstParametersImpl<COLUMN_TYPE, T> {
-      using SoAConstParametersImpl<COLUMN_TYPE, T>::SoAConstParametersImpl;
-    };
+    using DataType = SoAConstParametersImpl<COLUMN_TYPE, T>;
   };
 
   // Templated parameter sets for scalars, columns and Eigen columns
@@ -234,9 +232,7 @@ namespace cms::soa {
   template <SoAColumnType COLUMN_TYPE>
   struct SoAParameters_ColumnType {
     template <typename T>
-    struct DataType : public SoAParametersImpl<COLUMN_TYPE, T> {
-      using SoAParametersImpl<COLUMN_TYPE, T>::SoAParametersImpl;
-    };
+    using DataType = SoAParametersImpl<COLUMN_TYPE, T>;
   };
 
   // Helper template managing the value at index idx within a column.
