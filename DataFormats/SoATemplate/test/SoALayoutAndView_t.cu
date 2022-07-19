@@ -48,7 +48,8 @@ using SoADeviceOnlyLayout = SoADeviceOnlyLayoutTemplate<>;
 using SoADeviceOnlyView = SoADeviceOnlyLayout::View;
 
 // A 1 to 1 view of the store (except for unsupported types).
-GENERATE_SOA_VIEW(SoAFullDeviceConstViewTemplate, SoAFullDeviceViewTemplate,
+GENERATE_SOA_VIEW(SoAFullDeviceConstViewTemplate,
+                  SoAFullDeviceViewTemplate,
                   SOA_VIEW_LAYOUT_LIST(SOA_VIEW_LAYOUT(SoAHostDeviceLayout, soaHD),
                                        SOA_VIEW_LAYOUT(SoADeviceOnlyLayout, soaDO)),
                   SOA_VIEW_LAYOUT_LIST(SOA_VIEW_VALUE(soaHD, x),
