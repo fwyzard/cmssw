@@ -25,7 +25,7 @@
 #define SOA_HOST_ONLY
 #define SOA_DEVICE_ONLY
 #define SOA_HOST_DEVICE
-#define SOA_INLINE inline
+#define SOA_INLINE inline __attribute__((always_inline))
 #endif
 
 // Exception throwing (or willful crash in kernels)
@@ -97,6 +97,10 @@ namespace cms::soa {
     using ReferenceToConst = const T&;
   };
 
+  // Forward declarations
+  template <SoAColumnType COLUMN_TYPE, typename T>
+  struct SoAConstParametersImpl;
+
   template <SoAColumnType COLUMN_TYPE, typename T>
   struct SoAParametersImpl;
 
@@ -113,17 +117,17 @@ namespace cms::soa {
     SoAConstParametersImpl() = default;
 
     // constructor from an address
-    SOA_HOST_DEVICE SOA_INLINE SoAConstParametersImpl(ValueType const* addr) : addr_(addr) {}
+    SOA_HOST_DEVICE SOA_INLINE constexpr SoAConstParametersImpl(ValueType const* addr) : addr_(addr) {}
 
     // constructor from a non-const parameter set
-    SOA_HOST_DEVICE SOA_INLINE constexpr SoAConstParametersImpl(SoAParametersImpl<columnType, ValueType> const& o) {
-      addr_ = o.addr_;
-    }
+    SOA_HOST_DEVICE SOA_INLINE constexpr SoAConstParametersImpl(SoAParametersImpl<columnType, ValueType> const& o)
+        : addr_{o.addr_} {}
 
     static constexpr bool checkAlignement(ValueType* addr, byte_size_type alignment) {
       return reinterpret_cast<intptr_t>(addr) % alignment;
     }
 
+  public:
     // scalar or column
     ValueType const* addr_ = nullptr;
   };
@@ -141,24 +145,24 @@ namespace cms::soa {
     SoAConstParametersImpl() = default;
 
     // constructor from individual address and stride
-    SOA_HOST_DEVICE SOA_INLINE SoAConstParametersImpl(ScalarType const* addr, byte_size_type stride)
+    SOA_HOST_DEVICE SOA_INLINE constexpr SoAConstParametersImpl(ScalarType const* addr, byte_size_type stride)
         : addr_(addr), stride_(stride) {}
 
     // constructor from address and stride packed in a tuple
-    SOA_HOST_DEVICE SOA_INLINE SoAConstParametersImpl(TupleOrPointerType const& tuple)
+    SOA_HOST_DEVICE SOA_INLINE constexpr SoAConstParametersImpl(TupleOrPointerType const& tuple)
         : addr_(std::get<0>(tuple)), stride_(std::get<1>(tuple)) {}
 
     // constructor from a non-const parameter set
-    SOA_HOST_DEVICE SOA_INLINE SoAConstParametersImpl(SoAParametersImpl<columnType, ValueType> const& o) {
-      addr_ = o.addr_;
-      stride_ = o.stride_;
-    }
+    SOA_HOST_DEVICE SOA_INLINE constexpr SoAConstParametersImpl(SoAParametersImpl<columnType, ValueType> const& o)
+        : addr_{o.addr_}, stride_{o.stride_} {}
 
-    static bool checkAlignement(TupleOrPointerType const& tuple, byte_size_type alignment) {
+    static constexpr bool checkAlignement(TupleOrPointerType const& tuple, byte_size_type alignment) {
       const auto& [addr, stride] = tuple;
       return reinterpret_cast<intptr_t>(addr) % alignment;
     }
 
+  public:
+    // address and stride
     ScalarType const* addr_ = nullptr;
     byte_size_type stride_ = 0;
   };
@@ -167,9 +171,7 @@ namespace cms::soa {
   template <SoAColumnType COLUMN_TYPE>
   struct SoAConstParameters_ColumnType {
     template <typename T>
-    struct DataType : public SoAConstParametersImpl<COLUMN_TYPE, T> {
-      using SoAConstParametersImpl<COLUMN_TYPE, T>::SoAConstParametersImpl;
-    };
+    using DataType = SoAConstParametersImpl<COLUMN_TYPE, T>;
   };
 
   // Templated parameter sets for scalars, columns and Eigen columns
@@ -194,6 +196,7 @@ namespace cms::soa {
       return reinterpret_cast<intptr_t>(addr) % alignment;
     }
 
+  public:
     // scalar or column
     ValueType* addr_ = nullptr;
   };
@@ -214,18 +217,20 @@ namespace cms::soa {
     SoAParametersImpl() = default;
 
     // constructor from individual address and stride
-    SOA_HOST_DEVICE SOA_INLINE SoAParametersImpl(ScalarType* addr, byte_size_type stride)
+    SOA_HOST_DEVICE SOA_INLINE constexpr SoAParametersImpl(ScalarType* addr, byte_size_type stride)
         : addr_(addr), stride_(stride) {}
 
     // constructor from address and stride packed in a tuple
-    SOA_HOST_DEVICE SOA_INLINE SoAParametersImpl(TupleOrPointerType const& tuple)
+    SOA_HOST_DEVICE SOA_INLINE constexpr SoAParametersImpl(TupleOrPointerType const& tuple)
         : addr_(std::get<0>(tuple)), stride_(std::get<1>(tuple)) {}
 
-    static bool checkAlignement(TupleOrPointerType const& tuple, byte_size_type alignment) {
+    static constexpr bool checkAlignement(TupleOrPointerType const& tuple, byte_size_type alignment) {
       const auto& [addr, stride] = tuple;
       return reinterpret_cast<intptr_t>(addr) % alignment;
     }
 
+  public:
+    // address and stride
     ScalarType* addr_ = nullptr;
     byte_size_type stride_ = 0;
   };
@@ -234,10 +239,28 @@ namespace cms::soa {
   template <SoAColumnType COLUMN_TYPE>
   struct SoAParameters_ColumnType {
     template <typename T>
-    struct DataType : public SoAParametersImpl<COLUMN_TYPE, T> {
-      using SoAParametersImpl<COLUMN_TYPE, T>::SoAParametersImpl;
-    };
+    using DataType = SoAParametersImpl<COLUMN_TYPE, T>;
   };
+
+  // Helper converting a const parameter set to a non-const parameter set, to be used only in the constructor of non-const "element"
+  namespace {
+    template <typename T>
+    constexpr inline std::remove_const_t<T>* non_const_ptr(T* p) {
+      return const_cast<std::remove_const_t<T>*>(p);
+    }
+  }  // namespace
+
+  template <SoAColumnType COLUMN_TYPE, typename T>
+  SOA_HOST_DEVICE SOA_INLINE constexpr SoAParametersImpl<COLUMN_TYPE, T> const_cast_SoAParametersImpl(
+      SoAConstParametersImpl<COLUMN_TYPE, T> const& o) {
+    return SoAParametersImpl<COLUMN_TYPE, T>{non_const_ptr(o.addr_)};
+  }
+
+  template <typename T>
+  SOA_HOST_DEVICE SOA_INLINE constexpr SoAParametersImpl<SoAColumnType::eigen, T> const_cast_SoAParametersImpl(
+      SoAConstParametersImpl<SoAColumnType::eigen, T> const& o) {
+    return SoAParametersImpl<SoAColumnType::eigen, T>{non_const_ptr(o.addr_), o.stride_};
+  }
 
   // Helper template managing the value at index idx within a column.
   // The optional compile time alignment parameter enables informing the
