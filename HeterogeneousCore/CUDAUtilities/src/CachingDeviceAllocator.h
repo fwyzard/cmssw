@@ -43,6 +43,7 @@
 #include <set>
 #include <mutex>
 
+#include "HeterogeneousCore/CUDAUtilities/interface/EventCache.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/deviceAllocatorStatus.h"
 
@@ -127,7 +128,9 @@ namespace notcub {
       unsigned int bin;                // Bin enumeration
       int device;                      // device ordinal
       cudaStream_t associated_stream;  // Associated associated_stream
-      cudaEvent_t ready_event;  // Signal when associated stream has run to the point at which this block was freed
+      cms::cuda::SharedEventPtr
+          ready_event;  // Signal when associated stream has run to the point at which this block was freed
+                        // CMS: replace the cudaEvent_t raw pointer with a shared_ptr
 
       // Constructor (suitable for searching maps for a specific block, given its pointer and device)
       BlockDescriptor(void *d_ptr, int device)
@@ -377,7 +380,7 @@ namespace notcub {
           // in use by the device, only consider cached blocks that are
           // either (from the active stream) or (from an idle stream)
           if ((active_stream == block_itr->associated_stream) ||
-              (cudaEventQuery(block_itr->ready_event) != cudaErrorNotReady)) {
+              (cudaEventQuery(block_itr->ready_event.get()) != cudaErrorNotReady)) {
             // Reuse existing cache block.  Insert into live blocks.
             found = true;
             search_key = *block_itr;
@@ -399,9 +402,9 @@ namespace notcub {
                   search_key.d_ptr,
                   (long long)search_key.bytes,
                   (long long)search_key.associated_stream,
-                  (long long)search_key.ready_event,
+                  (long long)search_key.ready_event.get(),
                   (long long)block_itr->associated_stream,
-                  (long long)block_itr->ready_event);
+                  (long long)block_itr->ready_event.get());
 
             cached_blocks.erase(block_itr);
 
@@ -450,12 +453,12 @@ namespace notcub {
             // blocking and will synchronize across all kernels executing
             // on the current device
 
-            // Free device memory and destroy stream event.
+            // Free device memory and (CMS) return the event to the pool
             // CMS: silently ignore errors and pass them to the caller
             if ((error = cudaFree(block_itr->d_ptr)))
               break;
-            if ((error = cudaEventDestroy(block_itr->ready_event)))
-              break;
+            // CMS: modifying the record is fine because the event is not part of the key
+            const_cast<BlockDescriptor &>(*block_itr).ready_event = nullptr;
 
             // Reduce balance and erase entry
             cached_bytes[device].free -= block_itr->bytes;
@@ -490,8 +493,8 @@ namespace notcub {
         }
 
         // Create ready event
-        // CMS: throw exception on error
-        cudaCheck(error = cudaEventCreateWithFlags(&search_key.ready_event, cudaEventDisableTiming));
+        // CMS: use events from a pool
+        search_key.ready_event = cms::cuda::getEventCache().get();
 
         // Insert into live blocks
         mutex_locker.lock();
@@ -508,7 +511,7 @@ namespace notcub {
                  search_key.d_ptr,
                  (long long)search_key.bytes,
                  (long long)search_key.associated_stream,
-                 (long long)search_key.ready_event);
+                 (long long)search_key.ready_event.get());
 
         // Attempt to revert back to previous device if necessary
         if ((entrypoint_device != INVALID_DEVICE_ORDINAL) && (entrypoint_device != device)) {
@@ -596,7 +599,7 @@ namespace notcub {
                 (long long)search_key.bytes,
                 d_ptr,
                 (long long)search_key.associated_stream,
-                (long long)search_key.ready_event,
+                (long long)search_key.ready_event.get(),
                 (long long)cached_blocks.size(),
                 (long long)cached_bytes[device].free,
                 (long long)live_blocks.size(),
@@ -614,7 +617,7 @@ namespace notcub {
       if (recached) {
         // Insert the ready event in the associated stream (must have current device set properly)
         // CMS: throw exception on error
-        cudaCheck(error = cudaEventRecord(search_key.ready_event, search_key.associated_stream));
+        cudaCheck(error = cudaEventRecord(search_key.ready_event.get(), search_key.associated_stream));
       }
 
       // Unlock
@@ -624,7 +627,7 @@ namespace notcub {
         // Free the allocation from the runtime and cleanup the event.
         // CMS: throw exception on error
         cudaCheck(error = cudaFree(d_ptr));
-        cudaCheck(error = cudaEventDestroy(search_key.ready_event));
+        cudaCheck(error = cudaEventDestroy(search_key.ready_event.get()));
 
         if (debug)
           // CMS: improved debug message
@@ -635,7 +638,7 @@ namespace notcub {
               (long long)search_key.bytes,
               d_ptr,
               (long long)search_key.associated_stream,
-              (long long)search_key.ready_event,
+              (long long)search_key.ready_event.get(),
               (long long)cached_blocks.size(),
               (long long)cached_bytes[device].free,
               (long long)live_blocks.size(),
@@ -689,12 +692,12 @@ namespace notcub {
           current_device = begin->device;
         }
 
-        // Free device memory
+        // Free device memory and (CMS) return the event to the pool
         // CMS: silently ignore errors and pass them to the caller
         if ((error = cudaFree(begin->d_ptr)))
           break;
-        if ((error = cudaEventDestroy(begin->ready_event)))
-          break;
+        // CMS: modifying the record is fine because the event is not part of the key
+        const_cast<BlockDescriptor &>(*begin).ready_event = nullptr;
 
         // Reduce balance and erase entry
         cached_bytes[current_device].free -= begin->bytes;
