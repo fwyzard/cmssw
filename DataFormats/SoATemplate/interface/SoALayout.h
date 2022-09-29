@@ -173,6 +173,7 @@
       /* Column */                                                                                                     \
       (BOOST_PP_CAT(NAME, _)(nullptr)),                                                                                \
       /* Eigen column */                                                                                               \
+      (BOOST_PP_CAT(NAME, ElementsWithPadding_)(0))                                                                    \
       (BOOST_PP_CAT(NAME, _)(nullptr))                                                                                 \
       (BOOST_PP_CAT(NAME, Stride_)(0))                                                                                 \
   )
@@ -189,6 +190,7 @@
       /* Column */                                                                                                     \
       (BOOST_PP_CAT(NAME, _){other.BOOST_PP_CAT(NAME, _)}),                                                            \
       /* Eigen column */                                                                                               \
+      (BOOST_PP_CAT(NAME, ElementsWithPadding_){other.BOOST_PP_CAT(NAME, ElementsWithPadding_)})                       \
       (BOOST_PP_CAT(NAME, _){other.BOOST_PP_CAT(NAME, _)})                                                             \
       (BOOST_PP_CAT(NAME, Stride_){other.BOOST_PP_CAT(NAME, Stride_)})                                                 \
   )
@@ -201,12 +203,13 @@
 #define _DECLARE_MEMBER_ASSIGNMENT_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                                    \
   _SWITCH_ON_TYPE(VALUE_TYPE,                                                                                          \
       /* Scalar */                                                                                                     \
-      BOOST_PP_CAT(NAME, _) = other.BOOST_PP_CAT(NAME, _);,                                                          \
+      BOOST_PP_CAT(NAME, _) = other.BOOST_PP_CAT(NAME, _);,                                                            \
       /* Column */                                                                                                     \
-      BOOST_PP_CAT(NAME, _) = other.BOOST_PP_CAT(NAME, _);,                                                          \
+      BOOST_PP_CAT(NAME, _) = other.BOOST_PP_CAT(NAME, _);,                                                            \
       /* Eigen column */                                                                                               \
-      BOOST_PP_CAT(NAME, _) = other.BOOST_PP_CAT(NAME, _);                                                           \
-      BOOST_PP_CAT(NAME, Stride_) = other.BOOST_PP_CAT(NAME, Stride_);                                               \
+      BOOST_PP_CAT(NAME, ElementsWithPadding_) = other.BOOST_PP_CAT(NAME, ElementsWithPadding_);                       \
+      BOOST_PP_CAT(NAME, _) = other.BOOST_PP_CAT(NAME, _);                                                             \
+      BOOST_PP_CAT(NAME, Stride_) = other.BOOST_PP_CAT(NAME, Stride_);                                                 \
   )
 // clang-format on
 
@@ -279,11 +282,13 @@
       curMem += cms::soa::alignSize(elements_ * sizeof(CPP_TYPE), alignment);                                          \
       ,                                                                                                                \
       /* Eigen column */                                                                                               \
+      BOOST_PP_CAT(NAME, Stride_) = cms::soa::alignSize(elements_ * sizeof(CPP_TYPE::Scalar), alignment)               \
+        / sizeof(CPP_TYPE::Scalar);                                                                                    \
+      BOOST_PP_CAT(NAME, ElementsWithPadding_) = BOOST_PP_CAT(NAME, Stride_)                                           \
+        *  CPP_TYPE::RowsAtCompileTime * CPP_TYPE::ColsAtCompileTime;                                                  \
       BOOST_PP_CAT(NAME, _) = reinterpret_cast<CPP_TYPE::Scalar*>(curMem);                                             \
       curMem += cms::soa::alignSize(elements_ * sizeof(CPP_TYPE::Scalar), alignment) * CPP_TYPE::RowsAtCompileTime     \
         * CPP_TYPE::ColsAtCompileTime;                                                                                 \
-      BOOST_PP_CAT(NAME, Stride_) = cms::soa::alignSize(elements_ * sizeof(CPP_TYPE::Scalar), alignment)               \
-        / sizeof(CPP_TYPE::Scalar);                                                                                    \
   )                                                                                                                    \
   if constexpr (alignmentEnforcement == AlignmentEnforcement::enforced)                                                \
     if (reinterpret_cast<intptr_t>(BOOST_PP_CAT(NAME, _)) % alignment)                                                 \
@@ -367,7 +372,8 @@
       memcpy(BOOST_PP_CAT(NAME, _), onfile.BOOST_PP_CAT(NAME, _), sizeof(CPP_TYPE) * onfile.elements_);                \
       ,                                                                                                                \
       /* Eigen column */                                                                                               \
-      std::cerr << "Warning: reading an Eigen column from a ROOT file is not implemented" << std::endl;                \
+      memcpy(BOOST_PP_CAT(NAME, _), onfile.BOOST_PP_CAT(NAME, _),                                                      \
+        sizeof(CPP_TYPE :: Scalar) * BOOST_PP_CAT(NAME, ElementsWithPadding_));                                        \
   )
 // clang-format on
 
@@ -387,6 +393,7 @@
       CPP_TYPE * BOOST_PP_CAT(NAME, _) = nullptr;                                                                      \
       ,                                                                                                                \
       /* Eigen column */                                                                                               \
+      size_type BOOST_PP_CAT(NAME, ElementsWithPadding_); /* For ROOT serialization, (displikes the default value) */  \
       CPP_TYPE::Scalar * BOOST_PP_CAT(NAME, _) = nullptr;                                                              \
       byte_size_type BOOST_PP_CAT(NAME, Stride_) = 0;                                                                  \
   )
