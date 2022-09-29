@@ -361,13 +361,13 @@
 #define _STREAMER_READ_SOA_DATA_MEMBER_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                                \
   _SWITCH_ON_TYPE(VALUE_TYPE,                                                                                          \
       /* Scalar */                                                                                                     \
-      /* TODO: implement*/                                                                                             \
+      memcpy(BOOST_PP_CAT(NAME, _), onfile.BOOST_PP_CAT(NAME, _), sizeof(CPP_TYPE));                                   \
       ,                                                                                                                \
       /* Column */                                                                                                     \
       memcpy(BOOST_PP_CAT(NAME, _), onfile.BOOST_PP_CAT(NAME, _), sizeof(CPP_TYPE) * onfile.elements_);                \
       ,                                                                                                                \
       /* Eigen column */                                                                                               \
-      /* TODO: implement*/                                                                                             \
+      std::cerr << "Warning: reading an Eigen column from a ROOT file is not implemented" << std::endl;                \
   )
 // clang-format on
 
