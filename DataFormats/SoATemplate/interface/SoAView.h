@@ -390,7 +390,8 @@ namespace cms::soa {
                  template RestrictQualifier<restrictQualify>::ParamReturnType                                          \
   LOCAL_NAME(size_type index) {                                                                                        \
     if constexpr (rangeChecking == cms::soa::RangeChecking::enabled) {                                                 \
-      if (index >= base_type::elements_)                                                                               \
+      if (cms::soa::RangeChecking::outOfRange(index, base_type::elements_,                                             \
+        base_type:: BOOST_PP_CAT(LOCAL_NAME, Parameters_)))                                                            \
         SOA_THROW_OUT_OF_RANGE("Out of range index in mutable " #LOCAL_NAME "(size_type index)")                       \
     }                                                                                                                  \
     return typename cms::soa::SoAAccessors<typename BOOST_PP_CAT(Metadata::TypeOf_, LOCAL_NAME)>::                     \
@@ -428,7 +429,7 @@ namespace cms::soa {
                 template RestrictQualifier<restrictQualify>::ParamReturnType                                           \
   LOCAL_NAME(size_type index) const {                                                                                  \
     if constexpr (rangeChecking == cms::soa::RangeChecking::enabled) {                                                 \
-      if (index >= elements_)                                                                                          \
+      if (cms::soa::RangeChecking::outOfRange(index, elements_, BOOST_PP_CAT(LOCAL_NAME, Parameters_)))                \
         SOA_THROW_OUT_OF_RANGE("Out of range index in const " #LOCAL_NAME "(size_type index)")                         \
     }                                                                                                                  \
     return typename cms::soa::SoAAccessors<typename BOOST_PP_CAT(Metadata::TypeOf_, LOCAL_NAME)>::                     \
@@ -473,6 +474,8 @@ namespace cms::soa {
       ,                                                                                                                \
       /* Eigen column */                                                                                               \
       NAME() = value.NAME;                                                                                             \
+      ,                                                                                                                \
+      /* Aux column (empty, no row access) */ \
 )
 // clang-format on
 

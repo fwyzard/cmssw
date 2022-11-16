@@ -22,7 +22,9 @@ namespace portabletest {
                       SOA_SCALAR(double, r),
                       // Eigen columns
                       // the typedef is needed because commas confuse macros
-                      SOA_EIGEN_COLUMN(Matrix, m))
+                      SOA_EIGEN_COLUMN(Matrix, m),
+                      // Auxiliary array of doubles of size 5 * n + 3
+                      SOA_AUX_COLUMN(SOA_AUX_TYPE(double, 5, 3), aux))
 
   using TestSoA = TestSoALayout<>;
 

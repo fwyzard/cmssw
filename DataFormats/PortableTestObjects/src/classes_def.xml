@@ -8,6 +8,7 @@
     <field name="id_" comment="[elements_]"/>
     <field name="m_" comment="[mElementsWithPadding_]"/>
     <field name="r_" comment="[scalar_]"/>
+    <field name="aux_" comment="[auxElements_]"/>
   </class>
   <class name="portabletest::TestSoA::View"/>
 </lcgdict>

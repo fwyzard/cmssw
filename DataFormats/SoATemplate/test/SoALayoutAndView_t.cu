@@ -31,7 +31,8 @@ GENERATE_SOA_LAYOUT(SoAHostDeviceLayoutTemplate,
                     SOA_EIGEN_COLUMN(Eigen::Vector3d, r),
                     // scalars: one value for the whole structure
                     SOA_SCALAR(const char*, description),
-                    SOA_SCALAR(uint32_t, someNumber))
+                    SOA_SCALAR(uint32_t, someNumber),
+                    SOA_AUX_COLUMN(SOA_AUX_TYPE(double, 2, 5), aux))
 
 using SoAHostDeviceLayout = SoAHostDeviceLayoutTemplate<>;
 using SoAHostDeviceView = SoAHostDeviceLayout::View;
@@ -262,11 +263,32 @@ int main(void) {
         soa1viewRangeChecking(h_soahdLayout);
     // This should throw an exception
     [[maybe_unused]] auto si = soa1viewRangeChecking[soa1viewRangeChecking.metadata().size()];
-    std::cout << "Fail: expected range-check exception (view-level index access) not caught on the host." << std::endl;
+    std::cout << "Fail: expected range-check exception (view-level indexed access) not caught on the host."
+              << std::endl;
     assert(false);
   } catch (const std::out_of_range&) {
-    std::cout << "Pass: expected range-check exception (view-level index access) successfully caught on the host."
+    std::cout << "Pass: expected range-check exception (view-level indexed access) successfully caught on the host."
               << std::endl;
+  }
+
+  {
+    // Get a view like the default, except for range checking (make sure range check passes up to the last
+    //
+    SoAHostDeviceLayout::ViewTemplate<SoAHostDeviceView::restrictQualify, cms::soa::RangeChecking::enabled>
+        soa1viewRangeChecking(h_soahdLayout);
+    // This is the last element of the aux array and the range checking should not throw an exception.
+    soa1viewRangeChecking.aux(soa1viewRangeChecking.metadata().parametersOf_aux().size_ - 1) = 0;
+    try {
+      soa1viewRangeChecking.aux(soa1viewRangeChecking.metadata().parametersOf_aux().size_) = 0;
+      std::cout
+          << "Fail: expected range-check exception (view-level indexed access of aux array) not caught on the host."
+          << std::endl;
+      assert(false);
+    } catch (const std::out_of_range&) {
+      std::cout << "Pass: expected range-check exception (view-level indexed access of aux array) successfully caught "
+                   "on the host."
+                << std::endl;
+    }
   }
 
   // Validation of range checking in a kernel

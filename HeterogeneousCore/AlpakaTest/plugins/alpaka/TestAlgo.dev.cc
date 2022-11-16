@@ -36,6 +36,20 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
   };
 
+  class TestAlgoAuxKernel {
+  public:
+    template <typename TAcc, typename = std::enable_if_t<is_accelerator_v<TAcc>>>
+    ALPAKA_FN_ACC void operator()(TAcc const& acc, portabletest::TestDeviceCollection::View view, int32_t size) const {
+      // global index of the thread within the grid
+      const int32_t thread = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
+
+      //make a second strided loop on the (longer) auxiliary array
+      for (int32_t i : elements_with_stride(acc, size)) {
+        view.aux(i) = 3.14 * i;
+      }
+    }
+  };
+
   void TestAlgo::fill(Queue& queue, portabletest::TestDeviceCollection& collection) const {
     // use 64 items per group (this value is arbitrary, but it's a reasonable starting point)
     uint32_t items = 64;
@@ -49,6 +63,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto workDiv = make_workdiv<Acc1D>(groups, items);
 
     alpaka::exec<Acc1D>(queue, workDiv, TestAlgoKernel{}, collection.view(), collection->metadata().size());
+
+    // use as many groups as needed to cover the whole problem
+    uint32_t groupsAux = divide_up_by(collection->metadata().parametersOf_aux().size_, items);
+
+    // map items to
+    //   - threads with a single element per thread on a GPU backend
+    //   - elements within a single thread on a CPU backend
+    auto workDivAux = make_workdiv<Acc1D>(groupsAux, items);
+
+    alpaka::exec<Acc1D>(
+        queue, workDivAux, TestAlgoAuxKernel{}, collection.view(), collection->metadata().parametersOf_aux().size_);
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

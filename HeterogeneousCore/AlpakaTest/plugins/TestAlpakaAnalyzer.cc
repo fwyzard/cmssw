@@ -93,8 +93,10 @@ public:
           << "  z    @ " << view.metadata().addressOf_z() << " = " << Column(view.z(), view.metadata().size()) << ",\n"
           << "  id   @ " << view.metadata().addressOf_id() << " = " << Column(view.id(), view.metadata().size())
           << ",\n"
-          << "  r    @ " << view.metadata().addressOf_r() << " = " << view.r() << '\n'
-          << "  m    @ " << view.metadata().addressOf_m() << " = { ... {" << view[1].m()(1, Eigen::all)
+          << "  r    @ " << view.metadata().addressOf_r() << " = " << view.r() << ",\n"
+          << "  m    @ " << view.metadata().addressOf_m() << " = { ... {" << view[1].m()(1, Eigen::all) << ",\n"
+          << "  aux  @ " << view.metadata().addressOf_aux() << " = "
+          << Column(view.aux(), view.metadata().parametersOf_aux().size_) << "\n"
           << " } ... } \n";
       msg << std::hex << "  [y - x] = 0x"
           << reinterpret_cast<intptr_t>(view.metadata().addressOf_y()) -
@@ -110,7 +112,10 @@ public:
                  reinterpret_cast<intptr_t>(view.metadata().addressOf_id())
           << "  [m - r] = 0x"
           << reinterpret_cast<intptr_t>(view.metadata().addressOf_m()) -
-                 reinterpret_cast<intptr_t>(view.metadata().addressOf_r());
+                 reinterpret_cast<intptr_t>(view.metadata().addressOf_r())
+          << "  [aux - m] = 0x"
+          << reinterpret_cast<intptr_t>(view.metadata().addressOf_aux()) -
+                 reinterpret_cast<intptr_t>(view.metadata().addressOf_m());
     }
 
     checkViewAddresses(view);
@@ -126,6 +131,9 @@ public:
       assert(vi.z() == 0.);
       assert(vi.id() == i);
       assert(vi.m() == matrix * i);
+    }
+    for (int32_t i = 0; i < view.metadata().parametersOf_aux().size_; ++i) {
+      assert(view.aux(i) == i * 3.14);
     }
   }
 

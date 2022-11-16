@@ -57,6 +57,26 @@
  */
 
 // clang-format off
+#define _AUX_COLUMN_TYPE_SZ(TYPE) sizeof(BOOST_PP_TUPLE_ELEM(0, TYPE))
+#if 0
+#define _AUX_COLUMN_TYPE(CPP_TYPE, N, K) CPP_TYPE
+/* Colomn size parameters in size = N * (SoA soze) + K */
+#define _AUX_COLUMN_SIZE_N(CPP_TYPE, N, K) N
+#define _AUX_COLUMN_SIZE_K(CPP_TYPE, N, K) K
+#endif
+
+#define _AUX_COLUMN_TYPE_IMPL(CPP_TYPE, N, K) CPP_TYPE
+/* Colomn size parameters in size = N * (SoA soze) + K */
+#define _AUX_COLUMN_SIZE_N_IMPL(CPP_TYPE, N, K) N
+#define _AUX_COLUMN_SIZE_K_IMPL(CPP_TYPE, N, K) K
+
+#define _AUX_COLUMN_TYPE(TYPE) _AUX_COLUMN_TYPE_IMPL TYPE
+/* Colomn size parameters in size = N * (SoA soze) + K */
+#define _AUX_COLUMN_SIZE_N(TYPE) _AUX_COLUMN_SIZE_N_IMPL TYPE
+#define _AUX_COLUMN_SIZE_K(TYPE) _AUX_COLUMN_SIZE_N_IMPL TYPE
+
+#define _AUX_COLUMN_SIZE(NAME) BOOST_PP_CAT(NAME, Elements_)
+
 #define _DECLARE_SOA_STREAM_INFO_IMPL(VALUE_TYPE, CPP_TYPE, NAME)                                                      \
   _SWITCH_ON_TYPE(                                                                                                     \
       VALUE_TYPE,                                                                                                      \
@@ -84,6 +104,14 @@
          << std::endl;                                                                                                 \
       offset += cms::soa::alignSize(elements_ * sizeof(CPP_TYPE::Scalar), alignment)                                   \
                 * CPP_TYPE::RowsAtCompileTime * CPP_TYPE::ColsAtCompileTime;                                           \
+      ,                                                                                                                \
+      /* Dump aux column */                                                                                            \
+      os << " Aux column " BOOST_PP_STRINGIZE(NAME) " at offset " << offset << " has size "                            \
+         << _AUX_COLUMN_TYPE_SZ(CPP_TYPE) * _AUX_COLUMN_SIZE(NAME) << " and padding "                                  \
+         << cms::soa::alignSize(_AUX_COLUMN_TYPE_SZ(CPP_TYPE) * _AUX_COLUMN_SIZE(NAME), alignment) -                   \
+              (_AUX_COLUMN_TYPE_SZ(CPP_TYPE) * _AUX_COLUMN_SIZE(NAME))                                                 \
+         << std::endl;                                                                                                 \
+      offset += cms::soa::alignSize(_AUX_COLUMN_TYPE_SZ(CPP_TYPE) * _AUX_COLUMN_SIZE(NAME), alignment);                \
   )
 // clang-format on
 
@@ -159,7 +187,30 @@
       SOA_HOST_DEVICE SOA_INLINE                                                                                       \
       CPP_TYPE::Scalar* BOOST_PP_CAT(addressOf_, NAME)() {                                                             \
         return parent_.metadata().BOOST_PP_CAT(parametersOf_, NAME)().addr_;                                           \
+      },                                                                                                               \
+      /* Aux column */                                                                                                 \
+      using BOOST_PP_CAT(ParametersTypeOf_, NAME) =                                                                    \
+         cms::soa::SoAParameters_ColumnType<cms::soa::SoAColumnType::auxColumn>::DataType<_AUX_COLUMN_TYPE(CPP_TYPE)>; \
+      SOA_HOST_DEVICE SOA_INLINE                                                                                       \
+      BOOST_PP_CAT(ParametersTypeOf_, NAME) BOOST_PP_CAT(parametersOf_, NAME)() const {                                \
+        return  BOOST_PP_CAT(ParametersTypeOf_, NAME) (                                                                \
+          parent_.BOOST_PP_CAT(NAME, _), parent_.BOOST_PP_CAT(NAME, Elements_));                                       \
       }                                                                                                                \
+      SOA_HOST_DEVICE SOA_INLINE                                                                                       \
+      _AUX_COLUMN_TYPE(CPP_TYPE) const* BOOST_PP_CAT(addressOf_, NAME)() const {                                       \
+        return parent_.metadata().BOOST_PP_CAT(parametersOf_, NAME)().addr_;                                           \
+      }                                                                                                                \
+      SOA_HOST_DEVICE SOA_INLINE                                                                                       \
+      _AUX_COLUMN_TYPE(CPP_TYPE)* BOOST_PP_CAT(addressOf_, NAME)() {                                                   \
+        return parent_.metadata().BOOST_PP_CAT(paraemtersOf_, NAME)().addr_;                                           \
+      }                                                                                                                \
+      SOA_HOST_DEVICE SOA_INLINE                                                                                       \
+      byte_size_type BOOST_PP_CAT(NAME, Size()) const {                                                                \
+        return cms::soa::alignSize(parent_.metadata().BOOST_PP_CAT(paraemtersOf_, NAME)().size_ *                      \
+          _AUX_COLUMN_TYPE_SZ(CPP_TYPE), ParentClass::alignment);                                                      \
+      }                                                                                                                \
+      using BOOST_PP_CAT(TypeOf_, NAME) = _AUX_COLUMN_TYPE(CPP_TYPE);                                                  \
+      constexpr static cms::soa::SoAColumnType BOOST_PP_CAT(ColumnTypeOf_, NAME) = cms::soa::SoAColumnType::auxColumn; \
 )
 // clang-format on
 #define _DEFINE_METADATA_MEMBERS(R, DATA, TYPE_NAME) _DEFINE_METADATA_MEMBERS_IMPL TYPE_NAME
@@ -174,7 +225,10 @@
       /* Eigen column */                                                                                               \
       (BOOST_PP_CAT(NAME, ElementsWithPadding_)(0))                                                                    \
       (BOOST_PP_CAT(NAME, _)(nullptr))                                                                                 \
-      (BOOST_PP_CAT(NAME, Stride_)(0))                                                                                 \
+      (BOOST_PP_CAT(NAME, Stride_)(0)),                                                                                \
+      /* Aux column */                                                                                                 \
+      (BOOST_PP_CAT(NAME, Elements_)(0))                                                                               \
+      (BOOST_PP_CAT(NAME, _)(nullptr))                                                                                 \
   )
 // clang-format on
 
@@ -191,7 +245,10 @@
       /* Eigen column */                                                                                               \
       (BOOST_PP_CAT(NAME, ElementsWithPadding_){other.BOOST_PP_CAT(NAME, ElementsWithPadding_)})                       \
       (BOOST_PP_CAT(NAME, _){other.BOOST_PP_CAT(NAME, _)})                                                             \
-      (BOOST_PP_CAT(NAME, Stride_){other.BOOST_PP_CAT(NAME, Stride_)})                                                 \
+      (BOOST_PP_CAT(NAME, Stride_){other.BOOST_PP_CAT(NAME, Stride_)}),                                                \
+      /* Aux column */                                                                                                 \
+      (BOOST_PP_CAT(NAME, Elements_){other.BOOST_PP_CAT(NAME, Elements_)})                                             \
+      (BOOST_PP_CAT(NAME, _){other.BOOST_PP_CAT(NAME, _)})                                                             \
   )
 // clang-format on
 
@@ -208,7 +265,10 @@
       /* Eigen column */                                                                                               \
       BOOST_PP_CAT(NAME, ElementsWithPadding_) = other.BOOST_PP_CAT(NAME, ElementsWithPadding_);                       \
       BOOST_PP_CAT(NAME, _) = other.BOOST_PP_CAT(NAME, _);                                                             \
-      BOOST_PP_CAT(NAME, Stride_) = other.BOOST_PP_CAT(NAME, Stride_);                                                 \
+      BOOST_PP_CAT(NAME, Stride_) = other.BOOST_PP_CAT(NAME, Stride_);,                                                \
+      /* Aux column */                                                                                                 \
+      BOOST_PP_CAT(NAME, Elements_) = other.BOOST_PP_CAT(NAME, Elements_);                                             \
+      BOOST_PP_CAT(NAME, _) = other.BOOST_PP_CAT(NAME, _);                                                             \
   )
 // clang-format on
 
@@ -227,6 +287,8 @@
       ,                                                                                                                \
       /* Eigen column */                                                                                               \
       CPP_TYPE NAME;                                                                                                   \
+      ,                                                                                                                \
+      /* Aux column (empty: not row accessible) */                                                                     \
   )
 // clang-format on
 
@@ -243,7 +305,9 @@
       /* Column */                                                                                                     \
       (CPP_TYPE NAME),                                                                                                 \
       /* Eigen column */                                                                                               \
-      (CPP_TYPE NAME)                                                                                                  \
+      (CPP_TYPE NAME),                                                                                                 \
+      /* Aux column (empty: non-row member) */                                                                         \
+                                                                                                                       \
   )
 // clang-format on
 
@@ -260,7 +324,9 @@
       /* Column */                                                                                                     \
       (NAME{NAME}),                                                                                                    \
       /* Eigen column */                                                                                               \
-      (NAME{NAME})                                                                                                     \
+      (NAME{NAME}),                                                                                                    \
+      /* Aux column (empty, aux Columns are dosconnected from rows) */                                                 \
+                                                                                                                       \
   )
 // clang-format on
 
@@ -288,6 +354,11 @@
       BOOST_PP_CAT(NAME, _) = reinterpret_cast<CPP_TYPE::Scalar*>(curMem);                                             \
       curMem += cms::soa::alignSize(elements_ * sizeof(CPP_TYPE::Scalar), alignment) * CPP_TYPE::RowsAtCompileTime     \
         * CPP_TYPE::ColsAtCompileTime;                                                                                 \
+      ,                                                                                                                \
+      /* Aux column */                                                                                                 \
+      BOOST_PP_CAT(NAME, Elements_) = elements_ * _AUX_COLUMN_SIZE_N(CPP_TYPE) +_AUX_COLUMN_SIZE_K(CPP_TYPE);          \
+      BOOST_PP_CAT(NAME, _) = reinterpret_cast<_AUX_COLUMN_TYPE(CPP_TYPE)*>(curMem);                                   \
+      curMem += cms::soa::alignSize(BOOST_PP_CAT(NAME, Elements_) * _AUX_COLUMN_TYPE_SZ(CPP_TYPE), alignment);            \
   )                                                                                                                    \
   if constexpr (alignmentEnforcement == AlignmentEnforcement::enforced)                                                \
     if (reinterpret_cast<intptr_t>(BOOST_PP_CAT(NAME, _)) % alignment)                                                 \
@@ -311,6 +382,10 @@
       /* Eigen column */                                                                                               \
       ret += cms::soa::alignSize(elements * sizeof(CPP_TYPE::Scalar), alignment) * CPP_TYPE::RowsAtCompileTime         \
              * CPP_TYPE::ColsAtCompileTime;                                                                            \
+      ,                                                                                                                \
+      /* Aux column */                                                                                                 \
+      ret += cms::soa::alignSize( ( elements * _AUX_COLUMN_SIZE_N(CPP_TYPE) +_AUX_COLUMN_SIZE_K(CPP_TYPE) ) *          \
+            _AUX_COLUMN_TYPE_SZ(CPP_TYPE), alignment);                                                                 \
   )
 // clang-format on
 
@@ -332,6 +407,12 @@
       /* Eigen column */                                                                                               \
       /* TODO: implement*/                                                                                             \
       BOOST_PP_EMPTY()                                                                                                 \
+      ,                                                                                                                \
+      /* Aux column */                                                                                                 \
+      SOA_HOST_DEVICE SOA_INLINE _AUX_COLUMN_TYPE(CPP_TYPE)* NAME() { return BOOST_PP_CAT(NAME, _); }                  \
+      SOA_HOST_DEVICE SOA_INLINE _AUX_COLUMN_TYPE(CPP_TYPE)& NAME(size_type index) {                                   \
+        return BOOST_PP_CAT(NAME, _)[index];                                                                           \
+      }                                                                                                                \
   )
 // clang-format on
 
@@ -353,6 +434,10 @@
       /* Eigen column */                                                                                               \
       SOA_HOST_DEVICE SOA_INLINE CPP_TYPE::Scalar const* NAME() const { return BOOST_PP_CAT(NAME, _); }                \
       SOA_HOST_DEVICE SOA_INLINE size_type BOOST_PP_CAT(NAME, Stride)() { return BOOST_PP_CAT(NAME, Stride_); }        \
+      ,                                                                                                                \
+      /* Aux column */                                                                                                 \
+      SOA_HOST_DEVICE SOA_INLINE _AUX_COLUMN_TYPE(CPP_TYPE) const* NAME() const { return BOOST_PP_CAT(NAME, _); }      \
+      SOA_HOST_DEVICE SOA_INLINE size_type BOOST_PP_CAT(NAME, Size)() { return BOOST_PP_CAT(NAME, Elements_); }        \
   )
 // clang-format on
 
@@ -373,6 +458,10 @@
       /* Eigen column */                                                                                               \
       memcpy(BOOST_PP_CAT(NAME, _), onfile.BOOST_PP_CAT(NAME, _),                                                      \
         sizeof(CPP_TYPE::Scalar) * BOOST_PP_CAT(NAME, ElementsWithPadding_));                                          \
+      ,                                                                                                                \
+      /* Aux column */                                                                                                 \
+      memcpy(BOOST_PP_CAT(NAME, _), onfile.BOOST_PP_CAT(NAME, _),                                                      \
+        _AUX_COLUMN_TYPE_SZ(CPP_TYPE) * BOOST_PP_CAT(NAME, Elements_));                                                \
   )
 // clang-format on
 
@@ -395,7 +484,11 @@
       size_type BOOST_PP_CAT(NAME, ElementsWithPadding_); /* For ROOT serialization, (displikes the default value) */  \
       CPP_TYPE::Scalar * BOOST_PP_CAT(NAME, _) = nullptr;                                                              \
       byte_size_type BOOST_PP_CAT(NAME, Stride_) = 0;                                                                  \
-  )
+      ,                                                                                                                \
+      /* Aux column */                                                                                                 \
+      size_type BOOST_PP_CAT(NAME, Elements_) = 0;                                                                     \
+      BOOST_PP_TUPLE_ELEM(0, CPP_TYPE) * BOOST_PP_CAT(NAME, _) = nullptr;                                              \
+)
 // clang-format on
 
 #define _DECLARE_SOA_DATA_MEMBER(R, DATA, TYPE_NAME) BOOST_PP_EXPAND(_DECLARE_SOA_DATA_MEMBER_IMPL TYPE_NAME)
