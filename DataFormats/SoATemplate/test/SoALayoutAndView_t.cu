@@ -16,6 +16,8 @@
 // Scalars, Columns of scalars and of Eigen vectors
 // View to each of them, from one and multiple stores.
 
+enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
+
 GENERATE_SOA_LAYOUT(SoAHostDeviceLayoutTemplate,
                     /*SoAHostDeviceViewTemplate,*/
                     // predefined static scalars
@@ -32,7 +34,9 @@ GENERATE_SOA_LAYOUT(SoAHostDeviceLayoutTemplate,
                     // scalars: one value for the whole structure
                     SOA_SCALAR(const char*, description),
                     SOA_SCALAR(uint32_t, someNumber),
-                    SOA_AUX_COLUMN(SOA_AUX_TYPE(double, 2, 5), aux))
+                    /*SOA_AUX_COLUMN(SOA_AUX_TYPE(double, 2, 5), aux))*/
+                    SOA_AUX_COLUMN(SOA_AUX_TYPE(double, 2, 5), aux),
+                    SOA_COLUMN(Quality, quality))
 
 using SoAHostDeviceLayout = SoAHostDeviceLayoutTemplate<>;
 using SoAHostDeviceView = SoAHostDeviceLayout::View;
@@ -195,7 +199,8 @@ int main(void) {
     auto v2 = 2.0 * i;
     auto v3 = 3.0 * i - 1.0;
     if (i % 2) {
-      si = {v1, v2, v3, {v1, v2, v3}, {v3, v2, v1}, {0, 0, 0}};
+      //si = {v1, v2, v3, {v1, v2, v3}, {v3, v2, v1}, {0, 0, 0}};
+      si = {v1, v2, v3, {v1, v2, v3}, {v3, v2, v1}, {0, 0, 0}, Quality::strict};
     } else {
       si.x() = si.a()(0) = si.b()(2) = v1;
       si.y() = si.a()(1) = si.b()(1) = v2;

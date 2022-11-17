@@ -31,7 +31,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // make a strided loop over the kernel grid, covering up to "size" elements
       for (int32_t i : elements_with_stride(acc, size)) {
-        view[i] = {0., 0., 0., i, matrix * i};
+        view[i] = {0., 0., 0., i, matrix * i, portabletest::Quality::strict};
       }
     }
   };

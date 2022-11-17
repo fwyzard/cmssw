@@ -69,6 +69,9 @@ namespace {
     assert(view.metadata().addressOf_r() == &view.r());
     //assert(view.metadata().addressOf_r() == &view.r(0));                  // cannot access a scalar with an index
     //assert(view.metadata().addressOf_r() == &view[0].r());                // cannot access a scalar via a SoA row-like accessor
+    assert(view.metadata().addressOf_quality() == view.quality());
+    assert(view.metadata().addressOf_quality() == &view.quality(0));
+    assert(view.metadata().addressOf_quality() == &view[0].quality());
   }
 
 }  // namespace
@@ -96,7 +99,9 @@ public:
           << "  r    @ " << view.metadata().addressOf_r() << " = " << view.r() << ",\n"
           << "  m    @ " << view.metadata().addressOf_m() << " = { ... {" << view[1].m()(1, Eigen::all) << ",\n"
           << "  aux  @ " << view.metadata().addressOf_aux() << " = "
-          << Column(view.aux(), view.metadata().parametersOf_aux().size_) << "\n"
+          << Column(view.aux(), view.metadata().parametersOf_aux().size_) << ",\n"
+          << "  quality @ " << view.metadata().addressOf_quality() << " = "
+          << Column(view.quality(), view.metadata().size()) << ",\n"
           << " } ... } \n";
       msg << std::hex << "  [y - x] = 0x"
           << reinterpret_cast<intptr_t>(view.metadata().addressOf_y()) -
@@ -131,6 +136,7 @@ public:
       assert(vi.z() == 0.);
       assert(vi.id() == i);
       assert(vi.m() == matrix * i);
+      assert(vi.quality() == portabletest::Quality::strict);
     }
     for (int32_t i = 0; i < view.metadata().parametersOf_aux().size_; ++i) {
       assert(view.aux(i) == i * 3.14);

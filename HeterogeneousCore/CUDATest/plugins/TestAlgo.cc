@@ -10,7 +10,7 @@ namespace cudatest {
     view.r() = 1.;
 
     for (auto i = 0; i < size; ++i) {
-      view[i] = {0., 0., 0., i, matrix * i};
+      view[i] = {0., 0., 0., i, matrix * i, cudatest::Quality::strict};
     }
   }
 
