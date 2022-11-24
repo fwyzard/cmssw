@@ -19,7 +19,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class TestAlgoKernel {
   public:
     template <typename TAcc, typename = std::enable_if_t<is_accelerator_v<TAcc>>>
-    ALPAKA_FN_ACC void operator()(TAcc const& acc, portabletest::TestDeviceCollection::View view, int32_t size) const {
+    ALPAKA_FN_ACC void operator()(TAcc const& acc, portabletest::TestDeviceCollection::View<> view) const {
       // global index of the thread within the grid
       const int32_t thread = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
       const portabletest::Matrix matrix{{1, 2, 3, 4, 5, 6}, {2, 4, 6, 8, 10, 12}, {3, 6, 9, 12, 15, 18}};
@@ -30,7 +30,27 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
 
       // make a strided loop over the kernel grid, covering up to "size" elements
-      for (int32_t i : elements_with_stride(acc, size)) {
+      for (int32_t i : elements_with_stride(acc, view.metadata().size())) {
+        view[i] = {0., 0., 0., i, matrix * i};
+      }
+    }
+  };
+
+  class TestAlgoMultiKernel {
+  public:
+    template <typename TAcc, typename = std::enable_if_t<is_accelerator_v<TAcc>>>
+    ALPAKA_FN_ACC void operator()(TAcc const& acc, portabletest::TestDeviceMultiCollection::View<1> view) const {
+      // global index of the thread within the grid
+      const int32_t thread = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
+      const portabletest::Matrix matrix{{1, 2, 3, 4, 5, 6}, {2, 4, 6, 8, 10, 12}, {3, 6, 9, 12, 15, 18}};
+
+      // set this only once in the whole kernel grid
+      if (thread == 0) {
+        view.r2() = 1.;
+      }
+
+      // make a strided loop over the kernel grid, covering up to "size" elements
+      for (int32_t i : elements_with_stride(acc, view.metadata().size())) {
         view[i] = {0., 0., 0., i, matrix * i};
       }
     }
@@ -48,7 +68,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     //   - elements within a single thread on a CPU backend
     auto workDiv = make_workdiv<Acc1D>(groups, items);
 
-    alpaka::exec<Acc1D>(queue, workDiv, TestAlgoKernel{}, collection.view(), collection->metadata().size());
+    alpaka::exec<Acc1D>(queue, workDiv, TestAlgoKernel{}, collection.view());
+  }
+
+  void TestAlgo::fillMulti(Queue& queue, portabletest::TestDeviceMultiCollection& collection) const {
+    // use 64 items per group (this value is arbitrary, but it's a reasonable starting point)
+    uint32_t items = 64;
+
+    // use as many groups as needed to cover the whole problem
+    uint32_t groups = divide_up_by(collection->metadata().size(), items);
+    uint32_t groups2 = divide_up_by(collection.view<1>().metadata().size(), items);
+
+    // map items to
+    //   - threads with a single element per thread on a GPU backend
+    //   - elements within a single thread on a CPU backend
+    auto workDiv = make_workdiv<Acc1D>(groups, items);
+    auto workDiv2 = make_workdiv<Acc1D>(groups2, items);
+
+    alpaka::exec<Acc1D>(queue, workDiv, TestAlgoKernel{}, collection.view<portabletest::TestSoA>());
+    alpaka::exec<Acc1D>(queue, workDiv2, TestAlgoMultiKernel{}, collection.view<portabletest::TestSoA2>());
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

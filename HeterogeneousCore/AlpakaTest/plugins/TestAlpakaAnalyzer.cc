@@ -71,12 +71,36 @@ namespace {
     //assert(view.metadata().addressOf_r() == &view[0].r());                // cannot access a scalar via a SoA row-like accessor
   }
 
+  template <typename T>
+  void checkViewAddresses2(T const& view) {
+    assert(view.metadata().addressOf_x2() == view.x2());
+    assert(view.metadata().addressOf_x2() == &view.x2(0));
+    assert(view.metadata().addressOf_x2() == &view[0].x2());
+    assert(view.metadata().addressOf_y2() == view.y2());
+    assert(view.metadata().addressOf_y2() == &view.y2(0));
+    assert(view.metadata().addressOf_y2() == &view[0].y2());
+    assert(view.metadata().addressOf_z2() == view.z2());
+    assert(view.metadata().addressOf_z2() == &view.z2(0));
+    assert(view.metadata().addressOf_z2() == &view[0].z2());
+    assert(view.metadata().addressOf_id2() == view.id2());
+    assert(view.metadata().addressOf_id2() == &view.id2(0));
+    assert(view.metadata().addressOf_id2() == &view[0].id2());
+    assert(view.metadata().addressOf_m2() == view.m2());
+    assert(view.metadata().addressOf_m2() == &view.m2(0).coeffRef(0, 0));
+    assert(view.metadata().addressOf_m2() == &view[0].m2().coeffRef(0, 0));
+    assert(view.metadata().addressOf_r2() == &view.r2());
+    //assert(view.metadata().addressOf_r2() == &view.r2(0));                  // cannot access a scalar with an index
+    //assert(view.metadata().addressOf_r2() == &view[0].r2());                // cannot access a scalar via a SoA row-like accessor
+  }
+
 }  // namespace
 
 class TestAlpakaAnalyzer : public edm::stream::EDAnalyzer<> {
 public:
   TestAlpakaAnalyzer(edm::ParameterSet const& config)
-      : source_{config.getParameter<edm::InputTag>("source")}, token_{consumes(source_)} {}
+      : source_{config.getParameter<edm::InputTag>("source")},
+        token_{consumes(source_)},
+        tokenMulti_{consumes(source_)} {}
 
   void analyze(edm::Event const& event, edm::EventSetup const&) override {
     portabletest::TestHostCollection const& product = event.get(token_);
@@ -127,6 +151,40 @@ public:
       assert(vi.id() == i);
       assert(vi.m() == matrix * i);
     }
+
+    portabletest::TestHostMultiCollection const& productMulti = event.get(tokenMulti_);
+    auto const& viewMulti0 = productMulti.const_view<0>();
+    auto& mviewMulti0 = productMulti.view<0>();
+    auto const& cmviewMulti0 = productMulti.view<0>();
+    auto const& viewMulti1 = productMulti.const_view<1>();
+    auto& mviewMulti1 = productMulti.view<1>();
+    auto const& cmviewMulti1 = productMulti.view<1>();
+
+    checkViewAddresses(viewMulti0);
+    checkViewAddresses(mviewMulti0);
+    checkViewAddresses(cmviewMulti0);
+    checkViewAddresses2(viewMulti1);
+    checkViewAddresses2(mviewMulti1);
+    checkViewAddresses2(cmviewMulti1);
+
+    assert(viewMulti0.r() == 1.);
+    for (int32_t i = 0; i < viewMulti0.metadata().size(); ++i) {
+      auto vi = viewMulti0[i];
+      assert(vi.x() == 0.);
+      assert(vi.y() == 0.);
+      assert(vi.z() == 0.);
+      assert(vi.id() == i);
+      assert(vi.m() == matrix * i);
+    }
+    assert(viewMulti1.r2() == 1.);
+    for (int32_t i = 0; i < viewMulti1.metadata().size(); ++i) {
+      auto vi = viewMulti1[i];
+      assert(vi.x2() == 0.);
+      assert(vi.y2() == 0.);
+      assert(vi.z2() == 0.);
+      assert(vi.id2() == i);
+      assert(vi.m2() == matrix * i);
+    }
   }
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -138,6 +196,7 @@ public:
 private:
   const edm::InputTag source_;
   const edm::EDGetTokenT<portabletest::TestHostCollection> token_;
+  const edm::EDGetTokenT<portabletest::TestHostMultiCollection> tokenMulti_;
 };
 
 #include "FWCore/Framework/interface/MakerMacros.h"

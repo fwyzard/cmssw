@@ -15,17 +15,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #if defined ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
   // ... or any other CPU-based accelerators
-
-  // generic SoA-based product in host memory
-  template <typename T>
-  using PortableCollection = ::PortableHostCollection<T>;
-
+  template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
+  using PortableCollection = ::PortableHostCollection<T0, T1, T2, T3, T4>;
 #else
-
-  // generic SoA-based product in device memory
-  template <typename T>
-  using PortableCollection = ::PortableDeviceCollection<T, Device>;
-
+  template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
+  using PortableCollection = ::PortableDeviceCollection<Device, T0, T1, T2, T3, T4>;
 #endif  // ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
@@ -33,27 +27,28 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 namespace traits {
 
   // specialise the trait for the device provided by the ALPAKA_ACCELERATOR_NAMESPACE
-  template <typename T>
-  class PortableCollectionTrait<T, ALPAKA_ACCELERATOR_NAMESPACE::Device> {
-    using CollectionType = ALPAKA_ACCELERATOR_NAMESPACE::PortableCollection<T>;
+  template <typename T0, typename T1, typename T2, typename T3, typename T4>
+  class PortableCollectionTrait<ALPAKA_ACCELERATOR_NAMESPACE::Device, T0, T1, T2, T3, T4> {
+    using CollectionType = ALPAKA_ACCELERATOR_NAMESPACE::PortableCollection<T0, T1, T2, T3, T4>;
   };
 
 }  // namespace traits
 
 namespace cms::alpakatools {
   // TODO: Is this the right place for the specialization? Or should it be in PortableDeviceProduct?
-  template <typename T>
-  struct TransferToHost<ALPAKA_ACCELERATOR_NAMESPACE::PortableCollection<T>> {
-    using HostDataType = ::PortableHostCollection<T>;
+  template <typename T0, typename T1, typename T2, typename T3, typename T4>
+  struct TransferToHost<ALPAKA_ACCELERATOR_NAMESPACE::PortableCollection<T0, T1, T2, T3, T4>> {
+    using HostDataType = ::PortableHostCollection<T0, T1, T2, T3, T4>;
 
     template <typename TQueue>
-    static HostDataType transferAsync(TQueue& queue,
-                                      ALPAKA_ACCELERATOR_NAMESPACE::PortableCollection<T> const& deviceData) {
-      HostDataType hostData(deviceData->metadata().size(), queue);
+    static HostDataType transferAsync(
+        TQueue& queue, ALPAKA_ACCELERATOR_NAMESPACE::PortableCollection<T0, T1, T2, T3, T4> const& deviceData) {
+      HostDataType hostData(deviceData.sizes(), queue);
       alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
       return hostData;
     }
   };
+
 }  // namespace cms::alpakatools
 
 #endif  // DataFormats_Portable_interface_alpaka_PortableDeviceCollection_h

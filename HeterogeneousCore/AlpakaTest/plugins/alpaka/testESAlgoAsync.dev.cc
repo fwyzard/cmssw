@@ -18,7 +18,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     alpaka::exec<Acc1D>(
         queue,
         workDiv,
-        [] ALPAKA_FN_ACC(Acc1D const& acc, int const* a, int const* b, AlpakaESTestDataDDevice::View c, int size) {
+        [] ALPAKA_FN_ACC(Acc1D const& acc, int const* a, int const* b, AlpakaESTestDataDDevice::View<> c, int size) {
           const int32_t thread = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
           const int32_t stride = alpaka::getWorkDiv<alpaka::Grid, alpaka::Threads>(acc)[0u];
           for (auto i = thread; i < size; i += stride) {
