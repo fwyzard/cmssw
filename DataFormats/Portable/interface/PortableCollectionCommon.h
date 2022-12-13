@@ -26,49 +26,15 @@ struct CollectionLeaf {
   View view_;      //!
 };
 
-template <std::size_t Idx, typename T0, typename T1, typename T2, typename T3, typename T4>
-struct CollectionImpl : public CollectionLeaf<Idx, T0>, public CollectionImpl<Idx + 1, T1, T2, T3, T4, void> {
+template <std::size_t Idx, typename T, typename... Args>
+struct CollectionImpl : public CollectionLeaf<Idx, T>, public CollectionImpl<Idx + 1, Args..., void> {
   CollectionImpl() = default;
-  CollectionImpl(std::byte* buffer, int32_t elements) : CollectionLeaf<Idx, T0>(buffer, elements) {}
+  CollectionImpl(std::byte* buffer, int32_t elements) : CollectionLeaf<Idx, T>(buffer, elements) {}
 
   template <std::size_t N>
   CollectionImpl(std::byte* buffer, std::array<int32_t, N> const& sizes)
-      : CollectionLeaf<Idx, T0>(buffer, sizes),
-        CollectionImpl<Idx + 1, T1, T2, T3, T4, void>(CollectionLeaf<Idx, T0>::layout_.metadata().nextByte(), sizes) {}
-};
-
-template <std::size_t Idx, typename T0, typename T1, typename T2, typename T3, typename T4>
-using CollectionTypeResolver = typename std::tuple_element<Idx, std::tuple<T0, T1, T2, T3, T4>>::type;
-
-template <typename T, typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
-static constexpr std::size_t CollectionTypeCount = (std::is_same<T0, T>::value ? 1 : 0) +
-                                                   (std::is_same<T1, T>::value ? 1 : 0) +
-                                                   (std::is_same<T2, T>::value ? 1 : 0) +
-                                                   (std::is_same<T3, T>::value ? 1 : 0) +
-                                                   (std::is_same<T4, T>::value ? 1 : 0);
-
-template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
-static constexpr std::size_t CollectionMembersCount = (std::is_same<T0, void>::value ? 0 : 1) +
-                                                      (std::is_same<T1, void>::value ? 0 : 1) +
-                                                      (std::is_same<T2, void>::value ? 0 : 1) +
-                                                      (std::is_same<T3, void>::value ? 0 : 1) +
-                                                      (std::is_same<T4, void>::value ? 0 : 1);
-
-template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
-struct CollectionIdxResolver {
-  template <typename T, typename = void>
-  struct Resolver {
-    static_assert(CollectionTypeCount<T, T0, T1, T2, T3, T4> == 1);
-    static_assert(not std::is_same<T, T0>::value);
-    static constexpr std::size_t Idx = 1 + CollectionIdxResolver<T1, T2, T3, T4, void>::template Resolver<T>::Idx;
-  };
-
-  template <typename T>
-  struct Resolver<T, std::enable_if_t<std::is_same<T, T0>::value>> {
-    static_assert(CollectionTypeCount<T, T0, T1, T2, T3, T4> == 1);
-    static_assert(std::is_same<T, T0>::value);
-    static constexpr std::size_t Idx = 0;
-  };
+      : CollectionLeaf<Idx, T>(buffer, sizes),
+        CollectionImpl<Idx + 1, Args..., void>(CollectionLeaf<Idx, T>::layout_.metadata().nextByte(), sizes) {}
 };
 
 template <std::size_t Idx>
@@ -79,6 +45,34 @@ struct CollectionImpl<Idx, void, void, void, void, void> {
     static_assert(N == Idx);
   }
 };
+
+template <std::size_t Idx, typename... Args>
+using CollectionTypeResolver = typename std::tuple_element<Idx, std::tuple<Args...>>::type;
+
+template <typename T, typename... Args>
+static constexpr std::size_t CollectionTypeCount = ((std::is_same<T, Args>::value ? 1 : 0) + ...);
+
+template <typename... Args>
+static constexpr std::size_t CollectionMembersCount = sizeof...(Args) - CollectionTypeCount<void, Args...>;
+
+template <typename T, typename Tuple>
+struct CollectionIdxResolverImpl;
+
+template <typename T, typename... Args>
+struct CollectionIdxResolverImpl<T, std::tuple<T, Args...>> {
+  static_assert(CollectionTypeCount<T, Args...> == 0, "the requested type appears more than once among the arguments");
+  static const std::size_t value = 0;
+};
+
+template <typename T, typename U, typename... Args>
+struct CollectionIdxResolverImpl<T, std::tuple<U, Args...>> {
+  static_assert(not std::is_same_v<T, U>);
+  static_assert(CollectionTypeCount<T, Args...> == 1, "the requested type does not appear among the arguments");
+  static const std::size_t value = 1 + CollectionIdxResolverImpl<T, std::tuple<Args...>>::value;
+};
+
+template <typename T, typename... Args>
+static constexpr std::size_t CollectionIdxResolver = CollectionIdxResolverImpl<T, std::tuple<Args...>>::value;
 
 // TODO: namespace this
 

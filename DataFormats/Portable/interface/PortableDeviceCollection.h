@@ -34,7 +34,10 @@ public:
   using Buffer = cms::alpakatools::device_buffer<TDev, std::byte[]>;
   using ConstBuffer = cms::alpakatools::const_device_buffer<TDev, std::byte[]>;
   using Implementation = CollectionImpl<0, T0, T1, T2, T3, T4>;
-  using IdxResolver = CollectionIdxResolver<T0, T1, T2, T3, T4>;
+
+  template <typename T>
+  static constexpr auto IdxResolver = CollectionIdxResolver<T, T0, T1, T2, T3, T4>;
+
   using SizesArray = std::array<int32_t, membersCount>;
 
   template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
@@ -56,13 +59,13 @@ private:
   }
 
   template <typename T>
-  CollectionLeaf<IdxResolver::template Resolver<T>::Idx, T>& get() {
-    return dynamic_cast<CollectionLeaf<IdxResolver::template Resolver<T>::Idx, T>&>(impl_);
+  CollectionLeaf<IdxResolver<T>, T>& get() {
+    return dynamic_cast<CollectionLeaf<IdxResolver<T>, T>&>(impl_);
   }
 
   template <typename T>
-  const CollectionLeaf<IdxResolver::template Resolver<T>::Idx, T>& get() const {
-    return dynamic_cast<const CollectionLeaf<IdxResolver::template Resolver<T>::Idx, T>&>(impl_);
+  const CollectionLeaf<IdxResolver<T>, T>& get() const {
+    return dynamic_cast<const CollectionLeaf<IdxResolver<T>, T>&>(impl_);
   }
 
 public:
