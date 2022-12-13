@@ -82,7 +82,7 @@ public:
 
   static int32_t computeDataSize(const std::array<int32_t, membersCount>& sizes) {
     int32_t ret = 0;
-    constexpr_for<0, membersCount, 1>(
+    constexpr_for<0, membersCount>(
         [&sizes, &ret](auto i) { ret += TypeResolver::template Resolver<i>::type::computeDataSize(sizes[i]); });
     return ret;
   }
@@ -91,10 +91,10 @@ public:
       // allocate pinned host memory associated to the given work queue, accessible by the queue's device
       : buffer_{cms::alpakatools::make_host_buffer<std::byte[]>(computeDataSize(sizes))}, impl_{buffer_->data(), sizes} {
     // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
-    constexpr_for<0, membersCount, 1>(
+    constexpr_for<0, membersCount>(
         [&](auto i) { assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<i>::alignment == 0); });
     constexpr auto alignment = Layout<0>::alignment;
-    constexpr_for<1, membersCount, 1>([&alignment](auto i) { static_assert(alignment == Layout<i>::alignment); });
+    constexpr_for<1, membersCount>([&alignment](auto i) { static_assert(alignment == Layout<i>::alignment); });
   }
 
   template <typename TQueue, typename = std::enable_if_t<cms::alpakatools::is_queue_v<TQueue>>>
@@ -103,10 +103,10 @@ public:
       : buffer_{cms::alpakatools::make_host_buffer<std::byte[]>(queue, computeDataSize(sizes))},
         impl_{buffer_->data(), sizes} {
     // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
-    constexpr_for<0, membersCount, 1>(
+    constexpr_for<0, membersCount>(
         [&](auto i) { assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<i>::alignment == 0); });
     constexpr auto alignment = Layout<0>::alignment;
-    constexpr_for<1, membersCount, 1>([&alignment](auto i) { static_assert(alignment == Layout<i>::alignment); });
+    constexpr_for<1, membersCount>([&alignment](auto i) { static_assert(alignment == Layout<i>::alignment); });
   }
 
   // non-copyable
@@ -200,7 +200,7 @@ public:
   // Extract the sizes array
   SizesArray sizes() const {
     SizesArray ret;
-    constexpr_for<0, membersCount, 1>([&](auto i) { ret[i] = get<i>().layout_.metadata().size(); });
+    constexpr_for<0, membersCount>([&](auto i) { ret[i] = get<i>().layout_.metadata().size(); });
     return ret;
   }
 
@@ -209,11 +209,11 @@ public:
     newObj->~PortableHostCollection();
     // use the global "host" object returned by cms::alpakatools::host()
     std::array<int32_t, membersCount> sizes;
-    constexpr_for<0, membersCount, 1>([&sizes, &impl](auto i) {
+    constexpr_for<0, membersCount>([&sizes, &impl](auto i) {
       sizes[i] = impl.CollectionLeaf<i, typename TypeResolver::template Resolver<i>::type>::layout_.metadata().size();
     });
     new (newObj) PortableHostCollection(sizes, cms::alpakatools::host());
-    constexpr_for<0, membersCount, 1>([&sizes, &newObj, &impl](auto i) {
+    constexpr_for<0, membersCount>([&sizes, &newObj, &impl](auto i) {
       newObj->impl_.CollectionLeaf<i, typename TypeResolver::template Resolver<i>::type>::layout_.ROOTReadStreamer(
           impl.CollectionLeaf<i, typename TypeResolver::template Resolver<i>::type>::layout_);
     });

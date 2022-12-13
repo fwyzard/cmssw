@@ -1,10 +1,12 @@
 #ifndef DataFormats_Portable_interface_PortableCollectionCommon_h
 #define DataFormats_Portable_interface_PortableCollectionCommon_h
 
-template <auto Start, auto End, auto Inc, class F>
+#include <cstddef>
+
+template <std::size_t Start, std::size_t End, std::size_t Inc = 1, class F>
 constexpr void constexpr_for(F&& f) {
   if constexpr (Start < End) {
-    f(std::integral_constant<decltype(Start), Start>());
+    f(std::integral_constant<std::size_t, Start>());
     constexpr_for<Start + Inc, End, Inc>(f);
   }
 }
