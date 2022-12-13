@@ -42,22 +42,22 @@ public:
 private:
   template <std::size_t Idx>
   CollectionLeaf<Idx, Layout<Idx>>& get() {
-    return dynamic_cast<CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
+    return static_cast<CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
   }
 
   template <std::size_t Idx>
   const CollectionLeaf<Idx, Layout<Idx>>& get() const {
-    return dynamic_cast<const CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
+    return static_cast<const CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
   }
 
   template <typename T>
   CollectionLeaf<IdxResolver<T>, T>& get() {
-    return dynamic_cast<CollectionLeaf<IdxResolver<T>, T>&>(impl_);
+    return static_cast<CollectionLeaf<IdxResolver<T>, T>&>(impl_);
   }
 
   template <typename T>
   const CollectionLeaf<IdxResolver<T>, T>& get() const {
-    return dynamic_cast<const CollectionLeaf<IdxResolver<T>, T>&>(impl_);
+    return static_cast<const CollectionLeaf<IdxResolver<T>, T>&>(impl_);
   }
 
 public:
