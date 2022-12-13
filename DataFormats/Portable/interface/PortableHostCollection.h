@@ -26,12 +26,11 @@ public:
   using Buffer = cms::alpakatools::host_buffer<std::byte[]>;
   using ConstBuffer = cms::alpakatools::const_host_buffer<std::byte[]>;
   using Implementation = CollectionImpl<0, T0, T1, T2, T3, T4>;
-  using TypeResolver = CollectionTypeResolver<T0, T1, T2, T3, T4>;
   using IdxResolver = CollectionIdxResolver<T0, T1, T2, T3, T4>;
   using SizesArray = std::array<int32_t, membersCount>;
 
   template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
-  using Layout = typename TypeResolver::template Resolver<Idx>::type;
+  using Layout = CollectionTypeResolver<Idx, T0, T1, T2, T3, T4>;
   template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
   using View = typename Layout<Idx>::View;
   template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
@@ -39,13 +38,13 @@ public:
 
 private:
   template <std::size_t Idx>
-  CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>& get() {
-    return dynamic_cast<CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>&>(impl_);
+  CollectionLeaf<Idx, Layout<Idx>>& get() {
+    return dynamic_cast<CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
   }
 
   template <std::size_t Idx>
-  const CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>& get() const {
-    return dynamic_cast<const CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>&>(impl_);
+  const CollectionLeaf<Idx, Layout<Idx>>& get() const {
+    return dynamic_cast<const CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
   }
 
   template <typename T>
@@ -82,8 +81,7 @@ public:
 
   static int32_t computeDataSize(const std::array<int32_t, membersCount>& sizes) {
     int32_t ret = 0;
-    constexpr_for<0, membersCount>(
-        [&sizes, &ret](auto i) { ret += TypeResolver::template Resolver<i>::type::computeDataSize(sizes[i]); });
+    constexpr_for<0, membersCount>([&sizes, &ret](auto i) { ret += Layout<i>::computeDataSize(sizes[i]); });
     return ret;
   }
 
@@ -209,13 +207,11 @@ public:
     newObj->~PortableHostCollection();
     // use the global "host" object returned by cms::alpakatools::host()
     std::array<int32_t, membersCount> sizes;
-    constexpr_for<0, membersCount>([&sizes, &impl](auto i) {
-      sizes[i] = impl.CollectionLeaf<i, typename TypeResolver::template Resolver<i>::type>::layout_.metadata().size();
-    });
+    constexpr_for<0, membersCount>(
+        [&sizes, &impl](auto i) { sizes[i] = impl.CollectionLeaf<i, Layout<i>>::layout_.metadata().size(); });
     new (newObj) PortableHostCollection(sizes, cms::alpakatools::host());
     constexpr_for<0, membersCount>([&sizes, &newObj, &impl](auto i) {
-      newObj->impl_.CollectionLeaf<i, typename TypeResolver::template Resolver<i>::type>::layout_.ROOTReadStreamer(
-          impl.CollectionLeaf<i, typename TypeResolver::template Resolver<i>::type>::layout_);
+      newObj->impl_.CollectionLeaf<i, Layout<i>>::layout_.ROOTReadStreamer(impl.CollectionLeaf<i, Layout<i>>::layout_);
     });
   }
 

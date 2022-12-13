@@ -34,12 +34,11 @@ public:
   using Buffer = cms::alpakatools::device_buffer<TDev, std::byte[]>;
   using ConstBuffer = cms::alpakatools::const_device_buffer<TDev, std::byte[]>;
   using Implementation = CollectionImpl<0, T0, T1, T2, T3, T4>;
-  using TypeResolver = CollectionTypeResolver<T0, T1, T2, T3, T4>;
   using IdxResolver = CollectionIdxResolver<T0, T1, T2, T3, T4>;
   using SizesArray = std::array<int32_t, membersCount>;
 
   template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
-  using Layout = typename TypeResolver::template Resolver<Idx>::type;
+  using Layout = CollectionTypeResolver<Idx, T0, T1, T2, T3, T4>;
   template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
   using View = typename Layout<Idx>::View;
   template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
@@ -47,13 +46,13 @@ public:
 
 private:
   template <std::size_t Idx>
-  CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>& get() {
-    return dynamic_cast<CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>&>(impl_);
+  CollectionLeaf<Idx, Layout<Idx>>& get() {
+    return dynamic_cast<CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
   }
 
   template <std::size_t Idx>
-  const CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>& get() const {
-    return dynamic_cast<const CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>&>(impl_);
+  const CollectionLeaf<Idx, Layout<Idx>>& get() const {
+    return dynamic_cast<const CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
   }
 
   template <typename T>
@@ -88,8 +87,7 @@ public:
 
   static int32_t computeDataSize(const SizesArray& sizes) {
     int32_t ret = 0;
-    constexpr_for<0, membersCount>(
-        [&sizes, &ret](auto i) { ret += TypeResolver::template Resolver<i>::type::computeDataSize(sizes[i]); });
+    constexpr_for<0, membersCount>([&sizes, &ret](auto i) { ret += Layout<i>::computeDataSize(sizes[i]); });
     return ret;
   }
 

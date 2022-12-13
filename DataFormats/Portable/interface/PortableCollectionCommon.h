@@ -37,37 +37,8 @@ struct CollectionImpl : public CollectionLeaf<Idx, T0>, public CollectionImpl<Id
         CollectionImpl<Idx + 1, T1, T2, T3, T4, void>(CollectionLeaf<Idx, T0>::layout_.metadata().nextByte(), sizes) {}
 };
 
-// This should work, but does not due to a GCC bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282
-// Workaround implementation below
-/*
-template <typename T0, typename T1, typename T2, typename T3, typename T4>
-struct CollectionTypeResolver{
-  template <std::size_t Idx>
-  struct Resolver{
-    static_assert(Idx != 0);
-    using type = typename CollectionTypeResolver<T1, T2, T3, T4, void>::template Resolver<Idx - 1>::type;
-  };
-
-  template <>
-  struct Resolver<0>{
-    using type = T0;
-  };
-};
-*/
-
-template <typename T0, typename T1, typename T2, typename T3, typename T4>
-struct CollectionTypeResolver {
-  template <std::size_t Idx, typename = void>
-  struct Resolver {
-    static_assert(Idx != 0);
-    using type = typename CollectionTypeResolver<T1, T2, T3, T4, void>::template Resolver<Idx - 1>::type;
-  };
-
-  template <std::size_t Idx>
-  struct Resolver<Idx, std::enable_if_t<Idx == 0>> {
-    using type = T0;
-  };
-};
+template <std::size_t Idx, typename T0, typename T1, typename T2, typename T3, typename T4>
+using CollectionTypeResolver = typename std::tuple_element<Idx, std::tuple<T0, T1, T2, T3, T4>>::type;
 
 template <typename T, typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
 static constexpr size_t CollectionTypeCount = (std::is_same<T0, T>::value ? 1 : 0) +
