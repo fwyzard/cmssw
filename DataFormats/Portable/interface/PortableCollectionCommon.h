@@ -1,4 +1,3 @@
-
 #ifndef DataFormats_Portable_interface_PortableCollectionCommon_h
 #define DataFormats_Portable_interface_PortableCollectionCommon_h
 
@@ -10,13 +9,13 @@ constexpr void constexpr_for(F&& f) {
   }
 }
 
-template <std::size_t idx, typename T>
+template <std::size_t Idx, typename T>
 struct CollectionLeaf {
   CollectionLeaf() = default;
   CollectionLeaf(std::byte* buffer, int32_t elements) : layout_(buffer, elements), view_(layout_) {}
   template <std::size_t N>
-  CollectionLeaf(std::byte* buffer, std::array<int32_t, N> sizes) : layout_(buffer, sizes[idx]), view_(layout_) {
-    static_assert(N > idx);
+  CollectionLeaf(std::byte* buffer, std::array<int32_t, N> sizes) : layout_(buffer, sizes[Idx]), view_(layout_) {
+    static_assert(N > Idx);
   }
   using Layout = T;
   using View = typename Layout::View;
@@ -25,15 +24,15 @@ struct CollectionLeaf {
   View view_;      //!
 };
 
-template <std::size_t idx, typename T0, typename T1, typename T2, typename T3, typename T4>
-struct CollectionImpl : public CollectionLeaf<idx, T0>, public CollectionImpl<idx + 1, T1, T2, T3, T4, void> {
+template <std::size_t Idx, typename T0, typename T1, typename T2, typename T3, typename T4>
+struct CollectionImpl : public CollectionLeaf<Idx, T0>, public CollectionImpl<Idx + 1, T1, T2, T3, T4, void> {
   CollectionImpl() = default;
-  CollectionImpl(std::byte* buffer, int32_t elements) : CollectionLeaf<idx, T0>(buffer, elements) {}
+  CollectionImpl(std::byte* buffer, int32_t elements) : CollectionLeaf<Idx, T0>(buffer, elements) {}
 
   template <size_t N>
   CollectionImpl(std::byte* buffer, std::array<int32_t, N> sizes)
-      : CollectionLeaf<idx, T0>(buffer, sizes),
-        CollectionImpl<idx + 1, T1, T2, T3, T4, void>(CollectionLeaf<idx, T0>::layout_.metadata().nextByte(), sizes) {}
+      : CollectionLeaf<Idx, T0>(buffer, sizes),
+        CollectionImpl<Idx + 1, T1, T2, T3, T4, void>(CollectionLeaf<Idx, T0>::layout_.metadata().nextByte(), sizes) {}
 };
 
 // This should work, but does not due to a GCC bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282
@@ -41,10 +40,10 @@ struct CollectionImpl : public CollectionLeaf<idx, T0>, public CollectionImpl<id
 /*
 template <typename T0, typename T1, typename T2, typename T3, typename T4>
 struct CollectionTypeResolver{
-  template <std::size_t idx>
+  template <std::size_t Idx>
   struct Resolver{
-    static_assert(idx != 0);
-    using type = typename CollectionTypeResolver<T1, T2, T3, T4, void>::template Resolver<idx - 1>::type;
+    static_assert(Idx != 0);
+    using type = typename CollectionTypeResolver<T1, T2, T3, T4, void>::template Resolver<Idx - 1>::type;
   };
 
   template <>
@@ -56,14 +55,14 @@ struct CollectionTypeResolver{
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4>
 struct CollectionTypeResolver {
-  template <std::size_t idx, class = void>
+  template <std::size_t Idx, class = void>
   struct Resolver {
-    static_assert(idx != 0);
-    using type = typename CollectionTypeResolver<T1, T2, T3, T4, void>::template Resolver<idx - 1>::type;
+    static_assert(Idx != 0);
+    using type = typename CollectionTypeResolver<T1, T2, T3, T4, void>::template Resolver<Idx - 1>::type;
   };
 
-  template <std::size_t idx>
-  struct Resolver<idx, std::enable_if_t<idx == 0>> {
+  template <std::size_t Idx>
+  struct Resolver<Idx, std::enable_if_t<Idx == 0>> {
     using type = T0;
   };
 };
@@ -88,23 +87,23 @@ struct CollectionIdxResolver {
   struct Resolver {
     static_assert(CollectionTypeCount<T, T0, T1, T2, T3, T4> == 1);
     static_assert(not std::is_same<T, T0>::value);
-    static constexpr std::size_t idx = 1 + CollectionIdxResolver<T1, T2, T3, T4, void>::template Resolver<T>::idx;
+    static constexpr std::size_t Idx = 1 + CollectionIdxResolver<T1, T2, T3, T4, void>::template Resolver<T>::Idx;
   };
 
   template <typename T>
   struct Resolver<T, std::enable_if_t<std::is_same<T, T0>::value>> {
     static_assert(CollectionTypeCount<T, T0, T1, T2, T3, T4> == 1);
     static_assert(std::is_same<T, T0>::value);
-    static constexpr std::size_t idx = 0;
+    static constexpr std::size_t Idx = 0;
   };
 };
 
-template <std::size_t idx>
-struct CollectionImpl<idx, void, void, void, void, void> {
+template <std::size_t Idx>
+struct CollectionImpl<Idx, void, void, void, void, void> {
   CollectionImpl() = default;
   template <size_t N>
   CollectionImpl(std::byte* buffer, std::array<int32_t, N> sizes) {
-    static_assert(N == idx);
+    static_assert(N == Idx);
   }
 };
 

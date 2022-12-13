@@ -30,32 +30,32 @@ public:
   using IdxResolver = CollectionIdxResolver<T0, T1, T2, T3, T4>;
   using SizesArray = std::array<int32_t, membersCount>;
 
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  using Layout = typename TypeResolver::template Resolver<idx>::type;
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  using View = typename Layout<idx>::View;
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  using ConstView = typename Layout<idx>::ConstView;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  using Layout = typename TypeResolver::template Resolver<Idx>::type;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  using View = typename Layout<Idx>::View;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  using ConstView = typename Layout<Idx>::ConstView;
 
 private:
-  template <std::size_t idx>
-  CollectionLeaf<idx, typename TypeResolver::template Resolver<idx>::type>& get() {
-    return dynamic_cast<CollectionLeaf<idx, typename TypeResolver::template Resolver<idx>::type>&>(impl_);
+  template <std::size_t Idx>
+  CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>& get() {
+    return dynamic_cast<CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>&>(impl_);
   }
 
-  template <std::size_t idx>
-  const CollectionLeaf<idx, typename TypeResolver::template Resolver<idx>::type>& get() const {
-    return dynamic_cast<const CollectionLeaf<idx, typename TypeResolver::template Resolver<idx>::type>&>(impl_);
-  }
-
-  template <typename T>
-  CollectionLeaf<IdxResolver::template Resolver<T>::idx, T>& get() {
-    return dynamic_cast<CollectionLeaf<IdxResolver::template Resolver<T>::idx, T>&>(impl_);
+  template <std::size_t Idx>
+  const CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>& get() const {
+    return dynamic_cast<const CollectionLeaf<Idx, typename TypeResolver::template Resolver<Idx>::type>&>(impl_);
   }
 
   template <typename T>
-  const CollectionLeaf<IdxResolver::template Resolver<T>::idx, T>& get() const {
-    return dynamic_cast<const CollectionLeaf<IdxResolver::template Resolver<T>::idx, T>&>(impl_);
+  CollectionLeaf<IdxResolver::template Resolver<T>::Idx, T>& get() {
+    return dynamic_cast<CollectionLeaf<IdxResolver::template Resolver<T>::Idx, T>&>(impl_);
+  }
+
+  template <typename T>
+  const CollectionLeaf<IdxResolver::template Resolver<T>::Idx, T>& get() const {
+    return dynamic_cast<const CollectionLeaf<IdxResolver::template Resolver<T>::Idx, T>&>(impl_);
   }
 
 public:
@@ -121,39 +121,39 @@ public:
   ~PortableHostCollection() = default;
 
   // access the View by index
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  View<idx>& view() {
-    return get<idx>().view_;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  View<Idx>& view() {
+    return get<Idx>().view_;
   }
 
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  ConstView<idx> const& view() const {
-    return get<idx>().view_;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  ConstView<Idx> const& view() const {
+    return get<Idx>().view_;
   }
 
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  ConstView<idx> const& const_view() const {
-    return get<idx>().view_;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  ConstView<Idx> const& const_view() const {
+    return get<Idx>().view_;
   }
 
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  View<idx>& operator*() {
-    return get<idx>().view_;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  View<Idx>& operator*() {
+    return get<Idx>().view_;
   }
 
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  ConstView<idx> const& operator*() const {
-    return get<idx>().view_;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  ConstView<Idx> const& operator*() const {
+    return get<Idx>().view_;
   }
 
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  View<idx>* operator->() {
-    return &get<idx>().view_;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  View<Idx>* operator->() {
+    return &get<Idx>().view_;
   }
 
-  template <std::size_t idx = 0, typename = std::enable_if_t<(membersCount > idx)>>
-  ConstView<idx> const* operator->() const {
-    return &get<idx>().view_;
+  template <std::size_t Idx = 0, typename = std::enable_if_t<(membersCount > Idx)>>
+  ConstView<Idx> const* operator->() const {
+    return &get<Idx>().view_;
   }
 
   // access the View by type
