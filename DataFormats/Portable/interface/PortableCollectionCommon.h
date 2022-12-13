@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-template <std::size_t Start, std::size_t End, std::size_t Inc = 1, class F>
+template <std::size_t Start, std::size_t End, std::size_t Inc = 1, typename F>
 constexpr void constexpr_for(F&& f) {
   if constexpr (Start < End) {
     f(std::integral_constant<std::size_t, Start>());
@@ -16,7 +16,7 @@ struct CollectionLeaf {
   CollectionLeaf() = default;
   CollectionLeaf(std::byte* buffer, int32_t elements) : layout_(buffer, elements), view_(layout_) {}
   template <std::size_t N>
-  CollectionLeaf(std::byte* buffer, std::array<int32_t, N> sizes) : layout_(buffer, sizes[Idx]), view_(layout_) {
+  CollectionLeaf(std::byte* buffer, std::array<int32_t, N> const& sizes) : layout_(buffer, sizes[Idx]), view_(layout_) {
     static_assert(N > Idx);
   }
   using Layout = T;
@@ -32,7 +32,7 @@ struct CollectionImpl : public CollectionLeaf<Idx, T0>, public CollectionImpl<Id
   CollectionImpl(std::byte* buffer, int32_t elements) : CollectionLeaf<Idx, T0>(buffer, elements) {}
 
   template <size_t N>
-  CollectionImpl(std::byte* buffer, std::array<int32_t, N> sizes)
+  CollectionImpl(std::byte* buffer, std::array<int32_t, N> const& sizes)
       : CollectionLeaf<Idx, T0>(buffer, sizes),
         CollectionImpl<Idx + 1, T1, T2, T3, T4, void>(CollectionLeaf<Idx, T0>::layout_.metadata().nextByte(), sizes) {}
 };
@@ -57,7 +57,7 @@ struct CollectionTypeResolver{
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4>
 struct CollectionTypeResolver {
-  template <std::size_t Idx, class = void>
+  template <std::size_t Idx, typename = void>
   struct Resolver {
     static_assert(Idx != 0);
     using type = typename CollectionTypeResolver<T1, T2, T3, T4, void>::template Resolver<Idx - 1>::type;
@@ -85,7 +85,7 @@ static constexpr size_t CollectionMembersCount = (std::is_same<T0, void>::value 
 
 template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
 struct CollectionIdxResolver {
-  template <typename T, class = void>
+  template <typename T, typename = void>
   struct Resolver {
     static_assert(CollectionTypeCount<T, T0, T1, T2, T3, T4> == 1);
     static_assert(not std::is_same<T, T0>::value);
@@ -104,7 +104,7 @@ template <std::size_t Idx>
 struct CollectionImpl<Idx, void, void, void, void, void> {
   CollectionImpl() = default;
   template <size_t N>
-  CollectionImpl(std::byte* buffer, std::array<int32_t, N> sizes) {
+  CollectionImpl(std::byte* buffer, std::array<int32_t, N> const& sizes) {
     static_assert(N == Idx);
   }
 };
