@@ -18,9 +18,9 @@ class PortableHostCollection {
   static_assert(not std::is_same<T2, void>::value or std::is_same<T3, void>::value);
   static_assert(not std::is_same<T1, void>::value or std::is_same<T2, void>::value);
   template <typename T>
-  static constexpr size_t typeCount = CollectionTypeCount<T, T0, T1, T2, T3, T4>;
+  static constexpr std::size_t typeCount = CollectionTypeCount<T, T0, T1, T2, T3, T4>;
 
-  static constexpr size_t membersCount = CollectionMembersCount<T0, T1, T2, T3, T4>;
+  static constexpr std::size_t membersCount = CollectionMembersCount<T0, T1, T2, T3, T4>;
 
 public:
   using Buffer = cms::alpakatools::host_buffer<std::byte[]>;

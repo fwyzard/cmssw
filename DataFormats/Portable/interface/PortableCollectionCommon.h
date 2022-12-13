@@ -31,7 +31,7 @@ struct CollectionImpl : public CollectionLeaf<Idx, T0>, public CollectionImpl<Id
   CollectionImpl() = default;
   CollectionImpl(std::byte* buffer, int32_t elements) : CollectionLeaf<Idx, T0>(buffer, elements) {}
 
-  template <size_t N>
+  template <std::size_t N>
   CollectionImpl(std::byte* buffer, std::array<int32_t, N> const& sizes)
       : CollectionLeaf<Idx, T0>(buffer, sizes),
         CollectionImpl<Idx + 1, T1, T2, T3, T4, void>(CollectionLeaf<Idx, T0>::layout_.metadata().nextByte(), sizes) {}
@@ -41,18 +41,18 @@ template <std::size_t Idx, typename T0, typename T1, typename T2, typename T3, t
 using CollectionTypeResolver = typename std::tuple_element<Idx, std::tuple<T0, T1, T2, T3, T4>>::type;
 
 template <typename T, typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
-static constexpr size_t CollectionTypeCount = (std::is_same<T0, T>::value ? 1 : 0) +
-                                              (std::is_same<T1, T>::value ? 1 : 0) +
-                                              (std::is_same<T2, T>::value ? 1 : 0) +
-                                              (std::is_same<T3, T>::value ? 1 : 0) +
-                                              (std::is_same<T4, T>::value ? 1 : 0);
+static constexpr std::size_t CollectionTypeCount = (std::is_same<T0, T>::value ? 1 : 0) +
+                                                   (std::is_same<T1, T>::value ? 1 : 0) +
+                                                   (std::is_same<T2, T>::value ? 1 : 0) +
+                                                   (std::is_same<T3, T>::value ? 1 : 0) +
+                                                   (std::is_same<T4, T>::value ? 1 : 0);
 
 template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
-static constexpr size_t CollectionMembersCount = (std::is_same<T0, void>::value ? 0 : 1) +
-                                                 (std::is_same<T1, void>::value ? 0 : 1) +
-                                                 (std::is_same<T2, void>::value ? 0 : 1) +
-                                                 (std::is_same<T3, void>::value ? 0 : 1) +
-                                                 (std::is_same<T4, void>::value ? 0 : 1);
+static constexpr std::size_t CollectionMembersCount = (std::is_same<T0, void>::value ? 0 : 1) +
+                                                      (std::is_same<T1, void>::value ? 0 : 1) +
+                                                      (std::is_same<T2, void>::value ? 0 : 1) +
+                                                      (std::is_same<T3, void>::value ? 0 : 1) +
+                                                      (std::is_same<T4, void>::value ? 0 : 1);
 
 template <typename T0, typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void>
 struct CollectionIdxResolver {
@@ -74,7 +74,7 @@ struct CollectionIdxResolver {
 template <std::size_t Idx>
 struct CollectionImpl<Idx, void, void, void, void, void> {
   CollectionImpl() = default;
-  template <size_t N>
+  template <std::size_t N>
   CollectionImpl(std::byte* buffer, std::array<int32_t, N> const& sizes) {
     static_assert(N == Idx);
   }
