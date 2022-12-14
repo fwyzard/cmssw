@@ -27,22 +27,22 @@ class PortableDeviceCollection {
   static_assert(not std::is_same<T1, void>::value or std::is_same<T2, void>::value);
 
   template <typename T>
-  static constexpr std::size_t count_t_ = CollectionTypeCount<T, T0, T1, T2, T3, T4>;
+  static constexpr std::size_t count_t_ = portablecollection::typeCount<T, T0, T1, T2, T3, T4>;
 
-  static constexpr std::size_t members_ = CollectionMembersCount<T0, T1, T2, T3, T4>;
+  template <typename T>
+  static constexpr std::size_t index_t_ = portablecollection::typeIndex<T, T0, T1, T2, T3, T4>;
+
+  static constexpr std::size_t members_ = portablecollection::membersCount<T0, T1, T2, T3, T4>;
 
 public:
   using Buffer = cms::alpakatools::device_buffer<TDev, std::byte[]>;
   using ConstBuffer = cms::alpakatools::const_device_buffer<TDev, std::byte[]>;
-  using Implementation = CollectionImpl<0, T0, T1, T2, T3, T4>;
-
-  template <typename T>
-  static constexpr auto IdxResolver = CollectionIdxResolver<T, T0, T1, T2, T3, T4>;
+  using Implementation = portablecollection::CollectionImpl<0, T0, T1, T2, T3, T4>;
 
   using SizesArray = std::array<int32_t, members_>;
 
   template <std::size_t Idx = 0, typename = std::enable_if_t<(members_ > Idx)>>
-  using Layout = CollectionTypeResolver<Idx, T0, T1, T2, T3, T4>;
+  using Layout = portablecollection::TypeResolver<Idx, T0, T1, T2, T3, T4>;
   template <std::size_t Idx = 0, typename = std::enable_if_t<(members_ > Idx)>>
   using View = typename Layout<Idx>::View;
   template <std::size_t Idx = 0, typename = std::enable_if_t<(members_ > Idx)>>
@@ -50,43 +50,26 @@ public:
 
 private:
   template <std::size_t Idx>
-  CollectionLeaf<Idx, Layout<Idx>>& get() {
-    return static_cast<CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
+  using Leaf = portablecollection::CollectionLeaf<Idx, Layout<Idx>>;
+
+  template <std::size_t Idx>
+  Leaf<Idx>& get() {
+    return static_cast<Leaf<Idx>&>(impl_);
   }
 
   template <std::size_t Idx>
-  const CollectionLeaf<Idx, Layout<Idx>>& get() const {
-    return static_cast<const CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
+  Leaf<Idx> const& get() const {
+    return static_cast<Leaf<Idx> const&>(impl_);
   }
 
   template <typename T>
-  CollectionLeaf<IdxResolver<T>, T>& get() {
-    return static_cast<CollectionLeaf<IdxResolver<T>, T>&>(impl_);
+  Leaf<index_t_<T>>& get() {
+    return static_cast<Leaf<index_t_<T>>&>(impl_);
   }
 
   template <typename T>
-  const CollectionLeaf<IdxResolver<T>, T>& get() const {
-    return static_cast<const CollectionLeaf<IdxResolver<T>, T>&>(impl_);
-  }
-
-public:
-  PortableDeviceCollection() = default;
-
-  PortableDeviceCollection(int32_t elements, TDev const& device)
-      : buffer_{cms::alpakatools::make_device_buffer<std::byte[]>(device, Layout<>::computeDataSize(elements))},
-        impl_{buffer_->data(), elements} {
-    // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
-    assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<>::alignment == 0);
-    static_assert(members_ == 1);
-  }
-
-  template <typename TQueue, typename = std::enable_if_t<cms::alpakatools::is_queue_v<TQueue>>>
-  PortableDeviceCollection(int32_t elements, TQueue const& queue)
-      : buffer_{cms::alpakatools::make_device_buffer<std::byte[]>(queue, Layout<>::computeDataSize(elements))},
-        impl_{buffer_->data(), elements} {
-    // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
-    assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<>::alignment == 0);
-    static_assert(members_ == 1);
+  Leaf<index_t_<T>> const& get() const {
+    return static_cast<Leaf<index_t_<T>> const&>(impl_);
   }
 
   static int32_t computeDataSize(const SizesArray& sizes) {
@@ -95,10 +78,30 @@ public:
     return ret;
   }
 
+public:
+  PortableDeviceCollection() = default;
+
+  PortableDeviceCollection(int32_t elements, TDev const& device)
+      // allocate device memory
+      : buffer_{cms::alpakatools::make_device_buffer<std::byte[]>(device, Layout<>::computeDataSize(elements))},
+        impl_{buffer_->data(), elements} {
+    assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<>::alignment == 0);
+    static_assert(members_ == 1);
+  }
+
+  template <typename TQueue, typename = std::enable_if_t<cms::alpakatools::is_queue_v<TQueue>>>
+  PortableDeviceCollection(int32_t elements, TQueue const& queue)
+      // allocate device memory asynchronously on the given work queue
+      : buffer_{cms::alpakatools::make_device_buffer<std::byte[]>(queue, Layout<>::computeDataSize(elements))},
+        impl_{buffer_->data(), elements} {
+    assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<>::alignment == 0);
+    static_assert(members_ == 1);
+  }
+
   PortableDeviceCollection(const SizesArray& sizes, TDev const& device)
+      // allocate device memory
       : buffer_{cms::alpakatools::make_device_buffer<std::byte[]>(device, computeDataSize(sizes))},
         impl_{buffer_->data(), sizes} {
-    // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
     constexpr_for<0, members_>(
         [&](auto i) { assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<i>::alignment == 0); });
     constexpr auto alignment = Layout<0>::alignment;
@@ -107,9 +110,9 @@ public:
 
   template <typename TQueue, typename = std::enable_if_t<cms::alpakatools::is_queue_v<TQueue>>>
   PortableDeviceCollection(const SizesArray& sizes, TQueue const& queue)
+      // allocate device memory asynchronously on the given work queue
       : buffer_{cms::alpakatools::make_device_buffer<std::byte[]>(queue, computeDataSize(sizes))},
         impl_{buffer_->data(), sizes} {
-    // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
     constexpr_for<0, members_>(
         [&](auto i) { assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<i>::alignment == 0); });
     constexpr auto alignment = Layout<0>::alignment;

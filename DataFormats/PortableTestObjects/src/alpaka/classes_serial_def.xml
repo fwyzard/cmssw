@@ -1,11 +1,11 @@
 <lcgdict>
   <class name="portabletest::TestHostCollection::Implementation"/>
-  <class name="CollectionImpl<1,void,void,void,void,void>"/>
-  <class name="CollectionLeaf<0,portabletest::TestSoALayout<128,false> >"/>
-  <class name="CollectionImpl<2,void,void,void,void,void>"/>
-  <class name="CollectionImpl<1,portabletest::TestSoALayout2<128,false>,void,void,void,void>"/>
-  <class name="CollectionImpl<0,portabletest::TestSoALayout<128,false>,portabletest::TestSoALayout2<128,false>,void,void,void>"/>
-  <class name="CollectionLeaf<1,portabletest::TestSoALayout2<128,false> >"/>
+  <class name="portablecollection::CollectionImpl<1,void,void,void,void,void>"/>
+  <class name="portablecollection::CollectionLeaf<0,portabletest::TestSoALayout<128,false> >"/>
+  <class name="portablecollection::CollectionImpl<2,void,void,void,void,void>"/>
+  <class name="portablecollection::CollectionImpl<1,portabletest::TestSoALayout2<128,false>,void,void,void,void>"/>
+  <class name="portablecollection::CollectionImpl<0,portabletest::TestSoALayout<128,false>,portabletest::TestSoALayout2<128,false>,void,void,void>"/>
+  <class name="portablecollection::CollectionLeaf<1,portabletest::TestSoALayout2<128,false> >"/>
   <class name="portabletest::TestHostCollection"/>
   <read
     sourceClass="portabletest::TestHostCollection"

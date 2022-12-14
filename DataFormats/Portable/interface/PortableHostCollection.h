@@ -19,22 +19,22 @@ class PortableHostCollection {
   static_assert(not std::is_same<T1, void>::value or std::is_same<T2, void>::value);
 
   template <typename T>
-  static constexpr std::size_t count_t_ = CollectionTypeCount<T, T0, T1, T2, T3, T4>;
+  static constexpr std::size_t count_t_ = portablecollection::typeCount<T, T0, T1, T2, T3, T4>;
 
-  static constexpr std::size_t members_ = CollectionMembersCount<T0, T1, T2, T3, T4>;
+  template <typename T>
+  static constexpr std::size_t index_t_ = portablecollection::typeIndex<T, T0, T1, T2, T3, T4>;
+
+  static constexpr std::size_t members_ = portablecollection::membersCount<T0, T1, T2, T3, T4>;
 
 public:
   using Buffer = cms::alpakatools::host_buffer<std::byte[]>;
   using ConstBuffer = cms::alpakatools::const_host_buffer<std::byte[]>;
-  using Implementation = CollectionImpl<0, T0, T1, T2, T3, T4>;
-
-  template <typename T>
-  static constexpr auto IdxResolver = CollectionIdxResolver<T, T0, T1, T2, T3, T4>;
+  using Implementation = portablecollection::CollectionImpl<0, T0, T1, T2, T3, T4>;
 
   using SizesArray = std::array<int32_t, members_>;
 
   template <std::size_t Idx = 0, typename = std::enable_if_t<(members_ > Idx)>>
-  using Layout = CollectionTypeResolver<Idx, T0, T1, T2, T3, T4>;
+  using Layout = portablecollection::TypeResolver<Idx, T0, T1, T2, T3, T4>;
   template <std::size_t Idx = 0, typename = std::enable_if_t<(members_ > Idx)>>
   using View = typename Layout<Idx>::View;
   template <std::size_t Idx = 0, typename = std::enable_if_t<(members_ > Idx)>>
@@ -42,23 +42,32 @@ public:
 
 private:
   template <std::size_t Idx>
-  CollectionLeaf<Idx, Layout<Idx>>& get() {
-    return static_cast<CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
+  using Leaf = portablecollection::CollectionLeaf<Idx, Layout<Idx>>;
+
+  template <std::size_t Idx>
+  Leaf<Idx>& get() {
+    return static_cast<Leaf<Idx>&>(impl_);
   }
 
   template <std::size_t Idx>
-  const CollectionLeaf<Idx, Layout<Idx>>& get() const {
-    return static_cast<const CollectionLeaf<Idx, Layout<Idx>>&>(impl_);
+  Leaf<Idx> const& get() const {
+    return static_cast<Leaf<Idx> const&>(impl_);
   }
 
   template <typename T>
-  CollectionLeaf<IdxResolver<T>, T>& get() {
-    return static_cast<CollectionLeaf<IdxResolver<T>, T>&>(impl_);
+  portablecollection::CollectionLeaf<index_t_<T>, T>& get() {
+    return static_cast<portablecollection::CollectionLeaf<index_t_<T>, T>&>(impl_);
   }
 
   template <typename T>
-  const CollectionLeaf<IdxResolver<T>, T>& get() const {
-    return static_cast<const CollectionLeaf<IdxResolver<T>, T>&>(impl_);
+  const portablecollection::CollectionLeaf<index_t_<T>, T>& get() const {
+    return static_cast<const portablecollection::CollectionLeaf<index_t_<T>, T>&>(impl_);
+  }
+
+  static int32_t computeDataSize(const std::array<int32_t, members_>& sizes) {
+    int32_t ret = 0;
+    constexpr_for<0, members_>([&sizes, &ret](auto i) { ret += Layout<i>::computeDataSize(sizes[i]); });
+    return ret;
   }
 
 public:
@@ -81,12 +90,6 @@ public:
     // Alpaka set to a default alignment of 128 bytes defining ALPAKA_DEFAULT_HOST_MEMORY_ALIGNMENT=128
     assert(reinterpret_cast<uintptr_t>(buffer_->data()) % Layout<>::alignment == 0);
     static_assert(members_ == 1);
-  }
-
-  static int32_t computeDataSize(const std::array<int32_t, members_>& sizes) {
-    int32_t ret = 0;
-    constexpr_for<0, members_>([&sizes, &ret](auto i) { ret += Layout<i>::computeDataSize(sizes[i]); });
-    return ret;
   }
 
   PortableHostCollection(const std::array<int32_t, members_>& sizes, alpaka_common::DevHost const& host)
@@ -212,10 +215,10 @@ public:
     // use the global "host" object returned by cms::alpakatools::host()
     std::array<int32_t, members_> sizes;
     constexpr_for<0, members_>(
-        [&sizes, &impl](auto i) { sizes[i] = impl.CollectionLeaf<i, Layout<i>>::layout_.metadata().size(); });
+        [&sizes, &impl](auto i) { sizes[i] = static_cast<Leaf<i> const&>(impl).layout_.metadata().size(); });
     new (newObj) PortableHostCollection(sizes, cms::alpakatools::host());
     constexpr_for<0, members_>([&sizes, &newObj, &impl](auto i) {
-      newObj->impl_.CollectionLeaf<i, Layout<i>>::layout_.ROOTReadStreamer(impl.CollectionLeaf<i, Layout<i>>::layout_);
+      static_cast<Leaf<i>&>(newObj->impl_).layout_.ROOTReadStreamer(static_cast<Leaf<i> const&>(impl).layout_);
     });
   }
 
