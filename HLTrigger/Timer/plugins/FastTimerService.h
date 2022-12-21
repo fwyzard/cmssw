@@ -180,6 +180,8 @@ private:
   // inherited from TBB task_scheduler_observer
   void on_scheduler_entry(bool worker) final;
   void on_scheduler_exit(bool worker) final;
+  void on_scheduler_idle(bool worker) final;
+  void on_scheduler_active(bool worker) final;
 
 public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);

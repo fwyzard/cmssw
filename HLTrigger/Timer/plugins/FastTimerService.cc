@@ -1796,6 +1796,10 @@ void FastTimerService::on_scheduler_exit(bool worker) {
   thread().measure_and_accumulate(job_summary_.idle);
 }
 
+void FastTimerService::on_scheduler_idle(bool worker) { thread().measure_and_accumulate(job_summary_.overhead); }
+
+void FastTimerService::on_scheduler_active(bool worker) { thread().measure_and_accumulate(job_summary_.idle); }
+
 FastTimerService::Measurement& FastTimerService::thread() { return guard_.thread(); }
 
 // describe the module's configuration
