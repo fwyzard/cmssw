@@ -1,0 +1,7 @@
+<lcgdict>
+  <class name="alpaka_serial_sync::SiPixelDigisDevice" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_serial_sync::SiPixelDigisDevice>" persistent="false"/>
+
+  <class name="alpaka_serial_sync::SiPixelDigiErrorsDevice" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_serial_sync::SiPixelDigiErrorsDevice>" persistent="false"/>
+</lcgdict>

@@ -1,0 +1,6 @@
+<!-- TODO: Unused class rule -->
+<lcgdict>
+  <class name="alpaka_cuda_async::BeamSpotAlpaka>" persistent="false"/>
+  <class name="cms::alpakatools::Product<alpaka_cuda_async::BeamSpotAlpaka>" persistent="false"/>
+  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_cuda_async::BeamSpotAlpaka>>" persistent="false"/>
+</lcgdict>

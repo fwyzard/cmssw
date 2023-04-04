@@ -1,0 +1,6 @@
+
+<lcgdict>
+  <class name="alpaka_rocm_async::BeamSpotAlpaka>" persistent="false"/>
+  <class name="cms::alpakatools::Product<alpaka_rocm_async::BeamSpotAlpaka>" persistent="false"/>
+  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_rocm_async::BeamSpotAlpaka>>" persistent="false"/>
+</lcgdict>

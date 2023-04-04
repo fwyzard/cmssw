@@ -1,3 +1,4 @@
+<use name="alpaka"/>
 <use name="cuda"/>
 <use name="CondFormats/DataRecord"/>
 <use name="CondFormats/SiPixelObjects"/>
@@ -6,7 +7,10 @@
 <use name="FWCore/Framework"/>
 <use name="FWCore/MessageLogger"/>
 <use name="FWCore/ParameterSet"/>
+<use name="HeterogeneousCore/AlpakaCore"/>
+<use name="HeterogeneousCore/AlpakaInterface"/>
 <use name="HeterogeneousCore/CUDACore"/>
+<flags ALPAKA_BACKENDS="1"/>
 <export>
   <lib name="1"/>
 </export>

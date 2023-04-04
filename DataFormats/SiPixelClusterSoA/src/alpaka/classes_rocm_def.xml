@@ -1,0 +1,5 @@
+<lcgdict>
+  <class name="alpaka_rocm_async::SiPixelClustersDevice" persistent="false"/>
+  <class name="cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::SiPixelClustersDevice>" persistent="false"/>
+  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::SiPixelClustersDevice>>" persistent="false"/>
+</lcgdict>
