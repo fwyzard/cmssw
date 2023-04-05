@@ -1,0 +1,21 @@
+<use name="eigen"/>
+<bin file="alpaka/TrackSoAHeterogeneous_test.cc alpaka/TrackSoAHeterogeneous_test.dev.cc" name="TrackSoAHeterogeneousAlpaka_test">
+  <use name="alpaka"/>
+  <use name="HeterogeneousCore/AlpakaInterface"/>
+<flags ALPAKA_BACKENDS="1"/>
+</bin>
+
+<!-- <use name="eigen"/>
+<bin file="alpaka/justTest.cc alpaka/justTest.dev.cc" name="TrackSoAHeterogeneousAlpaka_test">
+  <use name="alpaka"/>
+  <use name="HeterogeneousCore/AlpakaInterface"/>
+<flags ALPAKA_BACKENDS="1"/>
+</bin> -->
+
+<!-- <bin name="TrackSoAHeterogeneousAlpaka_catchTest" file="alpaka/test.dev.cc"> -->
+<!--   <use name="alpaka"/> -->
+<!--   <use name="catch2"/> -->
+<!--   <use name="HeterogeneousCore/AlpakaInterface"/> -->
+<!--   <flags CXXFLAGS="-g -DGPU_DEBUG"/> -->
+<!--   <flags ALPAKA_BACKENDS="1"/> -->
+<!-- </bin> -->
