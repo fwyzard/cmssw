@@ -2,7 +2,6 @@
 <use name="root"/>
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
-<use name="HeterogeneousCore/AlpakaUtilities"/>
 <use name="HeterogeneousCore/CUDAUtilities"/>
 <use name="MagneticField/Engine"/>
 <use name="MagneticField/Records"/>
