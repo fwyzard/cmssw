@@ -5,7 +5,7 @@
 #include <cstdio>
 
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "HeterogeneousCore/AlpakaUtilities/interface/prefixScan.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/prefixScan.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersLayout.h"

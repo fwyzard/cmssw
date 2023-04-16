@@ -13,7 +13,6 @@
 <use name="CUDADataFormats/BeamSpot"/>
 <use name="FWCore/ParameterSet"/>
 <use name="HeterogeneousCore/AlpakaCore"/>
-<use name="HeterogeneousCore/AlpakaUtilities"/>
 <use name="HeterogeneousCore/CUDACore"/>
 <use name="HeterogeneousCore/CUDAUtilities"/>
 <use name="RecoLocalTracker/ClusterParameterEstimator"/>

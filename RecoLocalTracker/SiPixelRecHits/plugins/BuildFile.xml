@@ -4,7 +4,6 @@
 <use name="DataFormats/TrackerCommon"/>
 <use name="HeterogeneousCore/AlpakaCore"/>
 <use name="HeterogeneousCore/AlpakaInterface"/>
-<use name="HeterogeneousCore/AlpakaUtilities"/>
 <use name="HeterogeneousCore/CUDACore"/>
 <use name="RecoLocalTracker/ClusterParameterEstimator"/>
 <use name="RecoLocalTracker/Records"/>

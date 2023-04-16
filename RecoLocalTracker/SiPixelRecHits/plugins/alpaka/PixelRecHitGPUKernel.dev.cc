@@ -8,7 +8,7 @@
 // CMSSW headers
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 
 #include "PixelRecHitGPUKernel.h"
 #include "pixelRecHits.h"

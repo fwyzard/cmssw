@@ -20,8 +20,8 @@
 #include <utility>
 
 // CMSSW includes
-#include "HeterogeneousCore/AlpakaUtilities/interface/prefixScan.h"
-#include "HeterogeneousCore/AlpakaUtilities/interface/SimpleVector.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/prefixScan.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"

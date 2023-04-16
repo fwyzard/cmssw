@@ -5,7 +5,6 @@
 <use name="DataFormats/Common"/>
 <use name="DataFormats/TrackerCommon" source_only="1"/>
 <use name="DataFormats/SoATemplate" source_only="1"/>
-<use name="HeterogeneousCore/AlpakaUtilities"/>
 <use name="HeterogeneousCore/AlpakaInterface"/>
 <flags ALPAKA_BACKENDS="cuda rocm"/>
 <export>

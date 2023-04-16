@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParams.h"
 #include "SiPixelHitStatus.h"
