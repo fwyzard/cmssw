@@ -12,7 +12,7 @@
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"
-#include "HeterogeneousCore/AlpakaUtilities/interface/SimpleVector.h"
+#include "HeterogeneousCore/AlapakaInterface/interface/SimpleVector.h"
 
 #include "CAHitNtupletGeneratorKernels.h"
 #include "CACell.h"

@@ -20,7 +20,7 @@
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
 #include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
-#include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"

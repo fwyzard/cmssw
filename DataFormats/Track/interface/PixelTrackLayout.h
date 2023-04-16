@@ -2,7 +2,7 @@
 #define DataFormats_Track_interface_PixelTrackLayout_h
 
 #include <Eigen/Core>
-#include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"

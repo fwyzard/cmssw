@@ -1,6 +1,6 @@
 #include <alpaka/alpaka.hpp>
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"

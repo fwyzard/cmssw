@@ -9,7 +9,7 @@
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "HeterogeneousCore/AlpakaUtilities/interface/VecArray.h"
+#include "HeterogeneousCore/AlapakaInterface/interface/VecArray.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/Math/interface/approx_atan2.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
