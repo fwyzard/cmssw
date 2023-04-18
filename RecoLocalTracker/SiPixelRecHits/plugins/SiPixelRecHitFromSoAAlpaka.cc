@@ -3,7 +3,6 @@
 #include <fmt/printf.h>
 
 #include "DataFormats/Portable/interface/HostProductAlpaka.h"
-#include "DataFormats/Portable/interface/Product.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"

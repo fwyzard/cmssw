@@ -2,7 +2,6 @@
 #define DataFormats_TrackingRecHitSoA_alpaka_classes_serial_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
-#include "DataFormats/Portable/interface/Product.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 

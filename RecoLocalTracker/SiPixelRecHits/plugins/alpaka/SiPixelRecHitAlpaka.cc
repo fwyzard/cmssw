@@ -1,5 +1,4 @@
 #include "DataFormats/BeamSpotAlpaka/interface/alpaka/BeamSpotAlpaka.h"
-#include "DataFormats/Portable/interface/Product.h"
 #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
