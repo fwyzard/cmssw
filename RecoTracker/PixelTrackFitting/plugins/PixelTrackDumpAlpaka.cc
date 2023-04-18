@@ -1,6 +1,5 @@
 #include <Eigen/Core>  // needed here by soa layout
 
-#include "DataFormats/Portable/interface/Product.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
