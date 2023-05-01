@@ -1,12 +1,10 @@
 <lcgdict>
   <class name="alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase1" persistent="false"/>
   <class name="edm::Wrapper<alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase1>" persistent="false"/>
-  <class name="cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase1>" persistent="false"/>
-  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase1>>" persistent="false"/>
+  <class name="edm::DeviceProduct<alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase1>" persistent="false"/>
 
   <class name="alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase2" persistent="false"/>
   <class name="edm::Wrapper<alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase2>" persistent="false"/>
-  <class name="cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase2>" persistent="false"/>
-  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase2>>" persistent="false"/>
+  <class name="edm::DeviceProduct<alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase2>" persistent="false"/>
 
 </lcgdict>

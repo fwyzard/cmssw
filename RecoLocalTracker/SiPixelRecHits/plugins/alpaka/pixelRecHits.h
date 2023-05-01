@@ -9,7 +9,7 @@
 
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "DataFormats/BeamSpotAlpaka/interface/alpaka/BeamSpotAlpaka.h"
+#include "DataFormats/BeamSpotSoA/interface/alpaka/BeamSpotDevice.h"
 #include "DataFormats/Math/interface/approx_atan2.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
@@ -28,7 +28,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* __restrict__ cpeParams,
-                                    BeamSpotPOD const* __restrict__ bs,
+                                    BeamSpotLayoutSoAConstView bs,
                                     SiPixelDigisLayoutSoAConstView digis,
                                     uint32_t numElements,
                                     SiPixelClustersLayoutSoAConstView clusters,
@@ -50,17 +50,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           auto nLadders = TrackerTraits::numberOfLaddersInBarrel;
 
           cms::alpakatools::for_each_element_in_block_strided(acc, nLadders, [&](uint32_t il) {
-            agc.ladderZ[il] = ag.ladderZ[il] - bs->z;
-            agc.ladderX[il] = ag.ladderX[il] - bs->x;
-            agc.ladderY[il] = ag.ladderY[il] - bs->y;
+            agc.ladderZ[il] = ag.ladderZ[il] - bs.z();
+            agc.ladderX[il] = ag.ladderX[il] - bs.x();
+            agc.ladderY[il] = ag.ladderY[il] - bs.y();
             agc.ladderR[il] = sqrt(agc.ladderX[il] * agc.ladderX[il] + agc.ladderY[il] * agc.ladderY[il]);
-            agc.ladderMinZ[il] = ag.ladderMinZ[il] - bs->z;
-            agc.ladderMaxZ[il] = ag.ladderMaxZ[il] - bs->z;
+            agc.ladderMinZ[il] = ag.ladderMinZ[il] - bs.z();
+            agc.ladderMaxZ[il] = ag.ladderMaxZ[il] - bs.z();
           });
 
           if (0 == threadIdxLocal) {
-            agc.endCapZ[0] = ag.endCapZ[0] - bs->z;
-            agc.endCapZ[1] = ag.endCapZ[1] - bs->z;
+            agc.endCapZ[0] = ag.endCapZ[0] - bs.z();
+            agc.endCapZ[1] = ag.endCapZ[1] - bs.z();
           }
         }
 
@@ -218,9 +218,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             // to global and compute phi...
             cpeParams->detParams(me).frame.toGlobal(xl, yl, xg, yg, zg);
             // here correct for the beamspot...
-            xg -= bs->x;
-            yg -= bs->y;
-            zg -= bs->z;
+            xg -= bs.x();
+            yg -= bs.y();
+            zg -= bs.z();
 
             hits[h].xGlobal() = xg;
             hits[h].yGlobal() = yg;

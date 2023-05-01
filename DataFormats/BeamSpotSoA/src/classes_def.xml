@@ -1,0 +1,19 @@
+<lcgdict>
+  <class name="BeamSpotLayoutSoA"/>
+  <class name="BeamSpotLayoutSoA::View"/>
+  <class name="PortableHostCollection<BeamSpotLayoutSoA>"/>
+  <read
+    sourceClass="PortableHostCollection<BeamSpotLayoutSoA>"
+    targetClass="PortableHostCollection<BeamSpotLayoutSoA>"
+    version="[1-]"
+    source="BeamSpotLayoutSoA layout_;"
+    target="buffer_"
+    embed="false">
+  <![CDATA[
+    PortableHostCollection<BeamSpotLayoutSoA>::ROOTReadStreamer(newObj, onfile.layout_);
+  ]]>
+  </read>
+
+  <class name="BeamSpotHost"/>
+  <class name="edm::Wrapper<BeamSpotHost>" splitLevel="0"/>
+</lcgdict>

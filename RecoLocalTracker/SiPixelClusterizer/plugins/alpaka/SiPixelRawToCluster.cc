@@ -110,7 +110,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                            iConfig.getParameter<int32_t>("clusterThreshold_otherLayers")} {
     if (includeErrors_) {
       digiErrorPutToken_ =
-          produces();  //<cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::SiPixelDigisDevice>>(); //reg.produces<cms::alpakatools::Product<Queue, SiPixelDigiErrorsAlpaka>>();
+          produces();  //<edm::DeviceProduct<alpaka_cuda_async::Queue,alpaka_cuda_async::SiPixelDigisDevice>>(); //reg.produces<edm::DeviceProduct<Queue, SiPixelDigiErrorsAlpaka>>();
     }
 
     // regions

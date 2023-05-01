@@ -1,4 +1,0 @@
-<lcgdict>
-  <class name="alpaka_serial_sync::SiPixelClustersDevice" persistent="false"/>
-  <class name="edm::Wrapper<alpaka_serial_sync::SiPixelClustersDevice>" persistent="false"/>
-</lcgdict>

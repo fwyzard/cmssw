@@ -1,8 +1,0 @@
-<use name="alpaka"/>
-<use name="rootcore"/>
-<use name="DataFormats/BeamSpot"/>
-<use name="HeterogeneousCore/AlpakaInterface"/>
-<flags ALPAKA_BACKENDS="serial"/>
-<export>
-  <lib name="1"/>
-</export>

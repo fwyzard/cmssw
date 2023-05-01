@@ -2,6 +2,7 @@
 #define DataFormats_SiPixelDigiSoA_alpaka_classes_cuda_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
+#include "DataFormats/Common/interface/DeviceProduct.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
 

@@ -49,7 +49,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     TrackingRecHitAlpakaDevice<TrackerTraits> PixelRecHitGPUKernel<TrackerTraits>::makeHitsAsync(
         SiPixelDigisDevice const& digis_d,
         SiPixelClustersDevice const& clusters_d,
-        BeamSpotAlpaka const& bs_d,
+        BeamSpotDevice const& bs_d,
         pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* cpeParams,
         Queue queue) const {
       using namespace gpuPixelRecHits;
@@ -72,7 +72,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             workDiv1D,
                             getHits<TrackerTraits>{},
                             cpeParams,
-                            bs_d.data(),
+                            bs_d.view(),
                             digis_d.view(),
                             digis_d.nDigis(),
                             clusters_d.view(),
