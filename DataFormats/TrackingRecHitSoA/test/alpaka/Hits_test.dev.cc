@@ -1,5 +1,6 @@
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 

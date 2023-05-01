@@ -7,9 +7,12 @@
 
 #include "DataFormats/BeamSpotSoA/interface/BeamSpotLayout.h"
 #include "DataFormats/BeamSpotSoA/interface/alpaka/BeamSpotDevice.h"
-#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParams.h"
@@ -31,8 +34,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       using ParamsOnGPU = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
 
-      TrackingRecHitAlpakaDevice<TrackerTraits> makeHitsAsync(SiPixelDigisDevice const& digis_d,
-                                                              SiPixelClustersDevice const& clusters_d,
+      TrackingRecHitAlpakaCollection<TrackerTraits> makeHitsAsync(SiPixelDigisSoA const& digis_d,
+                                                              SiPixelClustersSoA const& clusters_d,
                                                               BeamSpotDevice const& bs_d,
                                                               ParamsOnGPU const* cpeParams,
                                                               Queue queue) const;

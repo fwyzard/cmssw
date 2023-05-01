@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelClusterSoA_SiPixelClustersHost_h
-#define DataFormats_SiPixelClusterSoA_SiPixelClustersHost_h
+#ifndef DataFormats_SiPixelClusterSoA_interface_SiPixelClustersHost_h
+#define DataFormats_SiPixelClusterSoA_interface_SiPixelClustersHost_h
 
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
@@ -35,4 +35,4 @@ private:
   int32_t offsetBPIX2_h = 0;
 };
 
-#endif  // DataFormats_SiPixelClusterSoA_SiPixelClustersHost_h
+#endif  // DataFormats_SiPixelClusterSoA_interface_SiPixelClustersHost_h

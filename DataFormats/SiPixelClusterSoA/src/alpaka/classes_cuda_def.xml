@@ -1,4 +1,4 @@
 <lcgdict>
-  <class name="alpaka_cuda_async::SiPixelClustersDevice" persistent="false"/>
-  <class name="edm::DeviceProduct<alpaka_cuda_async::SiPixelClustersDevice>" persistent="false"/>
+  <class name="alpaka_cuda_async::SiPixelClustersSoA" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_cuda_async::SiPixelClustersSoA>" persistent="false"/>
 </lcgdict>

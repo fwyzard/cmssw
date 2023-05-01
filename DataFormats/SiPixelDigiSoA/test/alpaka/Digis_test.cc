@@ -1,7 +1,8 @@
 #include <alpaka/alpaka.hpp>
 #include <unistd.h>
 
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
 
@@ -30,7 +31,7 @@ int main() {
   {
     // Instantiate tracks on device. PortableDeviceCollection allocates
     // SoA on device automatically.
-    SiPixelDigisDevice digis_d(1000, queue);
+    SiPixelDigisSoA digis_d(1000, queue);
     testDigisSoA::runKernels(digis_d.view(), queue);
 
     // Instantate tracks on host. This is where the data will be

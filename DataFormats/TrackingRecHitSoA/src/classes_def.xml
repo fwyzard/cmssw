@@ -1,11 +1,13 @@
 <lcgdict>
   <class name="TrackingRecHitAlpakaSoA<pixelTopology::Phase1>"/>
-  <!-- <class name="TrackingRecHitAlpakaLayout<pixelTopology::Phase1>"/>
-  <class name="TrackingRecHitAlpakaSoAView<pixelTopology::Phase1>"/> -->
+  <class name="TrackingRecHitAlpakaSoA<pixelTopology::Phase1>::TrackingRecHitAlpakaSoALayout<>"/>
+  <class name="TrackingRecHitAlpakaLayout<pixelTopology::Phase1>"/>
+  <class name="TrackingRecHitAlpakaSoAView<pixelTopology::Phase1>"/>
 
   <class name="TrackingRecHitAlpakaSoA<pixelTopology::Phase2>"/>
-  <!-- <class name="TrackingRecHitAlpakaLayout<pixelTopology::Phase2>"/>
-  <class name="TrackingRecHitAlpakaSoAView<pixelTopology::Phase2>"/> -->
+  <class name="TrackingRecHitAlpakaSoA<pixelTopology::Phase2>::TrackingRecHitAlpakaSoALayout<>"/>
+  <class name="TrackingRecHitAlpakaLayout<pixelTopology::Phase2>"/>
+  <class name="TrackingRecHitAlpakaSoAView<pixelTopology::Phase2>"/>
 
     <class name="PortableHostCollection<TrackingRecHitAlpakaLayout<pixelTopology::Phase1>>"/>
   <read

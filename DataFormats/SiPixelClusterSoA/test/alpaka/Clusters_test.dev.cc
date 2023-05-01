@@ -1,4 +1,5 @@
-#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"

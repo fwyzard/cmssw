@@ -1,7 +1,10 @@
 #include "DataFormats/BeamSpotSoA/interface/alpaka/BeamSpotDevice.h"
-#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParams.h"
@@ -40,9 +43,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     const device::ESGetToken<pixelCPEforDevice::PixelCPEFastParams<Device, TrackerTraits>, TkPixelCPERecord> cpeToken_;
     const device::EDGetToken<BeamSpotDevice> tBeamSpot;
-    const device::EDGetToken<SiPixelClustersDevice> tokenClusters_;
-    const device::EDGetToken<SiPixelDigisDevice> tokenDigi_;
-    const device::EDPutToken<TrackingRecHitAlpakaDevice<TrackerTraits>> tokenHit_;
+    const device::EDGetToken<SiPixelClustersSoA> tokenClusters_;
+    const device::EDGetToken<SiPixelDigisSoA> tokenDigi_;
+    const device::EDPutToken<TrackingRecHitAlpakaCollection<TrackerTraits>> tokenHit_;
 
     const pixelgpudetails::PixelRecHitGPUKernel<TrackerTraits> gpuAlgo_;
   };

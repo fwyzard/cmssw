@@ -4,9 +4,12 @@
 #include <utility>
 #include <vector>
 
-#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsCollection.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
 
 #include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelMappingDevice.h"
 #include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelMappingUtilities.h"
@@ -70,9 +73,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // cms::alpakatools::ContextState<Queue> ctxState_;
 
     edm::EDGetTokenT<FEDRawDataCollection> rawGetToken_;
-    device::EDPutToken<SiPixelDigisDevice> digiPutToken_;
-    device::EDPutToken<SiPixelDigiErrorsDevice> digiErrorPutToken_;
-    device::EDPutToken<SiPixelClustersDevice> clusterPutToken_;
+    device::EDPutToken<SiPixelDigisSoA> digiPutToken_;
+    device::EDPutToken<SiPixelDigiErrorsSoA> digiErrorPutToken_;
+    device::EDPutToken<SiPixelClustersSoA> clusterPutToken_;
 
     edm::ESWatcher<SiPixelFedCablingMapRcd> recordWatcher_;
     const device::ESGetToken<SiPixelMappingDevice, SiPixelMappingSoARecord> mapToken_;
@@ -290,12 +293,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // still used downstream to initialize TrackingRecHitSoADevice. If there
       // are no valid pointers to clusters' Collection columns, instantiation
       // of TrackingRecHits fail. Example: workflow 11604.0
-      SiPixelDigisDevice digis_d = SiPixelDigisDevice(nDigis_, iEvent.queue());
-      SiPixelClustersDevice clusters_d = SiPixelClustersDevice(pixelTopology::Phase1::numberOfModules, iEvent.queue());
+      SiPixelDigisSoA digis_d = SiPixelDigisSoA(nDigis_, iEvent.queue());
+      SiPixelClustersSoA clusters_d = SiPixelClustersSoA(pixelTopology::Phase1::numberOfModules, iEvent.queue());
       iEvent.emplace(digiPutToken_, std::move(digis_d));
       iEvent.emplace(clusterPutToken_, std::move(clusters_d));
       if (includeErrors_) {
-        iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsDevice());
+        iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsSoA());
       }
       return;
     }

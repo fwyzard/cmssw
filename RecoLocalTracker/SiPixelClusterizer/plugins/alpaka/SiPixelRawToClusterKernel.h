@@ -8,9 +8,12 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 
-#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsDevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsCollection.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsDevice.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 
 #include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLTLayout.h"
@@ -165,32 +168,32 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                    const uint32_t numDigis,
                                    Queue& queue);
 
-      // std::pair<SiPixelDigisDevice, SiPixelClustersDevice> getResults() {
+      // std::pair<SiPixelDigisSoA, SiPixelClustersDevice> getResults() {
       //   digis_d->setNModulesDigis(nModules_Clusters_h[0], nDigis);
       //   clusters_d->setNClusters(nModules_Clusters_h[1], nModules_Clusters_h[2]);
       //   return std::make_pair(std::move(*digis_d), std::move(*clusters_d));
       // }
 
-      SiPixelDigisDevice&& getDigis() {
+      SiPixelDigisSoA&& getDigis() {
         digis_d->setNModulesDigis(nModules_Clusters_h[0], nDigis);
         return std::move(*digis_d);
       }
 
-      SiPixelClustersDevice&& getClusters() {
+      SiPixelClustersSoA&& getClusters() {
         clusters_d->setNClusters(nModules_Clusters_h[1], nModules_Clusters_h[2]);
         return std::move(*clusters_d);
       }
 
-      SiPixelDigiErrorsDevice&& getErrors() { return std::move(*digiErrors_d); }
+      SiPixelDigiErrorsSoA&& getErrors() { return std::move(*digiErrors_d); }
 
     private:
       uint32_t nDigis = 0;
 
       // Data to be put in the event
       cms::alpakatools::host_buffer<uint32_t[]> nModules_Clusters_h;
-      std::optional<SiPixelDigisDevice> digis_d;
-      std::optional<SiPixelClustersDevice> clusters_d;
-      std::optional<SiPixelDigiErrorsDevice> digiErrors_d;
+      std::optional<SiPixelDigisSoA> digis_d;
+      std::optional<SiPixelClustersSoA> clusters_d;
+      std::optional<SiPixelDigiErrorsSoA> digiErrors_d;
     };
 
   }  // namespace pixelDetails

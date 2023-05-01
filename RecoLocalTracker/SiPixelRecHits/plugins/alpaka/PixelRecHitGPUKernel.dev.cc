@@ -46,16 +46,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelgpudetails {
 
     template <typename TrackerTraits>
-    TrackingRecHitAlpakaDevice<TrackerTraits> PixelRecHitGPUKernel<TrackerTraits>::makeHitsAsync(
-        SiPixelDigisDevice const& digis_d,
-        SiPixelClustersDevice const& clusters_d,
+    TrackingRecHitAlpakaCollection<TrackerTraits> PixelRecHitGPUKernel<TrackerTraits>::makeHitsAsync(
+        SiPixelDigisSoA const& digis_d,
+        SiPixelClustersSoA const& clusters_d,
         BeamSpotDevice const& bs_d,
         pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* cpeParams,
         Queue queue) const {
       using namespace gpuPixelRecHits;
       auto nHits = clusters_d.nClusters();
 
-      TrackingRecHitAlpakaDevice<TrackerTraits> hits_d(
+      TrackingRecHitAlpakaCollection<TrackerTraits> hits_d(
           nHits, clusters_d.offsetBPIX2(), cpeParams, clusters_d->clusModuleStart(), queue);
 
       int activeModulesWithDigis = digis_d.nModules();

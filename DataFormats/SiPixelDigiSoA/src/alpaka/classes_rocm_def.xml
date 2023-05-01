@@ -1,6 +1,4 @@
 <lcgdict>
-  <class name="alpaka_rocm_async::SiPixelDigisDevice" persistent="false"/>
-  <class name="edm::Wrapper<alpaka_rocm_async::SiPixelDigisDevice>" persistent="false"/>
-  <class name="edm::DeviceProduct<alpaka_rocm_async::SiPixelDigisDevice>" persistent="false"/>
-  <class name="edm::Wrapper<edm::DeviceProduct<alpaka_rocm_async::SiPixelDigisDevice>>" persistent="false"/>
+  <class name="alpaka_rocm_async::SiPixelDigisSoA" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_rocm_async::SiPixelDigisSoA>" persistent="false"/>
 </lcgdict>

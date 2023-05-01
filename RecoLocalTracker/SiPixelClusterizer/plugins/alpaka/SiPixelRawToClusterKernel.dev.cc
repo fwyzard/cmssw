@@ -601,11 +601,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
       constexpr int numberOfModules = pixelTopology::Phase1::numberOfModules;
-      digis_d = SiPixelDigisDevice(wordCounter, queue);
+      digis_d = SiPixelDigisSoA(wordCounter, queue);
       if (includeErrors) {
-        digiErrors_d = SiPixelDigiErrorsDevice(wordCounter, std::move(errors), queue);
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+        digiErrors_d = SiPixelDigiErrorsSoA(wordCounter, std::move(errors));
+#else
+        digiErrors_d = SiPixelDigiErrorsSoA(wordCounter, std::move(errors), queue);
+#endif
       }
-      clusters_d = SiPixelClustersDevice(numberOfModules, queue);
+      clusters_d = SiPixelClustersSoA(numberOfModules, queue);
 
       if (wordCounter)  // protect in case of empty event....
       {
@@ -775,11 +779,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       using pixelTopology::Phase2;
       nDigis = numDigis;
       constexpr int numberOfModules = pixelTopology::Phase2::numberOfModules;
-      // digis_d = SiPixelDigisDevice(numDigis, queue);
+      // digis_d = SiPixelDigisSoA(numDigis, queue);
 
       // alpaka::memcpy(queue, digis_d->view(), digis_h_view);
 
-      clusters_d = SiPixelClustersDevice(Phase2::numberOfModules, queue);
+      clusters_d = SiPixelClustersSoA(numberOfModules, queue);
 
       // nModules_Clusters_h = cms::cuda::make_host_unique<uint32_t[]>(2, stream);
 

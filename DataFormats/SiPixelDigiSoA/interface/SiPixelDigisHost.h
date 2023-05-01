@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigi_SiPixelDigisHost_h
-#define DataFormats_SiPixelDigi_SiPixelDigisHost_h
+#ifndef DataFormats_SiPixelDigiSoA_interface_SiPixelDigisHost_h
+#define DataFormats_SiPixelDigiSoA_interface_SiPixelDigisHost_h
 
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
@@ -33,4 +33,4 @@ private:
   uint32_t nDigis_h = 0;
 };
 
-#endif  // DataFormats_SiPixelDigi_SiPixelDigisHost_h
+#endif  // DataFormats_SiPixelDigiSoA_interface_SiPixelDigisHost_h
