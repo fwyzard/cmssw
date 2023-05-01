@@ -37,7 +37,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "HeterogeneousCore/AlpakaCore/interface/ScopedContext.h"
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
 
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"

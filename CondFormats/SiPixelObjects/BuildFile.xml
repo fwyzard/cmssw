@@ -14,7 +14,8 @@
 <use name="Geometry/CommonDetUnit"/>
 <use name="Geometry/CommonTopologies"/>
 <use name="HeterogeneousCore/AlpakaInterface"/>
-<flags ALPAKA_BACKENDS="cuda rocm"/>
+<use name="HeterogeneousCore/AlpakaCore"/>
+<flags ALPAKA_BACKENDS="1"/>
 <export>
   <lib name="1"/>
 </export>

@@ -1,5 +1,5 @@
 <use name="fmt"/>
-<use name="DataFormats/BeamSpotAlpaka"/>
+<use name="DataFormats/BeamSpotSoA"/>
 <use name="DataFormats/TrackingRecHitSoA"/>
 <use name="DataFormats/TrackerCommon"/>
 <use name="HeterogeneousCore/AlpakaCore"/>

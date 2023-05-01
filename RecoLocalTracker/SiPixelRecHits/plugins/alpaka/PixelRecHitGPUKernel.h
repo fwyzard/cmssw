@@ -5,6 +5,7 @@
 
 #include <alpaka/alpaka.hpp>
 
+#include "DataFormats/BeamSpotSoA/interface/BeamSpotLayout.h"
 #include "DataFormats/BeamSpotSoA/interface/alpaka/BeamSpotDevice.h"
 #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"

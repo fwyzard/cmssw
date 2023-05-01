@@ -1,6 +1,8 @@
 #include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLTHost.h"
+#include "CalibTracker/Records/interface/SiPixelGainCalibrationForHLTSoARcd.h"
 #include "CondFormats/DataRecord/interface/SiPixelGainCalibrationForHLTRcd.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLT.h"
+#include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "FWCore/Framework/interface/ESProducer.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
