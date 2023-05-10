@@ -17,15 +17,19 @@ public:
                                  SiPixelFormatterErrors errors,
                                  cms::alpakatools::host_buffer<SiPixelErrorCompact[]> data)
       : nErrorWords_(nErrorWords), formatterErrors_h{std::move(errors)} {
+    printf("SiPixelDigiErrorsHost");
     data_h = std::move(data);
     error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();
     (*error_h).data()->set_data((*data_h).data());
+    printf("ok SiPixelDigiErrorsHost");
   }
   explicit SiPixelDigiErrorsHost(int nErrorWords, SiPixelFormatterErrors errors)
       : nErrorWords_(nErrorWords), formatterErrors_h{std::move(errors)} {
+    printf("SiPixelDigiErrorsHost");        
     data_h = cms::alpakatools::make_host_buffer<SiPixelErrorCompact[]>(nErrorWords);
     error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();
     (*error_h).data()->set_data((*data_h).data());
+    printf("ok SiPixelDigiErrorsHost");
   }
 
   int nErrorWords() const { return nErrorWords_; }

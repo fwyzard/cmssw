@@ -14,12 +14,14 @@ class SiPixelDigiErrorsDevice {
 public:
   template <typename TQueue>
   explicit SiPixelDigiErrorsDevice(size_t maxFedWords, SiPixelFormatterErrors errors, TQueue& queue)
-      : maxFedWords_(maxFedWords), formatterErrors_h{std::move(errors)} {
+      : maxFedWords_(maxFedWords), formatterErrors_h{errors} {
+    printf("SiPixelDigiErrorsDevice");
     data_d = cms::alpakatools::make_device_buffer<SiPixelErrorCompact[]>(queue, maxFedWords);
     error_d = cms::alpakatools::make_device_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact> >(queue);
     (*error_d).data()->construct(maxFedWords, data_d->data());
     ALPAKA_ASSERT_OFFLOAD((*error_d).data()->empty());
     ALPAKA_ASSERT_OFFLOAD((*error_d).data()->capacity() == static_cast<int>(maxFedWords));
+    printf("ok SiPixelDigiErrorsDevice");
   }
   SiPixelDigiErrorsDevice() = default;
   ~SiPixelDigiErrorsDevice() = default;

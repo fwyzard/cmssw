@@ -8,4 +8,6 @@
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
+using namespace pixelTopology;
+
 #endif  // DataFormats_Track_src_alpaka_classes_cuda_h
