@@ -12,7 +12,7 @@
 #include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelGainCalibrationForHLTUtilities.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersLayout.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisErrorLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"

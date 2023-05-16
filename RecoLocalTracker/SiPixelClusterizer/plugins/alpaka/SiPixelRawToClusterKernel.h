@@ -155,7 +155,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                              const unsigned char* modToUnp,
                              const SiPixelGainCalibrationForHLTSoAConstView& gains,
                              const WordFedAppender& wordFed,
-                             SiPixelFormatterErrors&& errors,
+                             //  SiPixelFormatterErrors&& errors,
                              const uint32_t wordCounter,
                              const uint32_t fedCounter,
                              bool useQualityInfo,

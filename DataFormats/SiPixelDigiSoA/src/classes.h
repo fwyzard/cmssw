@@ -4,6 +4,7 @@
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
 
 #endif  // DataFormats_SiPixelClusterSoA_src_classes_h

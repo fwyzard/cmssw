@@ -1,4 +1,6 @@
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsUtilities.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorsSoA.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -23,7 +25,7 @@ private:
   edm::EDGetTokenT<SiPixelDigiErrorsHost> digiErrorGetToken_;
   edm::EDPutTokenT<SiPixelErrorsSoA> digiErrorPutToken_;
 
-  std::optional<cms::alpakatools::host_buffer<SiPixelErrorCompact[]>> data_;
+  // std::optional<cms::alpakatools::host_buffer<SiPixelErrorCompact[]>> data_;
   cms::alpakatools::SimpleVector<SiPixelErrorCompact> error_ =
       cms::alpakatools::make_SimpleVector<SiPixelErrorCompact>(0, nullptr);
   const SiPixelFormatterErrors* formatterErrors_ = nullptr;
@@ -53,16 +55,20 @@ void SiPixelDigiErrorsSoAFromAlpaka::produce(edm::Event& iEvent, const edm::Even
 
   const auto& cpuDigiErrors = iEvent.get(digiErrorGetToken_);
 
-  if (cpuDigiErrors.nErrorWords() == 0)
+  if (cpuDigiErrors.maxFedWords() == 0)
     return;
 
+  formatterErrors_ = nullptr;
+
   error_ = *cpuDigiErrors.error();
-  data_ = std::move(cpuDigiErrors.error_data());
-  formatterErrors_ = &(cpuDigiErrors.formatterErrors());
+  // error_ = *error(cpuDigiErrors.view());
+  // data_ = std::move(cpuDigiErrors.error_data());
+  // data_ = std::move(cpuDigiErrors.view().pixelErrors());
+  // formatterErrors_ = &(cpuDigiErrors.formatterErrors());
 
   iEvent.emplace(digiErrorPutToken_, error_.size(), error_.data(), formatterErrors_);
   error_ = cms::alpakatools::make_SimpleVector<SiPixelErrorCompact>(0, nullptr);
-  data_.reset();
+  // data_.reset();
   formatterErrors_ = nullptr;
 }
 

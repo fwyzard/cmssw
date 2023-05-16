@@ -278,7 +278,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             modulesToUnpack,
                             dGains.const_view(),
                             wordFedAppender,
-                            std::move(errors_),
+                            // std::move(errors_),
                             wordCounter,
                             fedCounter,
                             useQuality_,
