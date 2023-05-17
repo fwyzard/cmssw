@@ -224,13 +224,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       if (nWords == 0) {
         continue;
       }
-      std::cout << __LINE__ << std::endl;
+      // std::cout << __LINE__ << std::endl;
       // check CRC bit
       const cms_uint64_t* trailer = reinterpret_cast<const cms_uint64_t*>(rawData.data()) + (nWords - 1);
       if (not errorcheck.checkCRC(errorsInEvent, fedId, trailer, errors_)) {
         continue;
       }
-      std::cout << __LINE__ << std::endl;
+      // std::cout << __LINE__ << std::endl;
       // check headers
       const cms_uint64_t* header = reinterpret_cast<const cms_uint64_t*>(rawData.data());
       header--;
@@ -285,31 +285,41 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             includeErrors_,
                             edm::MessageDrop::instance()->debugEnabled,
                             iEvent.queue());
+    std::cout << __LINE__ << std::endl;
   }
 
   void SiPixelRawToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
+    std::cout << __LINE__ << std::endl;
     if (nDigis_ == 0) {
       // Cannot use the default constructor here, as it would not allocate memory.
       // In the case of no digis, clusters_d are not being instantiated, but are
       // still used downstream to initialize TrackingRecHitSoADevice. If there
       // are no valid pointers to clusters' Collection columns, instantiation
       // of TrackingRecHits fail. Example: workflow 11604.0
+      std::cout << __LINE__ << std::endl;
       SiPixelDigisSoA digis_d = SiPixelDigisSoA(nDigis_, iEvent.queue());
       SiPixelClustersSoA clusters_d = SiPixelClustersSoA(pixelTopology::Phase1::numberOfModules, iEvent.queue());
+      std::cout << __LINE__ << std::endl;
       iEvent.emplace(digiPutToken_, std::move(digis_d));
       iEvent.emplace(clusterPutToken_, std::move(clusters_d));
+      std::cout << __LINE__ << std::endl;
       if (includeErrors_) {
+        std::cout << __LINE__ << std::endl;
         iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsSoA());
       }
       return;
     }
+    std::cout << __LINE__ << std::endl;
 
     // auto tmp = Algo_.getResults();
     iEvent.emplace(digiPutToken_, Algo_.getDigis());  //std::move(tmp.first));
     iEvent.emplace(clusterPutToken_, Algo_.getClusters());
+    std::cout << __LINE__ << std::endl;
     if (includeErrors_) {
+      std::cout << __LINE__ << std::endl;
       iEvent.emplace(digiErrorPutToken_, Algo_.getErrors());
     }
+    std::cout << __LINE__ << std::endl;
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

@@ -91,7 +91,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     SiPixelClustersLayoutSoAView clus_view,
                                     const unsigned int numElements) const {
         [[maybe_unused]] constexpr int nMaxModules = TrackerTraits::numberOfModules;
-        assert(nMaxModules < nMaxModules);  //TODO better naming
 
         cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
           digi_view[i].clus() = i;

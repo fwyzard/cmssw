@@ -18,14 +18,14 @@ public:
   template <typename TQueue>
   explicit SiPixelDigiErrorsDevice(size_t maxFedWords, TQueue queue)
       : PortableDeviceCollection<SiPixelDigiErrorsLayout<>, TDev>(maxFedWords, queue), maxFedWords_(maxFedWords) {
-    printf("SiPixelDigiErrorsDevice");
+    printf("SiPixelDigiErrorsDevice\n");
     // data_d = cms::alpakatools::make_device_buffer<SiPixelErrorCompact[]>(queue, maxFedWords);
     // error_d = cms::alpakatools::make_device_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>(queue);
     // (*error_d).data()->construct(maxFedWords, data_d->data());
-    this->view().pixelErrorsVec().set_data(this->view().pixelErrors());
-    ALPAKA_ASSERT_OFFLOAD(this->view().pixelErrorsVec().empty());
-    ALPAKA_ASSERT_OFFLOAD(this->view().pixelErrorsVec().capacity() == static_cast<int>(maxFedWords));
-    printf("ok SiPixelDigiErrorsDevice");
+    // this->view().pixelErrorsVec().set_data(this->view().pixelErrors());
+    // ALPAKA_ASSERT_OFFLOAD(this->view().pixelErrorsVec().empty());
+    // ALPAKA_ASSERT_OFFLOAD(this->view().pixelErrorsVec().capacity() == static_cast<int>(maxFedWords));
+    printf("ok SiPixelDigiErrorsDevice\n");
   }
   ~SiPixelDigiErrorsDevice() = default;
 
@@ -36,13 +36,13 @@ public:
   SiPixelDigiErrorsDevice(SiPixelDigiErrorsDevice&&) = default;
   SiPixelDigiErrorsDevice& operator=(SiPixelDigiErrorsDevice&&) = default;
 
-  cms::alpakatools::SimpleVector<SiPixelErrorCompact>* error() { return (&this->view().pixelErrorsVec()); }
-  cms::alpakatools::SimpleVector<SiPixelErrorCompact> const* error() const { return (&this->view().pixelErrorsVec()); }
-  cms::alpakatools::SimpleVector<SiPixelErrorCompact> const* c_error() const {
-    return (&this->view().pixelErrorsVec());
-  }
+  // cms::alpakatools::SimpleVector<SiPixelErrorCompact>* error() { return (&this->view().pixelErrorsVec()); }
+  // cms::alpakatools::SimpleVector<SiPixelErrorCompact> const* error() const { return (&this->view().pixelErrorsVec()); }
+  // cms::alpakatools::SimpleVector<SiPixelErrorCompact> const* c_error() const {
+  //   return (&this->view().pixelErrorsVec());
+  // }
 
-  auto& error_vector() const { return (this->view().pixelErrorsVec()); }
+  // auto& error_vector() const { return (this->view().pixelErrorsVec()); }
   auto& error_data() const { return (*this->view().pixelErrors()); }
   auto maxFedWords() const { return maxFedWords_; }
 

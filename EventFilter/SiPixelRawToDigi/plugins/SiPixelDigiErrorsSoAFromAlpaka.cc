@@ -60,7 +60,7 @@ void SiPixelDigiErrorsSoAFromAlpaka::produce(edm::Event& iEvent, const edm::Even
 
   formatterErrors_ = nullptr;
 
-  error_ = *cpuDigiErrors.error();
+  // error_ = *cpuDigiErrors.error();
   // error_ = *error(cpuDigiErrors.view());
   // data_ = std::move(cpuDigiErrors.error_data());
   // data_ = std::move(cpuDigiErrors.view().pixelErrors());

@@ -12,27 +12,27 @@
 class SiPixelDigiErrorsHost : public PortableHostCollection<SiPixelDigiErrorsLayout<>> {
 public:
   SiPixelDigiErrorsHost() = default;
-  template <typename TQueue>
-  explicit SiPixelDigiErrorsHost(int maxFedWords,
-                                 cms::alpakatools::host_buffer<SiPixelErrorCompact[]> data,
-                                 TQueue queue)
-      : PortableHostCollection<SiPixelDigiErrorsLayout<>>(maxFedWords, queue), maxFedWords_(maxFedWords) {
-    printf("SiPixelDigiErrorsHost");
-    // view().pixelErrors() = std::move(data.data());
-    // error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();
-    // (*error_h).data()->set_data((*data_h).data());
-    view().pixelErrorsVec().set_data(std::move(data.data()));
-    printf("ok SiPixelDigiErrorsHost");
-  }
+  // template <typename TQueue>
+  // explicit SiPixelDigiErrorsHost(int maxFedWords,
+  //                                cms::alpakatools::host_buffer<SiPixelErrorCompact[]> data,
+  //                                TQueue queue)
+  //     : PortableHostCollection<SiPixelDigiErrorsLayout<>>(maxFedWords, queue), maxFedWords_(maxFedWords) {
+  //   printf("SiPixelDigiErrorsHost\n");
+  //   // view().pixelErrors() = std::move(data.data());
+  //   // error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();
+  //   // (*error_h).data()->set_data((*data_h).data());
+  //   // view().pixelErrorsVec().set_data(std::move(data.data()));
+  //   printf("ok SiPixelDigiErrorsHost\n");
+  // }
   template <typename TQueue>
   explicit SiPixelDigiErrorsHost(int maxFedWords, TQueue queue)
       : PortableHostCollection<SiPixelDigiErrorsLayout<>>(maxFedWords, queue), maxFedWords_(maxFedWords) {
-    printf("SiPixelDigiErrorsHost");
+    printf("SiPixelDigiErrorsHost\n");
     // data_h = cms::alpakatools::make_host_buffer<SiPixelErrorCompact[]>(nErrorWords);
     // error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();
     // (*error_h).data()->set_data((*data_h).data());
-    view().pixelErrorsVec().set_data(view().pixelErrors());
-    printf("ok SiPixelDigiErrorsHost");
+    // view().pixelErrorsVec().set_data(view().pixelErrors());
+    printf("ok2 SiPixelDigiErrorsHost\n");
   }
   ~SiPixelDigiErrorsHost() = default;
 
@@ -47,11 +47,11 @@ public:
   // auto const& error_data() const { return (*data_h); }
   // auto& error_vector() const { return (*error_h); }
 
-  cms::alpakatools::SimpleVector<SiPixelErrorCompact>* error() { return (&view().pixelErrorsVec()); }
-  cms::alpakatools::SimpleVector<SiPixelErrorCompact> const* error() const { return (&view().pixelErrorsVec()); }
+  // cms::alpakatools::SimpleVector<SiPixelErrorCompact>* error() { return (&view().pixelErrorsVec()); }
+  // cms::alpakatools::SimpleVector<SiPixelErrorCompact> const* error() const { return (&view().pixelErrorsVec()); }
   auto& error_data() { return (*view().pixelErrors()); }
   auto const& error_data() const { return (*view().pixelErrors()); }
-  auto& error_vector() const { return view().pixelErrorsVec(); }
+  // auto& error_vector() const { return view().pixelErrorsVec(); }
 
 private:
   int maxFedWords_ = 0;

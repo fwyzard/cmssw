@@ -36,7 +36,8 @@ namespace cms::alpakatools {
       // }
 
       // SiPixelDigiErrorsHost dstData(error_vector_d.capacity(), error_data_h);
-      SiPixelDigiErrorsHost dstData(srcData.error_vector().capacity(), queue);
+      // SiPixelDigiErrorsHost dstData(srcData.error_vector().capacity(), queue);
+      SiPixelDigiErrorsHost dstData(srcData.maxFedWords(), queue);
       // SiPixelDigiErrorsHost dstData(error_vector(srcData.view()).capacity(), queue);
 
       alpaka::memcpy(queue, dstData.buffer(), srcData.buffer());
