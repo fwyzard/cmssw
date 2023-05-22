@@ -51,19 +51,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     std::optional<SiPixelMappingHost> produce(const SiPixelMappingSoARecord& iRecord) {
       auto cablingMap = iRecord.getTransientHandle(cablingMapToken_);
-      std::cout << __LINE__ << std::endl;
+      // std::cout << __LINE__ << std::endl;
       const SiPixelQuality* quality = nullptr;
       if (useQuality_) {
         auto qualityInfo = iRecord.getTransientHandle(qualityToken_);
         quality = qualityInfo.product();
       }
-      std::cout << __LINE__ << std::endl;
+      // std::cout << __LINE__ << std::endl;
       bool hasQuality = quality != nullptr;
       auto geom = iRecord.getTransientHandle(geometryToken_);
       SiPixelMappingHost product(pixelgpudetails::MAX_SIZE,cms::alpakatools::host());
       // auto product = std::make_unique<SiPixelMappingHost>(
       //     );  //(pixelgpudetails::MAX_SIZE, *(cablingMap.product()), hasQuality, cms::alpakatools::host());
-      std::cout << __LINE__ << std::endl;
+      // std::cout << __LINE__ << std::endl;
       std::vector<unsigned int> const& fedIds = cablingMap->fedIds();
       std::unique_ptr<SiPixelFedCablingTree> const& cabling = cablingMap->cablingTree();
 
@@ -76,7 +76,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto mapView = product.view();
 
       mapView.hasQuality() = hasQuality;
-      std::cout << __LINE__ << std::endl;
+      // std::cout << __LINE__ << std::endl;
       for (unsigned int fed = startFed; fed <= endFed; fed++) {
         for (unsigned int link = 1; link <= pixelgpudetails::MAX_LINK; link++) {
           for (unsigned int roc = 1; roc <= pixelgpudetails::MAX_ROC; roc++) {
@@ -103,7 +103,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           }
         }
       }  // end of FED loop
-      std::cout << __LINE__ << std::endl;
+      // std::cout << __LINE__ << std::endl;
       // Given FedId, Link and idinLnk; use the following formula
       // to get the rawId and idinDU
       // index = (FedID-1200) * MAX_LINK* MAX_ROC + (Link-1)* MAX_ROC + idinLnk;
@@ -123,22 +123,26 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           */
           auto gdet = trackerGeom->idToDetUnit(mapView[i].rawId());
           if (!gdet) {
-            // LogDebug("SiPixelCablingSoAESProducer") << 
-            std::cout << " Not found: " << mapView[i].rawId() << std::endl;
+            LogDebug("SiPixelCablingSoAESProducer")
+            // std::cout 
+            << " Not found: " << mapView[i].rawId() << std::endl;
             continue;
           }
           mapView[i].moduleId() = gdet->index();
         }
         LogDebug("SiPixelCablingSoAESProducer")
             << "----------------------------------------------------------------------------" << std::endl;
-        // LogDebug("SiPixelCablingSoAESProducer") 
-        std::cout << i << std::setw(20) << mapView[i].fed() << std::setw(20)
+        LogDebug("SiPixelCablingSoAESProducer") 
+        // std::cout 
+        << i << std::setw(20) << mapView[i].fed() << std::setw(20)
                                                 << mapView[i].link() << std::setw(20) << mapView[i].roc() << std::endl;
-        // LogDebug("SiPixelCablingSoAESProducer")
-        std::cout    << i << std::setw(20) << mapView[i].rawId() << std::setw(20) << mapView[i].rocInDet() << std::setw(20)
+        LogDebug("SiPixelCablingSoAESProducer")
+        // std::cout    
+        << i << std::setw(20) << mapView[i].rawId() << std::setw(20) << mapView[i].rocInDet() << std::setw(20)
             << mapView[i].moduleId() << std::endl;
-        // LogDebug("SiPixelCablingSoAESProducer")
-        std::cout    << i << std::setw(20) << mapView[i].badRocs() << std::setw(20) << std::endl;
+        LogDebug("SiPixelCablingSoAESProducer")
+        // std::cout   
+         << i << std::setw(20) << mapView[i].badRocs() << std::setw(20) << std::endl;
         LogDebug("SiPixelCablingSoAESProducer")
             << "----------------------------------------------------------------------------" << std::endl;
       }

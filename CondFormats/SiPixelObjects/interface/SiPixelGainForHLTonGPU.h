@@ -42,6 +42,11 @@ public:
 
     auto offset = range.first + col * lengthOfColumnData + lengthOfAveragedDataInEachColumn * numberOfDataBlocksToSkip;
 
+    if (true)
+    {
+      printf("%d - %d - %d - %.2f - %.2f\n",moduleInd, col,row,float(range.second),float(offset));
+      printf("> %d - %d - %d \n", int(lengthOfColumnData), int(lengthOfAveragedDataInEachColumn), int(numberOfDataBlocksToSkip));
+    }
     assert(offset < range.second);
     assert(offset < 3088384);
     assert(0 == offset % 2);

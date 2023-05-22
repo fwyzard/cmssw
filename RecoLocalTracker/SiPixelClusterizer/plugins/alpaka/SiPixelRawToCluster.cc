@@ -148,9 +148,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   void SiPixelRawToCluster::acquire(device::Event const& iEvent, device::EventSetup const& iSetup) {
     // cms::alpakatools::ScopedContextAcquire<Queue> ctx{iEvent.streamID(), std::move(waitingTaskHolder), ctxState_};
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     [[maybe_unused]] auto const& hMap = iSetup.getData(mapToken_);
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     // if (SiPixelMappingUtilities::hasQuality(hMap.const_view()) != useQuality_) {
     //   throw cms::Exception("LogicError")
     //       << "UseQuality of the module (" << useQuality_
@@ -159,14 +159,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // get the GPU product already here so that the async transfer can begin
     // const auto* Map = hMap.getGPUProductAsync(iEvent.queue());
     // const unsigned char* ModulesToUnpack = hMap.getModToUnpAllAsync(iEvent.queue());
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     auto const& dGains = iSetup.getData(gainsToken_);
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     auto Gains = SiPixelGainCalibrationForHLTDevice(1, iEvent.queue());
     auto modulesToUnpackRegional =
         cms::alpakatools::make_device_buffer<unsigned char[]>(iEvent.queue(), ::pixelgpudetails::MAX_SIZE);
     const unsigned char* modulesToUnpack;
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     // initialize cabling map or update if necessary
     if (recordWatcher_.check(iSetup) or regions_) {
       // cabling map, which maps online address (fed->link->ROC->local pixel) to offline (DetId->global pixel)
@@ -176,7 +176,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       cabling_ = cablingMap_->cablingTree();
       LogDebug("map version:") << cablingMap_->version();
     }
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     if (regions_) {
       regions_->run(iEvent, iSetup);
       LogDebug("SiPixelRawToCluster") << "region2unpack #feds: " << regions_->nFEDs();
@@ -198,11 +198,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     unsigned int wordCounter = 0;
     unsigned int fedCounter = 0;
     bool errorsInEvent = false;
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     std::vector<unsigned int> index(fedIds_.size(), 0);
     std::vector<cms_uint32_t const*> start(fedIds_.size(), nullptr);
     std::vector<ptrdiff_t> words(fedIds_.size(), 0);
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     // In CPU algorithm this loop is part of PixelDataFormatter::interpretRawData()
     ErrorChecker errorcheck;
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
@@ -260,9 +260,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       wordCounter += (ew - bw);
 
     }  // end of for loop
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     nDigis_ = wordCounter;
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     if (nDigis_ == 0)
       return;
 
@@ -271,7 +271,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }
-    std::cout << __LINE__ << std::endl;
+    // std::cout << __LINE__ << std::endl;
     Algo_.makeClustersAsync(isRun2_,
                             clusterThresholds_,
                             hMap.const_view(),
@@ -289,7 +289,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   void SiPixelRawToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
-    std::cout << __LINE__ << std::endl;
+    std::cout << "SiPixelRawToCluster::produce" << std::endl;
     if (nDigis_ == 0) {
       // Cannot use the default constructor here, as it would not allocate memory.
       // In the case of no digis, clusters_d are not being instantiated, but are
@@ -319,7 +319,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       std::cout << __LINE__ << std::endl;
       iEvent.emplace(digiErrorPutToken_, Algo_.getErrors());
     }
-    std::cout << __LINE__ << std::endl;
+
+    std::cout << "SiPixelRawToCluster::produce" << std::endl;
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

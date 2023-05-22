@@ -14,16 +14,20 @@ struct SiPixelGainUtilities {
       int row,
       bool& isDeadColumn,
       bool& isNoisyColumn) {
-    auto range = view.rangeAndCols()[moduleInd].first;
-    auto nCols = view.rangeAndCols()[moduleInd].second;
+    auto start = view.modStarts()[moduleInd];//view.rangeAndCols()[moduleInd].first;
+    auto end   = view.modEnds()[moduleInd];
+    auto nCols = view.modCols()[moduleInd];//.second;
     // determine what averaged data block we are in (there should be 1 or 2 of these depending on if plaquette is 1 by X or 2 by X
-    unsigned int lengthOfColumnData = (range.second - range.first) / nCols;
+    unsigned int lengthOfColumnData = (end - start) / nCols;
     unsigned int lengthOfAveragedDataInEachColumn = 2;  // we always only have two values per column averaged block
     unsigned int numberOfDataBlocksToSkip = row / view.numberOfRowsAveragedOver();
 
-    auto offset = range.first + col * lengthOfColumnData + lengthOfAveragedDataInEachColumn * numberOfDataBlocksToSkip;
-
-    assert(offset < range.second);
+    auto offset = start + col * lengthOfColumnData + lengthOfAveragedDataInEachColumn * numberOfDataBlocksToSkip;
+    if (true or offset >= end)
+      {
+        // printf("%d - %d - %d - %.2f - %.2f\n > %d - %d - %d \n",moduleInd, col,row,float(end),float(offset),int(lengthOfColumnData), int(lengthOfAveragedDataInEachColumn), int(numberOfDataBlocksToSkip));
+      }
+    assert(offset < end);
     assert(offset < 3088384);
     assert(0 == offset % 2);
 

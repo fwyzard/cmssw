@@ -113,7 +113,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       assert(0 == p->iend % 2);
       assert(p->ibegin != p->iend);
       assert(p->ncols > 0);
-      product->view().rangeAndCols()[i] = std::make_pair(siPixelGainsSoA::Range(p->ibegin, p->iend), p->ncols);
+      
+      // std::cout << "SiPixelGainCalibrationForHLTGPU;" << i <<  ";" << p->ibegin << ";" << p->iend <<std::endl;
+      product->view().modStarts()[i] = p->ibegin; //std::make_pair(siPixelGainsSoA::Range(p->ibegin, p->iend), p->ncols);
+      product->view().modEnds()[i] = p->iend;
+      product->view().modCols()[i] = p->ncols;
+
       if (ind[i].detid != dus[i]->geographicalId())
         LogDebug("SiPixelGainCalibrationForHLTSoA") << ind[i].detid << "!=" << dus[i]->geographicalId();
     }

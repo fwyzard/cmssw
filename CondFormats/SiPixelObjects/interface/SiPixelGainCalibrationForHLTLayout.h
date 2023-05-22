@@ -11,14 +11,17 @@ namespace siPixelGainsSoA {
     uint8_t ped;
   };
 
-  using Range = std::pair<uint32_t, uint32_t>;
-  using RangeAndCols = std::array<std::pair<Range, int>, phase1PixelTopology::numberOfModules>;
-
+  using Ranges = std::array<uint32_t,phase1PixelTopology::numberOfModules>;//std::pair<uint32_t, uint32_t>;
+  // using RangeAndCols = std::array<std::pair<Range, int>, phase1PixelTopology::numberOfModules>;
+  using Cols = std::array<int,phase1PixelTopology::numberOfModules>;
 }  // namespace siPixelGainsSoA
 
 GENERATE_SOA_LAYOUT(SiPixelGainCalibrationForHLTLayout,
                     SOA_COLUMN(siPixelGainsSoA::DecodingStructure, v_pedestals),
-                    SOA_SCALAR(siPixelGainsSoA::RangeAndCols, rangeAndCols),
+                    
+                    SOA_SCALAR(siPixelGainsSoA::Ranges, modStarts),
+                    SOA_SCALAR(siPixelGainsSoA::Ranges, modEnds),
+                    SOA_SCALAR(siPixelGainsSoA::Cols,   modCols),
 
                     SOA_SCALAR(float, minPed),
                     SOA_SCALAR(float, maxPed),

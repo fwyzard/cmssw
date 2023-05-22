@@ -22,8 +22,8 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace calibPixel {
     using namespace cms::alpakatools;
-    constexpr uint16_t InvId = std::numeric_limits<uint16_t>::max();
-    ;  // must be > MaxNumModules
+    constexpr uint16_t InvId = std::numeric_limits<uint16_t>::max() - 1;
+    // must be > MaxNumModules
 
     // valid for run2
     constexpr float VCaltoElectronGain = 47;         // L2-4: 47 +- 4.7
@@ -41,9 +41,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     bool isRun2,
-                                    SiPixelDigisLayoutSoAView& view,
-                                    SiPixelClustersLayoutSoAView& clus_view,
-                                    const SiPixelGainCalibrationForHLTSoAConstView& gains,
+                                    SiPixelDigisLayoutSoAView view,
+                                    SiPixelClustersLayoutSoAView clus_view,
+                                    const SiPixelGainCalibrationForHLTSoAConstView gains,
                                     int numElements) const {
         const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
 
@@ -52,37 +52,38 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           clus_view[0].clusModuleStart() = clus_view[0].moduleStart();
         }
 
-        // cms::alpakatools::for_each_element_in_grid_strided(
-        //     acc, phase1PixelTopology::numberOfModules, [&](uint32_t i) { clus_view[i].clusInModule() = 0; });
+        cms::alpakatools::for_each_element_in_grid_strided(
+            acc, phase1PixelTopology::numberOfModules, [&](uint32_t i) { clus_view[i].clusInModule() = 0; });
 
-        // cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
-        //   auto dvgi = view[i];
-        //   if (dvgi.moduleId() != InvId) {
-        //     float conversionFactor =
-        //         (isRun2) ? (dvgi.moduleId() < 96 ? VCaltoElectronGain_L1 : VCaltoElectronGain) : 1.f;
-        //     float offset = (isRun2) ? (dvgi.moduleId() < 96 ? VCaltoElectronOffset_L1 : VCaltoElectronOffset) : 0;
+        cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
+          auto dvgi = view[i];
+          if (dvgi.moduleId() != InvId) {
+            float conversionFactor =
+                (isRun2) ? (dvgi.moduleId() < 96 ? VCaltoElectronGain_L1 : VCaltoElectronGain) : 1.f;
+            float offset = (isRun2) ? (dvgi.moduleId() < 96 ? VCaltoElectronOffset_L1 : VCaltoElectronOffset) : 0;
 
-        //     bool isDeadColumn = false, isNoisyColumn = false;
+            bool isDeadColumn = false, isNoisyColumn = false;
 
-        //     int row = dvgi.xx();
-        //     int col = dvgi.yy();
+            int row = dvgi.xx();
+            int col = dvgi.yy();
 
-        //     auto ret =
-        //         SiPixelGainUtilities::getPedAndGain(gains, dvgi.moduleId(), col, row, isDeadColumn, isNoisyColumn);
+            // printf("ThisDigi;%d;%d;%d\n",dvgi.moduleId(), col, row);
+            auto ret =
+                SiPixelGainUtilities::getPedAndGain(gains, dvgi.moduleId(), col, row, isDeadColumn, isNoisyColumn);
 
-        //     float pedestal = ret.first;
-        //     float gain = ret.second;
-        //     // float pedestal = 0; float gain = 1.;
-        //     if (isDeadColumn | isNoisyColumn) {
-        //       dvgi.moduleId() = InvId;
-        //       dvgi.adc() = 0;
-        //       printf("bad pixel at %d in %d\n", i, dvgi.moduleId());
-        //     } else {
-        //       float vcal = dvgi.adc() * gain - pedestal * gain;
-        //       dvgi.adc() = std::max(100, int(vcal * conversionFactor + offset));
-        //     }
-        //   }
-        // });
+            float pedestal = ret.first;
+            float gain = ret.second;
+            // float pedestal = 0; float gain = 1.;
+            if (isDeadColumn | isNoisyColumn) {
+              dvgi.moduleId() = InvId;
+              dvgi.adc() = 0;
+              printf("bad pixel at %d in %d\n", i, dvgi.moduleId());
+            } else {
+              float vcal = dvgi.adc() * gain - pedestal * gain;
+              dvgi.adc() = std::max(100, int(vcal * conversionFactor + offset));
+            }
+          }
+        });
       }
     };
 

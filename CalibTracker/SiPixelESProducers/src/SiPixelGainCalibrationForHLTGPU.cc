@@ -68,6 +68,7 @@ SiPixelGainCalibrationForHLTGPU::SiPixelGainCalibrationForHLTGPU(const SiPixelGa
     assert(0 == p->iend % 2);
     assert(p->ibegin != p->iend);
     assert(p->ncols > 0);
+    // std::cout << "SiPixelGainCalibrationForHLTGPU;" << i <<  ";" << p->ibegin << ";" << p->iend <<std::endl;
     gainForHLTonHost_->rangeAndCols_[i] = std::make_pair(SiPixelGainForHLTonGPU::Range(p->ibegin, p->iend), p->ncols);
     if (ind[i].detid != dus[i]->geographicalId())
       LogDebug("SiPixelGainCalibrationForHLTGPU") << ind[i].detid << "!=" << dus[i]->geographicalId();
