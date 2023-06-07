@@ -34,8 +34,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geometryToken_;
   };
 
-  SiPixelGainCalibrationForHLTSoAESProducer::SiPixelGainCalibrationForHLTSoAESProducer(
-      const edm::ParameterSet& iConfig) : ESProducer(iConfig) {
+  SiPixelGainCalibrationForHLTSoAESProducer::SiPixelGainCalibrationForHLTSoAESProducer(const edm::ParameterSet& iConfig)
+      : ESProducer(iConfig) {
     auto cc = setWhatProduced(this);
     gainsToken_ = cc.consumes();
     geometryToken_ = cc.consumes();
@@ -52,8 +52,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto gainsRecord = iRecord.getHandle(gainsToken_);
     auto geomRecord = iRecord.getHandle(geometryToken_);
 
-    auto geom = *(geomRecord);
-    auto gains = *(gainsRecord);
+    auto const& geom = *(geomRecord);
+    auto const& gains = *(gainsRecord);
 
     auto product = std::make_unique<SiPixelGainCalibrationForHLTHost>(gains.data().size(), cms::alpakatools::host());
 
@@ -113,9 +113,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       assert(0 == p->iend % 2);
       assert(p->ibegin != p->iend);
       assert(p->ncols > 0);
-      
+
       // std::cout << "SiPixelGainCalibrationForHLTGPU;" << i <<  ";" << p->ibegin << ";" << p->iend <<std::endl;
-      product->view().modStarts()[i] = p->ibegin; //std::make_pair(siPixelGainsSoA::Range(p->ibegin, p->iend), p->ncols);
+      product->view().modStarts()[i] =
+          p->ibegin;  //std::make_pair(siPixelGainsSoA::Range(p->ibegin, p->iend), p->ncols);
       product->view().modEnds()[i] = p->iend;
       product->view().modCols()[i] = p->ncols;
 
