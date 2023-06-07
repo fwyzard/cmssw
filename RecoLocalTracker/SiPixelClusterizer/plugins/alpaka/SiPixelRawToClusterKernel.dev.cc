@@ -378,7 +378,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     bool includeErrors,
                                     bool debug) const {
         cms::alpakatools::for_each_element_in_grid_strided(acc, wordCounter, [&](uint32_t iloop) {
-          // printf("%d\n", __LINE__);
           auto gIndex = iloop;
           auto dvgi = digisView[gIndex];
           dvgi.xx() = 0;
@@ -399,7 +398,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             // 0 is an indicator of a noise/dead channel, skip these pixels during clusterization
             return;
           }
-          // printf("%d\n", __LINE__);
 
           uint32_t link = getLink(ww);  // Extract link
           uint32_t roc = getRoc(ww);    // Extract Roc in link
@@ -413,7 +411,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             err[gIndex].pixelErrors() = SiPixelErrorCompact{rID, ww, errorType, fedId};
             return;
           }
-          // printf("%d\n", __LINE__);
 
           uint32_t rawId = detId.RawId;
           uint32_t rocIdInDetUnit = detId.rocInDet;
@@ -445,7 +442,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             side = (panel == 1) ? -1 : 1;
             //blade = (rawId >> bladeStartBit_) & bladeMask_;
           }
-          // printf("%d\n", __LINE__);
 
           // ***special case of layer to 1 be handled here
           ::pixelDetails::Pixel localPix;
@@ -481,7 +477,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               return;
             }
           }
-          // printf("%d\n", __LINE__);
 
           ::pixelDetails::Pixel globalPix = frameConversion(barrel, side, layer, rocIdInDetUnit, localPix);
           dvgi.xx() = globalPix.row;  // origin shifting by 1 0-159
@@ -607,20 +602,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #ifdef GPU_DEBUG
       std::cout << "decoding " << wordCounter << " digis." << std::endl;
 #endif
-      // std::cout << __LINE__ << std::endl;
       constexpr int numberOfModules = pixelTopology::Phase1::numberOfModules;
       digis_d = SiPixelDigisSoA(wordCounter, queue);
       if (includeErrors) {
-        std::cout << __LINE__ << std::endl;
         // std::cout << errors.begin()->first << " - " << (errors.begin()->second).size() << std::endl;
         digiErrors_d = SiPixelDigiErrorsSoA(wordCounter, queue);  // std::move(errors), queue);
       }
-      // std::cout << __LINE__ << std::endl;
       clusters_d = SiPixelClustersSoA(numberOfModules, queue);
-      // std::cout << __LINE__ << std::endl;
       if (wordCounter)  // protect in case of empty event....
       {
-        // std::cout << __LINE__ << std::endl;
 #if defined(ALPAKA_ACC_GPU_CUDA_ASYNC_BACKEND) || defined(ALPAKA_ACC_GPU_HIP_ASYNC_BACKEND)
         const int threadsPerBlockOrElementsPerThread = 512;
 #else
@@ -630,7 +620,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // fill it all
         const uint32_t blocks = cms::alpakatools::divide_up_by(wordCounter, threadsPerBlockOrElementsPerThread);
         const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
-        // std::cout << __LINE__ << std::endl;
         ALPAKA_ASSERT_OFFLOAD(0 == wordCounter % 2);
         // wordCounter is the total no of words in each event to be trasfered on device
         auto word_d = cms::alpakatools::make_device_buffer<uint32_t[]>(queue, wordCounter);
@@ -638,10 +627,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // However, only the first half of elements end up eventually used:
         // hence, here, only wordCounter/2 elements are allocated.
         auto fedId_d = cms::alpakatools::make_device_buffer<uint8_t[]>(queue, wordCounter / 2);
-        // std::cout << __LINE__ << std::endl;
         alpaka::memcpy(queue, word_d, wordFed.word(), wordCounter);
         alpaka::memcpy(queue, fedId_d, wordFed.fedId(), wordCounter / 2);
-        // std::cout << __LINE__ << std::endl;
         // Launch rawToDigi kernel
         alpaka::enqueue(queue,
                         alpaka::createTaskKernel<Acc1D>(workDiv,
@@ -707,7 +694,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             alpaka::createTaskKernel<Acc1D>(
                 workDiv, countModules<pixelTopology::Phase1>(), digis_d->view(), clusters_d->view(), wordCounter));
 
-        std::cout << __LINE__ << std::endl;
 
         auto moduleStartFirstElement =
             cms::alpakatools::make_device_view(alpaka::getDev(queue), clusters_d->view().moduleStart(), 1u);
@@ -742,7 +728,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                         clusters_d->view(),
                                                         clusterThresholds,
                                                         wordCounter));
-        std::cout << __LINE__ << std::endl;
         // count the module start indices already here (instead of
         // rechits) so that the number of clusters/hits can be made
         // available in the rechit producer without additional points of
@@ -755,7 +740,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             alpaka::createTaskKernel<Acc1D>(
                 workDivOneBlock, ::pixelDetails::fillHitsModuleStart<pixelTopology::Phase1>(), clusters_d->view()));
 
-        std::cout << __LINE__ << std::endl;
         // clusters_d->clusModuleStart()));
 
         // last element holds the number of all clusters
@@ -769,12 +753,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             alpaka::getDev(queue), const_cast<uint32_t const *>(clusters_d->view().clusModuleStart() + startBPIX2), 1u);
         auto nModules_Clusters_h_1 = cms::alpakatools::make_host_view(nModules_Clusters_h.data() + 1, 1u);
         alpaka::memcpy(queue, nModules_Clusters_h_1, clusModuleStartLastElement);
-        std::cout << __LINE__ << std::endl;
 
         auto nModules_Clusters_h_2 = cms::alpakatools::make_host_view(nModules_Clusters_h.data() + 2, 1u);
         alpaka::memcpy(queue, nModules_Clusters_h_2, bpix2ClusterStart);
-
-        std::cout << __LINE__ << std::endl;
 
       }  // end clusterizer scope
     }

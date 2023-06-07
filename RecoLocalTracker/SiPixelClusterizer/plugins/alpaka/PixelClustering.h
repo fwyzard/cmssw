@@ -120,13 +120,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
         if (blockIdx >= clus_view[0].moduleStart())
           return;
-        //printf("%d\n",__LINE__);
         auto firstPixel = clus_view[1 + blockIdx].moduleStart();
         auto thisModuleId = digi_view[firstPixel].moduleId();
         ALPAKA_ASSERT_OFFLOAD(thisModuleId < TrackerTraits::numberOfModules);
-        //printf("%d\n",__LINE__);
         const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
-//printf("%d\n",__LINE__);
 #ifdef GPU_DEBUG
         if (thisModuleId % 100 == 1)
           if (threadIdxLocal == 0)
@@ -167,20 +164,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
         //init hist  (ymax=416 < 512 : 9bits)
         constexpr uint32_t maxPixInModule = TrackerTraits::maxPixInModule;
-        //printf("%d\n",__LINE__);
         constexpr auto nbins = TrackerTraits::clusterBinning;
         constexpr auto nbits = TrackerTraits::clusterBits;
-        //printf("%d\n",__LINE__);
         using Hist = cms::alpakatools::HistoContainer<uint16_t, nbins, maxPixInModule, nbits, uint16_t>;
         auto& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
         auto& ws = alpaka::declareSharedVar<typename Hist::Counter[32], __COUNTER__>(acc);
-        //printf("%d\n",__LINE__);
         cms::alpakatools::for_each_element_in_block_strided(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });
         alpaka::syncBlockThreads(acc);
-        //printf("%d\n",__LINE__);
         ALPAKA_ASSERT_OFFLOAD((msize == numElements) or
                               ((msize < numElements) and (digi_view[msize].moduleId() != thisModuleId)));
-        //printf("%d\n",__LINE__);
         // limit to maxPixInModule  (FIXME if recurrent (and not limited to simulation with low threshold) one will need to implement something cleverer)
         if (0 == threadIdxLocal) {
           if (msize - firstPixel > maxPixInModule) {

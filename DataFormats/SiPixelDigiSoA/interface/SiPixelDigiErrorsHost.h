@@ -27,12 +27,12 @@ public:
   template <typename TQueue>
   explicit SiPixelDigiErrorsHost(int maxFedWords, TQueue queue)
       : PortableHostCollection<SiPixelDigiErrorsLayout<>>(maxFedWords, queue), maxFedWords_(maxFedWords) {
-    printf("SiPixelDigiErrorsHost\n");
+    // printf("SiPixelDigiErrorsHost\n");
     // data_h = cms::alpakatools::make_host_buffer<SiPixelErrorCompact[]>(nErrorWords);
     // error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();
     // (*error_h).data()->set_data((*data_h).data());
     // view().pixelErrorsVec().set_data(view().pixelErrors());
-    printf("ok2 SiPixelDigiErrorsHost\n");
+    // printf("ok2 SiPixelDigiErrorsHost\n");
   }
   ~SiPixelDigiErrorsHost() = default;
 
