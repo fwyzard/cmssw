@@ -49,7 +49,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         // zero for next kernels...
         if (threadIdxGlobal == 0) {
-          clus_view[0].clusModuleStart() = clus_view[0].moduleStart();
+          clus_view[0].clusModuleStart() = clus_view[0].moduleStart() = 0;
         }
 
         cms::alpakatools::for_each_element_in_grid_strided(
