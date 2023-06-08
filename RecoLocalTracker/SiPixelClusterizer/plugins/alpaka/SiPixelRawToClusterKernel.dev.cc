@@ -694,7 +694,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             alpaka::createTaskKernel<Acc1D>(
                 workDiv, countModules<pixelTopology::Phase1>(), digis_d->view(), clusters_d->view(), wordCounter));
 
-
         auto moduleStartFirstElement =
             cms::alpakatools::make_device_view(alpaka::getDev(queue), clusters_d->view().moduleStart(), 1u);
         alpaka::memcpy(queue, nModules_Clusters_h, moduleStartFirstElement);

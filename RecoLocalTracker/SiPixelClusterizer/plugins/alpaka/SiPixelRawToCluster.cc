@@ -55,6 +55,7 @@
 #include "HeterogeneousCore/AlpakaTest/interface/alpaka/AlpakaESTestData.h"
 
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
+#include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"
 #include "SiPixelRawToClusterKernel.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
@@ -73,6 +74,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // cms::alpakatools::ContextState<Queue> ctxState_;
 
     edm::EDGetTokenT<FEDRawDataCollection> rawGetToken_;
+    edm::EDPutTokenT<SiPixelFormatterErrors> fmtErrorToken_;
     device::EDPutToken<SiPixelDigisSoA> digiPutToken_;
     device::EDPutToken<SiPixelDigiErrorsSoA> digiErrorPutToken_;
     device::EDPutToken<SiPixelClustersSoA> clusterPutToken_;
@@ -113,6 +115,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     if (includeErrors_) {
       digiErrorPutToken_ =
           produces();  //<edm::DeviceProduct<alpaka_cuda_async::Queue,alpaka_cuda_async::SiPixelDigisDevice>>(); //reg.produces<edm::DeviceProduct<Queue, SiPixelDigiErrorsAlpaka>>();
+      fmtErrorToken_ = produces();
     }
 
     // regions
@@ -288,6 +291,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       iEvent.emplace(clusterPutToken_, std::move(clusters_d));
       if (includeErrors_) {
         iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsSoA());
+        // errors_.clear();
+        iEvent.emplace(fmtErrorToken_, std::move(errors_));
       }
       return;
     }
@@ -297,6 +302,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     iEvent.emplace(clusterPutToken_, Algo_.getClusters());
     if (includeErrors_) {
       iEvent.emplace(digiErrorPutToken_, Algo_.getErrors());
+      iEvent.emplace(fmtErrorToken_, std::move(errors_));
     }
 
     // std::cout << "SiPixelRawToCluster::produce" << std::endl;
