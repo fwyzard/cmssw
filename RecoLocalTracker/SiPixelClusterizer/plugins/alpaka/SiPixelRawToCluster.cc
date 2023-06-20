@@ -71,8 +71,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     void acquire(device::Event const& iEvent, device::EventSetup const& iSetup) override;
     void produce(device::Event& iEvent, device::EventSetup const& iSetup) override;
 
-    // cms::alpakatools::ContextState<Queue> ctxState_;
-
     edm::EDGetTokenT<FEDRawDataCollection> rawGetToken_;
     edm::EDPutTokenT<SiPixelFormatterErrors> fmtErrorToken_;
     device::EDPutToken<SiPixelDigisSoA> digiPutToken_;
@@ -113,8 +111,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         clusterThresholds_{iConfig.getParameter<int32_t>("clusterThreshold_layer1"),
                            iConfig.getParameter<int32_t>("clusterThreshold_otherLayers")} {
     if (includeErrors_) {
-      digiErrorPutToken_ =
-          produces();  //<edm::DeviceProduct<alpaka_cuda_async::Queue,alpaka_cuda_async::SiPixelDigisDevice>>(); //reg.produces<edm::DeviceProduct<Queue, SiPixelDigiErrorsAlpaka>>();
+      digiErrorPutToken_ = produces();
       fmtErrorToken_ = produces();
     }
 
@@ -291,13 +288,36 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       iEvent.emplace(clusterPutToken_, std::move(clusters_d));
       if (includeErrors_) {
         iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsSoA());
-        // errors_.clear();
         iEvent.emplace(fmtErrorToken_, std::move(errors_));
       }
       return;
     }
 
     // auto tmp = Algo_.getResults();
+
+    // SiPixelDigisHost digis_h(Algo_.getDigis().view().metadata().size(), iEvent.queue());
+    // alpaka::memcpy(iEvent.queue(), digis_h.buffer(), Algo_.getDigis().buffer());
+
+    // SiPixelClustersHost clusters_h(Algo_.getClusters().view().metadata().size(), iEvent.queue());
+    // alpaka::memcpy(iEvent.queue(), clusters_h.buffer(), Algo_.getClusters().buffer());
+
+    // for (int oia = 0; oia < (int)clusters_h.view().metadata().size(); ++oia) {
+    //   std::cout << "clusters_h.view().moduleStart():" << clusters_h.view()[oia].moduleStart() << std::endl;
+    //   std::cout << "clusters_h.view().clusInModule():" << clusters_h.view()[oia].clusInModule() << std::endl;
+    //   std::cout << "clusters_h.view().moduleId():" << clusters_h.view()[oia].moduleId() << std::endl;
+    //   std::cout << "clusters_h.view().clusModuleStart():" << clusters_h.view()[oia].clusModuleStart() << std::endl;
+    // }
+
+    // for (int oia = 0; oia < (int)digis_h.view().metadata().size(); ++oia) {
+    //   std::cout << "digis_h.view().clus():" << digis_h.view()[oia].clus() << std::endl;
+    //   std::cout << "digis_h.view().pdigi():" << digis_h.view()[oia].pdigi() << std::endl;
+    //   std::cout << "digis_h.view().rawIdArr():" << digis_h.view()[oia].rawIdArr() << std::endl;
+    //   std::cout << "digis_h.view().adc():" << digis_h.view()[oia].adc() << std::endl;
+    //   std::cout << "digis_h.view().xx():" << digis_h.view()[oia].xx() << std::endl;
+    //   std::cout << "digis_h.view().yy():" << digis_h.view()[oia].yy() << std::endl;
+    //   std::cout << "digis_h.view().moduleId():" << digis_h.view()[oia].moduleId() << std::endl;
+    // }
+
     iEvent.emplace(digiPutToken_, Algo_.getDigis());  //std::move(tmp.first));
     iEvent.emplace(clusterPutToken_, Algo_.getClusters());
     if (includeErrors_) {

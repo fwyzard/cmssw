@@ -7,7 +7,9 @@
 
 // using SiPixelErrorCompactVec = cms::alpakatools::SimpleVector<SiPixelErrorCompact>;
 
-GENERATE_SOA_LAYOUT(SiPixelDigiErrorsLayout, SOA_COLUMN(SiPixelErrorCompact, pixelErrors))  //,
+GENERATE_SOA_LAYOUT(SiPixelDigiErrorsLayout,
+                    SOA_COLUMN(SiPixelErrorCompact, pixelErrors),
+                    SOA_SCALAR(uint32_t, size))  //,
 // SOA_SCALAR(SiPixelErrorCompactVec, pixelErrorsVec))
 
 using SiPixelDigiErrorsLayoutSoA = SiPixelDigiErrorsLayout<>;

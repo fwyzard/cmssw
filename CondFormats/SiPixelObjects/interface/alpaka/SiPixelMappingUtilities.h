@@ -25,7 +25,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto modToUnpHost = cms::alpakatools::make_host_buffer<unsigned char[]>(queue, pixelgpudetails::MAX_SIZE);
 
       unsigned int startFed = fedIds.front();
-      unsigned int endFed = fedIds.back();
+      unsigned int endFed = fedIds.back() - 1;
 
       sipixelobjects::CablingPathToDetUnit path;
       int index = 1;

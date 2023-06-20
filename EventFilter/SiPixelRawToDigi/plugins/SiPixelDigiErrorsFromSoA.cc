@@ -91,13 +91,6 @@ void SiPixelDigiErrorsFromSoA::produce(edm::Event& iEvent, const edm::EventSetup
   const auto& digiErrors = iEvent.get(digiErrorsSoAGetToken_);
   const auto& formatterErrors = iEvent.get(fmtErrorsGetToken_);
 
-  std::cout << "digiErrors.view()[0].pixelErrors().rawId: " << digiErrors.view()[0].pixelErrors().rawId << std::endl;
-  std::cout << "digiErrors.view()[0].pixelErrors().word:" << digiErrors.view()[0].pixelErrors().word << std::endl;
-  std::cout << "digiErrors.view()[0].pixelErrors().errorType:" << uint32_t(digiErrors.view()[0].pixelErrors().errorType)
-            << std::endl;
-  std::cout << "digiErrors.view()[0].pixelErrors().fedId:" << uint32_t(digiErrors.view()[0].pixelErrors().fedId)
-            << std::endl;
-
   edm::DetSetVector<SiPixelRawDataError> errorcollection{};
   DetIdCollection tkerror_detidcollection{};
   DetIdCollection usererror_detidcollection{};
@@ -109,19 +102,16 @@ void SiPixelDigiErrorsFromSoA::produce(edm::Event& iEvent, const edm::EventSetup
   auto errors = formatterErrors;  // make a copy
   PixelDataFormatter::DetErrors nodeterrors;
 
+  // if (digiErrors.view().size() > 0) { // TODO: need to know if this size will be useful or not and how to use it
   uint32_t size = digiErrors.view().metadata().size();
   for (auto i = 0U; i < size; i++) {
     SiPixelErrorCompact err = digiErrors.view()[i].pixelErrors();
     if (err.errorType != 0) {
       SiPixelRawDataError error(err.word, err.errorType, err.fedId + FEDNumbering::MINSiPixeluTCAFEDID);
       errors[err.rawId].push_back(error);
-      std::cout << "error.getWord32():" << error.getWord32() << std::endl;
-      std::cout << "error.getWord64():" << error.getWord64() << std::endl;
-      std::cout << "error.getType():" << error.getType() << std::endl;
-      std::cout << "error.getFedId():" << error.getFedId() << std::endl;
-      std::cout << "error.getMessage():" << error.getMessage() << std::endl;
     }
   }
+  // }
 
   formatter.unpackFEDErrors(errors,
                             tkerrorlist_,
