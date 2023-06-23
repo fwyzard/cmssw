@@ -419,6 +419,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (threadIdxLocal == 0) {
           clus_view[thisModuleId].clusInModule() = foundClusters;
           clus_view[blockIdx].moduleId() = thisModuleId;
+          // printf("max hit %d in %d %d \n", clus_view[thisModuleId].clusInModule(), clus_view[blockIdx].moduleId(),blockIdx);
 #ifdef GPU_DEBUG
           if (foundClusters > gMaxHit<TAcc>) {
             gMaxHit<TAcc> = foundClusters;

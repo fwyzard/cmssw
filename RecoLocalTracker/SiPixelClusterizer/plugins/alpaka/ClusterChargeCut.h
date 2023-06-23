@@ -24,8 +24,20 @@ namespace pixelClustering {
         SiPixelClusterThresholds
             clusterThresholds,  // charge cut on cluster in electrons (for layer 1 and for other layers)
         const uint32_t numElements) const {
+
       constexpr int startBPIX2 = TrackerTraits::layerStart[1];
       [[maybe_unused]] constexpr int nMaxModules = TrackerTraits::numberOfModules;
+
+        // cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules, [&](uint32_t i) {
+        // {
+        //   if(i==0)
+        //   {
+        //     for(int j = 0; j<1000;j++)
+        //     {
+        //       printf("1. chargecut %d %d %d\n", j, clus_view[j].clusInModule(), clus_view[j].clusModuleStart());
+        //     }
+        //   }
+        // }});
 
       const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       if (blockIdx >= clus_view[0].moduleStart())
@@ -107,7 +119,10 @@ namespace pixelClustering {
 
       auto chargeCut = clusterThresholds.getThresholdForLayerOnCondition(thisModuleId < startBPIX2);
       cms::alpakatools::for_each_element_in_block_strided(
-          acc, nclus, [&](uint32_t i) { newclusId[i] = ok[i] = charge[i] > chargeCut ? 1 : 0; });
+          acc, nclus, [&](uint32_t i) { 
+            // printf("chargeCut: %d - %d - %d - %d \n",i,newclusId[i],charge[i],chargeCut);
+            newclusId[i] = ok[i] = charge[i] > chargeCut ? 1 : 0; 
+            });
       alpaka::syncBlockThreads(acc);
 
       // renumber
@@ -146,6 +161,18 @@ namespace pixelClustering {
       }
 
       //done
+
+        // cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules, [&](uint32_t i) {
+        // {
+        //   if(i==0)
+        //   {
+        //     for(int j = 0; j<1000;j++)
+        //     {
+        //       printf("2. chargecut %d %d %d\n", j, clus_view[j].clusInModule(), clus_view[j].clusModuleStart());
+        //     }
+        //   }
+        // }});
+
     }
   };
 

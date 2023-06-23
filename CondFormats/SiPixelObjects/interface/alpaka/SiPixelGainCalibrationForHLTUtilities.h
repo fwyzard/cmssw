@@ -25,7 +25,7 @@ struct SiPixelGainUtilities {
     auto offset = start + col * lengthOfColumnData + lengthOfAveragedDataInEachColumn * numberOfDataBlocksToSkip;
     if (true or offset >= end)
       {
-        // printf("%d - %d - %d - %.2f - %.2f\n > %d - %d - %d \n",moduleInd, col,row,float(end),float(offset),int(lengthOfColumnData), int(lengthOfAveragedDataInEachColumn), int(numberOfDataBlocksToSkip));
+        // printf("GAINS: %d - %d - %d - %.2f - %.2f\n > %d - %d - %d \n",moduleInd, col,row,float(end),float(offset),int(lengthOfColumnData), int(lengthOfAveragedDataInEachColumn), int(numberOfDataBlocksToSkip));
       }
     assert(offset < end);
     assert(offset < 3088384);
@@ -36,9 +36,9 @@ struct SiPixelGainUtilities {
 
     isDeadColumn = (s.ped & 0xFF) == view.deadFlag();
     isNoisyColumn = (s.ped & 0xFF) == view.noisyFlag();
-
-    float decodePed = float(s.gain & 0xFF) * view.gainPrecision() + view.minGain();
-    float decodeGain = float(s.ped & 0xFF) * view.pedPrecision() + view.minPed();
+    // printf("PED: %d - %d\n",s.ped,s.gain);
+    float decodeGain = float(s.gain & 0xFF) * view.gainPrecision() + view.minGain();
+    float decodePed = float(s.ped & 0xFF) * view.pedPrecision() + view.minPed();
 
     return std::make_pair(decodePed, decodeGain);
   };

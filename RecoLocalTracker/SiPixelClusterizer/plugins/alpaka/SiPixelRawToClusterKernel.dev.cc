@@ -600,9 +600,19 @@ namespace pixelDetails {
       ALPAKA_ASSERT_OFFLOAD(TrackerTraits::numberOfModules < 2048);  // easy to extend at least till 32*1024
 
       constexpr int nMaxModules = TrackerTraits::numberOfModules;
-
-      // printf("1moduleStart %d %d\n", 10, clus_view[10].clusModuleStart());
-
+      
+      cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules, [&](uint32_t i) {
+        {
+          if(i==0)
+          {
+            for(int j = 0; j<1000;j++)
+            {
+              printf("1. moduleStart %d %d %d\n", j, clus_view[j].clusInModule(), clus_view[j].clusModuleStart());
+            }
+          }
+        }});
+      
+      
 #ifndef NDEBUG
       [[maybe_unused]] const uint32_t blockIdxLocal(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       ALPAKA_ASSERT_OFFLOAD(0 == blockIdxLocal);
@@ -619,10 +629,32 @@ namespace pixelDetails {
       constexpr auto leftModules = isPhase2 ? 1024 : nMaxModules - 1024;
 
       auto &&ws = alpaka::declareSharedVar<uint32_t[32], __COUNTER__>(acc);
-      printf("2moduleStart %d %d\n", 10, clus_view[10].clusModuleStart());
+    
+     cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules, [&](uint32_t i) {
+        {
+          if(i==0)
+          {
+            for(int j = 0; j<1000;j++)
+            {
+              printf("2. moduleStart %d %d %d\n", j, clus_view[j].clusInModule(), clus_view[j].clusModuleStart());
+            }
+          }
+        }});
+
       cms::alpakatools::blockPrefixScan(
           acc, clus_view.clusModuleStart() + 1, clus_view.clusModuleStart() + 1, 1024, ws);
-      printf("3moduleStart %d %d\n", 10, clus_view[10].clusModuleStart());
+
+      cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules, [&](uint32_t i) {
+        {
+          if(i==0)
+          {
+            for(int j = 0; j<1000;j++)
+            {
+              printf("3. moduleStart %d %d %d\n", j, clus_view[j].clusInModule(), clus_view[j].clusModuleStart());
+            }
+          }
+        }});
+
       cms::alpakatools::blockPrefixScan(
           acc, clus_view.clusModuleStart() + 1024 + 1, clus_view.clusModuleStart() + 1024 + 1, leftModules, ws);
 

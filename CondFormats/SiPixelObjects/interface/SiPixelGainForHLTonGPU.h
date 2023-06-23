@@ -44,8 +44,8 @@ public:
 
     if (true)
     {
-      printf("%d - %d - %d - %.2f - %.2f\n",moduleInd, col,row,float(range.second),float(offset));
-      printf("> %d - %d - %d \n", int(lengthOfColumnData), int(lengthOfAveragedDataInEachColumn), int(numberOfDataBlocksToSkip));
+      // printf("GAINS: %d - %d - %d - %.2f - %.2f\n",moduleInd, col,row,float(range.second),float(offset));
+      // printf("> %d - %d - %d \n", int(lengthOfColumnData), int(lengthOfAveragedDataInEachColumn), int(numberOfDataBlocksToSkip));
     }
     assert(offset < range.second);
     assert(offset < 3088384);
@@ -53,7 +53,7 @@ public:
 
     DecodingStructure const* __restrict__ lp = v_pedestals_;
     auto s = lp[offset / 2];
-
+    // printf("PED: %d - %d\n",s.ped,s.gain);
     isDeadColumn = (s.ped & 0xFF) == deadFlag_;
     isNoisyColumn = (s.ped & 0xFF) == noisyFlag_;
 
