@@ -5,6 +5,7 @@
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorsSoA.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
+#include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"
 #include <vector>
 
 #endif  // SIPIXELRAWDATA_CLASSES_H

@@ -9,7 +9,8 @@
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 #include "DataFormats/SiPixelDetId/interface/PixelFEDChannel.h"
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
-#include "DataFormats/SiPixelRawData/interface/SiPixelErrorsSoA.h"
+// #include "DataFormats/SiPixelRawData/interface/SiPixelErrorsSoA.h"
+#include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"
 #include "EventFilter/SiPixelRawToDigi/interface/PixelDataFormatter.h"
 #include "FWCore/Framework/interface/ESTransientHandle.h"
 #include "FWCore/Framework/interface/ESWatcher.h"
@@ -20,6 +21,8 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
+// #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsCollection.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
 
 class SiPixelDigiErrorsFromSoA : public edm::stream::EDProducer<> {
 public:
@@ -32,7 +35,8 @@ private:
   void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
 
   const edm::ESGetToken<SiPixelFedCablingMap, SiPixelFedCablingMapRcd> cablingToken_;
-  const edm::EDGetTokenT<SiPixelErrorsSoA> digiErrorSoAGetToken_;
+  const edm::EDGetTokenT<SiPixelDigiErrorsHost> digiErrorsSoAGetToken_;
+  const edm::EDGetTokenT<SiPixelFormatterErrors> fmtErrorsGetToken_;
   const edm::EDPutTokenT<edm::DetSetVector<SiPixelRawDataError>> errorPutToken_;
   const edm::EDPutTokenT<DetIdCollection> tkErrorPutToken_;
   const edm::EDPutTokenT<DetIdCollection> userErrorPutToken_;
@@ -49,7 +53,8 @@ private:
 
 SiPixelDigiErrorsFromSoA::SiPixelDigiErrorsFromSoA(const edm::ParameterSet& iConfig)
     : cablingToken_(esConsumes(edm::ESInputTag("", iConfig.getParameter<std::string>("CablingMapLabel")))),
-      digiErrorSoAGetToken_{consumes<SiPixelErrorsSoA>(iConfig.getParameter<edm::InputTag>("digiErrorSoASrc"))},
+      digiErrorsSoAGetToken_{consumes<SiPixelDigiErrorsHost>(iConfig.getParameter<edm::InputTag>("digiErrorSoASrc"))},
+      fmtErrorsGetToken_{consumes<SiPixelFormatterErrors>(iConfig.getParameter<edm::InputTag>("fmtErrorsSoASrc"))},
       errorPutToken_{produces<edm::DetSetVector<SiPixelRawDataError>>()},
       tkErrorPutToken_{produces<DetIdCollection>()},
       userErrorPutToken_{produces<DetIdCollection>("UserErrorModules")},
@@ -60,7 +65,8 @@ SiPixelDigiErrorsFromSoA::SiPixelDigiErrorsFromSoA(const edm::ParameterSet& iCon
 
 void SiPixelDigiErrorsFromSoA::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("digiErrorSoASrc", edm::InputTag("siPixelDigiErrorsSoA"));
+  desc.add<edm::InputTag>("digiErrorSoASrc", edm::InputTag("siPixelDigis"));
+  desc.add<edm::InputTag>("fmtErrorsSoASrc", edm::InputTag("siPixelDigis"));
   // the configuration parameters here are named following those in SiPixelRawToDigi
   desc.add<std::string>("CablingMapLabel", "")->setComment("CablingMap label");
   desc.add<bool>("UsePhase1", false)->setComment("##  Use phase1");
@@ -82,7 +88,8 @@ void SiPixelDigiErrorsFromSoA::produce(edm::Event& iEvent, const edm::EventSetup
     LogDebug("map version:") << cabling_->version();
   }
 
-  const auto& digiErrors = iEvent.get(digiErrorSoAGetToken_);
+  const auto& digiErrors = iEvent.get(digiErrorsSoAGetToken_);
+  const auto& formatterErrors = iEvent.get(fmtErrorsGetToken_);
 
   edm::DetSetVector<SiPixelRawDataError> errorcollection{};
   DetIdCollection tkerror_detidcollection{};
@@ -90,19 +97,21 @@ void SiPixelDigiErrorsFromSoA::produce(edm::Event& iEvent, const edm::EventSetup
   edmNew::DetSetVector<PixelFEDChannel> disabled_channelcollection{};
 
   PixelDataFormatter formatter(cabling_.get(), usePhase1_);  // for phase 1 & 0
-  const PixelDataFormatter::Errors* formatterErrors = digiErrors.formatterErrors();
-  assert(formatterErrors != nullptr);
-  auto errors = *formatterErrors;  // make a copy
+  // const PixelDataFormatter::Errors* formatterErrors = digiErrors.formatterErrors();
+  // assert(formatterErrors != nullptr); // TODO: check what is happening here
+  auto errors = formatterErrors;  // make a copy
   PixelDataFormatter::DetErrors nodeterrors;
 
-  auto size = digiErrors.size();
+  // if (digiErrors.view().size() > 0) { // TODO: need to know if this size will be useful or not and how to use it
+  uint32_t size = digiErrors.view().metadata().size();
   for (auto i = 0U; i < size; i++) {
-    SiPixelErrorCompact err = digiErrors.error(i);
+    SiPixelErrorCompact err = digiErrors.view()[i].pixelErrors();
     if (err.errorType != 0) {
       SiPixelRawDataError error(err.word, err.errorType, err.fedId + FEDNumbering::MINSiPixeluTCAFEDID);
       errors[err.rawId].push_back(error);
     }
   }
+  // }
 
   formatter.unpackFEDErrors(errors,
                             tkerrorlist_,

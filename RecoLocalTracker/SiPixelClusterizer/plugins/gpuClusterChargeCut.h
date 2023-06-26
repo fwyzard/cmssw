@@ -109,6 +109,7 @@ namespace gpuClustering {
       bool good = true;
       for (auto i = threadIdx.x; i < nclus; i += blockDim.x) {
         newclusId[i] = ok[i] = charge[i] >= chargeCut ? 1 : 0;
+        printf("chargeCut: %d - %d - %d - %d \n",i,newclusId[i],charge[i],chargeCut);
         if (0 == ok[i])
           good = false;
       }
