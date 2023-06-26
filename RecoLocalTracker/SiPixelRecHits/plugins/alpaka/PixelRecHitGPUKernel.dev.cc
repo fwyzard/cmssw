@@ -2,13 +2,14 @@
 #include <algorithm>
 #include <numeric>
 
-// Alpaka lib
-//#include <alpaka/alpaka.hpp>
+// Alpaka headers
+#include <alpaka/alpaka.hpp>
 
 // CMSSW headers
+#include "DataFormats/BeamSpot/interface/BeamSpotPOD.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 #include "PixelRecHitGPUKernel.h"
 #include "pixelRecHits.h"
@@ -49,7 +50,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     TrackingRecHitAlpakaCollection<TrackerTraits> PixelRecHitGPUKernel<TrackerTraits>::makeHitsAsync(
         SiPixelDigisSoA const& digis_d,
         SiPixelClustersSoA const& clusters_d,
-        BeamSpotDevice const& bs_d,
+        BeamSpotPOD const* bs_d,
         pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* cpeParams,
         Queue queue) const {
       using namespace gpuPixelRecHits;
@@ -72,13 +73,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             workDiv1D,
                             getHits<TrackerTraits>{},
                             cpeParams,
-                            bs_d.view(),
+                            bs_d,
                             digis_d.view(),
                             digis_d.nDigis(),
                             clusters_d.view(),
                             hits_d.view());
-        // getHits<TrackerTraits><<<blocks, threadsPerBlock, 0, stream>>>(
-        //     cpeParams, bs_d.data(), digis_d.view(), digis_d.nDigis(), clusters_d.const_view(), hits_d.view());
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
 #endif

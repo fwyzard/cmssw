@@ -1,40 +1,35 @@
+#include <alpaka/alpaka.hpp>
+
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "DataFormats/Common/interface/OrphanHandle.h"
+#include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "DataFormats/Portable/interface/HostProductAlpaka.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
+#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "DataFormats/TrajectoryState/interface/LocalTrajectoryParameters.h"
-#include "DataFormats/GeometrySurface/interface/Plane.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/TrajectoryState/interface/LocalTrajectoryParameters.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/global/EDProducer.h"
-#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
-#include "FWCore/Utilities/interface/InputTag.h"
-#include "FWCore/PluginManager/interface/ModuleDef.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "Geometry/Records/interface/TrackerTopologyRcd.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
-
-#include "TrackingTools/AnalyticalJacobians/interface/JacobianLocalToCurvilinear.h"
-#include "TrackingTools/TrajectoryParametrization/interface/GlobalTrajectoryParameters.h"
-#include "TrackingTools/TrajectoryParametrization/interface/CurvilinearTrajectoryError.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/FitUtils.h"
-
-#include "DataFormats/Portable/interface/HostProductAlpaka.h"
-#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
+#include "TrackingTools/AnalyticalJacobians/interface/JacobianLocalToCurvilinear.h"
+#include "TrackingTools/TrajectoryParametrization/interface/CurvilinearTrajectoryError.h"
+#include "TrackingTools/TrajectoryParametrization/interface/GlobalTrajectoryParameters.h"
 
 #include "storeTracks.h"
-
-#include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
-#include <alpaka/alpaka.hpp>
 
 /**
  * This class creates "legacy" reco::Track
@@ -255,6 +250,8 @@ void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID strea
   storeTracks(iEvent, tracks, httopo);
   iEvent.put(std::move(indToEdmP));
 }
+
+#include "FWCore/Framework/interface/MakerMacros.h"
 
 using PixelTrackProducerFromSoAAlpakaPhase1 = PixelTrackProducerFromSoAAlpaka<pixelTopology::Phase1>;
 DEFINE_FWK_MODULE(PixelTrackProducerFromSoAAlpakaPhase1);

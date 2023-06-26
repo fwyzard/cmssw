@@ -5,8 +5,7 @@
 
 #include <alpaka/alpaka.hpp>
 
-#include "DataFormats/BeamSpotSoA/interface/BeamSpotLayout.h"
-#include "DataFormats/BeamSpotSoA/interface/alpaka/BeamSpotDevice.h"
+#include "DataFormats/BeamSpot/interface/BeamSpotPOD.h"
 #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
@@ -36,7 +35,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       TrackingRecHitAlpakaCollection<TrackerTraits> makeHitsAsync(SiPixelDigisSoA const& digis_d,
                                                               SiPixelClustersSoA const& clusters_d,
-                                                              BeamSpotDevice const& bs_d,
+                                                              BeamSpotPOD const* bs_d,
                                                               ParamsOnGPU const* cpeParams,
                                                               Queue queue) const;
     };
