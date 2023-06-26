@@ -20,7 +20,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   public:
     static constexpr int32_t S = TrackerTraits::maxNumberOfTuples;  //TODO: this could be made configurable at runtime
     //explicit TrackSoADevice() : PortableCollection<TrackLayout<TrackerTraits>>(S) {} //TODO: check if this is needed somewhere
-    TrackSoADevice() = default;  // cms::alpakatools::Product needs this
+    TrackSoADevice() = default;  // necessary for ROOT dictionaries
 
     using PortableCollection<TrackLayout<TrackerTraits>>::view;
     using PortableCollection<TrackLayout<TrackerTraits>>::const_view;

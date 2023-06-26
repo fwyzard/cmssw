@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 
 #include "vertexFinder.h"
 

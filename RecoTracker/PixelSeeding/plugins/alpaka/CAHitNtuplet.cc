@@ -1,26 +1,26 @@
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/Portable/interface/Product.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+
 #include "DataFormats/Common/interface/Handle.h"
+#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Utilities/interface/ESGetToken.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Utilities/interface/ESGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/Utilities/interface/RunningAverage.h"
-#include "HeterogeneousCore/AlpakaCore/interface/ScopedContext.h"
-#include "HeterogeneousCore/AlpakaCore/interface/alpaka/Event.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDGetToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDPutToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESGetToken.h"
+#include "HeterogeneousCore/AlpakaCore/interface/alpaka/Event.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EventSetup.h"
-#include "HeterogeneousCore/AlpakaCore/interface/alpaka/stream/EDProducer.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ProducerBase.h"
+#include "HeterogeneousCore/AlpakaCore/interface/alpaka/stream/EDProducer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "RecoTracker/TkMSParametrization/interface/PixelRecoUtilities.h"
@@ -31,7 +31,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   class CAHitNtupletAlpaka : public stream::EDProducer<> {
     using HitsConstView = TrackingRecHitAlpakaSoAConstView<TrackerTraits>;
-    using HitsOnDevice = TrackingRecHitAlpakaDevice<TrackerTraits>;
+    using HitsOnDevice = TrackingRecHitAlpakaCollection<TrackerTraits>;
     using HitsOnHost = TrackingRecHitAlpakaHost<TrackerTraits>;
 
     using TkSoAHost = TrackSoAHost<TrackerTraits>;

@@ -13,20 +13,21 @@
    the same Layout to access the data on host and print it.
  */
 
-#include <alpaka/alpaka.hpp>
 #include <unistd.h>
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
+
+#include <alpaka/alpaka.hpp>
+
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
 #include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 using namespace std;
 using namespace ALPAKA_ACCELERATOR_NAMESPACE;

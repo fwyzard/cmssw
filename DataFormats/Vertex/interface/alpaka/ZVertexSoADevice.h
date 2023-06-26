@@ -17,7 +17,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <int32_t S>
   class ZVertexSoADevice : public PortableCollection<ZVertexSoAHeterogeneousLayout<>> {
   public:
-    ZVertexSoADevice() = default;  // cms::alpakatools::Product needs this
+    ZVertexSoADevice() = default;  // necessary for ROOT dictionaries
 
     // Constructor which specifies the SoA size
     explicit ZVertexSoADevice(Queue queue) : PortableCollection<ZVertexSoAHeterogeneousLayout<>>(S, queue) {}

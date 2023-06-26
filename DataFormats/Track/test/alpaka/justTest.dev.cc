@@ -1,10 +1,11 @@
 #include <alpaka/alpaka.hpp>
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
+
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 
 using Tuples = typename TrackSoA<pixelTopology::Phase1>::HitContainer;
 using TupleMultiplicity = cms::alpakatools::OneToManyAssoc<typename pixelTopology::Phase1::tindex_type,

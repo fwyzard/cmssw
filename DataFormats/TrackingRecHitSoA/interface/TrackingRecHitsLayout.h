@@ -2,11 +2,12 @@
 #define DataFormats_RecHits_TrackingRecHitsLayout_h
 
 #include <Eigen/Dense>
+
+#include "DataFormats/SoATemplate/interface/SoALayout.h"
+#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
-#include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParams.h"
-#include "SiPixelHitStatus.h"
 
 template <typename TrackerTraits>
 struct TrackingRecHitAlpakaSoA {

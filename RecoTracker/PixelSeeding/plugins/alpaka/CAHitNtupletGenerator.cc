@@ -12,8 +12,6 @@
 
 #include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"

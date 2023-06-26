@@ -10,7 +10,7 @@
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/VecArray.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/VecArray.h"
 #include "DataFormats/Math/interface/approx_atan2.h"
 
 #include "CACell.h"

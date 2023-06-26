@@ -1,9 +1,9 @@
 #ifndef RecoPixelVertexing_PixelTriplets_CAStructures_h
 #define RecoPixelVertexing_PixelTriplets_CAStructures_h
 
-#include "HeterogeneousCore/AlapakaInterface/interface/SimpleVector.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/VecArray.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/VecArray.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 
 namespace caStructures {
 

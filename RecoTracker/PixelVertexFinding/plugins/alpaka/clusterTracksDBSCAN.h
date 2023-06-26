@@ -7,7 +7,7 @@
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "../PixelVertexWorkSpaceLayout.h"
 #include "vertexFinder.h"
 namespace ALPAKA_ACCELERATOR_NAMESPACE {

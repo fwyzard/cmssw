@@ -12,9 +12,8 @@
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/AtomicPairCounter.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/AtomicPairCounter.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 
 // #define DUMP_GPU_TK_TUPLES

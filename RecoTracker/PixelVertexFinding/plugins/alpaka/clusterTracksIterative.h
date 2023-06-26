@@ -8,7 +8,7 @@
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
 #include "vertexFinder.h"
 

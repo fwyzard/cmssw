@@ -2,10 +2,11 @@
 #define DataFormats_RecHits_TrackingRecHitsHost_h
 
 #include <cstdint>
+
 #include <alpaka/alpaka.hpp>
 
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 template <typename TrackerTraits>

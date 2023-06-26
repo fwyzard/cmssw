@@ -4,7 +4,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "CAHitNtupletGeneratorKernels.h"
 #include "CAHitNtupletGeneratorKernelsImpl.h"
 #include <mutex>

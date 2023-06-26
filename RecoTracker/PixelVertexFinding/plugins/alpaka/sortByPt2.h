@@ -7,8 +7,8 @@
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/HistoContainer.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/radixSort.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/radixSort.h"
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
 #include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
 

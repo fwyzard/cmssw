@@ -10,8 +10,8 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/VecArray.h"
-#include "HeterogeneousCore/AlapakaInterface/interface/SimpleVector.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/VecArray.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "RecoTracker/PixelSeeding/interface/CircleEq.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
