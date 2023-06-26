@@ -1,0 +1,6 @@
+<lcgdict>
+
+  <class name="alpaka_serial_sync::ZVertexDevice"/>
+  <class name="edm::Wrapper<alpaka_serial_sync::ZVertexDevice>" splitLevel="0"/>
+
+</lcgdict>
