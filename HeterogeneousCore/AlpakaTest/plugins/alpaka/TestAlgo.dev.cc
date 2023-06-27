@@ -6,6 +6,7 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceCollection.h"
+#include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceProduct.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
@@ -39,6 +40,26 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
   };
 
+  class TestAlgoOtherKernel {
+  public:
+    template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
+    ALPAKA_FN_ACC void operator()(TAcc const& acc,
+                                  portabletest::TestStruct* prod,
+                                  double xvalue) const {
+      // global index of the thread within the grid
+      const int32_t thread = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
+
+      // set these only once in the whole kernel grid
+      if (thread == 0) {
+        // portabletest::TestStruct
+        prod->x = xvalue;
+        prod->y = 1.;
+        prod->z = 1.;
+        prod->id = -1;
+      }
+    }
+  };
+
   void TestAlgo::fill(Queue& queue, portabletest::TestDeviceCollection& collection, double xvalue) const {
     // use 64 items per group (this value is arbitrary, but it's a reasonable starting point)
     uint32_t items = 64;
@@ -52,6 +73,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto workDiv = make_workdiv<Acc1D>(groups, items);
 
     alpaka::exec<Acc1D>(queue, workDiv, TestAlgoKernel{}, collection.view(), collection->metadata().size(), xvalue);
+  }
+
+  void TestAlgo::set(Queue& queue, portabletest::TestDeviceProduct& product, double xvalue) const {
+    // a work division with a single block, thread and element
+    auto workDiv = make_workdiv<Acc1D>(1u, 1u);
+
+    alpaka::exec<Acc1D>(queue, workDiv, TestAlgoOtherKernel{}, product.data(), xvalue);
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

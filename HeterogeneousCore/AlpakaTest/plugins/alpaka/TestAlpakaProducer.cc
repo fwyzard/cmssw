@@ -1,4 +1,5 @@
 #include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceCollection.h"
+#include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceProduct.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -18,15 +19,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class TestAlpakaProducer : public global::EDProducer<> {
   public:
     TestAlpakaProducer(edm::ParameterSet const& config)
-        : deviceToken_{produces()}, size_{config.getParameter<int32_t>("size")} {}
+        : productToken_{produces()},
+          collectionToken_{produces()},
+          size_{config.getParameter<int32_t>("size")} {}
 
     void produce(edm::StreamID sid, device::Event& event, device::EventSetup const&) const override {
       // run the algorithm, potentially asynchronously
-      portabletest::TestDeviceCollection deviceProduct{size_, event.queue()};
-      algo_.fill(event.queue(), deviceProduct);
+      portabletest::TestDeviceProduct product{event.queue()};
+      algo_.set(event.queue(), product);
+
+      portabletest::TestDeviceCollection collection{size_, event.queue()};
+      algo_.fill(event.queue(), collection);
 
       // put the asynchronous product into the event without waiting
-      event.emplace(deviceToken_, std::move(deviceProduct));
+      event.emplace(collectionToken_, std::move(collection));
+      event.emplace(productToken_, std::move(product));
     }
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -36,7 +43,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 
   private:
-    const device::EDPutToken<portabletest::TestDeviceCollection> deviceToken_;
+    const device::EDPutToken<portabletest::TestDeviceProduct> productToken_;
+    const device::EDPutToken<portabletest::TestDeviceCollection> collectionToken_;
     const int32_t size_;
 
     // implementation of the algorithm
