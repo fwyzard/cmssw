@@ -93,15 +93,16 @@ void SiPixelDigisClustersFromSoAT<TrackerTraits>::produce(edm::StreamID,
   edm::DetSet<PixelDigi>* detDigis = nullptr;
   uint32_t detId = 0;
   for (uint32_t i = 0; i < nDigis; i++) {
+    auto digi = digis.view()[i];
     // check for uninitialized digis
     // this is set in RawToDigi_kernel in SiPixelRawToClusterGPUKernel.cu
-    if (digis.view()[i].rawIdArr() == 0)
+    if (digi.rawIdArr() == 0)
       continue;
     // check for noisy/dead pixels (electrons set to 0)
-    if (digis.view()[i].adc() == 0)
+    if (digi.adc() == 0)
       continue;
 
-    detId = digis.view()[i].rawIdArr();
+    detId = digi.rawIdArr();
     if (storeDigis_) {
       detDigis = &collection->find_or_insert(detId);
       if ((*detDigis).empty())
@@ -152,24 +153,25 @@ void SiPixelDigisClustersFromSoAT<TrackerTraits>::produce(edm::StreamID,
   };
 
   for (uint32_t i = 0; i < nDigis; i++) {
+    auto digi = digis.view()[i];
     // check for uninitialized digis
-    if (digis.view()[i].rawIdArr() == 0)
+    if (digi.rawIdArr() == 0)
       continue;
     // check for noisy/dead pixels (electrons set to 0)
-    if (digis.view()[i].adc() == 0)
+    if (digi.adc() == 0)
       continue;
-    if (digis.view()[i].clus() > 9000)
+    if (digi.clus() > 9000)
       continue;  // not in cluster; TODO add an assert for the size
 #ifdef EDM_ML_DEBUG
-    assert(digis.view()[i].rawIdArr() > 109999);
+    assert(digi.rawIdArr() > 109999);
 #endif
-    if (detId != digis.view()[i].rawIdArr()) {
+    if (detId != digi.rawIdArr()) {
       // new module
       fillClusters(detId);
 #ifdef EDM_ML_DEBUG
       assert(nclus == -1);
 #endif
-      detId = digis.view()[i].rawIdArr();
+      detId = digi.rawIdArr();
       if (storeDigis_) {
         detDigis = &collection->find_or_insert(detId);
         if ((*detDigis).empty())
@@ -180,19 +182,19 @@ void SiPixelDigisClustersFromSoAT<TrackerTraits>::produce(edm::StreamID,
         }
       }
     }
-    PixelDigi dig(digis.view()[i].pdigi());
+    PixelDigi dig(digi.pdigi());
     if (storeDigis_)
       (*detDigis).data.emplace_back(dig);
       // fill clusters
 #ifdef EDM_ML_DEBUG
-    assert(digis.view()[i].clus() >= 0);
-    assert(digis.view()[i].clus() < gpuClustering::maxNumClustersPerModules);
+    assert(digi.clus() >= 0);
+    assert(digi.clus() < gpuClustering::maxNumClustersPerModules);
 #endif
-    nclus = std::max(digis.view()[i].clus(), nclus);
+    nclus = std::max(digi.clus(), nclus);
     auto row = dig.row();
     auto col = dig.column();
     SiPixelCluster::PixelPos pix(row, col);
-    aclusters[digis.view()[i].clus()].add(pix, digis.view()[i].adc());
+    aclusters[digi.clus()].add(pix, digi.adc());
   }
 
   // fill final clusters
