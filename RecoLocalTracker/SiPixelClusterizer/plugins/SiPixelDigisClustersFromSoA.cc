@@ -16,6 +16,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "Geometry/Records/interface/TrackerTopologyRcd.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
 
 // local include(s)
 #include "PixelClusterizerBase.h"
@@ -34,7 +35,8 @@ private:
 
   const edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> topoToken_;
 
-  edm::EDGetTokenT<SiPixelDigisSoA> digiGetToken_;
+  // edm::EDGetTokenT<SiPixelDigisSoA> digiGetToken_;
+  edm::EDGetTokenT<SiPixelDigisHost> digiGetToken_;
 
   edm::EDPutTokenT<edm::DetSetVector<PixelDigi>> digiPutToken_;
   edm::EDPutTokenT<SiPixelClusterCollectionNew> clusterPutToken_;
@@ -48,7 +50,7 @@ private:
 template <typename TrackerTraits>
 SiPixelDigisClustersFromSoAT<TrackerTraits>::SiPixelDigisClustersFromSoAT(const edm::ParameterSet& iConfig)
     : topoToken_(esConsumes()),
-      digiGetToken_(consumes<SiPixelDigisSoA>(iConfig.getParameter<edm::InputTag>("src"))),
+      digiGetToken_(consumes<SiPixelDigisHost>(iConfig.getParameter<edm::InputTag>("src"))),
       clusterPutToken_(produces<SiPixelClusterCollectionNew>()),
       clusterThresholds_{iConfig.getParameter<int>("clusterThreshold_layer1"),
                          iConfig.getParameter<int>("clusterThreshold_otherLayers")},
@@ -75,7 +77,8 @@ void SiPixelDigisClustersFromSoAT<TrackerTraits>::produce(edm::StreamID,
                                                           edm::Event& iEvent,
                                                           const edm::EventSetup& iSetup) const {
   const auto& digis = iEvent.get(digiGetToken_);
-  const uint32_t nDigis = digis.size();
+  // const uint32_t nDigis = digis.size();
+  const uint32_t nDigis = digis.view().metadata().size();
   const auto& ttopo = iSetup.getData(topoToken_);
   constexpr auto maxModules = TrackerTraits::numberOfModules;
 
@@ -92,13 +95,13 @@ void SiPixelDigisClustersFromSoAT<TrackerTraits>::produce(edm::StreamID,
   for (uint32_t i = 0; i < nDigis; i++) {
     // check for uninitialized digis
     // this is set in RawToDigi_kernel in SiPixelRawToClusterGPUKernel.cu
-    if (digis.rawIdArr(i) == 0)
+    if (digis.view()[i].rawIdArr() == 0)
       continue;
     // check for noisy/dead pixels (electrons set to 0)
-    if (digis.adc(i) == 0)
+    if (digis.view()[i].adc() == 0)
       continue;
 
-    detId = digis.rawIdArr(i);
+    detId = digis.view()[i].rawIdArr();
     if (storeDigis_) {
       detDigis = &collection->find_or_insert(detId);
       if ((*detDigis).empty())
@@ -150,23 +153,23 @@ void SiPixelDigisClustersFromSoAT<TrackerTraits>::produce(edm::StreamID,
 
   for (uint32_t i = 0; i < nDigis; i++) {
     // check for uninitialized digis
-    if (digis.rawIdArr(i) == 0)
+    if (digis.view()[i].rawIdArr() == 0)
       continue;
     // check for noisy/dead pixels (electrons set to 0)
-    if (digis.adc(i) == 0)
+    if (digis.view()[i].adc() == 0)
       continue;
-    if (digis.clus(i) > 9000)
+    if (digis.view()[i].clus() > 9000)
       continue;  // not in cluster; TODO add an assert for the size
 #ifdef EDM_ML_DEBUG
-    assert(digis.rawIdArr(i) > 109999);
+    assert(digis.view()[i].rawIdArr() > 109999);
 #endif
-    if (detId != digis.rawIdArr(i)) {
+    if (detId != digis.view()[i].rawIdArr()) {
       // new module
       fillClusters(detId);
 #ifdef EDM_ML_DEBUG
       assert(nclus == -1);
 #endif
-      detId = digis.rawIdArr(i);
+      detId = digis.view()[i].rawIdArr();
       if (storeDigis_) {
         detDigis = &collection->find_or_insert(detId);
         if ((*detDigis).empty())
@@ -177,19 +180,19 @@ void SiPixelDigisClustersFromSoAT<TrackerTraits>::produce(edm::StreamID,
         }
       }
     }
-    PixelDigi dig(digis.pdigi(i));
+    PixelDigi dig(digis.view()[i].pdigi());
     if (storeDigis_)
       (*detDigis).data.emplace_back(dig);
       // fill clusters
 #ifdef EDM_ML_DEBUG
-    assert(digis.clus(i) >= 0);
-    assert(digis.clus(i) < gpuClustering::maxNumClustersPerModules);
+    assert(digis.view()[i].clus() >= 0);
+    assert(digis.view()[i].clus() < gpuClustering::maxNumClustersPerModules);
 #endif
-    nclus = std::max(digis.clus(i), nclus);
+    nclus = std::max(digis.view()[i].clus(), nclus);
     auto row = dig.row();
     auto col = dig.column();
     SiPixelCluster::PixelPos pix(row, col);
-    aclusters[digis.clus(i)].add(pix, digis.adc(i));
+    aclusters[digis.view()[i].clus()].add(pix, digis.view()[i].adc());
   }
 
   // fill final clusters
