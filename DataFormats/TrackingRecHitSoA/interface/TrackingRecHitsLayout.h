@@ -7,7 +7,7 @@
 #include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
-#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParams.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
 template <typename TrackerTraits>
 struct TrackingRecHitAlpakaSoA {

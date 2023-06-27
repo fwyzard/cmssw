@@ -9,48 +9,140 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
-#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastAlpaka.h"
-#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParams.h"
+// #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastAlpaka.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/alpaka/PixelCPEFastParamsCollection.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParamsHost.h"
+
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
+
+#include "CondFormats/DataRecord/interface/SiPixelGenErrorDBObjectRcd.h"
+#include "RecoLocalTracker/Records/interface/PixelCPEFastParamsRecord.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   class PixelCPEFastParamsESProducerAlpaka : public ESProducer {
   public:
     PixelCPEFastParamsESProducerAlpaka(edm::ParameterSet const& iConfig);
-    std::optional<pixelCPEforDevice::PixelCPEFastParams<Device, TrackerTraits>> produce(device::EventSetup& es);
+    std::unique_ptr<PixelCPEFastParamsHost<TrackerTraits>> produce(const PixelCPEFastParamsRecord& iRecord);
+
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   private:
-    const device::ESGetToken<PixelCPEFastAlpaka<TrackerTraits>, TkPixelCPERecord> cpeToken_;
+
+    edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> magfieldToken_;
+    edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> pDDToken_;
+    edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> hTTToken_;
+    edm::ESGetToken<SiPixelLorentzAngle, SiPixelLorentzAngleRcd> lorentzAngleToken_;
+    edm::ESGetToken<SiPixelLorentzAngle, SiPixelLorentzAngleRcd> lorentzAngleWidthToken_;
+    edm::ESGetToken<SiPixelGenErrorDBObject, SiPixelGenErrorDBObjectRcd> genErrorDBObjectToken_;
+
+    edm::ParameterSet pset_;
+    bool useErrorsFromTemplates_;
+
+    // const device::ESGetToken<PixelCPEFastAlpaka<TrackerTraits>, TkPixelCPERecord> cpeToken_;
   };
 
-  template <typename TrackerTraits>
-  PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::PixelCPEFastParamsESProducerAlpaka(edm::ParameterSet const& iConfig)
-      : ESProducer(iConfig) {
-    auto const& myname = iConfig.getParameter<std::string>("ComponentName");
+
+using namespace edm;
+
+template <typename TrackerTraits>
+PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::PixelCPEFastParamsESProducerAlpaka(const edm::ParameterSet& p) : ESProducer(p), pset_(p) {
+  auto const& myname = p.getParameter<std::string>("ComponentName");
+  auto const& magname = p.getParameter<edm::ESInputTag>("MagneticFieldRecord");
+  useErrorsFromTemplates_ = p.getParameter<bool>("UseErrorsFromTemplates");
+
+  auto cc = setWhatProduced(this, myname);
+  magfieldToken_ = cc.consumes(magname);
+  pDDToken_ = cc.consumes();
+  hTTToken_ = cc.consumes();
+  lorentzAngleToken_ = cc.consumes(edm::ESInputTag(""));
+  lorentzAngleWidthToken_ = cc.consumes(edm::ESInputTag("", "forWidth"));
+  if (useErrorsFromTemplates_) {
+    genErrorDBObjectToken_ = cc.consumes();
   }
+}
 
-  template <typename TrackerTraits>
-  std::optional<pixelCPEforDevice::PixelCPEFastParams<Device, TrackerTraits>>
-  PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::produce(device::EventSetup& es) {
-    auto const& pcpe = es.getData(cpeToken_);
-    auto pcpe_buf = cms::alpakatools::make_host_buffer<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>, Platform>();
-    memcpy(pcpe_buf.data(), &pcpe.getCPEFastParams(), sizeof(pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>));
+template <typename TrackerTraits>
+std::unique_ptr<PixelCPEFastParamsHost<TrackerTraits>> 
+PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::produce(const PixelCPEFastParamsRecord& iRecord){
+  // add the new la width object
+  const SiPixelLorentzAngle* lorentzAngleWidthProduct = nullptr;
+  lorentzAngleWidthProduct = &iRecord.get(lorentzAngleWidthToken_);
 
-    return pixelCPEforDevice::PixelCPEFastParams<Device, TrackerTraits>(pcpe_buf);
+  const SiPixelGenErrorDBObject* genErrorDBObjectProduct = nullptr;
+
+  // Errors take only from new GenError
+  if (useErrorsFromTemplates_) {  // do only when generrors are needed
+    genErrorDBObjectProduct = &iRecord.get(genErrorDBObjectToken_);
+    //} else {
+    //std::cout<<" pass an empty GenError pointer"<<std::endl;
   }
+  return std::make_unique<PixelCPEFastParamsHost<TrackerTraits>>(pset_,
+                                                       &iRecord.get(magfieldToken_),
+                                                       iRecord.get(pDDToken_),
+                                                       iRecord.get(hTTToken_),
+                                                       &iRecord.get(lorentzAngleToken_),
+                                                       genErrorDBObjectProduct,
+                                                       lorentzAngleWidthProduct);
+}
 
-  template <typename TrackerTraits>
-  void PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::fillDescriptions(
-      edm::ConfigurationDescriptions& descriptions) {
-    edm::ParameterSetDescription desc;
+template <typename TrackerTraits>
+void PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  edm::ParameterSetDescription desc;
 
-    std::string name = "PixelCPEFast";
-    name += TrackerTraits::nameModifier;
-    desc.add<std::string>("ComponentName", name);
+  // from PixelCPEBase
+  PixelCPEBase::fillPSetDescription(desc);
 
-    descriptions.addWithDefaultLabel(desc);
-  }
+  // from PixelCPEFast
+  PixelCPEFastParamsHost<TrackerTraits>::fillPSetDescription(desc);
+
+  // used by PixelCPEFast
+  desc.add<double>("EdgeClusterErrorX", 50.0);
+  desc.add<double>("EdgeClusterErrorY", 85.0);
+  desc.add<bool>("UseErrorsFromTemplates", true);
+  desc.add<bool>("TruncatePixelCharge", true);
+
+  std::string name = "PixelCPEFastParams";
+  name += TrackerTraits::nameModifier;
+  desc.add<std::string>("ComponentName", name);
+  desc.add<edm::ESInputTag>("MagneticFieldRecord", edm::ESInputTag());
+
+  descriptions.addWithDefaultLabel(desc);
+}
+
+  // template <typename TrackerTraits>
+  // PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::PixelCPEFastParamsESProducerAlpaka(edm::ParameterSet const& iConfig)
+  //     : ESProducer(iConfig) {
+  //   auto const& myname = iConfig.getParameter<std::string>("ComponentName");
+  // }
+
+  // template <typename TrackerTraits>
+  // std::optional<PixelCPEFastParamsHost<TrackerTraits>>
+  // PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::produce(device::EventSetup& es) {
+  //   auto const& pcpe = es.getData(cpeToken_);
+  //   auto pcpe_buf = cms::alpakatools::make_host_buffer<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>, Platform>();
+  //   memcpy(pcpe_buf.data(), &pcpe.getCPEFastParams(), sizeof(pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>));
+
+  //   return PixelCPEFastParamsHost<TrackerTraits>(pcpe_buf);
+  // }
+
+  // template <typename TrackerTraits>
+  // void PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::fillDescriptions(
+  //     edm::ConfigurationDescriptions& descriptions) {
+  //   edm::ParameterSetDescription desc;
+
+  //   std::string name = "PixelCPEFastParams";
+  //   name += TrackerTraits::nameModifier;
+  //   desc.add<std::string>("ComponentName", name);
+
+  //   descriptions.addWithDefaultLabel(desc);
+  // }
 
   using PixelCPEFastParamsESProducerAlpakaPhase1 = PixelCPEFastParamsESProducerAlpaka<pixelTopology::Phase1>;
   using PixelCPEFastParamsESProducerAlpakaPhase2 = PixelCPEFastParamsESProducerAlpaka<pixelTopology::Phase2>;
