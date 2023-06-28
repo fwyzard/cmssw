@@ -747,7 +747,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // std::cout << errors.begin()->first << " - " << (errors.begin()->second).size() << std::endl;
         digiErrors_d = SiPixelDigiErrorsSoA(wordCounter, queue);  // std::move(errors), queue);
       }
-      clusters_d = SiPixelClustersSoA(numberOfModules, queue);
+      clusters_d = SiPixelClustersCollection(numberOfModules, queue);
       if (wordCounter)  // protect in case of empty event....
       {
 #if defined(ALPAKA_ACC_GPU_CUDA_ASYNC_BACKEND) || defined(ALPAKA_ACC_GPU_HIP_ASYNC_BACKEND)
@@ -911,7 +911,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // alpaka::memcpy(queue, digis_d->view(), digis_h_view);
 
-      clusters_d = SiPixelClustersSoA(numberOfModules, queue);
+      clusters_d = SiPixelClustersCollection(numberOfModules, queue);
 
       // nModules_Clusters_h = cms::cuda::make_host_unique<uint32_t[]>(2, stream);
 

@@ -1,4 +1,4 @@
 <lcgdict>
-  <class name="alpaka_rocm_async::SiPixelClustersSoA" persistent="false"/>
-  <class name="edm::Wrapper<alpaka_rocm_async::SiPixelClustersSoA>" persistent="false"/>
+  <class name="alpaka_rocm_async::SiPixelClustersCollection" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_rocm_async::SiPixelClustersCollection>" persistent="false"/>
 </lcgdict>

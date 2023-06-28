@@ -49,7 +49,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TrackerTraits>
     TrackingRecHitAlpakaCollection<TrackerTraits> PixelRecHitGPUKernel<TrackerTraits>::makeHitsAsync(
         SiPixelDigisSoA const& digis_d,
-        SiPixelClustersSoA const& clusters_d,
+        SiPixelClustersCollection const& clusters_d,
         BeamSpotPOD const* bs_d,
         pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* cpeParams,
         Queue queue) const {

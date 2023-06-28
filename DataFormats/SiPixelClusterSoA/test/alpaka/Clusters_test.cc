@@ -30,7 +30,7 @@ int main() {
   {
     // Instantiate tracks on device. PortableDeviceCollection allocates
     // SoA on device automatically.
-    SiPixelClustersSoA clusters_d(100, queue);
+    SiPixelClustersCollection clusters_d(100, queue);
     testClusterSoA::runKernels(clusters_d.view(), queue);
 
     // Instantate tracks on host. This is where the data will be

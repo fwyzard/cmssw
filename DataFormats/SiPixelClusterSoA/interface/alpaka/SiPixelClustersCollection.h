@@ -2,13 +2,15 @@
 #define DataFormats_SiPixelClusterSoA_interface_alpaka_SiPixelClustersCollection_h
 
 #include <cstdint>
+
 #include <alpaka/alpaka.hpp>
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersHost.h"
-#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersHost.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersLayout.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 // TODO: The class is created via inheritance of the PortableCollection.
 // This is generally discouraged, and should be done via composition.
@@ -18,16 +20,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using SiPixelClustersCollection = SiPixelClustersHost;
 #else
   using SiPixelClustersCollection = SiPixelClustersDevice<Device>;
-
 #endif
-  using SiPixelClustersSoA = SiPixelClustersCollection;
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {
   template <>
-  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::SiPixelClustersSoA> {
+  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::SiPixelClustersCollection> {
     template <typename TQueue>
-    static auto copyAsync(TQueue &queue, ALPAKA_ACCELERATOR_NAMESPACE::SiPixelClustersSoA const &srcData) {
+    static auto copyAsync(TQueue &queue, ALPAKA_ACCELERATOR_NAMESPACE::SiPixelClustersCollection const &srcData) {
       SiPixelClustersHost dstData(srcData->metadata().size(), queue);
       alpaka::memcpy(queue, dstData.buffer(), srcData.buffer());
       dstData.setNClusters(srcData.nClusters(), srcData.offsetBPIX2());

@@ -179,7 +179,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         return std::move(*digis_d);
       }
 
-      SiPixelClustersSoA&& getClusters() {
+      SiPixelClustersCollection&& getClusters() {
         clusters_d->setNClusters(nModules_Clusters_h[1], nModules_Clusters_h[2]);
         return std::move(*clusters_d);
       }
@@ -192,7 +192,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // Data to be put in the event
       cms::alpakatools::host_buffer<uint32_t[]> nModules_Clusters_h;
       std::optional<SiPixelDigisSoA> digis_d;
-      std::optional<SiPixelClustersSoA> clusters_d;
+      std::optional<SiPixelClustersCollection> clusters_d;
       std::optional<SiPixelDigiErrorsSoA> digiErrors_d;
     };
 

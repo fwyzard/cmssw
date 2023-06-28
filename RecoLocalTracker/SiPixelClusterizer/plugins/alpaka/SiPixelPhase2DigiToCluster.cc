@@ -68,7 +68,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     device::EDPutToken<SiPixelDigisSoA> digiPutToken_;
     device::EDPutToken<SiPixelDigiErrorsSoA> digiErrorPutToken_;
-    device::EDPutToken<SiPixelClustersSoA> clusterPutToken_;
+    device::EDPutToken<SiPixelClustersCollection> clusterPutToken_;
 
     pixelDetails::SiPixelRawToClusterKernel Algo_;
 
@@ -148,7 +148,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   void SiPixelPhase2DigiToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
     if (nDigis_ == 0) {
-      SiPixelClustersSoA clusters_d = SiPixelClustersSoA(pixelTopology::Phase1::numberOfModules, iEvent.queue());
+      SiPixelClustersCollection clusters_d{pixelTopology::Phase1::numberOfModules, iEvent.queue()};
       iEvent.emplace(digiPutToken_, std::move(digis_d));
       iEvent.emplace(clusterPutToken_, std::move(clusters_d));
       if (includeErrors_) {
