@@ -322,12 +322,12 @@ void PixelCPEFastParamsHost<TrackerTraits>::fillParamsForDevice() {
 #endif  // EDM_ML_DEBUG
 
   // fill Layer and ladders geometry
-  // memset(&buffer_->layerGeometry(), 0, sizeof(pixelCPEforDevice::LayerGeometryT<TrackerTraits>));
-  // memcpy(buffer_->layerGeometry().layerStart,
-  //        TrackerTraits::layerStart,
-  //        sizeof(pixelCPEforDevice::LayerGeometryT<TrackerTraits>::layerStart));
-  // memcpy(buffer_->layerGeometry().layer, pixelTopology::layer<TrackerTraits>.data(), pixelTopology::layer<TrackerTraits>.size());
-  // buffer_->layerGeometry().maxModuleStride = pixelTopology::maxModuleStride<TrackerTraits>;
+  memset(&buffer_->layerGeometry(), 0, sizeof(pixelCPEforDevice::LayerGeometryT<TrackerTraits>));
+  memcpy(buffer_->layerGeometry().layerStart,
+         TrackerTraits::layerStart,
+         sizeof(pixelCPEforDevice::LayerGeometryT<TrackerTraits>::layerStart));
+  memcpy(buffer_->layerGeometry().layer, pixelTopology::layer<TrackerTraits>.data(), pixelTopology::layer<TrackerTraits>.size());
+  buffer_->layerGeometry().maxModuleStride = pixelTopology::maxModuleStride<TrackerTraits>;
 }
 
 template <typename TrackerTraits>
