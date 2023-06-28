@@ -489,6 +489,11 @@ namespace pixelgpudetails {
     }
 
     if (threadIdx.x == 0) {
+
+      for(int j = 0; j<1000;j++)
+      {
+        printf("3. moduleStart %d %d %d\n", j, clusInModule[j], moduleStart[j]);
+      }
       // copy the number of modules
       nModules_Clusters[0] = *nModules;
       // last element holds the number of all clusters

@@ -1,0 +1,41 @@
+<lcgdict>
+
+  <class name="TrackSoA<pixelTopology::Phase1>"/>
+  <class name="TrackLayout<pixelTopology::Phase1>"/>
+  <class name="TrackSoAView<pixelTopology::Phase1>"/>
+
+  <class name="TrackSoA<pixelTopology::Phase2>"/>
+  <class name="TrackLayout<pixelTopology::Phase2>"/>
+  <class name="TrackSoAView<pixelTopology::Phase2>"/>
+
+    <class name="PortableHostCollection<TrackLayout<pixelTopology::Phase1>>"/>
+  <read
+    sourceClass="PortableHostCollection<TrackLayout<pixelTopology::Phase1>>"
+    targetClass="PortableHostCollection<TrackLayout<pixelTopology::Phase1>>"
+    version="[1-]"
+    source="TrackLayout<pixelTopology::Phase1> layout_;"
+    target="buffer_"
+    embed="false">
+  <![CDATA[
+    PortableHostCollection<TrackLayout<pixelTopology::Phase1>>::ROOTReadStreamer(newObj, onfile.layout_);
+  ]]>
+  </read>
+  <class name="TrackSoAHostPhase1"/>
+  <class name="edm::Wrapper<TrackSoAHostPhase1>" splitLevel="0"/>
+
+  <class name="PortableHostCollection<TrackLayout<pixelTopology::Phase2>>"/>
+  <read
+    sourceClass="PortableHostCollection<TrackLayout<pixelTopology::Phase2>>"
+    targetClass="PortableHostCollection<TrackLayout<pixelTopology::Phase2>>"
+    version="[1-]"
+    source="TrackLayout<pixelTopology::Phase2> layout_;"
+    target="buffer_"
+    embed="false">
+  <![CDATA[
+    PortableHostCollection<TrackLayout<pixelTopology::Phase2>>::ROOTReadStreamer(newObj, onfile.layout_);
+  ]]>
+  </read>
+  <class name="TrackSoAHostPhase2"/>
+  <class name="edm::Wrapper<TrackSoAHostPhase2>" splitLevel="0"/>
+
+</lcgdict>

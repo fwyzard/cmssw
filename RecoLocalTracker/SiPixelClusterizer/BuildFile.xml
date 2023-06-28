@@ -1,0 +1,11 @@
+<use name="FWCore/Framework"/>
+<use name="HeterogeneousCore/AlpakaCore"/>
+<use name="HeterogeneousCore/AlpakaInterface"/>
+<use name="HeterogeneousCore/AlpakaTest"/>
+<use name="CalibTracker/Records"/>
+<use name="CalibTracker/SiPixelESProducers"/>
+<use name="CondFormats/SiPixelObjects"/>
+<flags ALPAKA_BACKENDS="1"/>
+<export>
+  <lib name="1"/>
+</export>

@@ -1,0 +1,11 @@
+<lcgdict>
+  <class name="PortableDeviceCollection<SiPixelDigisLayoutSoA, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <class name="SiPixelDigisDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <class name="edm::DeviceProduct<SiPixelDigisDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<SiPixelDigisDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>>>" persistent="false"/>
+
+  <class name="PortableDeviceCollection<SiPixelDigiErrorsLayoutSoA, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <class name="SiPixelDigiErrorsDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <class name="edm::DeviceProduct<SiPixelDigiErrorsDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<SiPixelDigiErrorsDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>>>" persistent="false"/>
+</lcgdict>

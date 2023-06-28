@@ -1,0 +1,7 @@
+<lcgdict>
+  <class name="alpaka_cuda_async::pixelTrack::TrackSoADevicePhase1" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_cuda_async::pixelTrack::TrackSoADevicePhase1>" persistent="false"/>
+
+  <class name="alpaka_cuda_async::pixelTrack::TrackSoADevicePhase2" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_cuda_async::pixelTrack::TrackSoADevicePhase2>" persistent="false"/>
+</lcgdict>

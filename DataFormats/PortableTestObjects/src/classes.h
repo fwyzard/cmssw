@@ -1,3 +1,5 @@
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/PortableTestObjects/interface/TestHostCollection.h"
+#include "DataFormats/PortableTestObjects/interface/TestHostProduct.h"
 #include "DataFormats/PortableTestObjects/interface/TestSoA.h"
+#include "DataFormats/PortableTestObjects/interface/TestStruct.h"
