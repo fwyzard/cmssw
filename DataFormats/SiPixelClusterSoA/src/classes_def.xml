@@ -1,16 +1,16 @@
 <lcgdict>
-  <class name="SiPixelClustersLayoutSoA"/>
-  <class name="SiPixelClustersLayoutSoA::View"/>
-  <class name="PortableHostCollection<SiPixelClustersLayoutSoA>"/>
+  <class name="SiPixelClustersSoA"/>
+  <class name="SiPixelClustersSoA::View"/>
+  <class name="PortableHostCollection<SiPixelClustersSoA>"/>
   <read
-    sourceClass="PortableHostCollection<SiPixelClustersLayoutSoA>"
-    targetClass="PortableHostCollection<SiPixelClustersLayoutSoA>"
+    sourceClass="PortableHostCollection<SiPixelClustersSoA>"
+    targetClass="PortableHostCollection<SiPixelClustersSoA>"
     version="[1-]"
-    source="SiPixelClustersLayoutSoA layout_;"
+    source="SiPixelClustersSoA layout_;"
     target="buffer_"
     embed="false">
   <![CDATA[
-    PortableHostCollection<SiPixelClustersLayoutSoA>::ROOTReadStreamer(newObj, onfile.layout_);
+    PortableHostCollection<SiPixelClustersSoA>::ROOTReadStreamer(newObj, onfile.layout_);
   ]]>
   </read>
 

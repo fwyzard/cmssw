@@ -2,7 +2,7 @@
 #define DataFormats_SiPixelClusterSoA_src_classes_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
-#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersLayout.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersHost.h"
 
 #endif  // DataFormats_SiPixelClusterSoA_src_classes_h

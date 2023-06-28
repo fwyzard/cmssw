@@ -32,7 +32,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     BeamSpotPOD const* __restrict__ bs,
                                     SiPixelDigisLayoutSoAConstView digis,
                                     uint32_t numElements,
-                                    SiPixelClustersLayoutSoAConstView clusters,
+                                    SiPixelClustersSoAConstView clusters,
                                     TrackingRecHitAlpakaSoAView<TrackerTraits> hits) const {
         // FIXME
         // the compiler seems NOT to optimize loads from views (even in a simple test case)

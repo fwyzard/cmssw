@@ -11,7 +11,7 @@
 #include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
 #include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelGainCalibrationForHLTUtilities.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
-#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersLayout.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
@@ -42,7 +42,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     bool isRun2,
                                     SiPixelDigisLayoutSoAView view,
-                                    SiPixelClustersLayoutSoAView clus_view,
+                                    SiPixelClustersSoAView clus_view,
                                     const SiPixelGainCalibrationForHLTSoAConstView gains,
                                     int numElements) const {
         const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
@@ -93,7 +93,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     //   template <typename TAcc>
     //   ALPAKA_FN_ACC void operator()(const TAcc& acc,
     //                                 SiPixelDigisLayoutSoAView& view,
-    //                                 SiPixelClustersLayoutSoAView& clus_view,
+    //                                 SiPixelClustersSoAView& clus_view,
     //                                 int numElements
     //   ) const {
     //     const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);

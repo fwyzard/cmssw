@@ -10,7 +10,7 @@
   <class name="edm::DeviceProduct<alpaka_cuda_async::SiPixelClustersCollection>" persistent="false"/>
   <class name="edm::Wrapper<edm::DeviceProduct<alpaka_cuda_async::SiPixelClustersCollection>>" persistent="false"/>
   -->
-  <class name="PortableDeviceCollection<SiPixelClustersLayoutSoA, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <class name="PortableDeviceCollection<SiPixelClustersSoA, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
   <class name="SiPixelClustersDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
   <class name="edm::DeviceProduct<SiPixelClustersDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>>" persistent="false"/>
   <class name="edm::Wrapper<edm::DeviceProduct<SiPixelClustersDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>>>" persistent="false"/>

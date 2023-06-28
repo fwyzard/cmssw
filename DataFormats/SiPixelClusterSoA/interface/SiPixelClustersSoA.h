@@ -9,8 +9,8 @@ GENERATE_SOA_LAYOUT(SiPixelClustersLayout,
                     SOA_COLUMN(uint32_t, moduleId),
                     SOA_COLUMN(uint32_t, clusModuleStart))
 
-using SiPixelClustersLayoutSoA = SiPixelClustersLayout<>;
-using SiPixelClustersLayoutSoAView = SiPixelClustersLayout<>::View;
-using SiPixelClustersLayoutSoAConstView = SiPixelClustersLayout<>::ConstView;
+using SiPixelClustersSoA = SiPixelClustersLayout<>;
+using SiPixelClustersSoAView = SiPixelClustersSoA::View;
+using SiPixelClustersSoAConstView = SiPixelClustersSoA::ConstView;
 
 #endif  // DataFormats_SiPixelClusterSoA_SiPixelClustersLayout_h

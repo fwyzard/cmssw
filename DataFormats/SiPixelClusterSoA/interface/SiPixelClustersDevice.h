@@ -6,22 +6,22 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersHost.h"
 #include "DataFormats/Portable/interface/PortableDeviceCollection.h"
-#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersLayout.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
 
 template <typename TDev>
-class SiPixelClustersDevice : public PortableDeviceCollection<SiPixelClustersLayout<>, TDev> {
+class SiPixelClustersDevice : public PortableDeviceCollection<SiPixelClustersSoA, TDev> {
 public:
   SiPixelClustersDevice() = default;
   ~SiPixelClustersDevice() = default;
 
   template <typename TQueue>
   explicit SiPixelClustersDevice(size_t maxModules, TQueue queue)
-      : PortableDeviceCollection<SiPixelClustersLayout<>, TDev>(maxModules + 1, queue) {}
+      : PortableDeviceCollection<SiPixelClustersSoA, TDev>(maxModules + 1, queue) {}
 
   // Constructor which specifies the SoA size
   explicit SiPixelClustersDevice(size_t maxModules, TDev const &device)
-      : PortableDeviceCollection<SiPixelClustersLayout<>, TDev>(maxModules + 1, device) {}
+      : PortableDeviceCollection<SiPixelClustersSoA, TDev>(maxModules + 1, device) {}
 
   SiPixelClustersDevice(SiPixelClustersDevice &&) = default;
   SiPixelClustersDevice &operator=(SiPixelClustersDevice &&) = default;

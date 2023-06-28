@@ -508,7 +508,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 //     template <typename TAcc>
 //     ALPAKA_FN_ACC void operator()(const TAcc &acc,
 //                                   // uint32_t const *__restrict__ cluStart,
-//                                   SiPixelClustersLayoutSoAView clus_view
+//                                   SiPixelClustersSoAView clus_view
 //                                   // uint32_t *__restrict__ moduleStart
 //     ) const {
 //       ALPAKA_ASSERT_OFFLOAD(TrackerTraits::numberOfModules < 2048);  // easy to extend at least till 32*1024
@@ -595,7 +595,7 @@ namespace pixelDetails {
     template <typename TAcc>
     ALPAKA_FN_ACC void operator()(const TAcc &acc,
                                   // uint32_t const *__restrict__ cluStart,
-                                  SiPixelClustersLayoutSoAView clus_view) const {
+                                  SiPixelClustersSoAView clus_view) const {
       // uint32_t *__restrict__ moduleStart) const {
       ALPAKA_ASSERT_OFFLOAD(TrackerTraits::numberOfModules < 2048);  // easy to extend at least till 32*1024
 

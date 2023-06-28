@@ -4,20 +4,19 @@
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
-
-#include "SiPixelClustersLayout.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
 
 // TODO: The class is created via inheritance of the PortableCollection.
 // This is generally discouraged, and should be done via composition.
 // See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
-class SiPixelClustersHost : public PortableHostCollection<SiPixelClustersLayout<>> {
+class SiPixelClustersHost : public PortableHostCollection<SiPixelClustersSoA> {
 public:
   SiPixelClustersHost() = default;
   ~SiPixelClustersHost() = default;
 
   template <typename TQueue>
   explicit SiPixelClustersHost(size_t maxModules, TQueue queue)
-      : PortableHostCollection<SiPixelClustersLayout<>>(maxModules + 1, queue) {}
+      : PortableHostCollection<SiPixelClustersSoA>(maxModules + 1, queue) {}
 
   SiPixelClustersHost(SiPixelClustersHost &&) = default;
   SiPixelClustersHost &operator=(SiPixelClustersHost &&) = default;
