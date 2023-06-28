@@ -43,8 +43,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     //Common Params
     AlgoParams makeCommonParams(edm::ParameterSet const& cfg) {
-      return AlgoParams({cfg.getParameter<bool>("onGPU"),
-                         cfg.getParameter<unsigned int>("minHitsForSharingCut"),
+      return AlgoParams({cfg.getParameter<unsigned int>("minHitsForSharingCut"),
                          cfg.getParameter<bool>("useRiemannFit"),
                          cfg.getParameter<bool>("fitNas4"),
                          cfg.getParameter<bool>("includeJumpingForwardDoublets"),

@@ -23,7 +23,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     //Configuration params common to all topologies, for the algorithms
     struct AlgoParams {
-      const bool onGPU_;
       const uint32_t minHitsForSharingCut_;
       const bool useRiemannFit_;
       const bool fitNas4_;
