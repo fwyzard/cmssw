@@ -1171,11 +1171,11 @@ namespace hcal {
       int blocks2 =
           threadsPerBlock2.z > totalChannels ? 1 : (totalChannels + threadsPerBlock2.z - 1) / threadsPerBlock2.z;
 
-#ifdef HCAL_MAHI_CPUDEBUG
+      //#ifdef HCAL_MAHI_CPUDEBUG
       std::cout << "threads: " << threadsPerBlock2.x << " " << threadsPerBlock2.y << "  " << threadsPerBlock2.z
                 << std::endl;
       std::cout << "blocks: " << blocks2 << std::endl;
-#endif
+      //#endif
 
       hcal::mahi::kernel_prep_pulseMatrices_sameNumberOfSamples<<<blocks2, threadsPerBlock2, 0, cudaStream>>>(
           scratch.pulseMatrices.get(),

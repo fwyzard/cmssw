@@ -2,6 +2,12 @@
 <use name="DataFormats/Common"/>
 <use name="DataFormats/HcalDetId"/>
 <use name="DataFormats/HcalDigi"/>
+<use name="DataFormats/DetId"/>
+<use name="DataFormats/Portable"/>
+<use name="DataFormats/SoATemplate"/>
+<use name="FWCore/MessageLogger"/>
+<use name="HeterogeneousCore/AlpakaInterface"/>
+<flags ALPAKA_BACKENDS="cuda"/>
 <export>
   <lib name="1"/>
 </export>

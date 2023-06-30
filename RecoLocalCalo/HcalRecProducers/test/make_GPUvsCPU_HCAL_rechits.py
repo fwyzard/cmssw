@@ -22,7 +22,8 @@ process.maxEvents = cms.untracked.PSet(
 #-----------------------------------------
 
 process.source = cms.Source("PoolSource",
-  fileNames = cms.untracked.vstring('/store/data/Run2018D/EphemeralHLTPhysics1/RAW/v1/000/323/775/00000/A27DFA33-8FCB-BE42-A2D2-1A396EEE2B6E.root')
+  #fileNames = cms.untracked.vstring('/store/data/Run2018D/EphemeralHLTPhysics1/RAW/v1/000/323/775/00000/A27DFA33-8FCB-BE42-A2D2-1A396EEE2B6E.root')
+  fileNames = cms.untracked.vstring('file:../../11634.523_TTbar_14TeV+2021_Patatrack_HCALOnlyGPU_Validation/step2.root')
 )
 
 process.hltGetRaw = cms.EDAnalyzer( "HLTGetRaw",
@@ -146,4 +147,4 @@ process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
 )
 
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1

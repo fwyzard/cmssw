@@ -26,11 +26,12 @@ from RecoLocalCalo.HcalRecProducers.hcalSiPMCharacteristicsGPUESProducer_cfi imp
 from RecoLocalCalo.HcalRecProducers.hcalMahiPulseOffsetsGPUESProducer_cfi import hcalMahiPulseOffsetsGPUESProducer
 
 # convert the HBHE digis into SoA format, and copy them from CPU to GPU
+
 from EventFilter.HcalRawToDigi.hcalDigisProducerGPU_cfi import hcalDigisProducerGPU as _hcalDigisProducerGPU
 hcalDigisGPU = _hcalDigisProducerGPU.clone(
     digisLabelF01HE = "",
-    digisLabelF5HB = "",
-    digisLabelF3HB = ""
+    digisLabelF5HB  = "",
+    digisLabelF3HB  = ""
 )
 
 # run the HCAL local reconstruction (MAHI) on GPU

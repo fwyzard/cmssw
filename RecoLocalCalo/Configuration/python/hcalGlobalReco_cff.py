@@ -24,6 +24,7 @@ hcalOnlyLegacyGlobalRecoTask = hcalOnlyGlobalRecoTask.copy()
 
 #--- for Run 3 on GPU
 from Configuration.ProcessModifiers.gpu_cff import gpu
+from Configuration.ProcessModifiers.alpaka_cff import alpaka
 
 from RecoLocalCalo.HcalRecProducers.hcalCPURecHitsProducer_cfi import hcalCPURecHitsProducer as _hbherecoFromCUDA
 (run3_HB & gpu).toModify(hbhereco,
@@ -31,3 +32,19 @@ from RecoLocalCalo.HcalRecProducers.hcalCPURecHitsProducer_cfi import hcalCPURec
         produceSoA = False
     )
 )
+
+from RecoLocalCalo.HcalRecProducers.hcalRecHitSoAToLegacy_cfi import  hcalRecHitSoAToLegacy 
+(alpaka & run3_HB).toModify(hbhereco,
+    cpu = hcalRecHitSoAToLegacy.clone(
+        recHitsM0LabelIn = ("hbheRecHitProducerPortable","")
+    ),
+    cuda = hcalRecHitSoAToLegacy.clone(
+        recHitsM0LabelIn = ("hbheRecHitProducerPortable","")
+    )
+)
+
+hbherecoSerial = hcalRecHitSoAToLegacy.clone(
+    recHitsM0LabelIn = ("hbheRecHitProducerSerial","")
+)
+alpaka.toReplaceWith(hcalGlobalRecoTask, hcalGlobalRecoTask.copyAndAdd(hbherecoSerial))
+alpaka.toReplaceWith(hcalOnlyGlobalRecoTask, hcalOnlyGlobalRecoTask.copyAndAdd(hbherecoSerial))
