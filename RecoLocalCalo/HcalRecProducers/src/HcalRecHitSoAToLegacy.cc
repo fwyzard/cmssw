@@ -59,7 +59,6 @@ void HcalRecHitSoAToLegacy::produce(edm::Event& event, edm::EventSetup const& se
     recHitsLegacy->reserve(hcalRechitSoAView.metadata().size());
 
     for (auto i = 0; i < hcalRechitSoAView.metadata().size(); i++) {
-
       // skip bad channels
       if (hcalRechitSoAView.chi2()[i] < 0)
         continue;

@@ -24,8 +24,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace hcal::reconstruction {
     namespace mahi {
 
-      ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float uint_as_float(unsigned long long int val){
-#if defined(__CUDA_ARCH__) or defined(__HIP_DEVICE_COMPILE__)                  
+      ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float uint_as_float(unsigned long long int val) {
+#if defined(__CUDA_ARCH__) or defined(__HIP_DEVICE_COMPILE__)
         return __uint_as_float(val);
 #else
         return edm::bit_cast<float>(static_cast<unsigned int>(val));
