@@ -24,6 +24,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace hcal::reconstruction {
     namespace mahi {
 
+      ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float uint_as_float(unsigned long long int val){
+#if defined(__CUDA_ARCH__) or defined(__HIP_DEVICE_COMPILE__)                  
+        return __uint_as_float(val);
+#else
+        return edm::bit_cast<float>(static_cast<unsigned int>(val));
+#endif
+      }
+
       ALPAKA_FN_ACC ALPAKA_FN_INLINE float compute_time_slew_delay(float const fC,
                                                                    float const tzero,
                                                                    float const slope,
@@ -579,11 +587,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   auto const val = shrMethod0EnergySamplePair[lch];
                   int const max_sample = (val >> 32) & 0xffffffff;
 
-#if defined(__CUDA_ARCH__) or defined(__HIP_DEVICE_COMPILE__)                  
-                  float const max_energy = __uint_as_float(val & 0xffffffff);
-#else
-                  float const max_energy = edm::bit_cast<float>(static_cast<unsigned int>(val & 0xffffffff));
-#endif
+                  float const max_energy = uint_as_float(val & 0xffffffff);
 
                   float const max_energy_1 = static_cast<unsigned>(max_sample) < nsamplesForCompute - 1
                                                  ? shrEnergyM0PerTS[lch * nsamplesForCompute + max_sample + 1]
