@@ -119,32 +119,15 @@
    <class name="hcal::HcalPhase1DigiSoA::View"/>
    <class name="hcal::HcalPhase0DigiSoA::View"/>
 
-  <class name="hcal::Phase1DigiHostCollection"/>
-  <read
-    sourceClass="hcal::Phase1DigiHostCollection"
-    targetClass="hcal::Phase1DigiHostCollection"
-    version="[1-]"
-    source="hcal::HcalPhase1DigiSoA layout_;"
-    target="buffer_"
-    embed="false">
-  <![CDATA[
-    hcal::Phase1DigiHostCollection::ROOTReadStreamer(newObj, onfile.layout_);
-  ]]>
-  </read>
+  <class name="hcal::Phase1DigiHostCollection" ClassVersion="0">
+   <version ClassVersion="0" checksum="3418602304"/>
+  </class>
   <class name="edm::Wrapper<hcal::Phase1DigiHostCollection>" splitLevel="0"/>
 
-  <class name="hcal::Phase0DigiHostCollection"/>
-  <read
-    sourceClass="hcal::Phase0DigiHostCollection"
-    targetClass="hcal::Phase0DigiHostCollection"
-    version="[1-]"
-    source="hcal::HcalPhase0DigiSoA layout_;"
-    target="buffer_"
-    embed="false">
-  <![CDATA[
-    hcal::Phase0DigiHostCollection::ROOTReadStreamer(newObj, onfile.layout_);
-  ]]>
-  </read>
+  <class name="hcal::Phase0DigiHostCollection" ClassVersion="0">
+   <version ClassVersion="0" checksum="2921930364"/>
+  </class>
+
   <class name="edm::Wrapper<hcal::Phase0DigiHostCollection>" splitLevel="0"/>
 
 </lcgdict>

@@ -121,18 +121,8 @@
 
   <class name="hcal::HcalRecHitSoA"/>
   <class name="hcal::HcalRecHitSoA::View"/>
-
-  <class name="hcal::RecHitHostCollection"/>
-  <read
-    sourceClass="hcal::RecHitHostCollection"
-    targetClass="hcal::RecHitHostCollection"
-    version="[1-]"
-    source="hcal::HcalRecHitSoA layout_;"
-    target="buffer_"
-    embed="false">
-  <![CDATA[
-    hcal::RecHitHostCollection::ROOTReadStreamer(newObj, onfile.layout_);
-  ]]>
-  </read>
+  <class name="hcal::RecHitHostCollection" ClassVersion="-1">
+    <version ClassVersion="-1" checksum="1997600408"/>
+  </class>
   <class name="edm::Wrapper<hcal::RecHitHostCollection>" splitLevel="0"/>
   </lcgdict>

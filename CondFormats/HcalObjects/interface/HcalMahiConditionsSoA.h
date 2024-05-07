@@ -64,7 +64,5 @@ GENERATE_SOA_LAYOUT(HcalMahiConditionsSoALayout,
                     SOA_SCALAR(uint32_t, offsetForHashes))
 using HcalMahiConditionsSoA = HcalMahiConditionsSoALayout<>;
 
-using HcalPSfunctorArray = std::array<float, hcal::constants::maxPSshapeBin>;  // 256
-using HcalPSfunctorBXarray = std::array<float, hcal::constants::nsPerBX>;      // 25
 
 #endif

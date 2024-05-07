@@ -7,7 +7,7 @@
 <use name="DataFormats/SoATemplate"/>
 <use name="FWCore/MessageLogger"/>
 <use name="HeterogeneousCore/AlpakaInterface"/>
-<flags ALPAKA_BACKENDS="cuda"/>
+<flags ALPAKA_BACKENDS="!serial"/>
 <export>
   <lib name="1"/>
 </export>
