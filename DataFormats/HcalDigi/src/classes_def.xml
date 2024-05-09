@@ -119,15 +119,10 @@
    <class name="hcal::HcalPhase1DigiSoA::View"/>
    <class name="hcal::HcalPhase0DigiSoA::View"/>
 
-  <class name="hcal::Phase1DigiHostCollection" ClassVersion="0">
-   <version ClassVersion="0" checksum="3418602304"/>
-  </class>
+  <class name="hcal::Phase1DigiHostCollection"/>
   <class name="edm::Wrapper<hcal::Phase1DigiHostCollection>" splitLevel="0"/>
 
-  <class name="hcal::Phase0DigiHostCollection" ClassVersion="0">
-   <version ClassVersion="0" checksum="2921930364"/>
-  </class>
-
+  <class name="hcal::Phase0DigiHostCollection"/> 
   <class name="edm::Wrapper<hcal::Phase0DigiHostCollection>" splitLevel="0"/>
 
 </lcgdict>
