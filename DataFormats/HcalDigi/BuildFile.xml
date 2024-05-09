@@ -3,10 +3,8 @@
 <use name="DataFormats/DetId"/>
 <use name="DataFormats/Portable"/>
 <use name="DataFormats/SoATemplate"/>
-
-<!--<use name="eigen"/>-->
 <use name="HeterogeneousCore/AlpakaInterface"/>
-<flags ALPAKA_BACKENDS="cuda"/>
+<flags ALPAKA_BACKENDS="!serial"/>
 <export>
   <lib name="1"/>
 </export>
