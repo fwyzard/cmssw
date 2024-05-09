@@ -9,6 +9,8 @@
 
 #include <array>
 
+namespace hcal {
+
 static constexpr uint32_t numValuesPerChannel = 16;
 using HcalPedestalArray = std::array<float, 4>;                     // 4 capIds
 using HcalQIECodersArray = std::array<float, numValuesPerChannel>;  // QIEData
@@ -64,5 +66,6 @@ GENERATE_SOA_LAYOUT(HcalMahiConditionsSoALayout,
                     SOA_SCALAR(uint32_t, offsetForHashes))
 using HcalMahiConditionsSoA = HcalMahiConditionsSoALayout<>;
 
+} // namespace hcal
 
 #endif

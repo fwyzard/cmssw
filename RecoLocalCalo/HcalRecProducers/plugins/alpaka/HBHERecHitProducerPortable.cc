@@ -48,7 +48,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using OProductType = hcal::RecHitDeviceCollection;
     const device::EDPutToken<OProductType> rechitsM0Token_;
 
-    const device::ESGetToken<HcalMahiConditionsPortableDevice, HcalMahiConditionsRcd> mahiConditionsToken_;
+    const device::ESGetToken<hcal::HcalMahiConditionsPortableDevice, HcalMahiConditionsRcd> mahiConditionsToken_;
     const device::ESGetToken<HcalSiPMCharacteristicsPortableDevice, HcalSiPMCharacteristicsRcd>
         sipmCharacteristicsToken_;
     const device::ESGetToken<HcalRecoParamWithPulseShapeDevice, HcalRecoParamsRcd> recoParamsToken_;

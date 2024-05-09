@@ -87,7 +87,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       descriptions.addWithDefaultLabel(desc);
     }
 
-    std::unique_ptr<HcalMahiConditionsPortableHost> produce(HcalMahiConditionsRcd const& iRecord) {
+    std::unique_ptr<hcal::HcalMahiConditionsPortableHost> produce(HcalMahiConditionsRcd const& iRecord) {
       auto const& recoParams = iRecord.get(recoParamsToken_);
       auto const& pedestals = iRecord.get(pedestalsToken_);
       auto const& gains = iRecord.get(gainsToken_);
@@ -106,7 +106,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       size_t const totalChannels =
           pedestals.getAllContainers()[0].second.size() + pedestals.getAllContainers()[1].second.size();
 
-      auto product = std::make_unique<HcalMahiConditionsPortableHost>(totalChannels, cms::alpakatools::host());
+      auto product = std::make_unique<hcal::HcalMahiConditionsPortableHost>(totalChannels, cms::alpakatools::host());
 
       auto view = product->view();
 
