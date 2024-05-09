@@ -9,11 +9,11 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-  namespace hcal{
+  namespace hcal {
 
     using ::hcal::HcalMahiConditionsPortableHost;
     using HcalMahiConditionsPortableDevice = PortableCollection<::hcal::HcalMahiConditionsSoA>;
-  }
+  }  // namespace hcal
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 

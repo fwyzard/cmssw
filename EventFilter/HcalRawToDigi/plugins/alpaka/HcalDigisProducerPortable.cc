@@ -52,7 +52,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   void HcalDigisProducerPortable::fillDescriptions(edm::ConfigurationDescriptions& confDesc) {
     edm::ParameterSetDescription desc;
 
-    // FIXME
     desc.add<edm::InputTag>("hbheDigisLabel", edm::InputTag("hcalDigis"));
     desc.add<edm::InputTag>("qie11DigiLabel", edm::InputTag("hcalDigis"));
     desc.add<std::string>("digisLabelF01HE", std::string{"f01HEDigisGPU"});
@@ -66,8 +65,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   HcalDigisProducerPortable::HcalDigisProducerPortable(const edm::ParameterSet& ps)
-      : hbheDigiToken_{consumes<HBHEDigiCollection>(ps.getParameter<edm::InputTag>("hbheDigisLabel"))},
-        qie11DigiToken_{consumes<QIE11DigiCollection>(ps.getParameter<edm::InputTag>("qie11DigiLabel"))},
+      : hbheDigiToken_{consumes(ps.getParameter<edm::InputTag>("hbheDigisLabel"))},
+        qie11DigiToken_{consumes(ps.getParameter<edm::InputTag>("qie11DigiLabel"))},
         digisF01HEToken_{produces(ps.getParameter<std::string>("digisLabelF01HE"))},
         digisF5HBToken_{produces(ps.getParameter<std::string>("digisLabelF5HB"))},
         digisF3HBToken_{produces(ps.getParameter<std::string>("digisLabelF3HB"))} {
@@ -77,25 +76,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   void HcalDigisProducerPortable::produce(device::Event& event, device::EventSetup const& setup) {
-    const auto hbheDigis = event.getHandle(hbheDigiToken_);
-    const auto qie11Digis = event.getHandle(qie11DigiToken_);
+    const auto& hbheDigis = event.get(hbheDigiToken_);
+    const auto& qie11Digis = event.get(qie11DigiToken_);
 
     //Get the number of samples in data from the first digi
     auto const stride = HBHEDataFrame::MAXSAMPLES * 0.5 + 1;
-    auto const size = hbheDigis->size() * stride;  // number of channels * stride
+    auto const size = hbheDigis.size() * stride;  // number of channels * stride
 
     // stack host memory in the queue
     HostCollectionPhase0 hf5_(size, event.queue());
 
     // device product
-    DeviceCollectionPhase0 df5_(size, alpaka::getDev(event.queue()));
+    DeviceCollectionPhase0 df5_(size, event.queue());
 
     // set SoA_Scalar;
     hf5_.view().stride() = stride;
-    hf5_.view().size() = hbheDigis->size();
+    hf5_.view().size() = hbheDigis.size();
 
-    for (unsigned int i = 0; i < hbheDigis->size(); ++i) {
-      auto const& hbhe = (*hbheDigis)[i];
+    for (unsigned int i = 0; i < hbheDigis.size(); ++i) {
+      auto const hbhe = hbheDigis[i];
       auto const id = hbhe.id().rawId();
       auto const presamples = hbhe.presamples();
       uint16_t header_word = (1 << 15) | (0x5 << 12) | (0 << 10) | ((hbhe.sample(0).capid() & 0x3) << 8);
@@ -114,10 +113,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
     // copy hf5 to df5
     alpaka::memcpy(event.queue(), df5_.buffer(), hf5_.const_buffer());
-
     event.emplace(digisF5HBToken_, std::move(df5_));
-    //}
-    if (qie11Digis->empty()) {
+
+    if (qie11Digis.empty()) {
       event.emplace(digisF01HEToken_);
       event.emplace(digisF3HBToken_);
 
@@ -126,8 +124,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto size_f3 = 0;
 
       // count the size of the SOA;
-      for (unsigned int i = 0; i < qie11Digis->size(); i++) {
-        auto const& digi = QIE11DataFrame{(*qie11Digis)[i]};
+      for (unsigned int i = 0; i < qie11Digis.size(); i++) {
+        auto const digi = QIE11DataFrame{qie11Digis[i]};
 
         if (digi.flavor() == 0 or digi.flavor() == 1) {
           if (digi.detid().subdetId() == HcalEndcap) {
@@ -139,7 +137,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           }
         }
       }
-      auto const nsamples = qie11Digis->samples();
+      auto const nsamples = qie11Digis.samples();
       auto const stride01 = nsamples * QIE11DataFrame::WORDS_PER_SAMPLE + QIE11DataFrame::HEADER_WORDS;
 
       // stack host memory in the queue
@@ -147,8 +145,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       HostCollectionPhase1 hf3_(size_f3, event.queue());
 
       // device product
-      DeviceCollectionPhase1 df1_(size_f1, alpaka::getDev(event.queue()));
-      DeviceCollectionPhase1 df3_(size_f3, alpaka::getDev(event.queue()));
+      DeviceCollectionPhase1 df1_(size_f1, event.queue());
+      DeviceCollectionPhase1 df3_(size_f3, event.queue());
 
       // set SoA_Scalar;
       hf1_.view().stride() = stride01;
@@ -157,9 +155,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       unsigned int i_f1 = 0;  //counters for f1 digis
       unsigned int i_f3 = 0;  //counters for f3 digis
 
-      for (unsigned int i = 0; i < qie11Digis->size(); i++) {
-        auto const& digi = QIE11DataFrame{(*qie11Digis)[i]};
-        assert(digi.samples() == qie11Digis->samples() && "collection nsamples must equal per digi samples");
+      for (unsigned int i = 0; i < qie11Digis.size(); i++) {
+        auto const digi = QIE11DataFrame{qie11Digis[i]};
+        assert(digi.samples() == qie11Digis.samples() && "collection nsamples must equal per digi samples");
 
         if (digi.flavor() == 0 or digi.flavor() == 1) {
           if (digi.detid().subdetId() != HcalEndcap)
@@ -168,7 +166,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           hf01_vi.ids() = digi.detid().rawId();
           for (int hw = 0; hw < QIE11DataFrame::HEADER_WORDS + digi.samples(); hw++) {
-            hf01_vi.data()[hw] = ((*qie11Digis)[i][hw]);
+            hf01_vi.data()[hw] = (qie11Digis[i][hw]);
           }
           i_f1++;
         } else if (digi.flavor() == 3) {
@@ -179,7 +177,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           hf03_vi.ids() = digi.detid().rawId();
 
           for (int hw = 0; hw < QIE11DataFrame::HEADER_WORDS + digi.samples(); hw++) {
-            hf03_vi.data()[hw] = ((*qie11Digis)[i][hw]);
+            hf03_vi.data()[hw] = (qie11Digis[i][hw]);
           }
           i_f3++;
         }

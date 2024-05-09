@@ -15,8 +15,9 @@ public:
 
   class ConstView {
   public:
-    constexpr ConstView(typename RecoParamCollection::ConstView recoView,
-                        typename PulseShapeCollection::ConstView psView)
+    using RecoParamConstView = typename RecoParamCollection::ConstView;
+    using PulseShapeConstView = typename PulseShapeCollection::ConstView;
+    constexpr ConstView(RecoParamConstView recoView, PulseShapeConstView psView)
         : recoParamView_{recoView}, pulseShapeView_{psView} {};
     constexpr float pulseShape(int id) const { return 0; }
 
@@ -39,8 +40,8 @@ public:
   const RecoParamCollection& recoParam() const { return recoParam_; }
   const PulseShapeCollection& pulseShape() const { return pulseShape_; }
 
-  ALPAKA_FN_HOST_ACC typename RecoParamCollection::View recoParamView() { return recoParam_.view(); }
-  ALPAKA_FN_HOST_ACC typename PulseShapeCollection::View pulseShapeView() { return pulseShape_.view(); }
+  typename RecoParamCollection::View recoParamView() { return recoParam_.view(); }
+  typename PulseShapeCollection::View pulseShapeView() { return pulseShape_.view(); }
 
   ConstView const_view() const { return ConstView(recoParam_.view(), pulseShape_.view()); }
 
@@ -50,5 +51,19 @@ private:
 };
 
 using HcalRecoParamWithPulseShapeHost = HcalRecoParamWithPulseShapeT<alpaka::DevCpu>;
+
+namespace cms::alpakatools {
+  template <>
+  struct CopyToDevice<HcalRecoParamWithPulseShapeHost> {
+    template <typename TQueue>
+    static auto copyAsync(TQueue& queue, HcalRecoParamWithPulseShapeHost const& hostProduct) {
+      using RecoParamCopy = CopyToDevice<HcalRecoParamWithPulseShapeHost::RecoParamCollection>;
+      using PulseShapeCopy = CopyToDevice<HcalRecoParamWithPulseShapeHost::PulseShapeCollection>;
+      using TDevice = alpaka::Dev<TQueue>;
+      return HcalRecoParamWithPulseShapeT<TDevice>(RecoParamCopy::copyAsync(queue, hostProduct.recoParam()),
+                                                   PulseShapeCopy::copyAsync(queue, hostProduct.pulseShape()));
+    }
+  };
+}  // namespace cms::alpakatools
 
 #endif

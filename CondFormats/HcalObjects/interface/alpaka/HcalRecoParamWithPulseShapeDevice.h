@@ -11,19 +11,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using HcalRecoParamWithPulseShapeDevice = HcalRecoParamWithPulseShapeT<Device>;
 }
 
-namespace cms::alpakatools {
-  template <>
-  struct CopyToDevice<HcalRecoParamWithPulseShapeHost> {
-    template <typename TQueue>
-    static auto copyAsync(TQueue& queue, HcalRecoParamWithPulseShapeHost const& hostProduct) {
-      using RecoParamCopy = CopyToDevice<HcalRecoParamWithPulseShapeHost::RecoParamCollection>;
-      using PulseShapeCopy = CopyToDevice<HcalRecoParamWithPulseShapeHost::PulseShapeCollection>;
-      //using TDevice = typename alpaka::trait::DevType<TQueue>::type;
-      using TDevice = alpaka::Dev<TQueue>;
-      return HcalRecoParamWithPulseShapeT<TDevice>(RecoParamCopy::copyAsync(queue, hostProduct.recoParam()),
-                                                   PulseShapeCopy::copyAsync(queue, hostProduct.pulseShape()));
-    }
-  };
-}  // namespace cms::alpakatools
-
 #endif

@@ -4,8 +4,8 @@
 #include "CondFormats/HcalObjects/interface/HcalMahiConditionsSoA.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
 
-namespace hcal{
-    using HcalMahiConditionsPortableHost = PortableHostCollection<HcalMahiConditionsSoA>;
+namespace hcal {
+  using HcalMahiConditionsPortableHost = PortableHostCollection<HcalMahiConditionsSoA>;
 }
 
 #endif

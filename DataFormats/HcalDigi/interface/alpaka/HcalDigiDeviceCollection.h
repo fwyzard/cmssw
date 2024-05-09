@@ -10,7 +10,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace hcal {
 
     // make the names from the top-level hcal namespace visible for unqualified lookup
-    // inside the ALPAKA_ACCELERATOR_NAMESPACE::portabletest namespace
+    // inside the ALPAKA_ACCELERATOR_NAMESPACE::hcal namespace
     using namespace ::hcal;
 
     // HcalDigiSoA in device global memory
