@@ -1,6 +1,5 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
 
 #include "CondFormats/DataRecord/interface/HcalSiPMCharacteristicsRcd.h"
 #include "CondFormats/HcalObjects/interface/alpaka/HcalSiPMCharacteristicsDevice.h"
@@ -23,7 +22,6 @@
 
 #include "Mahi.h"
 #include "CalibCalorimetry/HcalAlgos/interface/HcalTimeSlew.h"
-//#include "HBHERecHitProducerPortable.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -56,7 +54,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     //
 
     hcal::reconstruction::ConfigParameters configParameters_;
-    //hcal::reconstruction::OutputDataGPU outputGPU_;
   };
 
   HBHERecHitProducerPortable::HBHERecHitProducerPortable(edm::ParameterSet const& ps)
@@ -73,10 +70,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     configParameters_.sipmQTSShift = ps.getParameter<int>("sipmQTSShift");
     configParameters_.sipmQNTStoSum = ps.getParameter<int>("sipmQNTStoSum");
     configParameters_.firstSampleShift = ps.getParameter<int>("firstSampleShift");
+    //TODO: produce only pedestals_width or convertedPedestalWidths depending on this bool
     configParameters_.useEffectivePedestals = ps.getParameter<bool>("useEffectivePedestals");
-    //if (configParameters_.useEffectivePedestals) {
-    //  effectivePedestalsToken_ = esConsumes();
-    //}
 
     configParameters_.meanTime = ps.getParameter<double>("meanTime");
     configParameters_.timeSigmaSiPM = ps.getParameter<double>("timeSigmaSiPM");

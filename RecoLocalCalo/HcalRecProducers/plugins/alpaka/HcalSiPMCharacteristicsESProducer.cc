@@ -1,11 +1,10 @@
-#include "FWCore/Framework/interface/ESTransientHandle.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/ESGetToken.h"
 
 #include "CondFormats/HcalObjects/interface/alpaka/HcalSiPMCharacteristicsDevice.h"
 #include "CondFormats/HcalObjects/interface/HcalSiPMCharacteristicsSoA.h"
 #include "CondFormats/DataRecord/interface/HcalSiPMCharacteristicsRcd.h"
 
-#include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESGetToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESProducer.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ModuleFactory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"

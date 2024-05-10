@@ -23,4 +23,3 @@
   <flags SKIP_FILES="%.cu"/>
 </iftool>
 <flags EDM_PLUGIN="1"/>
-<!--<flags CUDA_FLAGS="-fmad=false"/>-->

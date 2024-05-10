@@ -1,11 +1,9 @@
-#include "FWCore/Framework/interface/ESTransientHandle.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "CondFormats/HcalObjects/interface/alpaka/HcalMahiPulseOffsetsDevice.h"
 #include "CondFormats/HcalObjects/interface/HcalMahiPulseOffsetsSoA.h"
 #include "HeterogeneousCore/CUDACore/interface/JobConfigurationGPURecord.h"
 
-#include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESGetToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESProducer.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ModuleFactory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
