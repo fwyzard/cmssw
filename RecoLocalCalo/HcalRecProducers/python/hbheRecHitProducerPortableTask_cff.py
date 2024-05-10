@@ -35,11 +35,11 @@ hbheRecHitProducerPortable = _hbheRecHitProducerPortable.clone(
     recHitsLabelM0HBHE = "",
     mahiPulseOffSets = "hcalMahiPulseOffsetsESProducer:"
 )
-hbheRecHitProducerSerial = makeSerialClone(hbheRecHitProducerPortable)
-
-#hbheRecHitProducerSerial.digisLabelF01HE = ("hcalDigisSerial","f01HEDigisGPU")
-#hbheRecHitProducerSerial.digisLabelF5HB = ("hcalDigisSerial","f5HBDigisGPU")
-#hbheRecHitProducerSerial.digisLabelF3HB = ("hcalDigisSerial","f3HBDigisGPU")
+hbheRecHitProducerSerial = makeSerialClone(hbheRecHitProducerPortable,
+    digisLabelF01HE = ("hcalDigisSerial","f01HEDigisGPU"),
+    digisLabelF5HB = ("hcalDigisSerial","f5HBDigisGPU"),
+    digisLabelF3HB = ("hcalDigisSerial","f3HBDigisGPU")
+)
 
 # Tasks and Sequences
 hbheRecHitProducerPortableTask = cms.Task(

@@ -276,7 +276,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         return a.second > b.second;
       };
 
-      class kernel_prep1d_sameNumberOfSamples {
+      class Kernel_prep1d_sameNumberOfSamples {
       public:
         template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
         ALPAKA_FN_ACC void operator()(TAcc const& acc,
@@ -295,7 +295,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                       float* amplitudes,
                                       float* noiseTerms,
                                       float* electronicNoiseTerms,
-                                      float* soiSamples,
+                                      int8_t* soiSamples,
                                       int const windowSize) const {
           auto const nchannelsf015 = f01HEDigis.size() + f5HBDigis.size();
           auto const startingSample = compute_nsamples<Flavor1>(f01HEDigis.stride()) - windowSize;
@@ -311,8 +311,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             //Loop over each channel, first compute soiSamples for all channels
             for (auto channel : uniform_group_elements_y(acc, group, nchannels)) {
               auto const gch = channel.global;
-              if (gch >= nchannels)
-                return;
 
               for (auto i_sample : independent_group_elements_x(acc, nsamplesForCompute)) {
                 auto const sampleWithinWindow = i_sample;
@@ -342,9 +340,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               auto const gch = channel.global;
               auto const lch = channel.local;
 
-              if (gch >= nchannels)
-                return;
-
               //Loop over sample
               for (auto i_sample : independent_group_elements_x(acc, nsamplesForCompute)) {
                 auto const sampleWithinWindow = i_sample;
@@ -366,8 +361,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 auto* electronicNoiseTermsForChannel = electronicNoiseTerms + nsamplesForCompute * gch;
 
                 // configure shared mem
-                float* smem = alpaka::getDynSharedMem<float>(acc);
-                float* shrEnergyM0PerTS = reinterpret_cast<float*>(smem);
+                float* shrEnergyM0PerTS = alpaka::getDynSharedMem<float>(acc);
                 float* shrChargeMinusPedestal = shrEnergyM0PerTS + nsamplesForCompute * nchannels_per_block;
                 float* shrMethod0EnergyAccum = shrChargeMinusPedestal + nsamplesForCompute * nchannels_per_block;
                 float* shrEnergyM0TotalAccum = shrMethod0EnergyAccum + nchannels_per_block;
@@ -389,7 +383,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         ? compute_nsamples<Flavor1>(stride)
                         : (gch < nchannelsf015 ? compute_nsamples<Flavor5>(stride) : compute_nsamples<Flavor3>(stride));
 
-                assert(nsamples == nsamplesForCompute || nsamples - startingSample == nsamplesForCompute);
+                ALPAKA_ASSERT_ACC(nsamples == nsamplesForCompute || nsamples - startingSample == nsamplesForCompute);
 
                 auto const id = gch < f01HEDigis.size()
                                     ? f01HEDigis.ids()[gch]
@@ -679,8 +673,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             }    // loop for channels
           }      // loop for channgel groups
         }
-      };  //kernel_prep1d_sameNumberOfSamples
-      class kernel_prep_pulseMatrices_sameNumberOfSamples {
+      };  //Kernel_prep1d_sameNumberOfSamples
+      class Kernel_prep_pulseMatrices_sameNumberOfSamples {
       public:
         template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
         ALPAKA_FN_ACC void operator()(TAcc const& acc,
@@ -692,7 +686,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                       IProductTypef01::ConstView f01HEDigis,
                                       IProductTypef5::ConstView f5HBDigis,
                                       IProductTypef3::ConstView f3HBDigis,
-                                      float* soiSamples,
+                                      int8_t* soiSamples,
                                       HcalMahiConditionsPortableDevice::ConstView mahi,
                                       HcalRecoParamWithPulseShapeDevice::ConstView recoParamsWithPS,
                                       float const meanTime,
@@ -718,9 +712,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             //Loop over each channel
             for (auto channel : uniform_group_elements_z(acc, group, nchannels)) {
               auto const gch = channel.global;
-
-              if (gch >= nchannels)
-                return;
 
               //Loop over pulses
               for (auto ipulse : independent_group_elements_y(acc, npulses)) {
@@ -917,7 +908,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             }      // loop over channels
           }        // loop over group of channels
         }
-      };  // kernel_prep_pulseMatrices_sameNumberOfSamples
+      };  // Kernel_prep_pulseMatrices_sameNumberOfSamples
 
       template <int NSAMPLES, int NPULSES>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void update_covariance(
@@ -977,7 +968,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
 
       template <int NSAMPLES, int NPULSES>
-      class kernel_minimize {
+      class Kernel_minimize {
       public:
         template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
         ALPAKA_FN_ACC void operator()(TAcc const& acc,
@@ -989,7 +980,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                       HcalMahiPulseOffsetsPortableDevice::ConstView pulseOffsetsView,
                                       float* noiseTerms,
                                       float* electronicNoiseTerms,
-                                      float* soiSamples,
+                                      int8_t* soiSamples,
                                       HcalMahiConditionsPortableDevice::ConstView mahi,
                                       bool const useEffectivePedestals,
                                       IProductTypef01::ConstView f01HEDigis,
@@ -1020,10 +1011,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
               // configure shared mem
               float* shrmem = alpaka::getDynSharedMem<float>(acc);
-              float* shrMatrixLFnnlsStorage =
-                  reinterpret_cast<float*>(shrmem) + calo::multifit::MapSymM<float, NPULSES>::total * lch;
-              float* shrAtAStorage = reinterpret_cast<float*>(shrmem) +
-                                     calo::multifit::MapSymM<float, NPULSES>::total * (lch + threadsPerBlock);
+              float* shrMatrixLFnnlsStorage = shrmem + calo::multifit::MapSymM<float, NPULSES>::total * lch;
+              float* shrAtAStorage = shrmem + calo::multifit::MapSymM<float, NPULSES>::total * (lch + threadsPerBlock);
 
               // conditions for pedestal widths
               auto const id = gch < f01HEDigis.size() ? f01HEDigis.ids()[gch]
@@ -1299,7 +1288,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             }  // loop over channels
           }    //loop over group of channels
         }
-      };  // kernel_minimize
+      };  // Kernel_minimize
 
     }  // namespace mahi
   }    // namespace hcal::reconstruction
@@ -1350,7 +1339,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         alpaka::exec<Acc2D>(queue,
                             workDivPrep2D,
-                            mahi::kernel_prep1d_sameNumberOfSamples{},
+                            mahi::Kernel_prep1d_sameNumberOfSamples{},
                             outputGPU,
                             f01HEDigis,
                             f5HBDigis,
@@ -1363,10 +1352,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             configParameters.sipmQNTStoSum,
                             configParameters.firstSampleShift,
                             configParameters.ts4Thresh,
-                            reinterpret_cast<float*>(amplitudes.data()),
-                            reinterpret_cast<float*>(noiseTerms.data()),
-                            reinterpret_cast<float*>(electronicNoiseTerms.data()),
-                            reinterpret_cast<float*>(soiSamples.data()),
+                            amplitudes.data(),
+                            noiseTerms.data(),
+                            electronicNoiseTerms.data(),
+                            soiSamples.data(),
                             windowSize);
 
         //// 1024 is the max threads per block for gtx1080
@@ -1390,16 +1379,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         alpaka::exec<Acc3D>(queue,
                             workDivPrep3D,
-                            mahi::kernel_prep_pulseMatrices_sameNumberOfSamples{},
-                            reinterpret_cast<float*>(pulseMatrices.data()),
-                            reinterpret_cast<float*>(pulseMatricesM.data()),
-                            reinterpret_cast<float*>(pulseMatricesP.data()),
+                            mahi::Kernel_prep_pulseMatrices_sameNumberOfSamples{},
+                            pulseMatrices.data(),
+                            pulseMatricesM.data(),
+                            pulseMatricesP.data(),
                             mahiPulseOffsets,
-                            reinterpret_cast<float*>(amplitudes.data()),
+                            amplitudes.data(),
                             f01HEDigis,
                             f5HBDigis,
                             f3HBDigis,
-                            reinterpret_cast<float*>(soiSamples.data()),
+                            soiSamples.data(),
                             mahi,
                             recoParamsWithPS,
                             configParameters.meanTime,
@@ -1417,16 +1406,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         alpaka::exec<Acc1D>(queue,
                             workDivPrep1D,
-                            mahi::kernel_minimize<8, 8>{},
+                            mahi::Kernel_minimize<8, 8>{},
                             outputGPU,
-                            reinterpret_cast<float*>(amplitudes.data()),
-                            reinterpret_cast<float*>(pulseMatrices.data()),
-                            reinterpret_cast<float*>(pulseMatricesM.data()),
-                            reinterpret_cast<float*>(pulseMatricesP.data()),
+                            amplitudes.data(),
+                            pulseMatrices.data(),
+                            pulseMatricesM.data(),
+                            pulseMatricesP.data(),
                             mahiPulseOffsets,
-                            reinterpret_cast<float*>(noiseTerms.data()),
-                            reinterpret_cast<float*>(electronicNoiseTerms.data()),
-                            reinterpret_cast<float*>(soiSamples.data()),
+                            noiseTerms.data(),
+                            electronicNoiseTerms.data(),
+                            soiSamples.data(),
                             mahi,
                             configParameters.useEffectivePedestals,
                             f01HEDigis,
@@ -1443,10 +1432,10 @@ namespace alpaka::trait {
 
   //! The trait for getting the size of the block shared dynamic memory for Kernel_prep_1d_and_initialize.
   template <typename TAcc>
-  struct BlockSharedMemDynSizeBytes<kernel_prep1d_sameNumberOfSamples, TAcc> {
+  struct BlockSharedMemDynSizeBytes<Kernel_prep1d_sameNumberOfSamples, TAcc> {
     //! \return The size of the shared memory allocated for a block.
     template <typename TVec, typename... TArgs>
-    ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(kernel_prep1d_sameNumberOfSamples const&,
+    ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(Kernel_prep1d_sameNumberOfSamples const&,
                                                                  TVec const& threadsPerBlock,
                                                                  TVec const& elemsPerThread,
                                                                  TArgs const&...) -> std::size_t {
@@ -1463,10 +1452,10 @@ namespace alpaka::trait {
 
   //! The trait for getting the size of the block shared dynamic memory for kernel_minimize.
   template <int NSAMPLES, int NPULSES, typename TAcc>
-  struct BlockSharedMemDynSizeBytes<kernel_minimize<NSAMPLES, NPULSES>, TAcc> {
+  struct BlockSharedMemDynSizeBytes<Kernel_minimize<NSAMPLES, NPULSES>, TAcc> {
     //! \return The size of the shared memory allocated for a block.
     template <typename TVec, typename... TArgs>
-    ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(kernel_minimize<NSAMPLES, NPULSES> const&,
+    ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(Kernel_minimize<NSAMPLES, NPULSES> const&,
                                                                  TVec const& threadsPerBlock,
                                                                  TVec const& elemsPerThread,
                                                                  TArgs const&...) -> std::size_t {
