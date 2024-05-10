@@ -1,7 +1,7 @@
 #include "FWCore/Framework/interface/ESTransientHandle.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "CondFormats/HcalObjects/interface/alpaka/HcalRecoParamWithPulseShapeDevice.h"
+#include "CondFormats/HcalObjects/interface/HcalRecoParamWithPulseShapeHost.h"
 #include "CondFormats/HcalObjects/interface/HcalRecoParamWithPulseShapeSoA.h"
 #include "CondFormats/DataRecord/interface/HcalRecoParamsRcd.h"
 
