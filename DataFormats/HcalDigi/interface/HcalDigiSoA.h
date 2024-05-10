@@ -4,15 +4,15 @@
 //TODO: Use Eigen column for data(?)
 //#include <Eigen/Core>
 //#include <Eigen/Dense>
-#include <array>
 
+#include "DataFormats/Common/interface/StdArray.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
 
 namespace hcal {
 
-  using QIE11dataArray = std::array<uint16_t, QIE11DigiCollection::MAXSAMPLES>;
-  using QIE10dataArray = std::array<uint16_t, HBHEDataFrame::MAXSAMPLES>;
+  using QIE11dataArray = edm::StdArray<uint16_t, QIE11DigiCollection::MAXSAMPLES>;
+  using QIE10dataArray = edm::StdArray<uint16_t, HBHEDataFrame::MAXSAMPLES>;
 
   //using QIE11dataVector = Eigen::Matrix<uint16_t,  QIE11DigiCollection::MAXSAMPLES, 1>;
   //using QIE10dataVector = Eigen::Matrix<uint16_t,  HBHEDataFrame::MAXSAMPLES, 1>;
