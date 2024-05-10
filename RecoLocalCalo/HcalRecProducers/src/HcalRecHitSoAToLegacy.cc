@@ -38,37 +38,35 @@ void HcalRecHitSoAToLegacy::fillDescriptions(edm::ConfigurationDescriptions& con
 
 HcalRecHitSoAToLegacy::HcalRecHitSoAToLegacy(const edm::ParameterSet& ps)
     : recHitsM0TokenIn_{consumes<IProductType>(ps.getParameter<edm::InputTag>("recHitsM0LabelIn"))},
-      recHitsLegacyTokenOut_{produces<HBHERecHitCollection>(ps.getParameter<std::string>("recHitsLegacyLabelOut"))}
-{}
+      recHitsLegacyTokenOut_{produces<HBHERecHitCollection>(ps.getParameter<std::string>("recHitsLegacyLabelOut"))} {}
 
 void HcalRecHitSoAToLegacy::produce(edm::Event& event, edm::EventSetup const& setup) {
-    // populate the legacy collection
-    auto recHitsLegacy = std::make_unique<HBHERecHitCollection>();
+  // populate the legacy collection
+  auto recHitsLegacy = std::make_unique<HBHERecHitCollection>();
 
-    // get input from host SoA
-    auto const& hcalRechitSoAView = event.get(recHitsM0TokenIn_).const_view();
+  // get input from host SoA
+  auto const& hcalRechitSoAView = event.get(recHitsM0TokenIn_).const_view();
 
-    recHitsLegacy->reserve(hcalRechitSoAView.metadata().size());
+  recHitsLegacy->reserve(hcalRechitSoAView.metadata().size());
 
-    for (auto i = 0; i < hcalRechitSoAView.metadata().size(); i++) {
-      auto const & rechit = hcalRechitSoAView[i];
-      // skip bad channels
-      if (rechit.chi2() < 0)
-        continue;
+  for (auto i = 0; i < hcalRechitSoAView.metadata().size(); i++) {
+    auto const& rechit = hcalRechitSoAView[i];
+    // skip bad channels
+    if (rechit.chi2() < 0)
+      continue;
 
-      // build a legacy rechit with the computed detid and MAHI energy
-      recHitsLegacy->emplace_back(HcalDetId{rechit.did()},
-                                  rechit.energy(),
-                                  0  // timeRising
-      );
-      // update the legacy rechit with the Chi2 and M0 values
-      recHitsLegacy->back().setChiSquared(rechit.chi2());
-      recHitsLegacy->back().setRawEnergy(rechit.energyM0());
-    }
+    // build a legacy rechit with the computed detid and MAHI energy
+    recHitsLegacy->emplace_back(HcalDetId{rechit.did()},
+                                rechit.energy(),
+                                0  // timeRising
+    );
+    // update the legacy rechit with the Chi2 and M0 values
+    recHitsLegacy->back().setChiSquared(rechit.chi2());
+    recHitsLegacy->back().setRawEnergy(rechit.energyM0());
+  }
 
-    // put the legacy collection
-    event.put(recHitsLegacyTokenOut_, std::move(recHitsLegacy));
-
+  // put the legacy collection
+  event.put(recHitsLegacyTokenOut_, std::move(recHitsLegacy));
 }
 
 DEFINE_FWK_MODULE(HcalRecHitSoAToLegacy);
