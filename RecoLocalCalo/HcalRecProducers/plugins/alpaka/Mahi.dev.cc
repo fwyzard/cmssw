@@ -797,15 +797,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
                   if (sample == 0 && ipulse == 0) {
                     for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId,t0,i,0);
+                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId, t0, i, 0);
                     }
                     printf("\n");
                     for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId,t0p,i,0);
+                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId, t0p, i, 0);
                     }
                     printf("\n");
                     for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId,t0m,i,0);
+                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId, t0m, i, 0);
                     }
                   }
 #endif
@@ -818,13 +818,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   // auto const idx = sample - offset;
                   int32_t const idx = sample - pulseOffset;
                   auto const value = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                         ? recoParamsWithPS.compute_pulse_shape_value(hashedId,t0,idx,shift)
+                                         ? recoParamsWithPS.compute_pulse_shape_value(hashedId, t0, idx, shift)
                                          : 0;
                   auto const value_t0m = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                             ? recoParamsWithPS.compute_pulse_shape_value(hashedId,t0m,idx,shift)
+                                             ? recoParamsWithPS.compute_pulse_shape_value(hashedId, t0m, idx, shift)
                                              : 0;
                   auto const value_t0p = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                             ? recoParamsWithPS.compute_pulse_shape_value(hashedId,t0p,idx,shift)
+                                             ? recoParamsWithPS.compute_pulse_shape_value(hashedId, t0p, idx, shift)
                                              : 0;
 
                   // store to global
