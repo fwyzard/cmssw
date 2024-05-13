@@ -704,9 +704,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           auto const nchannels = f01HEDigis.size() + f5HBDigis.size() + f3HBDigis.size();
           auto const nchannelsf015 = f01HEDigis.size() + f5HBDigis.size();
 
-          auto const recoParamView = recoParamsWithPS.recoParamView();
-          auto const pulseShapeView = recoParamsWithPS.pulseShapeView();
-
           //Loop over all groups of channels
           for (auto group : uniform_groups_z(acc, nchannels)) {
             //Loop over each channel
@@ -738,17 +735,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                               mahi.lastHERing(),
                                               mahi.nEtaHE()) +
                                 mahi.offsetForHashes();
-
-                  // conditions based on the hash
-                  auto const recoPulseShapeId = recoParamView.ids()[hashedId];
-                  auto const* acc25nsVec = pulseShapeView.acc25nsVec()[recoPulseShapeId].data();
-                  auto const* diff25nsItvlVec = pulseShapeView.diff25nsItvlVec()[recoPulseShapeId].data();
-                  auto const* accVarLenIdxMinusOneVec =
-                      pulseShapeView.accVarLenIdxMinusOneVec()[recoPulseShapeId].data();
-                  auto const* diffVarItvlIdxMinusOneVec =
-                      pulseShapeView.diffVarItvlIdxMinusOneVec()[recoPulseShapeId].data();
-                  auto const* accVarLenIdxZeroVec = pulseShapeView.accVarLenIdxZEROVec()[recoPulseShapeId].data();
-                  auto const* diffVarItvlIdxZeroVec = pulseShapeView.diffVarItvlIdxZEROVec()[recoPulseShapeId].data();
 
                   // offset output arrays
                   auto* pulseMatrix = pulseMatrices + nsamples * npulses * gch;
@@ -811,42 +797,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
                   if (sample == 0 && ipulse == 0) {
                     for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = compute_pulse_shape_value(t0,
-                                                                   i,
-                                                                   0,
-                                                                   acc25nsVec,
-                                                                   diff25nsItvlVec,
-                                                                   accVarLenIdxMinusOneVec,
-                                                                   diffVarItvlIdxMinusOneVec,
-                                                                   accVarLenIdxZeroVec,
-                                                                   diffVarItvlIdxZeroVec);
-                      printf("pulse(%d) = %f\n", i, value);
+                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId,t0,i,0);
                     }
                     printf("\n");
                     for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = compute_pulse_shape_value(t0p,
-                                                                   i,
-                                                                   0,
-                                                                   acc25nsVec,
-                                                                   diff25nsItvlVec,
-                                                                   accVarLenIdxMinusOneVec,
-                                                                   diffVarItvlIdxMinusOneVec,
-                                                                   accVarLenIdxZeroVec,
-                                                                   diffVarItvlIdxZeroVec);
-                      printf("pulseP(%d) = %f\n", i, value);
+                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId,t0p,i,0);
                     }
                     printf("\n");
                     for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = compute_pulse_shape_value(t0m,
-                                                                   i,
-                                                                   0,
-                                                                   acc25nsVec,
-                                                                   diff25nsItvlVec,
-                                                                   accVarLenIdxMinusOneVec,
-                                                                   diffVarItvlIdxMinusOneVec,
-                                                                   accVarLenIdxZeroVec,
-                                                                   diffVarItvlIdxZeroVec);
-                      printf("pulseM(%d) = %f\n", i, value);
+                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId,t0m,i,0);
                     }
                   }
 #endif
@@ -859,37 +818,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   // auto const idx = sample - offset;
                   int32_t const idx = sample - pulseOffset;
                   auto const value = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                         ? compute_pulse_shape_value(t0,
-                                                                     idx,
-                                                                     shift,
-                                                                     acc25nsVec,
-                                                                     diff25nsItvlVec,
-                                                                     accVarLenIdxMinusOneVec,
-                                                                     diffVarItvlIdxMinusOneVec,
-                                                                     accVarLenIdxZeroVec,
-                                                                     diffVarItvlIdxZeroVec)
+                                         ? recoParamsWithPS.compute_pulse_shape_value(hashedId,t0,idx,shift)
                                          : 0;
                   auto const value_t0m = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                             ? compute_pulse_shape_value(t0m,
-                                                                         idx,
-                                                                         shift,
-                                                                         acc25nsVec,
-                                                                         diff25nsItvlVec,
-                                                                         accVarLenIdxMinusOneVec,
-                                                                         diffVarItvlIdxMinusOneVec,
-                                                                         accVarLenIdxZeroVec,
-                                                                         diffVarItvlIdxZeroVec)
+                                             ? recoParamsWithPS.compute_pulse_shape_value(hashedId,t0m,idx,shift)
                                              : 0;
                   auto const value_t0p = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                             ? compute_pulse_shape_value(t0p,
-                                                                         idx,
-                                                                         shift,
-                                                                         acc25nsVec,
-                                                                         diff25nsItvlVec,
-                                                                         accVarLenIdxMinusOneVec,
-                                                                         diffVarItvlIdxMinusOneVec,
-                                                                         accVarLenIdxZeroVec,
-                                                                         diffVarItvlIdxZeroVec)
+                                             ? recoParamsWithPS.compute_pulse_shape_value(hashedId,t0p,idx,shift)
                                              : 0;
 
                   // store to global
