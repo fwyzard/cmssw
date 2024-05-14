@@ -160,75 +160,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
       }
 
-      // TODO: remove what's not needed
-      // originally from from RecoLocalCalo/HcalRecAlgos/src/PulseShapeFunctor.cc
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE float compute_pulse_shape_value(float const pulse_time,
-                                                                     int const sample,
-                                                                     int const shift,
-                                                                     float const* acc25nsVec,
-                                                                     float const* diff25nsItvlVec,
-                                                                     float const* accVarLenIdxMinusOneVec,
-                                                                     float const* diffVarItvlIdxMinusOneVec,
-                                                                     float const* accVarLenIdxZeroVec,
-                                                                     float const* diffVarItvlIdxZeroVec) {
-        // constants
-        constexpr float slew = 0.f;
-        constexpr auto ns_per_bx = ::hcal::constants::nsPerBX;
-
-        // FIXME: clean up all the rounding... this is coming from original cpu version
-        float const i_start_float = -::hcal::constants::iniTimeShift - pulse_time - slew > 0.f
-                                        ? 0.f
-                                        : std::abs(-::hcal::constants::iniTimeShift - pulse_time - slew) + 1.f;
-        int i_start = static_cast<int>(i_start_float);
-        float offset_start = static_cast<float>(i_start) - ::hcal::constants::iniTimeShift - pulse_time - slew;
-        // FIXME: do we need a check for nan???
-#ifdef HCAL_MAHI_GPUDEBUG
-        if (shift == 0)
-          printf("i_start_float = %f i_start = %d offset_start = %f\n", i_start_float, i_start, offset_start);
-#endif
-
-        // boundary
-        if (offset_start == 1.0f) {
-          offset_start = 0.f;
-          i_start -= 1;
-        }
-
-#ifdef HCAL_MAHI_GPUDEBUG
-        if (shift == 0)
-          printf("i_start_float = %f i_start = %d offset_start = %f\n", i_start_float, i_start, offset_start);
-#endif
-
-        int const bin_start = static_cast<int>(offset_start);
-        auto const bin_start_up = static_cast<float>(bin_start) + 0.5f;
-        int const bin_0_start = offset_start < bin_start_up ? bin_start - 1 : bin_start;
-        int const its_start = i_start / ns_per_bx;
-        int const distTo25ns_start = ::hcal::constants::nsPerBX - 1 - i_start % ns_per_bx;
-        auto const factor = offset_start - static_cast<float>(bin_0_start) - 0.5;
-
-#ifdef HCAL_MAHI_GPUDEBUG
-        if (shift == 0) {
-          printf("bin_start = %d bin_0_start = %d its_start = %d distTo25ns_start = %d factor = %f\n",
-                 bin_start,
-                 bin_0_start,
-                 its_start,
-                 distTo25ns_start,
-                 factor);
-        }
-#endif
-
-        auto const sample_over10ts = sample + shift;
-        float value = 0.0f;
-        if (sample_over10ts == its_start) {
-          value = bin_0_start == -1
-                      ? accVarLenIdxMinusOneVec[distTo25ns_start] + factor * diffVarItvlIdxMinusOneVec[distTo25ns_start]
-                      : accVarLenIdxZeroVec[distTo25ns_start] + factor * diffVarItvlIdxZeroVec[distTo25ns_start];
-        } else if (sample_over10ts > its_start) {
-          int const bin_idx = distTo25ns_start + 1 + (sample_over10ts - its_start - 1) * ns_per_bx + bin_0_start;
-          value = acc25nsVec[bin_idx] + factor * diff25nsItvlVec[bin_idx];
-        }
-        return value;
-      }
-
       // TODO: provide constants from configuration
       // from RecoLocalCalo/HcalRecProducers/python/HBHEMahiParameters_cfi.py
       constexpr int nMaxItersMin = 50;
@@ -704,144 +635,154 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           auto const nchannels = f01HEDigis.size() + f5HBDigis.size() + f3HBDigis.size();
           auto const nchannelsf015 = f01HEDigis.size() + f5HBDigis.size();
 
-          //Loop over all groups of channels
-          for (auto group : uniform_groups_z(acc, nchannels)) {
-            //Loop over each channel
-            for (auto channel : uniform_group_elements_z(acc, group, nchannels)) {
-              auto const gch = channel.global;
+          //Loop over each channel
+          for (auto channel : uniform_elements_z(acc, nchannels)) {
+            //Loop over pulses
+            for (auto ipulse : independent_group_elements_y(acc, npulses)) {
+              //Loop over sample
+              for (auto sample : independent_group_elements_x(acc, nsamples)) {
+                // conditions
+                auto const id = channel < f01HEDigis.size()
+                                    ? f01HEDigis.ids()[channel]
+                                    : (channel < nchannelsf015 ? f5HBDigis.ids()[channel - f01HEDigis.size()]
+                                                               : f3HBDigis.ids()[channel - nchannelsf015]);
+                auto const deltaT =
+                    channel >= f01HEDigis.size() && channel < nchannelsf015 ? timeSigmaHPD : timeSigmaSiPM;
 
-              //Loop over pulses
-              for (auto ipulse : independent_group_elements_y(acc, npulses)) {
-                //Loop over sample
-                for (auto sample : independent_group_elements_x(acc, nsamples)) {
-                  // conditions
-                  auto const id = gch < f01HEDigis.size()
-                                      ? f01HEDigis.ids()[gch]
-                                      : (gch < nchannelsf015 ? f5HBDigis.ids()[gch - f01HEDigis.size()]
-                                                             : f3HBDigis.ids()[gch - nchannelsf015]);
-                  auto const deltaT = gch >= f01HEDigis.size() && gch < nchannelsf015 ? timeSigmaHPD : timeSigmaSiPM;
+                // compute hash for this did
+                // hash needed to convert condition arrays order (based on Topo) into digi arrays order(based on FED)
+                auto const did = DetId{id};
+                auto const hashedId =
+                    did.subdetId() == HcalBarrel
+                        ? did2linearIndexHB(id, mahi.maxDepthHB(), mahi.firstHBRing(), mahi.lastHBRing(), mahi.nEtaHB())
+                        : did2linearIndexHE(id,
+                                            mahi.maxDepthHE(),
+                                            mahi.maxPhiHE(),
+                                            mahi.firstHERing(),
+                                            mahi.lastHERing(),
+                                            mahi.nEtaHE()) +
+                              mahi.offsetForHashes();
 
-                  // compute hash for this did
-                  // hash needed to convert condition arrays order (based on Topo) into digi arrays order(based on FED)
-                  auto const did = DetId{id};
-                  auto const hashedId =
-                      did.subdetId() == HcalBarrel
-                          ? did2linearIndexHB(
-                                id, mahi.maxDepthHB(), mahi.firstHBRing(), mahi.lastHBRing(), mahi.nEtaHB())
-                          : did2linearIndexHE(id,
-                                              mahi.maxDepthHE(),
-                                              mahi.maxPhiHE(),
-                                              mahi.firstHERing(),
-                                              mahi.lastHERing(),
-                                              mahi.nEtaHE()) +
-                                mahi.offsetForHashes();
+                // offset output arrays
+                auto* pulseMatrix = pulseMatrices + nsamples * npulses * channel;
+                auto* pulseMatrixM = pulseMatricesM + nsamples * npulses * channel;
+                auto* pulseMatrixP = pulseMatricesP + nsamples * npulses * channel;
 
-                  // offset output arrays
-                  auto* pulseMatrix = pulseMatrices + nsamples * npulses * gch;
-                  auto* pulseMatrixM = pulseMatricesM + nsamples * npulses * gch;
-                  auto* pulseMatrixP = pulseMatricesP + nsamples * npulses * gch;
+                // amplitude per ipulse
+                int const soi = soiSamples[channel];
+                int const pulseOffset = pulseOffsets.offsets()[ipulse];
+                auto const amplitude = amplitudes[channel * nsamples + pulseOffset + soi];
 
-                  // amplitude per ipulse
-                  int const soi = soiSamples[gch];
-                  int const pulseOffset = pulseOffsets.offsets()[ipulse];
-                  auto const amplitude = amplitudes[gch * nsamples + pulseOffset + soi];
-
+                if (amplitude <= 0.f) {
+                  pulseMatrix[ipulse * nsamples + sample] = 0.f;
+                  pulseMatrixM[ipulse * nsamples + sample] = 0.f;
+                  pulseMatrixP[ipulse * nsamples + sample] = 0.f;
+                  continue;
+                }
 #ifdef HCAL_MAHI_GPUDEBUG
 #ifdef HCAL_MAHI_GPUDEBUG_FILTERDETID
-                  if (id != DETID_TO_DEBUG)
-                    return;
+                if (id != DETID_TO_DEBUG)
+                  return;
 #endif
+                if (sample == 0 && ipulse == 0) {
+                  for (int i = 0; i < 8; i++)
+                    printf("amplitude(%d) = %f\n", i, amplitudes[channel * nsamples + i]);
+                  printf("acc25nsVec and diff25nsItvlVec for recoPulseShapeId = %u\n", recoPulseShapeId);
+                  for (int i = 0; i < 256; i++) {
+                    printf("acc25nsVec(%d) = %f diff25nsItvlVec(%d) = %f\n", i, acc25nsVec[i], i, diff25nsItvlVec[i]);
+                  }
+                  printf("accVarLenIdxZEROVec and accVarLenIdxMinusOneVec\n");
+                  for (int i = 0; i < 25; i++) {
+                    printf("accVarLenIdxZEROVec(%d) = %f accVarLenIdxMinusOneVec(%d) = %f\n",
+                           i,
+                           accVarLenIdxZeroVec[i],
+                           i,
+                           accVarLenIdxMinusOneVec[i]);
+                  }
+                  printf("diffVarItvlIdxZEROVec and diffVarItvlIdxMinusOneVec\n");
+                  for (int i = 0; i < 25; i++) {
+                    printf("diffVarItvlIdxZEROVec(%d) = %f diffVarItvlIdxMinusOneVec(%d) = %f\n",
+                           i,
+                           diffVarItvlIdxZeroVec[i],
+                           i,
+                           diffVarItvlIdxMinusOneVec[i]);
+                  }
+                }
 #endif
+
+                auto t0 = meanTime;
+                if (applyTimeSlew) {
+                  if (amplitude <= 1.0f)
+                    t0 += compute_time_slew_delay(1.0, tzeroTimeSlew, slopeTimeSlew, tmaxTimeSlew);
+                  else
+                    t0 += compute_time_slew_delay(amplitude, tzeroTimeSlew, slopeTimeSlew, tmaxTimeSlew);
+                }
+                auto const t0m = -deltaT + t0;
+                auto const t0p = deltaT + t0;
 
 #ifdef HCAL_MAHI_GPUDEBUG
-                  if (sample == 0 && ipulse == 0) {
-                    for (int i = 0; i < 8; i++)
-                      printf("amplitude(%d) = %f\n", i, amplitudes[gch * nsamples + i]);
-                    printf("acc25nsVec and diff25nsItvlVec for recoPulseShapeId = %u\n", recoPulseShapeId);
-                    for (int i = 0; i < 256; i++) {
-                      printf("acc25nsVec(%d) = %f diff25nsItvlVec(%d) = %f\n", i, acc25nsVec[i], i, diff25nsItvlVec[i]);
-                    }
-                    printf("accVarLenIdxZEROVec and accVarLenIdxMinusOneVec\n");
-                    for (int i = 0; i < 25; i++) {
-                      printf("accVarLenIdxZEROVec(%d) = %f accVarLenIdxMinusOneVec(%d) = %f\n",
-                             i,
-                             accVarLenIdxZeroVec[i],
-                             i,
-                             accVarLenIdxMinusOneVec[i]);
-                    }
-                    printf("diffVarItvlIdxZEROVec and diffVarItvlIdxMinusOneVec\n");
-                    for (int i = 0; i < 25; i++) {
-                      printf("diffVarItvlIdxZEROVec(%d) = %f diffVarItvlIdxMinusOneVec(%d) = %f\n",
-                             i,
-                             diffVarItvlIdxZeroVec[i],
-                             i,
-                             diffVarItvlIdxMinusOneVec[i]);
-                    }
+                if (sample == 0 && ipulse == 0) {
+                  printf("time values: %f %f %f\n", t0, t0m, t0p);
+                }
+
+                if (sample == 0 && ipulse == 0) {
+                  for (int i = 0; i < hcal::constants::maxSamples; i++) {
+                    auto const value = recoParamsWithPS.compute_pulse_shape_value(
+                        recoParamsWithPS.recoParamView(), recoParamsWithPS.pulseShapeView(), hashedId, t0, i, 0);
                   }
+                  printf("\n");
+                  for (int i = 0; i < hcal::constants::maxSamples; i++) {
+                    auto const value = recoParamsWithPS.compute_pulse_shape_value(
+                        recoParamsWithPS.recoParamView(), recoParamsWithPS.pulseShapeView(), hashedId, t0p, i, 0);
+                  }
+                  printf("\n");
+                  for (int i = 0; i < hcal::constants::maxSamples; i++) {
+                    auto const value = recoParamsWithPS.compute_pulse_shape_value(
+                        recoParamsWithPS.recoParamView(), recoParamsWithPS.pulseShapeView(), hashedId, t0m, i, 0);
+                  }
+                }
 #endif
 
-                  auto t0 = meanTime;
-                  if (applyTimeSlew) {
-                    if (amplitude <= 1.0f)
-                      t0 += compute_time_slew_delay(1.0, tzeroTimeSlew, slopeTimeSlew, tmaxTimeSlew);
-                    else
-                      t0 += compute_time_slew_delay(amplitude, tzeroTimeSlew, slopeTimeSlew, tmaxTimeSlew);
-                  }
-                  auto const t0m = -deltaT + t0;
-                  auto const t0p = deltaT + t0;
+                // FIXME: shift should be treated properly,
+                // here assume 8 time slices and 8 samples
+                auto const shift = 4 - soi;  // as in cpu version!
 
-#ifdef HCAL_MAHI_GPUDEBUG
-                  if (sample == 0 && ipulse == 0) {
-                    printf("time values: %f %f %f\n", t0, t0m, t0p);
-                  }
+                int32_t const idx = sample - pulseOffset;
+                auto const value = idx >= 0 && static_cast<unsigned>(idx) < nsamples
+                                       ? recoParamsWithPS.compute_pulse_shape_value(recoParamsWithPS.recoParamView(),
+                                                                                    recoParamsWithPS.pulseShapeView(),
+                                                                                    hashedId,
+                                                                                    t0,
+                                                                                    idx,
+                                                                                    shift)
+                                       : 0;
+                auto const value_t0m =
+                    idx >= 0 && static_cast<unsigned>(idx) < nsamples
+                        ? recoParamsWithPS.compute_pulse_shape_value(recoParamsWithPS.recoParamView(),
+                                                                     recoParamsWithPS.pulseShapeView(),
+                                                                     hashedId,
+                                                                     t0m,
+                                                                     idx,
+                                                                     shift)
+                        : 0;
+                auto const value_t0p =
+                    idx >= 0 && static_cast<unsigned>(idx) < nsamples
+                        ? recoParamsWithPS.compute_pulse_shape_value(recoParamsWithPS.recoParamView(),
+                                                                     recoParamsWithPS.pulseShapeView(),
+                                                                     hashedId,
+                                                                     t0p,
+                                                                     idx,
+                                                                     shift)
+                        : 0;
 
-                  if (sample == 0 && ipulse == 0) {
-                    for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId, t0, i, 0);
-                    }
-                    printf("\n");
-                    for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId, t0p, i, 0);
-                    }
-                    printf("\n");
-                    for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                      auto const value = recoParamsWithPS.compute_pulse_shape_value(hashedId, t0m, i, 0);
-                    }
-                  }
-#endif
+                // store to global
+                pulseMatrix[ipulse * nsamples + sample] = value;
+                pulseMatrixM[ipulse * nsamples + sample] = value_t0m;
+                pulseMatrixP[ipulse * nsamples + sample] = value_t0p;
 
-                  // FIXME: shift should be treated properly,
-                  // here assume 8 time slices and 8 samples
-                  auto const shift = 4 - soi;  // as in cpu version!
-
-                  // auto const offset = ipulse - soi;
-                  // auto const idx = sample - offset;
-                  int32_t const idx = sample - pulseOffset;
-                  auto const value = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                         ? recoParamsWithPS.compute_pulse_shape_value(hashedId, t0, idx, shift)
-                                         : 0;
-                  auto const value_t0m = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                             ? recoParamsWithPS.compute_pulse_shape_value(hashedId, t0m, idx, shift)
-                                             : 0;
-                  auto const value_t0p = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                             ? recoParamsWithPS.compute_pulse_shape_value(hashedId, t0p, idx, shift)
-                                             : 0;
-
-                  // store to global
-                  if (amplitude > 0.f) {
-                    pulseMatrix[ipulse * nsamples + sample] = value;
-                    pulseMatrixM[ipulse * nsamples + sample] = value_t0m;
-                    pulseMatrixP[ipulse * nsamples + sample] = value_t0p;
-                  } else {
-                    pulseMatrix[ipulse * nsamples + sample] = 0.f;
-                    pulseMatrixM[ipulse * nsamples + sample] = 0.f;
-                    pulseMatrixP[ipulse * nsamples + sample] = 0.f;
-                  }
-
-                }  // loop over sample
-              }    // loop over pulse
-            }      // loop over channels
-          }        // loop over group of channels
+              }  // loop over sample
+            }    // loop over pulse
+          }      // loop over channels
         }
       };  // Kernel_prep_pulseMatrices_sameNumberOfSamples
 
@@ -1230,25 +1171,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace hcal {
     namespace reconstruction {
 
-      void entryPoint(Queue& queue,
-                      IProductTypef01::ConstView const& f01HEDigis,
-                      IProductTypef5::ConstView const& f5HBDigis,
-                      IProductTypef3::ConstView const& f3HBDigis,
-                      OProductType::View outputGPU,
-                      HcalMahiConditionsPortableDevice::ConstView const& mahi,
-                      HcalSiPMCharacteristicsPortableDevice::ConstView const& sipmCharacteristics,
-                      HcalRecoParamWithPulseShapeDevice::ConstView const& recoParamsWithPS,
-                      HcalMahiPulseOffsetsPortableDevice::ConstView const& mahiPulseOffsets,
-                      ConfigParameters const& configParameters) {
+      void runMahiAsync(Queue& queue,
+                        IProductTypef01::ConstView const& f01HEDigis,
+                        IProductTypef5::ConstView const& f5HBDigis,
+                        IProductTypef3::ConstView const& f3HBDigis,
+                        OProductType::View outputGPU,
+                        HcalMahiConditionsPortableDevice::ConstView const& mahi,
+                        HcalSiPMCharacteristicsPortableDevice::ConstView const& sipmCharacteristics,
+                        HcalRecoParamWithPulseShapeDevice::ConstView const& recoParamsWithPS,
+                        HcalMahiPulseOffsetsPortableDevice::ConstView const& mahiPulseOffsets,
+                        ConfigParameters const& configParameters) {
         auto const totalChannels =
             f01HEDigis.metadata().size() + f5HBDigis.metadata().size() + f3HBDigis.metadata().size();
         // FIXME: the number of channels in output might change given that some channesl might be filtered out
-
-        // do not run when there are no rechits (e.g. if HCAL is not being read),
-        // but do set the size of the output collection to 0
-        if (totalChannels == 0) {
-          return;
-        }
 
         // TODO: this can be lifted by implementing a separate kernel
         // similar to the default one, but properly handling the diff in #sample
@@ -1379,8 +1314,8 @@ namespace alpaka::trait {
       // threadsPerBlock[1] = threads2d.x = windowSize = 8
       // threadsPerBlock[0] = threads2d.y = nchannels_per_block = 32
       // elemsPerThread = 1
-      std::size_t bytes =
-          threadsPerBlock[0u] * elemsPerThread[0u] * ((2 * threadsPerBlock[1u] + 2) * sizeof(float) + sizeof(uint64_t));
+      std::size_t bytes = threadsPerBlock[0u] * elemsPerThread[0u] *
+                          ((2 * threadsPerBlock[1u] * elemsPerThread[1u] + 2) * sizeof(float) + sizeof(uint64_t));
       return bytes;
     }
   };

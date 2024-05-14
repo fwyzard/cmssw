@@ -18,17 +18,22 @@ public:
     constexpr ConstView(RecoParamConstView recoView, PulseShapeConstView psView)
         : recoParamView_{recoView}, pulseShapeView_{psView} {};
 
-    constexpr float compute_pulse_shape_value(uint32_t const hashedId,
+    // TODO: remove what's not needed
+    // originally from from RecoLocalCalo/HcalRecAlgos/src/PulseShapeFunctor.cc
+    constexpr float compute_pulse_shape_value(RecoParamConstView recoParamView,
+                                              PulseShapeConstView pulseShapeView,
+                                              uint32_t const hashedId,
                                               float const pulse_time,
                                               int const sample,
                                               int const shift) {
-      auto const recoPulseShapeId = this->recoParamView().ids()[hashedId];
-      auto const& acc25nsVec = this->pulseShapeView().acc25nsVec()[recoPulseShapeId];
-      auto const& diff25nsItvlVec = this->pulseShapeView().diff25nsItvlVec()[recoPulseShapeId];
-      auto const& accVarLenIdxMinusOneVec = this->pulseShapeView().accVarLenIdxMinusOneVec()[recoPulseShapeId];
-      auto const& diffVarItvlIdxMinusOneVec = this->pulseShapeView().diffVarItvlIdxMinusOneVec()[recoPulseShapeId];
-      auto const& accVarLenIdxZeroVec = this->pulseShapeView().accVarLenIdxZEROVec()[recoPulseShapeId];
-      auto const& diffVarItvlIdxZeroVec = this->pulseShapeView().diffVarItvlIdxZEROVec()[recoPulseShapeId];
+      auto const recoPulseShapeId = recoParamView.ids()[hashedId];
+      auto const& pulseShape = pulseShapeView[recoPulseShapeId];
+      auto const& acc25nsVec = pulseShape.acc25nsVec();
+      auto const& diff25nsItvlVec = pulseShape.diff25nsItvlVec();
+      auto const& accVarLenIdxMinusOneVec = pulseShape.accVarLenIdxMinusOneVec();
+      auto const& diffVarItvlIdxMinusOneVec = pulseShape.diffVarItvlIdxMinusOneVec();
+      auto const& accVarLenIdxZeroVec = pulseShape.accVarLenIdxZEROVec();
+      auto const& diffVarItvlIdxZeroVec = pulseShape.diffVarItvlIdxZEROVec();
 
       // constants
       constexpr float slew = 0.f;
@@ -48,10 +53,10 @@ public:
       }
 
       int const bin_start = static_cast<int>(offset_start);
-      auto const bin_start_up = static_cast<float>(bin_start) + 0.5f;
+      float const bin_start_up = static_cast<float>(bin_start) + 0.5f;
       int const bin_0_start = offset_start < bin_start_up ? bin_start - 1 : bin_start;
       int const its_start = i_start / ns_per_bx;
-      int const distTo25ns_start = ::hcal::constants::nsPerBX - 1 - i_start % ns_per_bx;
+      int const distTo25ns_start = ns_per_bx - 1 - i_start % ns_per_bx;
       auto const factor = offset_start - static_cast<float>(bin_0_start) - 0.5;
 
       auto const sample_over10ts = sample + shift;
