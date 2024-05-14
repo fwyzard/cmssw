@@ -80,8 +80,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const auto& qie11Digis = event.get(qie11DigiToken_);
 
     //Get the number of samples in data from the first digi
-    auto const stride = HBHEDataFrame::MAXSAMPLES * 0.5 + 1;
-    auto const size = hbheDigis.size() * stride;  // number of channels * stride
+    const int stride = HBHEDataFrame::MAXSAMPLES / 2 + 1;
+    const int size = hbheDigis.size() * stride;  // number of channels * stride
 
     // stack host memory in the queue
     HostCollectionPhase0 hf5_(size, event.queue());

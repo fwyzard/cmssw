@@ -148,16 +148,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       //
       // schedule algorithms
       //
-      hcal::reconstruction::entryPoint(queue,
-                                       f01HEDigisDev.const_view(),
-                                       f5HBDigisDev.const_view(),
-                                       f3HBDigisDev.const_view(),
-                                       outputGPU_.view(),
-                                       mahiConditionsDev.const_view(),
-                                       sipmCharacteristicsDev.const_view(),
-                                       recoParamsWithPulseShapeDev.const_view(),
-                                       mahiPulseOffsetsDev.const_view(),
-                                       configParameters_);
+      hcal::reconstruction::runMahiAsync(queue,
+                                         f01HEDigisDev.const_view(),
+                                         f5HBDigisDev.const_view(),
+                                         f3HBDigisDev.const_view(),
+                                         outputGPU_.view(),
+                                         mahiConditionsDev.const_view(),
+                                         sipmCharacteristicsDev.const_view(),
+                                         recoParamsWithPulseShapeDev.const_view(),
+                                         mahiPulseOffsetsDev.const_view(),
+                                         configParameters_);
     }
     //put into the event
     event.emplace(rechitsM0Token_, std::move(outputGPU_));

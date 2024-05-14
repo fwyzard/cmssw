@@ -1,3 +1,5 @@
+#ifndef RecoLocalCalo_HcalRecProducers_plugins_alpaka_Mahi_h
+#define RecoLocalCalo_HcalRecProducers_plugins_alpaka_Mahi_h
 
 #include <vector>
 
@@ -40,15 +42,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::hcal::reconstruction {
   using IProductTypef3 = hcal::Phase1DigiDeviceCollection;
   using OProductType = hcal::RecHitDeviceCollection;
 
-  void entryPoint(Queue& queue,
-                  IProductTypef01::ConstView const& f01HEDigis,
-                  IProductTypef5::ConstView const& f5HBDigis,
-                  IProductTypef3::ConstView const& f3HBDigis,
-                  OProductType::View outputGPU,
-                  HcalMahiConditionsPortableDevice::ConstView const& mahi,
-                  HcalSiPMCharacteristicsPortableDevice::ConstView const& sipmCharacteristics,
-                  HcalRecoParamWithPulseShapeDevice::ConstView const& recoParams,
-                  HcalMahiPulseOffsetsPortableDevice::ConstView const& mahiPulseOffsets,
-                  ConfigParameters const& configParameters);
+  void runMahiAsync(Queue& queue,
+                    IProductTypef01::ConstView const& f01HEDigis,
+                    IProductTypef5::ConstView const& f5HBDigis,
+                    IProductTypef3::ConstView const& f3HBDigis,
+                    OProductType::View outputGPU,
+                    HcalMahiConditionsPortableDevice::ConstView const& mahi,
+                    HcalSiPMCharacteristicsPortableDevice::ConstView const& sipmCharacteristics,
+                    HcalRecoParamWithPulseShapeDevice::ConstView const& recoParams,
+                    HcalMahiPulseOffsetsPortableDevice::ConstView const& mahiPulseOffsets,
+                    ConfigParameters const& configParameters);
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE::hcal::reconstruction
+#endif

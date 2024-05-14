@@ -22,30 +22,28 @@ private:
   void produce(edm::Event&, edm::EventSetup const&) override;
 
 private:
-  using IProductType = hcal::RecHitHostCollection;
-  const edm::EDGetTokenT<IProductType> recHitsM0TokenIn_;
+  const edm::EDGetTokenT<hcal::RecHitHostCollection> recHitsTokenIn_;
   const edm::EDPutTokenT<HBHERecHitCollection> recHitsLegacyTokenOut_;
 };
 
 void HcalRecHitSoAToLegacy::fillDescriptions(edm::ConfigurationDescriptions& confDesc) {
   edm::ParameterSetDescription desc;
 
-  desc.add<edm::InputTag>("recHitsM0LabelIn", edm::InputTag{"hbheRecHitProducerPortable"});
-  desc.add<std::string>("recHitsLegacyLabelOut", "");
+  desc.add<edm::InputTag>("src", edm::InputTag{"hbheRecHitProducerPortable"});
 
   confDesc.addWithDefaultLabel(desc);
 }
 
 HcalRecHitSoAToLegacy::HcalRecHitSoAToLegacy(const edm::ParameterSet& ps)
-    : recHitsM0TokenIn_{consumes<IProductType>(ps.getParameter<edm::InputTag>("recHitsM0LabelIn"))},
-      recHitsLegacyTokenOut_{produces<HBHERecHitCollection>(ps.getParameter<std::string>("recHitsLegacyLabelOut"))} {}
+    : recHitsTokenIn_{consumes<hcal::RecHitHostCollection>(ps.getParameter<edm::InputTag>("src"))},
+      recHitsLegacyTokenOut_{produces<HBHERecHitCollection>()} {}
 
 void HcalRecHitSoAToLegacy::produce(edm::Event& event, edm::EventSetup const& setup) {
   // populate the legacy collection
   auto recHitsLegacy = std::make_unique<HBHERecHitCollection>();
 
   // get input from host SoA
-  auto const& hcalRechitSoAView = event.get(recHitsM0TokenIn_).const_view();
+  auto const& hcalRechitSoAView = event.get(recHitsTokenIn_).const_view();
 
   recHitsLegacy->reserve(hcalRechitSoAView.metadata().size());
 

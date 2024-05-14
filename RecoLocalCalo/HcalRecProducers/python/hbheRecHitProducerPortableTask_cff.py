@@ -18,9 +18,9 @@ hcalMahiPulseOffSetAlpakaESRcdSource = cms.ESSource('EmptyESSource',
 # convert the HBHE digis into SoA format
 from EventFilter.HcalRawToDigi.hcalDigisProducerPortable_cfi import hcalDigisProducerPortable as _hcalDigisProducerPortable
 hcalDigisPortable = _hcalDigisProducerPortable.clone(
-    digisLabelF01HE = "f01HEDigisGPU",
-    digisLabelF5HB  = "f5HBDigisGPU",
-    digisLabelF3HB  = "f3HBDigisGPU"
+    digisLabelF01HE = "f01HEDigis",
+    digisLabelF5HB  = "f5HBDigis",
+    digisLabelF3HB  = "f3HBDigis"
 )
 
 from HeterogeneousCore.AlpakaCore.functions import *
@@ -29,16 +29,16 @@ hcalDigisSerial = makeSerialClone(hcalDigisPortable)
 # run the HCAL local reconstruction (MAHI) on GPU
 from RecoLocalCalo.HcalRecProducers.hbheRecHitProducerPortable_cfi import hbheRecHitProducerPortable as _hbheRecHitProducerPortable
 hbheRecHitProducerPortable = _hbheRecHitProducerPortable.clone(
-    digisLabelF01HE = ("hcalDigisPortable", "f01HEDigisGPU"),
-    digisLabelF5HB = ("hcalDigisPortable", "f5HBDigisGPU"),
-    digisLabelF3HB = ("hcalDigisPortable","f3HBDigisGPU"),
+    digisLabelF01HE = ("hcalDigisPortable", "f01HEDigis"),
+    digisLabelF5HB = ("hcalDigisPortable", "f5HBDigis"),
+    digisLabelF3HB = ("hcalDigisPortable","f3HBDigis"),
     recHitsLabelM0HBHE = "",
     mahiPulseOffSets = "hcalMahiPulseOffsetsESProducer:"
 )
 hbheRecHitProducerSerial = makeSerialClone(hbheRecHitProducerPortable,
-    digisLabelF01HE = ("hcalDigisSerial","f01HEDigisGPU"),
-    digisLabelF5HB = ("hcalDigisSerial","f5HBDigisGPU"),
-    digisLabelF3HB = ("hcalDigisSerial","f3HBDigisGPU")
+    digisLabelF01HE = ("hcalDigisSerial","f01HEDigis"),
+    digisLabelF5HB = ("hcalDigisSerial","f5HBDigis"),
+    digisLabelF3HB = ("hcalDigisSerial","f3HBDigis")
 )
 
 # Tasks and Sequences
