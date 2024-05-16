@@ -37,9 +37,6 @@ from RecoLocalCalo.HcalRecProducers.hcalRecHitSoAToLegacy_cfi import  hcalRecHit
 (alpaka & run3_HB).toModify(hbhereco,
     cpu = hcalRecHitSoAToLegacy.clone(
         src = ("hbheRecHitProducerPortable","")
-    ),
-    cuda = hcalRecHitSoAToLegacy.clone(
-        src = ("hbheRecHitProducerPortable","")
     )
 )
 
