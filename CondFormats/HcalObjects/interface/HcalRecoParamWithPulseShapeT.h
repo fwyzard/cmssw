@@ -11,6 +11,8 @@ public:
   using RecoParamCollection = PortableCollection<HcalRecoParamSoA, TDev>;
   using PulseShapeCollection = PortableCollection<HcalPulseShapeSoA, TDev>;
 
+  using PulseShapeConstElement = typename PulseShapeCollection::ConstView::const_element;
+
   class ConstView {
   public:
     using RecoParamConstView = typename RecoParamCollection::ConstView;
@@ -18,62 +20,12 @@ public:
     constexpr ConstView(RecoParamConstView recoView, PulseShapeConstView psView)
         : recoParamView_{recoView}, pulseShapeView_{psView} {};
 
-    // TODO: remove what's not needed
-    // originally from from RecoLocalCalo/HcalRecAlgos/src/PulseShapeFunctor.cc
-    constexpr float compute_pulse_shape_value(RecoParamConstView recoParamView,
-                                              PulseShapeConstView pulseShapeView,
-                                              uint32_t const hashedId,
-                                              float const pulse_time,
-                                              int const sample,
-                                              int const shift) {
-      auto const recoPulseShapeId = recoParamView.ids()[hashedId];
-      auto const& pulseShape = pulseShapeView[recoPulseShapeId];
-      auto const& acc25nsVec = pulseShape.acc25nsVec();
-      auto const& diff25nsItvlVec = pulseShape.diff25nsItvlVec();
-      auto const& accVarLenIdxMinusOneVec = pulseShape.accVarLenIdxMinusOneVec();
-      auto const& diffVarItvlIdxMinusOneVec = pulseShape.diffVarItvlIdxMinusOneVec();
-      auto const& accVarLenIdxZeroVec = pulseShape.accVarLenIdxZEROVec();
-      auto const& diffVarItvlIdxZeroVec = pulseShape.diffVarItvlIdxZEROVec();
-
-      // constants
-      constexpr float slew = 0.f;
-      constexpr auto ns_per_bx = ::hcal::constants::nsPerBX;
-
-      // FIXME: clean up all the rounding... this is coming from original cpu version
-      float const i_start_float = -::hcal::constants::iniTimeShift - pulse_time - slew > 0.f
-                                      ? 0.f
-                                      : std::abs(-::hcal::constants::iniTimeShift - pulse_time - slew) + 1.f;
-      int i_start = static_cast<int>(i_start_float);
-      float offset_start = static_cast<float>(i_start) - ::hcal::constants::iniTimeShift - pulse_time - slew;
-
-      // boundary
-      if (offset_start == 1.0f) {
-        offset_start = 0.f;
-        i_start -= 1;
-      }
-
-      int const bin_start = static_cast<int>(offset_start);
-      float const bin_start_up = static_cast<float>(bin_start) + 0.5f;
-      int const bin_0_start = offset_start < bin_start_up ? bin_start - 1 : bin_start;
-      int const its_start = i_start / ns_per_bx;
-      int const distTo25ns_start = ns_per_bx - 1 - i_start % ns_per_bx;
-      auto const factor = offset_start - static_cast<float>(bin_0_start) - 0.5;
-
-      auto const sample_over10ts = sample + shift;
-      float value = 0.0f;
-      if (sample_over10ts == its_start) {
-        value = bin_0_start == -1
-                    ? accVarLenIdxMinusOneVec[distTo25ns_start] + factor * diffVarItvlIdxMinusOneVec[distTo25ns_start]
-                    : accVarLenIdxZeroVec[distTo25ns_start] + factor * diffVarItvlIdxZeroVec[distTo25ns_start];
-      } else if (sample_over10ts > its_start) {
-        int const bin_idx = distTo25ns_start + 1 + (sample_over10ts - its_start - 1) * ns_per_bx + bin_0_start;
-        value = acc25nsVec[bin_idx] + factor * diff25nsItvlVec[bin_idx];
-      }
-      return value;
+    ALPAKA_FN_ACC PulseShapeConstElement getPulseShape(uint32_t const hashedId) const {
+      auto const recoPulseShapeId = recoParamView_.ids()[hashedId];
+      return pulseShapeView_[recoPulseShapeId];
     }
 
     constexpr typename RecoParamCollection::ConstView recoParamView() { return recoParamView_; }
-    constexpr typename PulseShapeCollection::ConstView pulseShapeView() { return pulseShapeView_; }
 
   private:
     typename RecoParamCollection::ConstView recoParamView_;
@@ -100,4 +52,5 @@ private:
   RecoParamCollection recoParam_;
   PulseShapeCollection pulseShape_;
 };
+
 #endif

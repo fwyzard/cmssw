@@ -160,6 +160,57 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
       }
 
+      using PulseShapeConstElement = typename HcalPulseShapeSoA::ConstView::const_element;
+      // TODO: remove what's not needed
+      // originally from from RecoLocalCalo/HcalRecAlgos/src/PulseShapeFunctor.cc
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE float compute_pulse_shape_value(PulseShapeConstElement const& pulseShape,
+                                                                     float const pulse_time,
+                                                                     int const sample,
+                                                                     int const shift) {
+        auto const& acc25nsVec = pulseShape.acc25nsVec();
+        auto const& diff25nsItvlVec = pulseShape.diff25nsItvlVec();
+        auto const& accVarLenIdxMinusOneVec = pulseShape.accVarLenIdxMinusOneVec();
+        auto const& diffVarItvlIdxMinusOneVec = pulseShape.diffVarItvlIdxMinusOneVec();
+        auto const& accVarLenIdxZeroVec = pulseShape.accVarLenIdxZEROVec();
+        auto const& diffVarItvlIdxZeroVec = pulseShape.diffVarItvlIdxZEROVec();
+
+        // constants
+        constexpr float slew = 0.f;
+        constexpr auto ns_per_bx = ::hcal::constants::nsPerBX;
+
+        // FIXME: clean up all the rounding... this is coming from original cpu version
+        float const i_start_float = -::hcal::constants::iniTimeShift - pulse_time - slew > 0.f
+                                        ? 0.f
+                                        : std::abs(-::hcal::constants::iniTimeShift - pulse_time - slew) + 1.f;
+        int i_start = static_cast<int>(i_start_float);
+        float offset_start = static_cast<float>(i_start) - ::hcal::constants::iniTimeShift - pulse_time - slew;
+
+        // boundary
+        if (offset_start == 1.0f) {
+          offset_start = 0.f;
+          i_start -= 1;
+        }
+
+        int const bin_start = static_cast<int>(offset_start);
+        float const bin_start_up = static_cast<float>(bin_start) + 0.5f;
+        int const bin_0_start = offset_start < bin_start_up ? bin_start - 1 : bin_start;
+        int const its_start = i_start / ns_per_bx;
+        int const distTo25ns_start = ns_per_bx - 1 - i_start % ns_per_bx;
+        auto const factor = offset_start - static_cast<float>(bin_0_start) - 0.5;
+
+        auto const sample_over10ts = sample + shift;
+        float value = 0.0f;
+        if (sample_over10ts == its_start) {
+          value = bin_0_start == -1
+                      ? accVarLenIdxMinusOneVec[distTo25ns_start] + factor * diffVarItvlIdxMinusOneVec[distTo25ns_start]
+                      : accVarLenIdxZeroVec[distTo25ns_start] + factor * diffVarItvlIdxZeroVec[distTo25ns_start];
+        } else if (sample_over10ts > its_start) {
+          int const bin_idx = distTo25ns_start + 1 + (sample_over10ts - its_start - 1) * ns_per_bx + bin_0_start;
+          value = acc25nsVec[bin_idx] + factor * diff25nsItvlVec[bin_idx];
+        }
+        return value;
+      }
+
       // TODO: provide constants from configuration
       // from RecoLocalCalo/HcalRecProducers/python/HBHEMahiParameters_cfi.py
       constexpr int nMaxItersMin = 50;
@@ -662,6 +713,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                             mahi.lastHERing(),
                                             mahi.nEtaHE()) +
                               mahi.offsetForHashes();
+                auto const pulseShape = recoParamsWithPS.getPulseShape(hashedId);
 
                 // offset output arrays
                 auto* pulseMatrix = pulseMatrices + nsamples * npulses * channel;
@@ -727,614 +779,597 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
                 if (sample == 0 && ipulse == 0) {
                   for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                    auto const value = recoParamsWithPS.compute_pulse_shape_value(
-                        recoParamsWithPS.recoParamView(), recoParamsWithPS.pulseShapeView(), hashedId, t0, i, 0);
+                    auto const value = compute_pulse_shape_value(pulseShape, t0, i, 0);
                   }
                   printf("\n");
                   for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                    auto const value = recoParamsWithPS.compute_pulse_shape_value(
-                        recoParamsWithPS.recoParamView(), recoParamsWithPS.pulseShapeView(), hashedId, t0p, i, 0);
+                    auto const value = compute_pulse_shape_value(pulseShape, t0p, i, 0);
                   }
                   printf("\n");
                   for (int i = 0; i < hcal::constants::maxSamples; i++) {
-                    auto const value = recoParamsWithPS.compute_pulse_shape_value(
-                        recoParamsWithPS.recoParamView(), recoParamsWithPS.pulseShapeView(), hashedId, t0m, i, 0);
+                    auto const value = compute_pulse_shape_value(pulseShape, t0m, i, 0);
                   }
-                }
 #endif
 
-                // FIXME: shift should be treated properly,
-                // here assume 8 time slices and 8 samples
-                auto const shift = 4 - soi;  // as in cpu version!
+                  // FIXME: shift should be treated properly,
+                  // here assume 8 time slices and 8 samples
+                  auto const shift = 4 - soi;  // as in cpu version!
 
-                int32_t const idx = sample - pulseOffset;
-                auto const value = idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                                       ? recoParamsWithPS.compute_pulse_shape_value(recoParamsWithPS.recoParamView(),
-                                                                                    recoParamsWithPS.pulseShapeView(),
-                                                                                    hashedId,
-                                                                                    t0,
-                                                                                    idx,
-                                                                                    shift)
-                                       : 0;
-                auto const value_t0m =
-                    idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                        ? recoParamsWithPS.compute_pulse_shape_value(recoParamsWithPS.recoParamView(),
-                                                                     recoParamsWithPS.pulseShapeView(),
-                                                                     hashedId,
-                                                                     t0m,
-                                                                     idx,
-                                                                     shift)
-                        : 0;
-                auto const value_t0p =
-                    idx >= 0 && static_cast<unsigned>(idx) < nsamples
-                        ? recoParamsWithPS.compute_pulse_shape_value(recoParamsWithPS.recoParamView(),
-                                                                     recoParamsWithPS.pulseShapeView(),
-                                                                     hashedId,
-                                                                     t0p,
-                                                                     idx,
-                                                                     shift)
-                        : 0;
+                  int32_t const idx = sample - pulseOffset;
+                  auto const value = idx >= 0 && static_cast<unsigned>(idx) < nsamples
+                                         ? compute_pulse_shape_value(pulseShape, t0, idx, shift)
+                                         : 0;
+                  auto const value_t0m = idx >= 0 && static_cast<unsigned>(idx) < nsamples
+                                             ? compute_pulse_shape_value(pulseShape, t0m, idx, shift)
+                                             : 0;
+                  auto const value_t0p = idx >= 0 && static_cast<unsigned>(idx) < nsamples
+                                             ? compute_pulse_shape_value(pulseShape, t0p, idx, shift)
+                                             : 0;
 
-                // store to global
-                pulseMatrix[ipulse * nsamples + sample] = value;
-                pulseMatrixM[ipulse * nsamples + sample] = value_t0m;
-                pulseMatrixP[ipulse * nsamples + sample] = value_t0p;
+                  // store to global
+                  pulseMatrix[ipulse * nsamples + sample] = value;
+                  pulseMatrixM[ipulse * nsamples + sample] = value_t0m;
+                  pulseMatrixP[ipulse * nsamples + sample] = value_t0p;
 
-              }  // loop over sample
-            }    // loop over pulse
-          }      // loop over channels
-        }
-      };  // Kernel_prep_pulseMatrices_sameNumberOfSamples
+                }  // loop over sample
+              }    // loop over pulse
+            }      // loop over channels
+          }
+        };  // Kernel_prep_pulseMatrices_sameNumberOfSamples
 
-      template <int NSAMPLES, int NPULSES>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void update_covariance(
-          calo::multifit::ColumnVector<NPULSES> const& resultAmplitudesVector,
-          calo::multifit::MapSymM<float, NSAMPLES>& covarianceMatrix,
-          Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> const& pulseMatrix,
-          Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> const& pulseMatrixM,
-          Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> const& pulseMatrixP) {
-        CMS_UNROLL_LOOP
-        for (int ipulse = 0; ipulse < NPULSES; ipulse++) {
-          auto const resultAmplitude = resultAmplitudesVector(ipulse);
-          if (resultAmplitude == 0)
-            continue;
+        template <int NSAMPLES, int NPULSES>
+        ALPAKA_FN_ACC ALPAKA_FN_INLINE void update_covariance(
+            calo::multifit::ColumnVector<NPULSES> const& resultAmplitudesVector,
+            calo::multifit::MapSymM<float, NSAMPLES>& covarianceMatrix,
+            Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> const& pulseMatrix,
+            Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> const& pulseMatrixM,
+            Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> const& pulseMatrixP) {
+          CMS_UNROLL_LOOP
+          for (int ipulse = 0; ipulse < NPULSES; ipulse++) {
+            auto const resultAmplitude = resultAmplitudesVector(ipulse);
+            if (resultAmplitude == 0)
+              continue;
 
 #ifdef HCAL_MAHI_GPUDEBUG
-          printf("pulse cov array for ibx = %d\n", ipulse);
+            printf("pulse cov array for ibx = %d\n", ipulse);
 #endif
 
-          // preload a column
-          float pmcol[NSAMPLES], pmpcol[NSAMPLES], pmmcol[NSAMPLES];
-          CMS_UNROLL_LOOP
-          for (int counter = 0; counter < NSAMPLES; counter++) {
-            pmcol[counter] = pulseMatrix.coeffRef(counter, ipulse);
-            pmpcol[counter] = pulseMatrixP.coeffRef(counter, ipulse);
-            pmmcol[counter] = pulseMatrixM.coeffRef(counter, ipulse);
-          }
-
-          auto const ampl2 = resultAmplitude * resultAmplitude;
-          CMS_UNROLL_LOOP
-          for (int col = 0; col < NSAMPLES; col++) {
-            auto const valueP_col = pmpcol[col];
-            auto const valueM_col = pmmcol[col];
-            auto const value_col = pmcol[col];
-            auto const tmppcol = valueP_col - value_col;
-            auto const tmpmcol = valueM_col - value_col;
-
-            // diagonal
-            auto tmp_value = 0.5 * (tmppcol * tmppcol + tmpmcol * tmpmcol);
-            covarianceMatrix(col, col) += ampl2 * tmp_value;
-
-            // FIXME: understand if this actually gets unrolled
+            // preload a column
+            float pmcol[NSAMPLES], pmpcol[NSAMPLES], pmmcol[NSAMPLES];
             CMS_UNROLL_LOOP
-            for (int row = col + 1; row < NSAMPLES; row++) {
-              float const valueP_row = pmpcol[row];  //pulseMatrixP(j, ipulseReal);
-              float const value_row = pmcol[row];    //pulseMatrix(j, ipulseReal);
-              float const valueM_row = pmmcol[row];  //pulseMatrixM(j, ipulseReal);
+            for (int counter = 0; counter < NSAMPLES; counter++) {
+              pmcol[counter] = pulseMatrix.coeffRef(counter, ipulse);
+              pmpcol[counter] = pulseMatrixP.coeffRef(counter, ipulse);
+              pmmcol[counter] = pulseMatrixM.coeffRef(counter, ipulse);
+            }
 
-              float tmpprow = valueP_row - value_row;
-              float tmpmrow = valueM_row - value_row;
+            auto const ampl2 = resultAmplitude * resultAmplitude;
+            CMS_UNROLL_LOOP
+            for (int col = 0; col < NSAMPLES; col++) {
+              auto const valueP_col = pmpcol[col];
+              auto const valueM_col = pmmcol[col];
+              auto const value_col = pmcol[col];
+              auto const tmppcol = valueP_col - value_col;
+              auto const tmpmcol = valueM_col - value_col;
 
-              auto const covValue = 0.5 * (tmppcol * tmpprow + tmpmcol * tmpmrow);
+              // diagonal
+              auto tmp_value = 0.5 * (tmppcol * tmppcol + tmpmcol * tmpmcol);
+              covarianceMatrix(col, col) += ampl2 * tmp_value;
 
-              covarianceMatrix(row, col) += ampl2 * covValue;
+              // FIXME: understand if this actually gets unrolled
+              CMS_UNROLL_LOOP
+              for (int row = col + 1; row < NSAMPLES; row++) {
+                float const valueP_row = pmpcol[row];  //pulseMatrixP(j, ipulseReal);
+                float const value_row = pmcol[row];    //pulseMatrix(j, ipulseReal);
+                float const valueM_row = pmmcol[row];  //pulseMatrixM(j, ipulseReal);
+
+                float tmpprow = valueP_row - value_row;
+                float tmpmrow = valueM_row - value_row;
+
+                auto const covValue = 0.5 * (tmppcol * tmpprow + tmpmcol * tmpmrow);
+
+                covarianceMatrix(row, col) += ampl2 * covValue;
+              }
             }
           }
         }
-      }
 
-      template <int NSAMPLES, int NPULSES>
-      class Kernel_minimize {
-      public:
-        template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
-        ALPAKA_FN_ACC void operator()(TAcc const& acc,
-                                      OProductType::View outputGPU,
-                                      float const* amplitudes,
-                                      float* pulseMatrices,
-                                      float* pulseMatricesM,
-                                      float* pulseMatricesP,
-                                      HcalMahiPulseOffsetsPortableDevice::ConstView pulseOffsetsView,
-                                      float* noiseTerms,
-                                      float* electronicNoiseTerms,
-                                      int8_t* soiSamples,
-                                      HcalMahiConditionsPortableDevice::ConstView mahi,
-                                      bool const useEffectivePedestals,
-                                      IProductTypef01::ConstView f01HEDigis,
-                                      IProductTypef5::ConstView f5HBDigis,
-                                      IProductTypef3::ConstView f3HBDigis) const {
-          // can be relaxed if needed - minor updates are needed in that case!
-          static_assert(NPULSES == NSAMPLES);
+        template <int NSAMPLES, int NPULSES>
+        class Kernel_minimize {
+        public:
+          template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
+          ALPAKA_FN_ACC void operator()(TAcc const& acc,
+                                        OProductType::View outputGPU,
+                                        float const* amplitudes,
+                                        float* pulseMatrices,
+                                        float* pulseMatricesM,
+                                        float* pulseMatricesP,
+                                        HcalMahiPulseOffsetsPortableDevice::ConstView pulseOffsetsView,
+                                        float* noiseTerms,
+                                        float* electronicNoiseTerms,
+                                        int8_t* soiSamples,
+                                        HcalMahiConditionsPortableDevice::ConstView mahi,
+                                        bool const useEffectivePedestals,
+                                        IProductTypef01::ConstView f01HEDigis,
+                                        IProductTypef5::ConstView f5HBDigis,
+                                        IProductTypef3::ConstView f3HBDigis) const {
+            // can be relaxed if needed - minor updates are needed in that case!
+            static_assert(NPULSES == NSAMPLES);
 
-          auto const nchannels = f01HEDigis.size() + f5HBDigis.size() + f3HBDigis.size();
+            auto const nchannels = f01HEDigis.size() + f5HBDigis.size() + f3HBDigis.size();
 
-          auto const nchannelsf015 = f01HEDigis.size() + f5HBDigis.size();
+            auto const nchannelsf015 = f01HEDigis.size() + f5HBDigis.size();
 
-          auto const threadsPerBlock(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
+            auto const threadsPerBlock(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
 
-          //Loop over all groups of channels
-          for (auto group : uniform_groups_x(acc, nchannels)) {
-            //Loop over each channel
-            for (auto channel : uniform_group_elements_x(acc, group, nchannels)) {
-              auto const gch = channel.global;
-              auto const lch = channel.local;
+            //Loop over all groups of channels
+            for (auto group : uniform_groups_x(acc, nchannels)) {
+              //Loop over each channel
+              for (auto channel : uniform_group_elements_x(acc, group, nchannels)) {
+                auto const gch = channel.global;
+                auto const lch = channel.local;
 
-              if (gch >= nchannels)
-                return;
+                if (gch >= nchannels)
+                  return;
 
-              // if chi2 is set to -9999 do not run minimization
-              if (outputGPU.chi2()[gch] == -9999.f)
-                return;
+                // if chi2 is set to -9999 do not run minimization
+                if (outputGPU.chi2()[gch] == -9999.f)
+                  return;
 
-              // configure shared mem
-              float* shrmem = alpaka::getDynSharedMem<float>(acc);
-              float* shrMatrixLFnnlsStorage = shrmem + calo::multifit::MapSymM<float, NPULSES>::total * lch;
-              float* shrAtAStorage = shrmem + calo::multifit::MapSymM<float, NPULSES>::total * (lch + threadsPerBlock);
+                // configure shared mem
+                float* shrmem = alpaka::getDynSharedMem<float>(acc);
+                float* shrMatrixLFnnlsStorage = shrmem + calo::multifit::MapSymM<float, NPULSES>::total * lch;
+                float* shrAtAStorage =
+                    shrmem + calo::multifit::MapSymM<float, NPULSES>::total * (lch + threadsPerBlock);
 
-              // conditions for pedestal widths
-              auto const id = gch < f01HEDigis.size() ? f01HEDigis.ids()[gch]
-                                                      : (gch < nchannelsf015 ? f5HBDigis.ids()[gch - f01HEDigis.size()]
-                                                                             : f3HBDigis.ids()[gch - nchannelsf015]);
-              auto const did = DetId{id};
-              auto const hashedId =
-                  did.subdetId() == HcalBarrel
-                      ? did2linearIndexHB(id, mahi.maxDepthHB(), mahi.firstHBRing(), mahi.lastHBRing(), mahi.nEtaHB())
-                      : did2linearIndexHE(id,
-                                          mahi.maxDepthHE(),
-                                          mahi.maxPhiHE(),
-                                          mahi.firstHERing(),
-                                          mahi.lastHERing(),
-                                          mahi.nEtaHE()) +
-                            mahi.offsetForHashes();
+                // conditions for pedestal widths
+                auto const id = gch < f01HEDigis.size()
+                                    ? f01HEDigis.ids()[gch]
+                                    : (gch < nchannelsf015 ? f5HBDigis.ids()[gch - f01HEDigis.size()]
+                                                           : f3HBDigis.ids()[gch - nchannelsf015]);
+                auto const did = DetId{id};
+                auto const hashedId =
+                    did.subdetId() == HcalBarrel
+                        ? did2linearIndexHB(id, mahi.maxDepthHB(), mahi.firstHBRing(), mahi.lastHBRing(), mahi.nEtaHB())
+                        : did2linearIndexHE(id,
+                                            mahi.maxDepthHE(),
+                                            mahi.maxPhiHE(),
+                                            mahi.firstHERing(),
+                                            mahi.lastHERing(),
+                                            mahi.nEtaHE()) +
+                              mahi.offsetForHashes();
 
-              // conditions based on the hash
-              auto const* pedestalWidthsForChannel =
-                  useEffectivePedestals && (gch < f01HEDigis.size() || gch >= nchannelsf015)
-                      ? mahi.convertedPedestalWidths()[hashedId].data()
-                      : mahi.pedestals_width()[hashedId].data();
-              auto const averagePedestalWidth2 = 0.25 * (pedestalWidthsForChannel[0] * pedestalWidthsForChannel[0] +
-                                                         pedestalWidthsForChannel[1] * pedestalWidthsForChannel[1] +
-                                                         pedestalWidthsForChannel[2] * pedestalWidthsForChannel[2] +
-                                                         pedestalWidthsForChannel[3] * pedestalWidthsForChannel[3]);
+                // conditions based on the hash
+                auto const* pedestalWidthsForChannel =
+                    useEffectivePedestals && (gch < f01HEDigis.size() || gch >= nchannelsf015)
+                        ? mahi.convertedPedestalWidths()[hashedId].data()
+                        : mahi.pedestals_width()[hashedId].data();
+                auto const averagePedestalWidth2 = 0.25 * (pedestalWidthsForChannel[0] * pedestalWidthsForChannel[0] +
+                                                           pedestalWidthsForChannel[1] * pedestalWidthsForChannel[1] +
+                                                           pedestalWidthsForChannel[2] * pedestalWidthsForChannel[2] +
+                                                           pedestalWidthsForChannel[3] * pedestalWidthsForChannel[3]);
 
-              // FIXME on cpu ts 0 capid was used - does it make any difference
-              auto const gain = mahi.gains_value()[hashedId][0];
+                // FIXME on cpu ts 0 capid was used - does it make any difference
+                auto const gain = mahi.gains_value()[hashedId][0];
 
-              auto const respCorrection = mahi.respCorrs_values()[hashedId];
-              auto const noisecorr = mahi.sipmPar_auxi2()[hashedId];
+                auto const respCorrection = mahi.respCorrs_values()[hashedId];
+                auto const noisecorr = mahi.sipmPar_auxi2()[hashedId];
 
 #ifdef HCAL_MAHI_GPUDEBUG
 #ifdef HCAL_MAHI_GPUDEBUG_FILTERDETID
-              if (id != DETID_TO_DEBUG)
-                return;
+                if (id != DETID_TO_DEBUG)
+                  return;
 #endif
 #endif
 
-              /*
+                /*
       // TODO: provide this properly
       int const soi = soiSamples[gch];
       */
-              calo::multifit::ColumnVector<NPULSES, int> pulseOffsets;
-              CMS_UNROLL_LOOP
-              for (int i = 0; i < NPULSES; ++i)
-                pulseOffsets(i) = i;
-              //        pulseOffsets(i) = pulseOffsetValues[i] - pulseOffsetValues[0];
+                calo::multifit::ColumnVector<NPULSES, int> pulseOffsets;
+                CMS_UNROLL_LOOP
+                for (int i = 0; i < NPULSES; ++i)
+                  pulseOffsets(i) = i;
+                //        pulseOffsets(i) = pulseOffsetValues[i] - pulseOffsetValues[0];
 
-              // output amplitudes/weights
-              calo::multifit::ColumnVector<NPULSES> resultAmplitudesVector =
-                  calo::multifit::ColumnVector<NPULSES>::Zero();
+                // output amplitudes/weights
+                calo::multifit::ColumnVector<NPULSES> resultAmplitudesVector =
+                    calo::multifit::ColumnVector<NPULSES>::Zero();
 
-              // map views
-              Eigen::Map<const calo::multifit::ColumnVector<NSAMPLES>> inputAmplitudesView{amplitudes + gch * NSAMPLES};
-              Eigen::Map<const calo::multifit::ColumnVector<NSAMPLES>> noiseTermsView{noiseTerms + gch * NSAMPLES};
-              Eigen::Map<const calo::multifit::ColumnVector<NSAMPLES>> noiseElectronicView{electronicNoiseTerms +
-                                                                                           gch * NSAMPLES};
-              Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> glbPulseMatrixMView{
-                  pulseMatricesM + gch * NSAMPLES * NPULSES};
-              Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> glbPulseMatrixPView{
-                  pulseMatricesP + gch * NSAMPLES * NPULSES};
-              Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> glbPulseMatrixView{
-                  pulseMatrices + gch * NSAMPLES * NPULSES};
+                // map views
+                Eigen::Map<const calo::multifit::ColumnVector<NSAMPLES>> inputAmplitudesView{amplitudes +
+                                                                                             gch * NSAMPLES};
+                Eigen::Map<const calo::multifit::ColumnVector<NSAMPLES>> noiseTermsView{noiseTerms + gch * NSAMPLES};
+                Eigen::Map<const calo::multifit::ColumnVector<NSAMPLES>> noiseElectronicView{electronicNoiseTerms +
+                                                                                             gch * NSAMPLES};
+                Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> glbPulseMatrixMView{
+                    pulseMatricesM + gch * NSAMPLES * NPULSES};
+                Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> glbPulseMatrixPView{
+                    pulseMatricesP + gch * NSAMPLES * NPULSES};
+                Eigen::Map<const calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES>> glbPulseMatrixView{
+                    pulseMatrices + gch * NSAMPLES * NPULSES};
 #ifdef HCAL_MAHI_GPUDEBUG
-              for (int i = 0; i < NSAMPLES; i++)
-                printf("inputValues(%d) = %f noiseTerms(%d) = %f\n", i, inputAmplitudesView(i), i, noiseTermsView(i));
-              for (int i = 0; i < NSAMPLES; i++) {
-                for (int j = 0; j < NPULSES; j++)
-                  printf("%f ", glbPulseMatrixView(i, j));
-                printf("\n");
-              }
-              printf("\n");
-              for (int i = 0; i < NSAMPLES; i++) {
-                for (int j = 0; j < NPULSES; j++)
-                  printf("%f ", glbPulseMatrixMView(i, j));
-                printf("\n");
-              }
-              printf("\n");
-              for (int i = 0; i < NSAMPLES; i++) {
-                for (int j = 0; j < NPULSES; j++)
-                  printf("%f ", glbPulseMatrixPView(i, j));
-                printf("\n");
-              }
-#endif
-
-              int npassive = 0;
-              float chi2 = 0, previous_chi2 = 0.f, chi2_2itersback = 0.f;
-              for (int iter = 1; iter < nMaxItersMin; iter++) {
-                //float covarianceMatrixStorage[MapSymM<float, NSAMPLES>::total];
-                // NOTE: only works when NSAMPLES == NPULSES
-                // if does not hold -> slightly rearrange shared mem to still reuse
-                // shared memory
-                float* covarianceMatrixStorage = shrMatrixLFnnlsStorage;
-                calo::multifit::MapSymM<float, NSAMPLES> covarianceMatrix{covarianceMatrixStorage};
-                CMS_UNROLL_LOOP
-                for (int counter = 0; counter < calo::multifit::MapSymM<float, NSAMPLES>::total; counter++)
-                  covarianceMatrixStorage[counter] = (noisecorr != 0.f) ? 0.f : averagePedestalWidth2;
-                CMS_UNROLL_LOOP
-                for (unsigned int counter = 0; counter < calo::multifit::MapSymM<float, NSAMPLES>::stride; counter++) {
-                  covarianceMatrix(counter, counter) += noiseTermsView.coeffRef(counter);
-                  if (counter != 0)
-                    covarianceMatrix(counter, counter - 1) +=
-                        noisecorr * noiseElectronicView.coeffRef(counter - 1) * noiseElectronicView.coeffRef(counter);
+                for (int i = 0; i < NSAMPLES; i++)
+                  printf("inputValues(%d) = %f noiseTerms(%d) = %f\n", i, inputAmplitudesView(i), i, noiseTermsView(i));
+                for (int i = 0; i < NSAMPLES; i++) {
+                  for (int j = 0; j < NPULSES; j++)
+                    printf("%f ", glbPulseMatrixView(i, j));
+                  printf("\n");
                 }
-
-                // update covariance matrix
-                update_covariance(resultAmplitudesVector,
-                                  covarianceMatrix,
-                                  glbPulseMatrixView,
-                                  glbPulseMatrixMView,
-                                  glbPulseMatrixPView);
-
-#ifdef HCAL_MAHI_GPUDEBUG
-                printf("covariance matrix\n");
-                for (int i = 0; i < 8; i++) {
-                  for (int j = 0; j < 8; j++)
-                    printf("%f ", covarianceMatrix(i, j));
+                printf("\n");
+                for (int i = 0; i < NSAMPLES; i++) {
+                  for (int j = 0; j < NPULSES; j++)
+                    printf("%f ", glbPulseMatrixMView(i, j));
+                  printf("\n");
+                }
+                printf("\n");
+                for (int i = 0; i < NSAMPLES; i++) {
+                  for (int j = 0; j < NPULSES; j++)
+                    printf("%f ", glbPulseMatrixPView(i, j));
                   printf("\n");
                 }
 #endif
 
-                // compute Cholesky Decomposition L matrix
-                //matrixDecomposition.compute(covarianceMatrix);
-                //auto const& matrixL = matrixDecomposition.matrixL();
-                float matrixLStorage[calo::multifit::MapSymM<float, NSAMPLES>::total];
-                calo::multifit::MapSymM<float, NSAMPLES> matrixL{matrixLStorage};
-                calo::multifit::compute_decomposition_unrolled(matrixL, covarianceMatrix);
-
-                //
-                // replace eigen
-                //
-                //auto const& A = matrixDecomposition
-                //    .matrixL()
-                //    .solve(pulseMatrixView);
-                calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES> A;
-                calo::multifit::solve_forward_subst_matrix(A, glbPulseMatrixView, matrixL);
-
-                //
-                // remove eigen
-                //
-                //auto const& b = matrixL
-                //   .solve(inputAmplitudesView);
-                //
-                float reg_b[NSAMPLES];
-                calo::multifit::solve_forward_subst_vector(reg_b, inputAmplitudesView, matrixL);
-
-                // TODO: we do not really need to change these matrcies
-                // will be fixed in the optimized version
-                //ColMajorMatrix<NPULSES, NPULSES> AtA = A.transpose() * A;
-                //ColumnVector<NPULSES> Atb = A.transpose() * b;
-                //ColMajorMatrix<NPULSES, NPULSES> AtA;
-                //float AtAStorage[MapSymM<float, NPULSES>::total];
-                calo::multifit::MapSymM<float, NPULSES> AtA{shrAtAStorage};
-                calo::multifit::ColumnVector<NPULSES> Atb;
-                CMS_UNROLL_LOOP
-                for (int icol = 0; icol < NPULSES; icol++) {
-                  float reg_ai[NSAMPLES];
-
-                  // load column icol
+                int npassive = 0;
+                float chi2 = 0, previous_chi2 = 0.f, chi2_2itersback = 0.f;
+                for (int iter = 1; iter < nMaxItersMin; iter++) {
+                  //float covarianceMatrixStorage[MapSymM<float, NSAMPLES>::total];
+                  // NOTE: only works when NSAMPLES == NPULSES
+                  // if does not hold -> slightly rearrange shared mem to still reuse
+                  // shared memory
+                  float* covarianceMatrixStorage = shrMatrixLFnnlsStorage;
+                  calo::multifit::MapSymM<float, NSAMPLES> covarianceMatrix{covarianceMatrixStorage};
                   CMS_UNROLL_LOOP
-                  for (int counter = 0; counter < NSAMPLES; counter++)
-                    reg_ai[counter] = A(counter, icol);
-
-                  // compute diagonal
-                  float sum = 0.f;
+                  for (int counter = 0; counter < calo::multifit::MapSymM<float, NSAMPLES>::total; counter++)
+                    covarianceMatrixStorage[counter] = (noisecorr != 0.f) ? 0.f : averagePedestalWidth2;
                   CMS_UNROLL_LOOP
-                  for (int counter = 0; counter < NSAMPLES; counter++)
-                    sum += reg_ai[counter] * reg_ai[counter];
+                  for (unsigned int counter = 0; counter < calo::multifit::MapSymM<float, NSAMPLES>::stride;
+                       counter++) {
+                    covarianceMatrix(counter, counter) += noiseTermsView.coeffRef(counter);
+                    if (counter != 0)
+                      covarianceMatrix(counter, counter - 1) +=
+                          noisecorr * noiseElectronicView.coeffRef(counter - 1) * noiseElectronicView.coeffRef(counter);
+                  }
 
-                  // store
-                  AtA(icol, icol) = sum;
+                  // update covariance matrix
+                  update_covariance(resultAmplitudesVector,
+                                    covarianceMatrix,
+                                    glbPulseMatrixView,
+                                    glbPulseMatrixMView,
+                                    glbPulseMatrixPView);
 
-                  // go thru the other columns
+#ifdef HCAL_MAHI_GPUDEBUG
+                  printf("covariance matrix\n");
+                  for (int i = 0; i < 8; i++) {
+                    for (int j = 0; j < 8; j++)
+                      printf("%f ", covarianceMatrix(i, j));
+                    printf("\n");
+                  }
+#endif
+
+                  // compute Cholesky Decomposition L matrix
+                  //matrixDecomposition.compute(covarianceMatrix);
+                  //auto const& matrixL = matrixDecomposition.matrixL();
+                  float matrixLStorage[calo::multifit::MapSymM<float, NSAMPLES>::total];
+                  calo::multifit::MapSymM<float, NSAMPLES> matrixL{matrixLStorage};
+                  calo::multifit::compute_decomposition_unrolled(matrixL, covarianceMatrix);
+
+                  //
+                  // replace eigen
+                  //
+                  //auto const& A = matrixDecomposition
+                  //    .matrixL()
+                  //    .solve(pulseMatrixView);
+                  calo::multifit::ColMajorMatrix<NSAMPLES, NPULSES> A;
+                  calo::multifit::solve_forward_subst_matrix(A, glbPulseMatrixView, matrixL);
+
+                  //
+                  // remove eigen
+                  //
+                  //auto const& b = matrixL
+                  //   .solve(inputAmplitudesView);
+                  //
+                  float reg_b[NSAMPLES];
+                  calo::multifit::solve_forward_subst_vector(reg_b, inputAmplitudesView, matrixL);
+
+                  // TODO: we do not really need to change these matrcies
+                  // will be fixed in the optimized version
+                  //ColMajorMatrix<NPULSES, NPULSES> AtA = A.transpose() * A;
+                  //ColumnVector<NPULSES> Atb = A.transpose() * b;
+                  //ColMajorMatrix<NPULSES, NPULSES> AtA;
+                  //float AtAStorage[MapSymM<float, NPULSES>::total];
+                  calo::multifit::MapSymM<float, NPULSES> AtA{shrAtAStorage};
+                  calo::multifit::ColumnVector<NPULSES> Atb;
                   CMS_UNROLL_LOOP
-                  for (int j = icol + 1; j < NPULSES; j++) {
-                    // load column j
-                    float reg_aj[NSAMPLES];
+                  for (int icol = 0; icol < NPULSES; icol++) {
+                    float reg_ai[NSAMPLES];
+
+                    // load column icol
                     CMS_UNROLL_LOOP
                     for (int counter = 0; counter < NSAMPLES; counter++)
-                      reg_aj[counter] = A(counter, j);
+                      reg_ai[counter] = A(counter, icol);
 
-                    // accum
+                    // compute diagonal
                     float sum = 0.f;
                     CMS_UNROLL_LOOP
                     for (int counter = 0; counter < NSAMPLES; counter++)
-                      sum += reg_aj[counter] * reg_ai[counter];
+                      sum += reg_ai[counter] * reg_ai[counter];
 
                     // store
-                    //AtA(icol, j) = sum;
-                    AtA(j, icol) = sum;
+                    AtA(icol, icol) = sum;
+
+                    // go thru the other columns
+                    CMS_UNROLL_LOOP
+                    for (int j = icol + 1; j < NPULSES; j++) {
+                      // load column j
+                      float reg_aj[NSAMPLES];
+                      CMS_UNROLL_LOOP
+                      for (int counter = 0; counter < NSAMPLES; counter++)
+                        reg_aj[counter] = A(counter, j);
+
+                      // accum
+                      float sum = 0.f;
+                      CMS_UNROLL_LOOP
+                      for (int counter = 0; counter < NSAMPLES; counter++)
+                        sum += reg_aj[counter] * reg_ai[counter];
+
+                      // store
+                      //AtA(icol, j) = sum;
+                      AtA(j, icol) = sum;
+                    }
+
+                    // Atb accum
+                    float sum_atb = 0;
+                    CMS_UNROLL_LOOP
+                    for (int counter = 0; counter < NSAMPLES; counter++)
+                      sum_atb += reg_ai[counter] * reg_b[counter];
+
+                    // store atb
+                    Atb(icol) = sum_atb;
                   }
 
-                  // Atb accum
-                  float sum_atb = 0;
-                  CMS_UNROLL_LOOP
-                  for (int counter = 0; counter < NSAMPLES; counter++)
-                    sum_atb += reg_ai[counter] * reg_b[counter];
-
-                  // store atb
-                  Atb(icol) = sum_atb;
-                }
-
 #ifdef HCAL_MAHI_GPUDEBUG
-                printf("AtA\n");
-                for (int i = 0; i < 8; i++) {
-                  for (int j = 0; j < 8; j++)
-                    printf("%f ", AtA(i, j));
+                  printf("AtA\n");
+                  for (int i = 0; i < 8; i++) {
+                    for (int j = 0; j < 8; j++)
+                      printf("%f ", AtA(i, j));
+                    printf("\n");
+                  }
+                  printf("Atb\n");
+                  for (int i = 0; i < 8; i++)
+                    printf("%f ", Atb(i));
                   printf("\n");
+                  printf("result Amplitudes before nnls\n");
+                  for (int i = 0; i < 8; i++)
+                    printf("%f ", resultAmplitudesVector(i));
+                  printf("\n");
+#endif
+
+                  // for fnnls
+                  calo::multifit::MapSymM<float, NPULSES> matrixLForFnnls{shrMatrixLFnnlsStorage};
+
+                  // run fast nnls
+                  calo::multifit::fnnls(AtA,
+                                        Atb,
+                                        resultAmplitudesVector,
+                                        npassive,
+                                        pulseOffsets,
+                                        matrixLForFnnls,
+                                        nnlsThresh,
+                                        nMaxItersNNLS,
+                                        10,
+                                        10);
+
+#ifdef HCAL_MAHI_GPUDEBUG
+                  printf("result Amplitudes\n");
+                  for (int i = 0; i < 8; i++)
+                    printf("resultAmplitudes(%d) = %f\n", i, resultAmplitudesVector(i));
+#endif
+
+                  calo::multifit::calculateChiSq(
+                      matrixL, glbPulseMatrixView, resultAmplitudesVector, inputAmplitudesView, chi2);
+
+                  auto const deltaChi2 = std::abs(chi2 - previous_chi2);
+                  if (chi2 == chi2_2itersback && chi2 < previous_chi2)
+                    break;
+
+                  // update
+                  chi2_2itersback = previous_chi2;
+                  previous_chi2 = chi2;
+
+                  // exit condition
+                  if (deltaChi2 < deltaChi2Threashold)
+                    break;
                 }
-                printf("Atb\n");
-                for (int i = 0; i < 8; i++)
-                  printf("%f ", Atb(i));
-                printf("\n");
-                printf("result Amplitudes before nnls\n");
-                for (int i = 0; i < 8; i++)
-                  printf("%f ", resultAmplitudesVector(i));
-                printf("\n");
-#endif
-
-                // for fnnls
-                calo::multifit::MapSymM<float, NPULSES> matrixLForFnnls{shrMatrixLFnnlsStorage};
-
-                // run fast nnls
-                calo::multifit::fnnls(AtA,
-                                      Atb,
-                                      resultAmplitudesVector,
-                                      npassive,
-                                      pulseOffsets,
-                                      matrixLForFnnls,
-                                      nnlsThresh,
-                                      nMaxItersNNLS,
-                                      10,
-                                      10);
 
 #ifdef HCAL_MAHI_GPUDEBUG
-                printf("result Amplitudes\n");
-                for (int i = 0; i < 8; i++)
-                  printf("resultAmplitudes(%d) = %f\n", i, resultAmplitudesVector(i));
+                for (int i = 0; i < NPULSES; i++)
+                  printf("pulseOffsets(%d) = %d outputAmplitudes(%d) = %f\n",
+                         i,
+                         pulseOffsets(i),
+                         i,
+                         resultAmplitudesVector(i));
+                printf("chi2 = %f\n", chi2);
 #endif
 
-                calo::multifit::calculateChiSq(
-                    matrixL, glbPulseMatrixView, resultAmplitudesVector, inputAmplitudesView, chi2);
+                outputGPU.chi2()[gch] = chi2;
+                auto const idx_for_energy = std::abs(pulseOffsetsView.offsets()[0]);
+                outputGPU.energy()[gch] = (gain * resultAmplitudesVector(idx_for_energy)) * respCorrection;
 
-                auto const deltaChi2 = std::abs(chi2 - previous_chi2);
-                if (chi2 == chi2_2itersback && chi2 < previous_chi2)
-                  break;
+              }  // loop over channels
+            }    //loop over group of channels
+          }
+        };  // Kernel_minimize
 
-                // update
-                chi2_2itersback = previous_chi2;
-                previous_chi2 = chi2;
+      }  // namespace mahi
+    }    // namespace hcal::reconstruction
+    namespace hcal {
+      namespace reconstruction {
 
-                // exit condition
-                if (deltaChi2 < deltaChi2Threashold)
-                  break;
-              }
+        void runMahiAsync(Queue& queue,
+                          IProductTypef01::ConstView const& f01HEDigis,
+                          IProductTypef5::ConstView const& f5HBDigis,
+                          IProductTypef3::ConstView const& f3HBDigis,
+                          OProductType::View outputGPU,
+                          HcalMahiConditionsPortableDevice::ConstView const& mahi,
+                          HcalSiPMCharacteristicsPortableDevice::ConstView const& sipmCharacteristics,
+                          HcalRecoParamWithPulseShapeDevice::ConstView const& recoParamsWithPS,
+                          HcalMahiPulseOffsetsPortableDevice::ConstView const& mahiPulseOffsets,
+                          ConfigParameters const& configParameters) {
+          auto const totalChannels =
+              f01HEDigis.metadata().size() + f5HBDigis.metadata().size() + f3HBDigis.metadata().size();
+          // FIXME: the number of channels in output might change given that some channesl might be filtered out
 
-#ifdef HCAL_MAHI_GPUDEBUG
-              for (int i = 0; i < NPULSES; i++)
-                printf("pulseOffsets(%d) = %d outputAmplitudes(%d) = %f\n",
-                       i,
-                       pulseOffsets(i),
-                       i,
-                       resultAmplitudesVector(i));
-              printf("chi2 = %f\n", chi2);
-#endif
+          // TODO: this can be lifted by implementing a separate kernel
+          // similar to the default one, but properly handling the diff in #sample
+          // or modifying existing one
+          // TODO: assert startingSample = f01nsamples - windowSize to be 0 or 2
+          // assert f01nsamples == f5nsamples
+          // assert f01nsamples == f3nsamples
+          int constexpr windowSize = 8;
 
-              outputGPU.chi2()[gch] = chi2;
-              auto const idx_for_energy = std::abs(pulseOffsetsView.offsets()[0]);
-              outputGPU.energy()[gch] = (gain * resultAmplitudesVector(idx_for_energy)) * respCorrection;
+          //compute work division
+          uint32_t nchannels_per_block = configParameters.kprep1dChannelsPerBlock;
+          auto const blocks_y = cms::alpakatools::divide_up_by(totalChannels, nchannels_per_block);
 
-            }  // loop over channels
-          }    //loop over group of channels
+          Vec2D const blocks_2d{blocks_y, 1u};  // {y, x} coordiantes
+          Vec2D const threads_2d{nchannels_per_block, windowSize};
+          auto workDivPrep2D = cms::alpakatools::make_workdiv<Acc2D>(blocks_2d, threads_2d);
+
+          //Device buffer for output
+          auto amplitudes = cms::alpakatools::make_device_buffer<float[]>(queue, totalChannels * windowSize);
+          auto noiseTerms = cms::alpakatools::make_device_buffer<float[]>(queue, totalChannels * windowSize);
+          auto electronicNoiseTerms = cms::alpakatools::make_device_buffer<float[]>(queue, totalChannels * windowSize);
+          auto soiSamples = cms::alpakatools::make_device_buffer<int8_t[]>(queue, totalChannels * windowSize);
+
+          alpaka::exec<Acc2D>(queue,
+                              workDivPrep2D,
+                              mahi::Kernel_prep1d_sameNumberOfSamples{},
+                              outputGPU,
+                              f01HEDigis,
+                              f5HBDigis,
+                              f3HBDigis,
+                              mahi,
+                              sipmCharacteristics,
+                              recoParamsWithPS,
+                              configParameters.useEffectivePedestals,
+                              configParameters.sipmQTSShift,
+                              configParameters.sipmQNTStoSum,
+                              configParameters.firstSampleShift,
+                              configParameters.ts4Thresh,
+                              amplitudes.data(),
+                              noiseTerms.data(),
+                              electronicNoiseTerms.data(),
+                              soiSamples.data(),
+                              windowSize);
+
+          //// 1024 is the max threads per block for gtx1080
+          //// FIXME: Take this from Alpaka in a way that does not need to query deviceProperty for every event
+          uint32_t const channelsPerBlock = 1024 / (windowSize * mahiPulseOffsets.metadata().size());
+
+          //launch 1D blocks of 3D threads
+          auto const blocks_z = cms::alpakatools::divide_up_by(totalChannels, channelsPerBlock);
+          Vec3D const blocks_3d{blocks_z, 1u, 1u};  // 1D block in z {z,y,x} coordinates
+          Vec3D const threads_3d{channelsPerBlock, mahiPulseOffsets.metadata().size(), windowSize};
+
+          auto workDivPrep3D = cms::alpakatools::make_workdiv<Acc3D>(blocks_3d, threads_3d);
+
+          //Device buffer for output
+          auto pulseMatrices = cms::alpakatools::make_device_buffer<float[]>(
+              queue, totalChannels * windowSize * mahiPulseOffsets.metadata().size());
+          auto pulseMatricesM = cms::alpakatools::make_device_buffer<float[]>(
+              queue, totalChannels * windowSize * mahiPulseOffsets.metadata().size());
+          auto pulseMatricesP = cms::alpakatools::make_device_buffer<float[]>(
+              queue, totalChannels * windowSize * mahiPulseOffsets.metadata().size());
+
+          alpaka::exec<Acc3D>(queue,
+                              workDivPrep3D,
+                              mahi::Kernel_prep_pulseMatrices_sameNumberOfSamples{},
+                              pulseMatrices.data(),
+                              pulseMatricesM.data(),
+                              pulseMatricesP.data(),
+                              mahiPulseOffsets,
+                              amplitudes.data(),
+                              f01HEDigis,
+                              f5HBDigis,
+                              f3HBDigis,
+                              soiSamples.data(),
+                              mahi,
+                              recoParamsWithPS,
+                              configParameters.meanTime,
+                              configParameters.timeSigmaSiPM,
+                              configParameters.timeSigmaHPD,
+                              configParameters.applyTimeSlew,
+                              configParameters.tzeroTimeSlew,
+                              configParameters.slopeTimeSlew,
+                              configParameters.tmaxTimeSlew);
+
+          uint32_t threadsPerBlock = configParameters.kernelMinimizeThreads[0];
+          auto blocks_1d = cms::alpakatools::divide_up_by(totalChannels, threadsPerBlock);
+
+          auto workDivPrep1D = cms::alpakatools::make_workdiv<Acc1D>(blocks_1d, threadsPerBlock);
+
+          alpaka::exec<Acc1D>(queue,
+                              workDivPrep1D,
+                              mahi::Kernel_minimize<8, 8>{},
+                              outputGPU,
+                              amplitudes.data(),
+                              pulseMatrices.data(),
+                              pulseMatricesM.data(),
+                              pulseMatricesP.data(),
+                              mahiPulseOffsets,
+                              noiseTerms.data(),
+                              electronicNoiseTerms.data(),
+                              soiSamples.data(),
+                              mahi,
+                              configParameters.useEffectivePedestals,
+                              f01HEDigis,
+                              f5HBDigis,
+                              f3HBDigis);
         }
-      };  // Kernel_minimize
 
-    }  // namespace mahi
-  }    // namespace hcal::reconstruction
-  namespace hcal {
-    namespace reconstruction {
+      }  // namespace reconstruction
+    }    // namespace hcal
+  }      // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-      void runMahiAsync(Queue& queue,
-                        IProductTypef01::ConstView const& f01HEDigis,
-                        IProductTypef5::ConstView const& f5HBDigis,
-                        IProductTypef3::ConstView const& f3HBDigis,
-                        OProductType::View outputGPU,
-                        HcalMahiConditionsPortableDevice::ConstView const& mahi,
-                        HcalSiPMCharacteristicsPortableDevice::ConstView const& sipmCharacteristics,
-                        HcalRecoParamWithPulseShapeDevice::ConstView const& recoParamsWithPS,
-                        HcalMahiPulseOffsetsPortableDevice::ConstView const& mahiPulseOffsets,
-                        ConfigParameters const& configParameters) {
-        auto const totalChannels =
-            f01HEDigis.metadata().size() + f5HBDigis.metadata().size() + f3HBDigis.metadata().size();
-        // FIXME: the number of channels in output might change given that some channesl might be filtered out
+  namespace alpaka::trait {
+    using namespace ALPAKA_ACCELERATOR_NAMESPACE::hcal::reconstruction::mahi;
 
-        // TODO: this can be lifted by implementing a separate kernel
-        // similar to the default one, but properly handling the diff in #sample
-        // or modifying existing one
-        // TODO: assert startingSample = f01nsamples - windowSize to be 0 or 2
-        // assert f01nsamples == f5nsamples
-        // assert f01nsamples == f3nsamples
-        int constexpr windowSize = 8;
+    //! The trait for getting the size of the block shared dynamic memory for Kernel_prep_1d_and_initialize.
+    template <typename TAcc>
+    struct BlockSharedMemDynSizeBytes<Kernel_prep1d_sameNumberOfSamples, TAcc> {
+      //! \return The size of the shared memory allocated for a block.
+      template <typename TVec, typename... TArgs>
+      ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(Kernel_prep1d_sameNumberOfSamples const&,
+                                                                   TVec const& threadsPerBlock,
+                                                                   TVec const& elemsPerThread,
+                                                                   TArgs const&...) -> std::size_t {
+        // return the amount of dynamic shared memory needed
 
-        //compute work division
-        uint32_t nchannels_per_block = configParameters.kprep1dChannelsPerBlock;
-        auto const blocks_y = cms::alpakatools::divide_up_by(totalChannels, nchannels_per_block);
-
-        Vec2D const blocks_2d{blocks_y, 1u};  // {y, x} coordiantes
-        Vec2D const threads_2d{nchannels_per_block, windowSize};
-        auto workDivPrep2D = cms::alpakatools::make_workdiv<Acc2D>(blocks_2d, threads_2d);
-
-        //Device buffer for output
-        auto amplitudes = cms::alpakatools::make_device_buffer<float[]>(queue, totalChannels * windowSize);
-        auto noiseTerms = cms::alpakatools::make_device_buffer<float[]>(queue, totalChannels * windowSize);
-        auto electronicNoiseTerms = cms::alpakatools::make_device_buffer<float[]>(queue, totalChannels * windowSize);
-        auto soiSamples = cms::alpakatools::make_device_buffer<int8_t[]>(queue, totalChannels * windowSize);
-
-        alpaka::exec<Acc2D>(queue,
-                            workDivPrep2D,
-                            mahi::Kernel_prep1d_sameNumberOfSamples{},
-                            outputGPU,
-                            f01HEDigis,
-                            f5HBDigis,
-                            f3HBDigis,
-                            mahi,
-                            sipmCharacteristics,
-                            recoParamsWithPS,
-                            configParameters.useEffectivePedestals,
-                            configParameters.sipmQTSShift,
-                            configParameters.sipmQNTStoSum,
-                            configParameters.firstSampleShift,
-                            configParameters.ts4Thresh,
-                            amplitudes.data(),
-                            noiseTerms.data(),
-                            electronicNoiseTerms.data(),
-                            soiSamples.data(),
-                            windowSize);
-
-        //// 1024 is the max threads per block for gtx1080
-        //// FIXME: Take this from Alpaka in a way that does not need to query deviceProperty for every event
-        uint32_t const channelsPerBlock = 1024 / (windowSize * mahiPulseOffsets.metadata().size());
-
-        //launch 1D blocks of 3D threads
-        auto const blocks_z = cms::alpakatools::divide_up_by(totalChannels, channelsPerBlock);
-        Vec3D const blocks_3d{blocks_z, 1u, 1u};  // 1D block in z {z,y,x} coordinates
-        Vec3D const threads_3d{channelsPerBlock, mahiPulseOffsets.metadata().size(), windowSize};
-
-        auto workDivPrep3D = cms::alpakatools::make_workdiv<Acc3D>(blocks_3d, threads_3d);
-
-        //Device buffer for output
-        auto pulseMatrices = cms::alpakatools::make_device_buffer<float[]>(
-            queue, totalChannels * windowSize * mahiPulseOffsets.metadata().size());
-        auto pulseMatricesM = cms::alpakatools::make_device_buffer<float[]>(
-            queue, totalChannels * windowSize * mahiPulseOffsets.metadata().size());
-        auto pulseMatricesP = cms::alpakatools::make_device_buffer<float[]>(
-            queue, totalChannels * windowSize * mahiPulseOffsets.metadata().size());
-
-        alpaka::exec<Acc3D>(queue,
-                            workDivPrep3D,
-                            mahi::Kernel_prep_pulseMatrices_sameNumberOfSamples{},
-                            pulseMatrices.data(),
-                            pulseMatricesM.data(),
-                            pulseMatricesP.data(),
-                            mahiPulseOffsets,
-                            amplitudes.data(),
-                            f01HEDigis,
-                            f5HBDigis,
-                            f3HBDigis,
-                            soiSamples.data(),
-                            mahi,
-                            recoParamsWithPS,
-                            configParameters.meanTime,
-                            configParameters.timeSigmaSiPM,
-                            configParameters.timeSigmaHPD,
-                            configParameters.applyTimeSlew,
-                            configParameters.tzeroTimeSlew,
-                            configParameters.slopeTimeSlew,
-                            configParameters.tmaxTimeSlew);
-
-        uint32_t threadsPerBlock = configParameters.kernelMinimizeThreads[0];
-        auto blocks_1d = cms::alpakatools::divide_up_by(totalChannels, threadsPerBlock);
-
-        auto workDivPrep1D = cms::alpakatools::make_workdiv<Acc1D>(blocks_1d, threadsPerBlock);
-
-        alpaka::exec<Acc1D>(queue,
-                            workDivPrep1D,
-                            mahi::Kernel_minimize<8, 8>{},
-                            outputGPU,
-                            amplitudes.data(),
-                            pulseMatrices.data(),
-                            pulseMatricesM.data(),
-                            pulseMatricesP.data(),
-                            mahiPulseOffsets,
-                            noiseTerms.data(),
-                            electronicNoiseTerms.data(),
-                            soiSamples.data(),
-                            mahi,
-                            configParameters.useEffectivePedestals,
-                            f01HEDigis,
-                            f5HBDigis,
-                            f3HBDigis);
+        // threadsPerBlock[1] = threads2d.x = windowSize = 8
+        // threadsPerBlock[0] = threads2d.y = nchannels_per_block = 32
+        // elemsPerThread = 1
+        std::size_t bytes = threadsPerBlock[0u] * elemsPerThread[0u] *
+                            ((2 * threadsPerBlock[1u] * elemsPerThread[1u] + 2) * sizeof(float) + sizeof(uint64_t));
+        return bytes;
       }
+    };
 
-    }  // namespace reconstruction
-  }    // namespace hcal
-}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
+    //! The trait for getting the size of the block shared dynamic memory for kernel_minimize.
+    template <int NSAMPLES, int NPULSES, typename TAcc>
+    struct BlockSharedMemDynSizeBytes<Kernel_minimize<NSAMPLES, NPULSES>, TAcc> {
+      //! \return The size of the shared memory allocated for a block.
+      template <typename TVec, typename... TArgs>
+      ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(Kernel_minimize<NSAMPLES, NPULSES> const&,
+                                                                   TVec const& threadsPerBlock,
+                                                                   TVec const& elemsPerThread,
+                                                                   TArgs const&...) -> std::size_t {
+        // return the amount of dynamic shared memory needed
 
-namespace alpaka::trait {
-  using namespace ALPAKA_ACCELERATOR_NAMESPACE::hcal::reconstruction::mahi;
+        std::size_t bytes =
+            2 * threadsPerBlock[0u] * elemsPerThread[0u] * (calo::multifit::MapSymM<float, 8>::total * sizeof(float));
+        return bytes;
+      }
+    };
 
-  //! The trait for getting the size of the block shared dynamic memory for Kernel_prep_1d_and_initialize.
-  template <typename TAcc>
-  struct BlockSharedMemDynSizeBytes<Kernel_prep1d_sameNumberOfSamples, TAcc> {
-    //! \return The size of the shared memory allocated for a block.
-    template <typename TVec, typename... TArgs>
-    ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(Kernel_prep1d_sameNumberOfSamples const&,
-                                                                 TVec const& threadsPerBlock,
-                                                                 TVec const& elemsPerThread,
-                                                                 TArgs const&...) -> std::size_t {
-      // return the amount of dynamic shared memory needed
-
-      // threadsPerBlock[1] = threads2d.x = windowSize = 8
-      // threadsPerBlock[0] = threads2d.y = nchannels_per_block = 32
-      // elemsPerThread = 1
-      std::size_t bytes = threadsPerBlock[0u] * elemsPerThread[0u] *
-                          ((2 * threadsPerBlock[1u] * elemsPerThread[1u] + 2) * sizeof(float) + sizeof(uint64_t));
-      return bytes;
-    }
-  };
-
-  //! The trait for getting the size of the block shared dynamic memory for kernel_minimize.
-  template <int NSAMPLES, int NPULSES, typename TAcc>
-  struct BlockSharedMemDynSizeBytes<Kernel_minimize<NSAMPLES, NPULSES>, TAcc> {
-    //! \return The size of the shared memory allocated for a block.
-    template <typename TVec, typename... TArgs>
-    ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(Kernel_minimize<NSAMPLES, NPULSES> const&,
-                                                                 TVec const& threadsPerBlock,
-                                                                 TVec const& elemsPerThread,
-                                                                 TArgs const&...) -> std::size_t {
-      // return the amount of dynamic shared memory needed
-
-      std::size_t bytes =
-          2 * threadsPerBlock[0u] * elemsPerThread[0u] * (calo::multifit::MapSymM<float, 8>::total * sizeof(float));
-      return bytes;
-    }
-  };
-
-}  // namespace alpaka::trait
+  }  // namespace alpaka::trait
