@@ -6,6 +6,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 
-using HcalSiPMCharacteristicsPortableHost = PortableHostCollection<HcalSiPMCharacteristicsSoA>;
-
+namespace hcal {
+  using HcalSiPMCharacteristicsPortableHost = PortableHostCollection<HcalSiPMCharacteristicsSoA>;
+}
 #endif

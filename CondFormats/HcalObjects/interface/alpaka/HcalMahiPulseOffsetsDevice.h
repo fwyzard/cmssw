@@ -9,8 +9,11 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-  using ::HcalMahiPulseOffsetsPortableHost;
-  using HcalMahiPulseOffsetsPortableDevice = PortableCollection<HcalMahiPulseOffsetsSoA>;
+  namespace hcal {
+    using ::hcal::HcalMahiPulseOffsetsPortableHost;
+    using HcalMahiPulseOffsetsPortableDevice = PortableCollection<::hcal::HcalMahiPulseOffsetsSoA>;
+
+  }  // namespace hcal
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 

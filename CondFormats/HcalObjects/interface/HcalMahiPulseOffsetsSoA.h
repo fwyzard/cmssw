@@ -5,7 +5,9 @@
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/SoATemplate/interface/SoAView.h"
 
-GENERATE_SOA_LAYOUT(HcalMahiPulseOffsetsSoALayout, SOA_COLUMN(int, offsets))
-using HcalMahiPulseOffsetsSoA = HcalMahiPulseOffsetsSoALayout<>;
+namespace hcal {
+  GENERATE_SOA_LAYOUT(HcalMahiPulseOffsetsSoALayout, SOA_COLUMN(int, offsets))
+  using HcalMahiPulseOffsetsSoA = HcalMahiPulseOffsetsSoALayout<>;
 
+}  // namespace hcal
 #endif

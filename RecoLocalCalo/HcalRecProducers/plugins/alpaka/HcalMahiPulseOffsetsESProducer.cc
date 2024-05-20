@@ -16,7 +16,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     HcalMahiPulseOffsetsESProducer(edm::ParameterSet const& iConfig) : ESProducer(iConfig) {
       std::vector<int> offsets = iConfig.getParameter<std::vector<int>>("pulseOffsets");
 
-      product = std::make_unique<HcalMahiPulseOffsetsPortableHost>(offsets.size(), cms::alpakatools::host());
+      product = std::make_unique<hcal::HcalMahiPulseOffsetsPortableHost>(offsets.size(), cms::alpakatools::host());
 
       auto view = product->view();
 
@@ -32,12 +32,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       descriptions.addWithDefaultLabel(desc);
     }
 
-    std::shared_ptr<HcalMahiPulseOffsetsPortableHost> produce(JobConfigurationGPURecord const& iRecord) {
+    std::shared_ptr<hcal::HcalMahiPulseOffsetsPortableHost> produce(JobConfigurationGPURecord const& iRecord) {
       return product;
     }
 
   private:
-    std::shared_ptr<HcalMahiPulseOffsetsPortableHost> product;
+    std::shared_ptr<hcal::HcalMahiPulseOffsetsPortableHost> product;
   };
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 

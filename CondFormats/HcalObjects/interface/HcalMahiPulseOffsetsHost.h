@@ -4,6 +4,7 @@
 #include "CondFormats/HcalObjects/interface/HcalMahiPulseOffsetsSoA.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
 
-using HcalMahiPulseOffsetsPortableHost = PortableHostCollection<HcalMahiPulseOffsetsSoA>;
-
+namespace hcal {
+  using HcalMahiPulseOffsetsPortableHost = PortableHostCollection<HcalMahiPulseOffsetsSoA>;
+}
 #endif

@@ -29,7 +29,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       descriptions.addWithDefaultLabel(desc);
     }
 
-    std::unique_ptr<HcalRecoParamWithPulseShapeHost> produce(HcalRecoParamsRcd const& iRecord) {
+    std::unique_ptr<hcal::HcalRecoParamWithPulseShapeHost> produce(HcalRecoParamsRcd const& iRecord) {
       auto const& recoParams = iRecord.get(recoParamsToken_);
 
       auto const containers = recoParams.getAllContainers();
@@ -60,8 +60,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
 
       // Fill products
-      auto product =
-          std::make_unique<HcalRecoParamWithPulseShapeHost>(totalChannels, idCache.size(), cms::alpakatools::host());
+      auto product = std::make_unique<hcal::HcalRecoParamWithPulseShapeHost>(
+          totalChannels, idCache.size(), cms::alpakatools::host());
       auto recoView = product->recoParamView();
       auto pulseShapeView = product->pulseShapeView();
       for (uint64_t i = 0; i < barrelValues.size(); ++i) {

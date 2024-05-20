@@ -24,12 +24,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       descriptions.addWithDefaultLabel(desc);
     }
 
-    std::unique_ptr<HcalSiPMCharacteristicsPortableHost> produce(HcalSiPMCharacteristicsRcd const& iRecord) {
+    std::unique_ptr<hcal::HcalSiPMCharacteristicsPortableHost> produce(HcalSiPMCharacteristicsRcd const& iRecord) {
       auto const& sipmCharacteristics = iRecord.get(sipmCharacteristicsToken_);
 
       size_t const totalItems = sipmCharacteristics.getTypes();
 
-      auto product = std::make_unique<HcalSiPMCharacteristicsPortableHost>(totalItems, cms::alpakatools::host());
+      auto product = std::make_unique<hcal::HcalSiPMCharacteristicsPortableHost>(totalItems, cms::alpakatools::host());
 
       auto view = product->view();
 

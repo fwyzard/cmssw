@@ -5,7 +5,9 @@
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-  using HcalRecoParamWithPulseShapeDevice = HcalRecoParamWithPulseShapeT<Device>;
-}
+  namespace hcal {
+    using HcalRecoParamWithPulseShapeDevice = ::hcal::HcalRecoParamWithPulseShapeT<Device>;
+  }
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #endif

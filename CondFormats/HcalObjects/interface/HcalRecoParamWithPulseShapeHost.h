@@ -5,18 +5,19 @@
 #include "DataFormats/Portable/interface/PortableCollection.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
 
-using HcalRecoParamWithPulseShapeHost = HcalRecoParamWithPulseShapeT<alpaka::DevCpu>;
-
+namespace hcal {
+  using HcalRecoParamWithPulseShapeHost = HcalRecoParamWithPulseShapeT<alpaka::DevCpu>;
+}
 namespace cms::alpakatools {
   template <>
-  struct CopyToDevice<HcalRecoParamWithPulseShapeHost> {
+  struct CopyToDevice<::hcal::HcalRecoParamWithPulseShapeHost> {
     template <typename TQueue>
-    static auto copyAsync(TQueue& queue, HcalRecoParamWithPulseShapeHost const& hostProduct) {
-      using RecoParamCopy = CopyToDevice<HcalRecoParamWithPulseShapeHost::RecoParamCollection>;
-      using PulseShapeCopy = CopyToDevice<HcalRecoParamWithPulseShapeHost::PulseShapeCollection>;
+    static auto copyAsync(TQueue& queue, ::hcal::HcalRecoParamWithPulseShapeHost const& hostProduct) {
+      using RecoParamCopy = CopyToDevice<::hcal::HcalRecoParamWithPulseShapeHost::RecoParamCollection>;
+      using PulseShapeCopy = CopyToDevice<::hcal::HcalRecoParamWithPulseShapeHost::PulseShapeCollection>;
       using Device = alpaka::Dev<TQueue>;
-      return HcalRecoParamWithPulseShapeT<Device>(RecoParamCopy::copyAsync(queue, hostProduct.recoParam()),
-                                                  PulseShapeCopy::copyAsync(queue, hostProduct.pulseShape()));
+      return ::hcal::HcalRecoParamWithPulseShapeT<Device>(RecoParamCopy::copyAsync(queue, hostProduct.recoParam()),
+                                                          PulseShapeCopy::copyAsync(queue, hostProduct.pulseShape()));
     }
   };
 }  // namespace cms::alpakatools

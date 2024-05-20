@@ -28,7 +28,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class HBHERecHitProducerPortable : public stream::EDProducer<> {
   public:
     explicit HBHERecHitProducerPortable(edm::ParameterSet const&);
-    ~HBHERecHitProducerPortable() override;
+    ~HBHERecHitProducerPortable() override = default;
     static void fillDescriptions(edm::ConfigurationDescriptions&);
 
   private:
@@ -47,10 +47,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const device::EDPutToken<OProductType> rechitsM0Token_;
 
     const device::ESGetToken<hcal::HcalMahiConditionsPortableDevice, HcalMahiConditionsRcd> mahiConditionsToken_;
-    const device::ESGetToken<HcalSiPMCharacteristicsPortableDevice, HcalSiPMCharacteristicsRcd>
+    const device::ESGetToken<hcal::HcalSiPMCharacteristicsPortableDevice, HcalSiPMCharacteristicsRcd>
         sipmCharacteristicsToken_;
-    const device::ESGetToken<HcalRecoParamWithPulseShapeDevice, HcalRecoParamsRcd> recoParamsToken_;
-    const device::ESGetToken<HcalMahiPulseOffsetsPortableDevice, JobConfigurationGPURecord> mahiPulseOffsetsToken_;
+    const device::ESGetToken<hcal::HcalRecoParamWithPulseShapeDevice, HcalRecoParamsRcd> recoParamsToken_;
+    const device::ESGetToken<hcal::HcalMahiPulseOffsetsPortableDevice, JobConfigurationGPURecord> mahiPulseOffsetsToken_;
     //
 
     hcal::reconstruction::ConfigParameters configParameters_;
@@ -60,7 +60,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       : digisTokenF01HE_{consumes(ps.getParameter<edm::InputTag>("digisLabelF01HE"))},
         digisTokenF5HB_{consumes(ps.getParameter<edm::InputTag>("digisLabelF5HB"))},
         digisTokenF3HB_{consumes(ps.getParameter<edm::InputTag>("digisLabelF3HB"))},
-        rechitsM0Token_{produces(ps.getParameter<std::string>("recHitsLabelM0HBHE"))},
+        rechitsM0Token_{produces()},
         mahiConditionsToken_{esConsumes()},
         sipmCharacteristicsToken_{esConsumes()},
         recoParamsToken_{esConsumes()},
@@ -92,8 +92,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     configParameters_.kernelMinimizeThreads[1] = threadsMinimize[1];
     configParameters_.kernelMinimizeThreads[2] = threadsMinimize[2];
   }
-
-  HBHERecHitProducerPortable::~HBHERecHitProducerPortable() {}
 
   void HBHERecHitProducerPortable::fillDescriptions(edm::ConfigurationDescriptions& cdesc) {
     edm::ParameterSetDescription desc;

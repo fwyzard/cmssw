@@ -16,8 +16,8 @@ hcalMahiPulseOffSetAlpakaESRcdSource = cms.ESSource('EmptyESSource',
 )
 
 # convert the HBHE digis into SoA format
-from EventFilter.HcalRawToDigi.hcalDigisProducerPortable_cfi import hcalDigisProducerPortable as _hcalDigisProducerPortable
-hcalDigisPortable = _hcalDigisProducerPortable.clone(
+from EventFilter.HcalRawToDigi.hcalDigisSoAProducer_cfi import hcalDigisSoAProducer as _hcalDigisSoAProducer
+hcalDigisPortable = _hcalDigisSoAProducer.clone(
     digisLabelF01HE = "f01HEDigis",
     digisLabelF5HB  = "f5HBDigis",
     digisLabelF3HB  = "f3HBDigis"

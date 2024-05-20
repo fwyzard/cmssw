@@ -9,8 +9,10 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-  using ::HcalSiPMCharacteristicsPortableHost;
-  using HcalSiPMCharacteristicsPortableDevice = PortableCollection<HcalSiPMCharacteristicsSoA>;
+  namespace hcal {
+    using ::hcal::HcalSiPMCharacteristicsPortableHost;
+    using HcalSiPMCharacteristicsPortableDevice = PortableCollection<::hcal::HcalSiPMCharacteristicsSoA>;
+  }  // namespace hcal
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 

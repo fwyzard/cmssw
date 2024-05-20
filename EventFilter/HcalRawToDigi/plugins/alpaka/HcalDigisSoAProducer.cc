@@ -17,10 +17,10 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-  class HcalDigisProducerPortable : public stream::EDProducer<> {
+  class HcalDigisSoAProducer : public stream::EDProducer<> {
   public:
-    explicit HcalDigisProducerPortable(edm::ParameterSet const& ps);
-    ~HcalDigisProducerPortable() override = default;
+    explicit HcalDigisSoAProducer(edm::ParameterSet const& ps);
+    ~HcalDigisSoAProducer() override = default;
     static void fillDescriptions(edm::ConfigurationDescriptions&);
 
   private:
@@ -49,14 +49,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ConfigParameters config_;
   };
 
-  void HcalDigisProducerPortable::fillDescriptions(edm::ConfigurationDescriptions& confDesc) {
+  void HcalDigisSoAProducer::fillDescriptions(edm::ConfigurationDescriptions& confDesc) {
     edm::ParameterSetDescription desc;
 
     desc.add<edm::InputTag>("hbheDigisLabel", edm::InputTag("hcalDigis"));
     desc.add<edm::InputTag>("qie11DigiLabel", edm::InputTag("hcalDigis"));
-    desc.add<std::string>("digisLabelF01HE", std::string{"f01HEDigisGPU"});
-    desc.add<std::string>("digisLabelF5HB", std::string{"f5HBDigisGPU"});
-    desc.add<std::string>("digisLabelF3HB", std::string{"f3HBDigisGPU"});
+    desc.add<std::string>("digisLabelF01HE", std::string{"f01HEDigis"});
+    desc.add<std::string>("digisLabelF5HB", std::string{"f5HBDigis"});
+    desc.add<std::string>("digisLabelF3HB", std::string{"f3HBDigis"});
     desc.add<uint32_t>("maxChannelsF01HE", 10000u);
     desc.add<uint32_t>("maxChannelsF5HB", 10000u);
     desc.add<uint32_t>("maxChannelsF3HB", 10000u);
@@ -64,7 +64,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     confDesc.addWithDefaultLabel(desc);
   }
 
-  HcalDigisProducerPortable::HcalDigisProducerPortable(const edm::ParameterSet& ps)
+  HcalDigisSoAProducer::HcalDigisSoAProducer(const edm::ParameterSet& ps)
       : hbheDigiToken_{consumes(ps.getParameter<edm::InputTag>("hbheDigisLabel"))},
         qie11DigiToken_{consumes(ps.getParameter<edm::InputTag>("qie11DigiLabel"))},
         digisF01HEToken_{produces(ps.getParameter<std::string>("digisLabelF01HE"))},
@@ -75,7 +75,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     config_.maxChannelsF3HB = ps.getParameter<uint32_t>("maxChannelsF3HB");
   }
 
-  void HcalDigisProducerPortable::produce(device::Event& event, device::EventSetup const& setup) {
+  void HcalDigisSoAProducer::produce(device::Event& event, device::EventSetup const& setup) {
     const auto& hbheDigis = event.get(hbheDigiToken_);
     const auto& qie11Digis = event.get(qie11DigiToken_);
 
@@ -195,4 +195,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
-DEFINE_FWK_ALPAKA_MODULE(HcalDigisProducerPortable);
+DEFINE_FWK_ALPAKA_MODULE(HcalDigisSoAProducer);

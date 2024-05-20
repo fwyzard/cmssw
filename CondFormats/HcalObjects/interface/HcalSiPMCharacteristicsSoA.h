@@ -7,7 +7,9 @@
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/SoATemplate/interface/SoAView.h"
 
-GENERATE_SOA_LAYOUT(HcalSiPMCharacteristicsSoALayout, SOA_COLUMN(HcalSiPMCharacteristics::PrecisionItem, precisionItem))
-using HcalSiPMCharacteristicsSoA = HcalSiPMCharacteristicsSoALayout<>;
-
+namespace hcal {
+  GENERATE_SOA_LAYOUT(HcalSiPMCharacteristicsSoALayout,
+                      SOA_COLUMN(HcalSiPMCharacteristics::PrecisionItem, precisionItem))
+  using HcalSiPMCharacteristicsSoA = HcalSiPMCharacteristicsSoALayout<>;
+}  // namespace hcal
 #endif
