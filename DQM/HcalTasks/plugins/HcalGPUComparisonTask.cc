@@ -106,6 +106,7 @@ HcalGPUComparisonTask::HcalGPUComparisonTask(edm::ParameterSet const& ps)
   _currentLS = lumiCache->currentLS;
 
   std::map<HcalDetId, double> mRecHitEnergy;
+  std::map<HcalDetId, HBHERecHit> mRecHit;
 
   for (HBHERecHitCollection::const_iterator it = chbhe_ref->begin(); it != chbhe_ref->end(); ++it) {
     double energy = it->energy();
@@ -113,8 +114,10 @@ HcalGPUComparisonTask::HcalGPUComparisonTask(edm::ParameterSet const& ps)
     //	Explicit check on the DetIds present in the Collection
     HcalDetId did = it->id();
 
-    if (mRecHitEnergy.find(did) == mRecHitEnergy.end())
+    if (mRecHitEnergy.find(did) == mRecHitEnergy.end()){
       mRecHitEnergy.insert(std::make_pair(did, energy));
+      mRecHit.insert(std::make_pair(did, *it));
+    }
     else
       edm::LogError("HcalGPUComparisonTask") << "Duplicate Rechit from the same HcalDetId";
     ;
@@ -128,6 +131,16 @@ HcalGPUComparisonTask::HcalGPUComparisonTask(edm::ParameterSet const& ps)
       energyGPUvsCPU_subdet_.fill(did, mRecHitEnergy[did], energy);
 
       if (mRecHitEnergy[did] != 0.) {
+       if (abs(energy - mRecHitEnergy[did] )>=0.1){
+              std::cout << "DIFF!!! Did = "<< did <<std::endl;
+              std::cout << "CPU Rechit "<<(mRecHit[did])  << std::endl;
+              std::cout << "GPU Rechit "<<(*it) << std::endl;
+          }
+        else{
+              std::cout << "SAME!!! Did = "<< did <<std::endl;
+              std::cout << "CPU Rechit "<<(mRecHit[did])  << std::endl;
+              std::cout << "GPU Rechit "<<(*it) << std::endl;
+        }
         energyDiffGPUCPU_subdet_.fill(did, (energy - mRecHitEnergy[did]) / mRecHitEnergy[did]);
         if (energy > 0.1)
           energyDiffGPUCPU_depth_.fill(did, (energy - mRecHitEnergy[did]) / mRecHitEnergy[did]);

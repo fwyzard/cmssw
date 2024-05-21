@@ -20,6 +20,8 @@ rawTask.ptype = 1
 recHitPreRecoTask.ptype = 1
 hcalGPUComparisonTask.ptype = 1
 
+hcalAlpakaComparisonTask = hcalGPUComparisonTask.clone()
+
 #   set the label for Emulator TP Task
 tpTask.tagEmul = "valHcalTriggerPrimitiveDigis"
 
@@ -40,6 +42,13 @@ hcalOnlyOfflineSourceSequenceGPU = cms.Sequence(
     rawTask +
     hcalGPUComparisonTask
 )
+hcalOnlyOfflineSourceSequenceAlpaka = cms.Sequence(
+    digiTask +
+    recHitTask +
+    rawTask +
+    hcalAlpakaComparisonTask
+)
+
 
 from Configuration.ProcessModifiers.gpuValidationHcal_cff import gpuValidationHcal
 gpuValidationHcal.toReplaceWith(hcalOnlyOfflineSourceSequence, hcalOnlyOfflineSourceSequenceGPU)
@@ -67,6 +76,11 @@ run3_HB.toModify(recHitTask,
     tagHBHE_ref = "hbherecoSerial",
     tagHBHE_target = "hbhereco"
 )
+run3_HB.toModify(hcalAlpakaComparisonTask,
+    tagHBHE_ref = "hbherecoSerial",
+    tagHBHE_target = "hbhereco"
+)
+
 _phase1_hcalOnlyOfflineSourceSequence = hcalOnlyOfflineSourceSequence.copy()
 _phase1_hcalOnlyOfflineSourceSequence.replace(recHitPreRecoTask, recHitTask)
 run3_HB.toReplaceWith(hcalOnlyOfflineSourceSequence, _phase1_hcalOnlyOfflineSourceSequence)
