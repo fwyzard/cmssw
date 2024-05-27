@@ -113,7 +113,7 @@ HcalGPUComparisonTask::HcalGPUComparisonTask(edm::ParameterSet const& ps)
     //	Explicit check on the DetIds present in the Collection
     HcalDetId did = it->id();
 
-    if (mRecHitEnergy.find(did) == mRecHitEnergy.end()) 
+    if (mRecHitEnergy.find(did) == mRecHitEnergy.end())
       mRecHitEnergy.insert(std::make_pair(did, energy));
     else
       edm::LogError("HcalGPUComparisonTask") << "Duplicate Rechit from the same HcalDetId";
