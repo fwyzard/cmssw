@@ -32,6 +32,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
       }
 
+      ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE unsigned long long int float_as_uint(float val) {
+#if defined(__CUDA_ARCH__) or defined(__HIP_DEVICE_COMPILE__)
+        return __float_as_uint(val);
+#else
+        return edm::bit_cast<unsigned int>(static_cast<float>(val));
+#endif
+      }
+
       ALPAKA_FN_ACC ALPAKA_FN_INLINE float compute_time_slew_delay(float const fC,
                                                                    float const tzero,
                                                                    float const slope,
@@ -303,16 +311,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               auto const gch = channel.global;
               auto const lch = channel.local;
 
-              // clear shared memory
-              if (cms::alpakatools::once_per_block(acc)) {
-                std::size_t bytes =
-                    nchannels_per_block * ((2 * nsamplesForCompute + 2) * sizeof(float) + sizeof(uint64_t));
-                char* mem = alpaka::getDynSharedMem<char>(acc);
-                for (unsigned int i = 0; i < bytes; ++i) {
-                  mem[i] = 0x00;
-                }
-              }
-
               for (auto i_sample : independent_group_elements_x(acc, nsamplesForCompute)) {
                 auto const sampleWithinWindow = i_sample;
                 auto const sample = i_sample + startingSample;
@@ -322,7 +320,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   soiSamples[gch] = -1;
                   shrMethod0EnergyAccum[lch] = 0;
                   //TODO: check this conversion
-                  shrMethod0EnergySamplePair[lch] = int(std::numeric_limits<float>::min());
+                  shrMethod0EnergySamplePair[lch] = float_as_uint(std::numeric_limits<float>::min());
                   shrEnergyM0TotalAccum[lch] = 0;
                 }
 
@@ -387,12 +385,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             }
             alpaka::syncBlockThreads(acc);
 
-            //Loop over each channel, compute input for multifit
+            //Loop over each channel, compute input for multifit using shrChargeMinusPedestal
             for (auto channel : uniform_group_elements_y(acc, group, nchannels)) {
               auto const gch = channel.global;
               auto const lch = channel.local;
-
-              //Loop over sample
               for (auto i_sample : independent_group_elements_x(acc, nsamplesForCompute)) {
                 auto const sampleWithinWindow = i_sample;
                 auto const sample = i_sample + startingSample;
@@ -644,14 +640,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             }    // end channel loop
             alpaka::syncBlockThreads(acc);
 
-            // compute energy
+            // compute energy using shrMethod0EnergySamplePair
             for (auto channel : uniform_group_elements_y(acc, group, nchannels)) {
               auto const gch = channel.global;
               auto const lch = channel.local;
-              //Loop over sample
               for (auto i_sample : independent_group_elements_x(acc, nsamplesForCompute)) {
                 auto const sampleWithinWindow = i_sample;
-                auto const sample = i_sample + startingSample;
 
                 int32_t const soi =
                     gch < f01HEDigis.size()
