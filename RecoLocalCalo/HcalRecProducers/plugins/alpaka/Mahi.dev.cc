@@ -288,19 +288,45 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           //2nd index = groups of sample
           auto const nsamplesForCompute(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[1u]);
 
+          // configure shared mem
+          float* shrEnergyM0PerTS = alpaka::getDynSharedMem<float>(acc);
+          float* shrChargeMinusPedestal = shrEnergyM0PerTS + nsamplesForCompute * nchannels_per_block;
+          float* shrMethod0EnergyAccum = shrChargeMinusPedestal + nsamplesForCompute * nchannels_per_block;
+          float* shrEnergyM0TotalAccum = shrMethod0EnergyAccum + nchannels_per_block;
+          unsigned long long int* shrMethod0EnergySamplePair =
+              reinterpret_cast<unsigned long long int*>(shrEnergyM0TotalAccum + nchannels_per_block);
+
           //Loop over all groups of channels
           for (auto group : uniform_groups_y(acc, nchannels)) {
-            //Loop over each channel, first compute soiSamples for all channels
+            //Loop over each channel, first compute soiSamples and shrMem for all channels
             for (auto channel : uniform_group_elements_y(acc, group, nchannels)) {
               auto const gch = channel.global;
+              auto const lch = channel.local;
+
+              // clear shared memory
+              if (cms::alpakatools::once_per_block(acc)) {
+                std::size_t bytes =
+                    nchannels_per_block * ((2 * nsamplesForCompute + 2) * sizeof(float) + sizeof(uint64_t));
+                char* mem = alpaka::getDynSharedMem<char>(acc);
+                for (unsigned int i = 0; i < bytes; ++i) {
+                  mem[i] = 0x00;
+                }
+              }
 
               for (auto i_sample : independent_group_elements_x(acc, nsamplesForCompute)) {
                 auto const sampleWithinWindow = i_sample;
                 auto const sample = i_sample + startingSample;
+                auto const linearThPerBlock = i_sample + channel.local * nsamplesForCompute;
                 // initialize
                 if (sampleWithinWindow == 0) {
                   soiSamples[gch] = -1;
+                  shrMethod0EnergyAccum[lch] = 0;
+                  //TODO: check this conversion
+                  shrMethod0EnergySamplePair[lch] = int(std::numeric_limits<float>::min());
+                  shrEnergyM0TotalAccum[lch] = 0;
                 }
+
+                // compute soiSamples
                 if (gch < f01HEDigis.size()) {
                   // NOTE: assume that soi is high only for a single guy!
                   //   which must be the case. cpu version does not check for that
@@ -313,6 +339,50 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   if (soibit == 1)
                     soiSamples[gch] = sampleWithinWindow;
                 }
+
+                // compute shrMem
+                auto const id = gch < f01HEDigis.size()
+                                    ? f01HEDigis.ids()[gch]
+                                    : (gch < nchannelsf015 ? f5HBDigis.ids()[gch - f01HEDigis.size()]
+                                                           : f3HBDigis.ids()[gch - nchannelsf015]);
+                auto const did = HcalDetId{id};
+
+                auto const adc =
+                    gch < f01HEDigis.size()
+                        ? adc_for_sample<Flavor1>(&(f01HEDigis.data()[gch][0]), sample)
+                        : (gch < nchannelsf015
+                               ? adc_for_sample<Flavor5>(&(f5HBDigis.data()[gch - f01HEDigis.size()][0]), sample)
+                               : adc_for_sample<Flavor3>(&(f3HBDigis.data()[gch - nchannelsf015][0]), sample));
+                auto const capid =
+                    gch < f01HEDigis.size()
+                        ? capid_for_sample<Flavor1>(&(f01HEDigis.data()[gch][0]), sample)
+                        : (gch < nchannelsf015
+                               ? capid_for_sample<Flavor5>(&(f5HBDigis.data()[gch - f01HEDigis.size()][0]), sample)
+                               : capid_for_sample<Flavor3>(&(f3HBDigis.data()[gch - nchannelsf015][0]), sample));
+
+                // compute hash for this did
+                // hash needed to convert condition arrays order (based on Topo) into digi arrays order(based on FED)
+                auto const hashedId =
+                    did.subdetId() == HcalBarrel
+                        ? did2linearIndexHB(id, mahi.maxDepthHB(), mahi.firstHBRing(), mahi.lastHBRing(), mahi.nEtaHB())
+                        : did2linearIndexHE(id,
+                                            mahi.maxDepthHE(),
+                                            mahi.maxPhiHE(),
+                                            mahi.firstHERing(),
+                                            mahi.lastHERing(),
+                                            mahi.nEtaHE()) +
+                              mahi.offsetForHashes();
+
+                // conditions based on the hash
+                auto const qieType = mahi.qieTypes_values()[hashedId] > 0 ? 1 : 0;  // 2 types at this point
+                auto const* qieOffsets = mahi.qieCoders_offsets()[hashedId].data();
+                auto const* qieSlopes = mahi.qieCoders_slopes()[hashedId].data();
+                auto const pedestal = mahi.pedestals_value()[hashedId][capid];
+
+                // compute charge
+                auto const charge = compute_coder_charge(qieType, adc, capid, qieOffsets, qieSlopes);
+
+                shrChargeMinusPedestal[linearThPerBlock] = charge - pedestal;
               }
             }
             alpaka::syncBlockThreads(acc);
@@ -326,7 +396,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               for (auto i_sample : independent_group_elements_x(acc, nsamplesForCompute)) {
                 auto const sampleWithinWindow = i_sample;
                 auto const sample = i_sample + startingSample;
-                auto const linearThPerBlock = i_sample + channel.local * nsamplesForCompute;
 
                 // initialize all output buffers
                 if (sampleWithinWindow == 0) {
@@ -341,20 +410,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 auto* amplitudesForChannel = amplitudes + nsamplesForCompute * gch;
                 auto* noiseTermsForChannel = noiseTerms + nsamplesForCompute * gch;
                 auto* electronicNoiseTermsForChannel = electronicNoiseTerms + nsamplesForCompute * gch;
-
-                // configure shared mem
-                float* shrEnergyM0PerTS = alpaka::getDynSharedMem<float>(acc);
-                float* shrChargeMinusPedestal = shrEnergyM0PerTS + nsamplesForCompute * nchannels_per_block;
-                float* shrMethod0EnergyAccum = shrChargeMinusPedestal + nsamplesForCompute * nchannels_per_block;
-                float* shrEnergyM0TotalAccum = shrMethod0EnergyAccum + nchannels_per_block;
-                unsigned long long int* shrMethod0EnergySamplePair =
-                    reinterpret_cast<unsigned long long int*>(shrEnergyM0TotalAccum + nchannels_per_block);
-                if (sampleWithinWindow == 0) {
-                  shrMethod0EnergyAccum[lch] = 0;
-                  //TODO: check this conversion
-                  shrMethod0EnergySamplePair[lch] = int(std::numeric_limits<float>::min());
-                  shrEnergyM0TotalAccum[lch] = 0;
-                }
 
                 // get event input quantities
                 auto const stride = gch < f01HEDigis.size()
@@ -434,8 +489,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
                 // compute charge
                 auto const charge = compute_coder_charge(qieType, adc, capid, qieOffsets, qieSlopes);
-
-                shrChargeMinusPedestal[linearThPerBlock] = charge - pedestal;
 
                 int32_t const soi =
                     gch < f01HEDigis.size()
@@ -543,7 +596,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                        recoParam1,
                        recoParam2);
 #endif
-
                 //Find the max energy of lch channel and the corresponding TS
                 if (sampleWithinWindow >= static_cast<unsigned>(startSample) &&
                     sampleWithinWindow < static_cast<unsigned>(endSample)) {
@@ -554,8 +606,78 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   atomicMaxPair(
                       acc, &shrMethod0EnergySamplePair[lch], {sampleWithinWindow, energym0_per_ts}, TSenergyCompare);
                 }
-                alpaka::syncBlockThreads(acc);
 
+                // Channel quality check
+                //    https://github.com/cms-sw/cmssw/blob/master/RecoLocalCalo/HcalRecAlgos/plugins/HcalChannelPropertiesEP.cc#L107-L109
+                //    https://github.com/cms-sw/cmssw/blob/6d2f66057131baacc2fcbdd203588c41c885b42c/CondCore/HcalPlugins/plugins/HcalChannelQuality_PayloadInspector.cc#L30
+                //      const bool taggedBadByDb = severity.dropChannel(digistatus->getValue());
+                //  do not run MAHI if taggedBadByDb = true
+                auto const digiStatus_ = mahi.channelQuality_status()[hashedId];
+                const bool taggedBadByDb = (digiStatus_ / 32770);
+
+                if (taggedBadByDb)
+                  outputGPU.chi2()[gch] = -9999.f;
+
+                // check as in cpu version if mahi is not needed
+                // FIXME: KNOWN ISSUE: observed a problem when rawCharge and pedestal
+                // are basically equal and generate -0.00000...
+                // needs to be treated properly
+                if (!(shrEnergyM0TotalAccum[lch] > 0 && energym0_per_ts_gain0 > ts4Thresh)) {
+                  // do not need to run mahi minimization
+                  //outputEnergy[gch] = 0; energy already inited to 0
+                  outputGPU.chi2()[gch] = -9999.f;
+                }
+                //
+                // preparations for mahi fit
+                //
+                auto const amplitude = rawCharge - pedestalToUseForMethod0;
+                auto const noiseADC = (1. / std::sqrt(12)) * dfc;
+                auto const noisePhotoSq = amplitude > pedestalWidth ? (amplitude * fcByPE) : 0.f;
+                auto const noiseTerm = noiseADC * noiseADC + noisePhotoSq + pedestalWidth * pedestalWidth;
+
+                // store to global memory
+                amplitudesForChannel[sampleWithinWindow] = amplitude;
+                noiseTermsForChannel[sampleWithinWindow] = noiseTerm;
+                electronicNoiseTermsForChannel[sampleWithinWindow] = pedestalWidth;
+
+              }  //end sample loop
+            }    // end channel loop
+            alpaka::syncBlockThreads(acc);
+
+            // compute energy
+            for (auto channel : uniform_group_elements_y(acc, group, nchannels)) {
+              auto const gch = channel.global;
+              auto const lch = channel.local;
+              //Loop over sample
+              for (auto i_sample : independent_group_elements_x(acc, nsamplesForCompute)) {
+                auto const sampleWithinWindow = i_sample;
+                auto const sample = i_sample + startingSample;
+
+                int32_t const soi =
+                    gch < f01HEDigis.size()
+                        ? soiSamples[gch]
+                        : (gch < nchannelsf015 ? f5HBDigis.npresamples()[gch - f01HEDigis.size()] : soiSamples[gch]);
+
+                auto const id = gch < f01HEDigis.size()
+                                    ? f01HEDigis.ids()[gch]
+                                    : (gch < nchannelsf015 ? f5HBDigis.ids()[gch - f01HEDigis.size()]
+                                                           : f3HBDigis.ids()[gch - nchannelsf015]);
+                auto const did = HcalDetId{id};
+                auto const hashedId =
+                    did.subdetId() == HcalBarrel
+                        ? did2linearIndexHB(id, mahi.maxDepthHB(), mahi.firstHBRing(), mahi.lastHBRing(), mahi.nEtaHB())
+                        : did2linearIndexHE(id,
+                                            mahi.maxDepthHE(),
+                                            mahi.maxPhiHE(),
+                                            mahi.firstHERing(),
+                                            mahi.lastHERing(),
+                                            mahi.nEtaHE()) +
+                              mahi.offsetForHashes();
+
+                auto const recoParam1 = recoParamsWithPS.recoParamView().param1()[hashedId];
+                auto const recoParam2 = recoParamsWithPS.recoParamView().param2()[hashedId];
+
+                auto const nsamplesToAdd = recoParam1 < 10 ? recoParam2 : (recoParam1 >> 14) & 0xF;
                 // NOTE: must take soi, as values for that thread are used...
                 // NOTE: does not run if soi is bad, because it does not match any sampleWithinWindow
                 if (sampleWithinWindow == static_cast<unsigned>(soi)) {
@@ -589,44 +711,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                          ts4Thresh);
 #endif
 
-                  // Channel quality check
-                  //    https://github.com/cms-sw/cmssw/blob/master/RecoLocalCalo/HcalRecAlgos/plugins/HcalChannelPropertiesEP.cc#L107-L109
-                  //    https://github.com/cms-sw/cmssw/blob/6d2f66057131baacc2fcbdd203588c41c885b42c/CondCore/HcalPlugins/plugins/HcalChannelQuality_PayloadInspector.cc#L30
-                  //      const bool taggedBadByDb = severity.dropChannel(digistatus->getValue());
-                  //  do not run MAHI if taggedBadByDb = true
-
-                  auto const digiStatus_ = mahi.channelQuality_status()[hashedId];
-                  const bool taggedBadByDb = (digiStatus_ / 32770);
-
-                  if (taggedBadByDb)
-                    outputGPU.chi2()[gch] = -9999.f;
-
-                  // check as in cpu version if mahi is not needed
-                  // FIXME: KNOWN ISSUE: observed a problem when rawCharge and pedestal
-                  // are basically equal and generate -0.00000...
-                  // needs to be treated properly
-                  if (!(shrEnergyM0TotalAccum[lch] > 0 && energym0_per_ts_gain0 > ts4Thresh)) {
-                    // do not need to run mahi minimization
-                    //outputEnergy[gch] = 0; energy already inited to 0
-                    outputGPU.chi2()[gch] = -9999.f;
-                  }
-
 #ifdef HCAL_MAHI_GPUDEBUG
-                  printf("method0_energy = %f max_sample = %d max_energy = %f time = %f\n",
+                  printf(" method0_energy = %f max_sample = %d max_energy = %f time = %f\n",
                          method0_energy,
                          max_sample,
                          max_energy,
                          time);
 #endif
                 }
-                //
-                // preparations for mahi fit
-                //
-                auto const amplitude = rawCharge - pedestalToUseForMethod0;
-                auto const noiseADC = (1. / std::sqrt(12)) * dfc;
-                auto const noisePhotoSq = amplitude > pedestalWidth ? (amplitude * fcByPE) : 0.f;
-                auto const noiseTerm = noiseADC * noiseADC + noisePhotoSq + pedestalWidth * pedestalWidth;
-
 #ifdef HCAL_MAHI_GPUDEBUG
                 printf(
                     "charge(%d) = %f pedestal(%d) = %f dfc(%d) = %f pedestalWidth(%d) = %f noiseADC(%d) = %f "
@@ -645,11 +737,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                     noisePhotoSq,
                     outputGPU.chi2()[gch]);
 #endif
-
-                // store to global memory
-                amplitudesForChannel[sampleWithinWindow] = amplitude;
-                noiseTermsForChannel[sampleWithinWindow] = noiseTerm;
-                electronicNoiseTermsForChannel[sampleWithinWindow] = pedestalWidth;
 
               }  // loop for sample
             }    // loop for channels

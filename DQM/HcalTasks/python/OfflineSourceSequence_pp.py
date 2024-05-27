@@ -77,7 +77,7 @@ run3_HB.toModify(recHitTask,
     tagHBHE_target = "hbhereco"
 )
 run3_HB.toModify(hcalAlpakaComparisonTask,
-    tagHBHE_ref = "hbherecoSerial",
+    tagHBHE_ref = "hbherecoLegacy",
     tagHBHE_target = "hbhereco"
 )
 
