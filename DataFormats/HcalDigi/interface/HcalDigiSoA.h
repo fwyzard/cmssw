@@ -90,11 +90,11 @@ namespace hcal {
       return (nwords - Flavor::HEADER_WORDS) / Flavor::WORDS_PER_SAMPLE;
   }
 
-  using QIE11dataArray = edm::StdArray<uint16_t, QIE11DigiCollection::MAXSAMPLES + Flavor1::HEADER_WORDS>;
-  using QIE10dataArray = edm::StdArray<uint16_t, HBHEDataFrame::MAXSAMPLES + Flavor5::HEADER_WORDS>;
+  using QIE11dataArray = edm::StdArray<uint16_t, Flavor1::HEADER_WORDS + QIE11DigiCollection::MAXSAMPLES>;
+  using QIE10dataArray = edm::StdArray<uint16_t, Flavor5::HEADER_WORDS + HBHEDataFrame::MAXSAMPLES>;
 
-  //using QIE11dataVector = Eigen::Matrix<uint16_t,  QIE11DigiCollection::MAXSAMPLES, 1>;
-  //using QIE10dataVector = Eigen::Matrix<uint16_t,  HBHEDataFrame::MAXSAMPLES, 1>;
+  //using QIE11dataVector = Eigen::Matrix<uint16_t,  Flavor1::HEADER_WORDS + QIE11DigiCollection::MAXSAMPLES, 1>;
+  //using QIE10dataVector = Eigen::Matrix<uint16_t,  Flavor5::HEADER_WORDS + HBHEDataFrame::MAXSAMPLES, 1>;
 
   GENERATE_SOA_LAYOUT(HcalPhase1DigiSoALayout,
                       SOA_COLUMN(uint32_t, ids),
@@ -115,4 +115,4 @@ namespace hcal {
 
 }  // namespace hcal
 
-#endif
+#endif  // DataFormats_HcalDigi_HcalDigiSoA_h

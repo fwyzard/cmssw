@@ -79,51 +79,56 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const auto& hbheDigis = event.get(hbheDigiToken_);
     const auto& qie11Digis = event.get(qie11DigiToken_);
 
-    //Get the number of samples in data from the first digi
-    const int stride = HBHEDataFrame::MAXSAMPLES / 2 + 1;
-    const int size = hbheDigis.size() * stride;  // number of channels * stride
+    if (hbheDigis.empty()) {
+      // FIXME this leaves the scalars uninitialised
+      event.emplace(digisF5HBToken_);
+    } else {
+      // get the number of samples in data from the first digi
+      const int stride = HBHEDataFrame::MAXSAMPLES / 2 + 1;
+      const int size = hbheDigis.size() * stride;  // number of channels * stride
 
-    // stack host memory in the queue
-    HostCollectionPhase0 hf5_(size, event.queue());
+      // temporary product in pinned host memory acessible by the queue's device
+      HostCollectionPhase0 hf5_(size, event.queue());
 
-    // device product
-    DeviceCollectionPhase0 df5_(size, event.queue());
+      // product in device global memory
+      DeviceCollectionPhase0 df5_(size, event.queue());
 
-    // set SoA_Scalar;
-    hf5_.view().stride() = stride;
-    hf5_.view().size() = hbheDigis.size();
+      // set SoA scalars
+      hf5_.view().stride() = stride;
+      hf5_.view().size() = hbheDigis.size();
 
-    for (unsigned int i = 0; i < hbheDigis.size(); ++i) {
-      auto const hbhe = hbheDigis[i];
-      auto const id = hbhe.id().rawId();
-      auto const presamples = hbhe.presamples();
-      uint16_t header_word = (1 << 15) | (0x5 << 12) | (0 << 10) | ((hbhe.sample(0).capid() & 0x3) << 8);
+      for (unsigned int i = 0; i < hbheDigis.size(); ++i) {
+        auto const& hbhe = hbheDigis[i];
+        auto const id = hbhe.id().rawId();
+        auto const presamples = hbhe.presamples();
+        uint16_t header_word = (1 << 15) | (0x5 << 12) | (0 << 10) | ((hbhe.sample(0).capid() & 0x3) << 8);
 
-      auto hf5_vi = hf5_.view()[i];
-      hf5_vi.ids() = id;
-      hf5_vi.npresamples() = presamples;
-      hf5_vi.data()[0] = header_word;
-      //TODO:: get HEADER_WORDS/WORDS_PER_SAMPLE from DataFormat
-      for (unsigned int i = 0; i < hf5_.view().stride() - 1; i++) {
-        uint16_t s0 = (0 << 7) | (static_cast<uint8_t>(hbhe.sample(2 * i).adc()) & 0x7f);
-        uint16_t s1 = (0 << 7) | (static_cast<uint8_t>(hbhe.sample(2 * i + 1).adc()) & 0x7f);
-        uint16_t sample = (s1 << 8) | s0;
-        hf5_vi.data()[i + 1] = sample;
+        auto hf5_vi = hf5_.view()[i];
+        hf5_vi.ids() = id;
+        hf5_vi.npresamples() = presamples;
+        hf5_vi.data()[0] = header_word;
+        //TODO:: get HEADER_WORDS/WORDS_PER_SAMPLE from DataFormat
+        for (unsigned int i = 0; i < hf5_.view().stride() - 1; i++) {
+          uint16_t s0 = (0 << 7) | (static_cast<uint8_t>(hbhe.sample(2 * i).adc()) & 0x7f);
+          uint16_t s1 = (0 << 7) | (static_cast<uint8_t>(hbhe.sample(2 * i + 1).adc()) & 0x7f);
+          uint16_t sample = (s1 << 8) | s0;
+          hf5_vi.data()[i + 1] = sample;
+        }
       }
+      // copy the temporary product to the device global memory
+      alpaka::memcpy(event.queue(), df5_.buffer(), hf5_.const_buffer());
+      event.emplace(digisF5HBToken_, std::move(df5_));
     }
-    // copy hf5 to df5
-    alpaka::memcpy(event.queue(), df5_.buffer(), hf5_.const_buffer());
-    event.emplace(digisF5HBToken_, std::move(df5_));
 
     if (qie11Digis.empty()) {
+      // FIXME this leaves the scalars uninitialised
       event.emplace(digisF01HEToken_);
       event.emplace(digisF3HBToken_);
-
     } else {
       auto size_f1 = 0;
       auto size_f3 = 0;
 
-      // count the size of the SOA;
+      // count the size of the SoA
       for (unsigned int i = 0; i < qie11Digis.size(); i++) {
         auto const digi = QIE11DataFrame{qie11Digis[i]};
 
@@ -137,18 +142,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           }
         }
       }
+
       auto const nsamples = qie11Digis.samples();
       auto const stride01 = nsamples * QIE11DataFrame::WORDS_PER_SAMPLE + QIE11DataFrame::HEADER_WORDS;
 
-      // stack host memory in the queue
+      // temporary product in pinned host memory acessible by the queue's device
       HostCollectionPhase1 hf1_(size_f1, event.queue());
       HostCollectionPhase1 hf3_(size_f3, event.queue());
 
-      // device product
+      // product in device global memory
       DeviceCollectionPhase1 df1_(size_f1, event.queue());
       DeviceCollectionPhase1 df3_(size_f3, event.queue());
 
-      // set SoA_Scalar;
+      // set scalars
       hf1_.view().stride() = stride01;
       hf3_.view().stride() = stride01;
 
@@ -166,7 +172,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           hf01_vi.ids() = digi.detid().rawId();
           for (int hw = 0; hw < QIE11DataFrame::HEADER_WORDS + digi.samples(); hw++) {
-            hf01_vi.data()[hw] = (qie11Digis[i][hw]);
+            hf01_vi.data()[hw] = qie11Digis[i][hw];
           }
           i_f1++;
         } else if (digi.flavor() == 3) {
@@ -177,7 +183,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           hf03_vi.ids() = digi.detid().rawId();
 
           for (int hw = 0; hw < QIE11DataFrame::HEADER_WORDS + digi.samples(); hw++) {
-            hf03_vi.data()[hw] = (qie11Digis[i][hw]);
+            hf03_vi.data()[hw] = qie11Digis[i][hw];
           }
           i_f3++;
         }

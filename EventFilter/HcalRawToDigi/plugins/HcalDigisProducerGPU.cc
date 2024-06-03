@@ -70,9 +70,9 @@ void HcalDigisProducerGPU::fillDescriptions(edm::ConfigurationDescriptions& conf
   // FIXME
   desc.add<edm::InputTag>("hbheDigisLabel", edm::InputTag("hcalDigis"));
   desc.add<edm::InputTag>("qie11DigiLabel", edm::InputTag("hcalDigis"));
-  desc.add<std::string>("digisLabelF01HE", std::string{"f01HEDigisGPU"});
-  desc.add<std::string>("digisLabelF5HB", std::string{"f5HBDigisGPU"});
-  desc.add<std::string>("digisLabelF3HB", std::string{"f3HBDigisGPU"});
+  desc.add<std::string>("digisLabelF01HE", std::string{"f01HEDigis"});
+  desc.add<std::string>("digisLabelF5HB", std::string{"f5HBDigis"});
+  desc.add<std::string>("digisLabelF3HB", std::string{"f3HBDigis"});
   desc.add<uint32_t>("maxChannelsF01HE", 10000u);
   desc.add<uint32_t>("maxChannelsF5HB", 10000u);
   desc.add<uint32_t>("maxChannelsF3HB", 10000u);
