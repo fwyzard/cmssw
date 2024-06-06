@@ -1090,6 +1090,164 @@ def customizeHLTforAlpakaEcalLocalReco(process):
     return process
 
 
+def customizeHLTforAlpakaHcalLocalReco(process):
+
+    # EventSetup modules
+    process.load('RecoLocalCalo.HcalRecProducers.hcalMahiConditionsESProducer_cfi')
+    process.load('RecoLocalCalo.HcalRecProducers.hcalMahiPulseOffsetsESProducer_cfi')
+    process.load('RecoLocalCalo.HcalRecProducers.hcalSiPMCharacteristicsESProducer_cfi')
+    process.load('RecoLocalCalo.HcalRecAlgos.hcalRecoParamWithPulseShapeESProducer_cfi')
+
+    # the JobConfigurationGPURecord is provided by the hltESSJobConfigurationGPURecord ESSource
+
+
+    # convert the HCAL digis to SoA format
+    from EventFilter.HcalRawToDigi.hcalDigisProducerPortable_cfi import hcalDigisProducerPortable as _hcalDigisProducerPortable
+
+    # convert the HCAL digis to SoA format, and copies them to the device
+    process.hltHcalDigisSoA = _hcalDigisProducerPortable.clone(
+      hbheDigisLabel = 'hltHcalDigis',
+      qie11DigiLabel = 'hltHcalDigis'
+    )
+
+    # convert the HCAL digis to SoA format, and copies them to the host
+    process.hltHcalDigisSoASerialSync = makeSerialClone(process.hltHcalDigisSoA)
+
+
+    # run the HCAL local reconstruction (MAHI) and produce the rechits in SoA format
+    from RecoLocalCalo.HcalRecProducers.hbheRecHitProducerPortable_cfi import hbheRecHitProducerPortable as _hbheRecHitProducerPortable
+
+    # run the HCAL local reconstruction (MAHI) and produce the rechits in SoA format on the device, and optionally copy the rechits to the host
+    process.hltHbheRecoSoA = _hbheRecHitProducerPortable.clone(
+      digisLabelF01HE = ('hltHcalDigisSoA', 'f01HEDigisGPU'),
+      digisLabelF5HB = ('hltHcalDigisSoA', 'f5HBDigisGPU'),
+      digisLabelF3HB = ('hltHcalDigisSoA', 'f3HBDigisGPU'),
+      recHitsLabelM0HBHE = '',
+      mahiPulseOffSets = 'hcalMahiPulseOffsetsESProducer:'
+    )
+
+    # run the HCAL local reconstruction (MAHI) and produce the rechits in SoA format on the host
+    process.hltHbheRecoSoASerialSync = makeSerialClone(process.hltHbheRecoSoA,
+      digisLabelF01HE = ('hltHcalDigisSoASerialSync', 'f01HEDigisGPU'),
+      digisLabelF5HB = ('hltHcalDigisSoASerialSync', 'f5HBDigisGPU'),
+      digisLabelF3HB = ('hltHcalDigisSoASerialSync', 'f3HBDigisGPU'),
+    )
+
+
+    # convert the rechits in SoA format on the host to legacy format
+    from RecoLocalCalo.HcalRecProducers.hcalRecHitSoAToLegacy_cfi import hcalRecHitSoAToLegacy as _hcalRecHitSoAToLegacy
+
+    # convert the rechits in SoA format on the host to legacy format
+    process.hltHbhereco = _hcalRecHitSoAToLegacy.clone(
+      src = 'hltHbheRecoSoA'
+    )
+
+    # convert the rechits in SoA format on the host to legacy format
+    process.hltHbherecoSerialSync = process.hltHbhereco.clone(
+      src = 'hltHbheRecoSoASerialSync'
+    )
+
+    # update the label of the rechits produced on the host
+    process.hltTowerMakerForAllSerialSync.hbheInput = "hltHbherecoSerialSync"
+    process.hltAK4CaloJetsIDPassedSerialSync.JetIDParams.hbheRecHitsColl = "hltHbherecoSerialSync"
+    process.hltHbheRecHitSoASerialSync.src = "hltHbherecoSerialSync"
+    process.hltMuonsSerialSync.TrackAssociatorParameters.HBHERecHitCollectionLabel = "hltHbherecoSerialSync"
+    process.hltMuonsSerialSync.CaloExtractorPSet.TrackAssociatorParameters.HBHERecHitCollectionLabel = "hltHbherecoSerialSync"
+    process.hltMuonsSerialSync.JetExtractorPSet.TrackAssociatorParameters.HBHERecHitCollectionLabel = "hltHbherecoSerialSync"
+
+    # run the HCAL local reconstruction, potentially offloading the MHI step to the device
+    process.HLTDoLocalHcalSequence = cms.Sequence(
+      process.hltHcalDigis +
+      process.hltHcalDigisSoA +
+      process.hltHbheRecoSoA +
+      process.hltHbhereco +
+      process.hltHfprereco +
+      process.hltHfreco +
+      process.hltHoreco )
+
+    # run the HCAL local reconstruction on the host
+    process.HLTDoLocalHcalSequenceSerialSync = cms.Sequence(
+      process.hltHcalDigis +
+      process.hltHcalDigisSoASerialSync +
+      process.hltHbheRecoSoASerialSync +
+      process.hltHbherecoSerialSync +
+      process.hltHfprereco +
+      process.hltHfreco +
+      process.hltHoreco )
+
+    # run the HBHE local reconstruction, potentially offloading the MHI step to the device
+    process.HLTStoppedHSCPLocalHcalReco = cms.Sequence(
+      process.hltHcalDigis +
+      process.hltHcalDigisSoA +
+      process.hltHbheRecoSoA +
+      process.hltHbhereco )
+
+    # PFJet reconstruction running on the host
+    process.HLTPFHcalClusteringSerialSync = cms.Sequence(
+      process.hltHbheRecHitSoASerialSync +
+      process.hltParticleFlowRecHitHBHESoASerialSync +
+      process.hltParticleFlowRecHitHBHESerialSync +
+      process.hltParticleFlowClusterHBHESoASerialSync +
+      process.hltParticleFlowClusterHBHESerialSync +
+      process.hltParticleFlowClusterHCALSerialSync )
+
+    process.AlCa_PFJet40_CPUOnly_v7 = cms.Path(
+      process.HLTBeginSequence +
+      process.hltL1sZeroBias +
+      process.hltPreAlCaPFJet40CPUOnly +
+      process.HLTDoLocalHcalSequenceSerialSync +
+      process.HLTAK4CaloJetsSequenceSerialSync +
+      process.hltSingleCaloJet10SerialSync +
+      process.HLTAK4PFJetsSequenceSerialSync +
+      process.hltPFJetsCorrectedMatchedToCaloJets10SerialSync +
+      process.hltSinglePFJet40SerialSync +
+      process.HLTEndSequence )
+
+    # compare the HCAL local reconstruction running on the device and on the host
+    process.DQM_HcalReconstruction_v8 = cms.Path(
+      process.HLTBeginSequence +
+      process.hltL1sDQMHcalReconstruction +
+      process.hltPreDQMHcalReconstruction +
+      process.hltBackend +
+      process.hltStatusOnGPUFilter +
+      process.HLTDoLocalHcalSequence +
+      process.HLTDoLocalHcalSequenceSerialSync +
+      process.HLTPFHcalClustering +
+      process.HLTPFHcalClusteringSerialSync +
+      process.HLTEndSequence )
+
+    # delete the obsolete modules and tasks
+    del process.hcalMahiPulseOffsetsGPUESProducer
+    del process.hcalChannelQualityGPUESProducer
+    del process.hcalConvertedEffectivePedestalWidthsGPUESProducer
+    del process.hcalConvertedEffectivePedestalsGPUESProducer
+    del process.hcalConvertedPedestalWidthsGPUESProducer
+    del process.hcalConvertedPedestalsGPUESProducer
+    del process.hcalElectronicsMappingGPUESProducer
+    del process.hcalGainWidthsGPUESProducer
+    del process.hcalGainsGPUESProducer
+    del process.hcalLUTCorrsGPUESProducer
+    del process.hcalQIECodersGPUESProducer
+    del process.hcalQIETypesGPUESProducer
+    del process.hcalRecoParamsWithPulseShapesGPUESProducer
+    del process.hcalRespCorrsGPUESProducer
+    del process.hcalSiPMCharacteristicsGPUESProducer
+    del process.hcalSiPMParametersGPUESProducer
+    del process.hcalTimeCorrsGPUESProducer
+
+    del process.hltHbherecoLegacy
+    del process.hltHcalDigisGPU
+    del process.hltHbherecoGPU
+    del process.hltHbherecoFromGPU
+    del process.hltHcalConsumerCPU
+    del process.hltHcalConsumerGPU
+
+    del process.HLTDoLocalHcalTask
+    del process.HLTStoppedHSCPLocalHcalRecoTask
+
+    return process
+
+
 def customizeHLTforAlpakaStatus(process):
 
     if not hasattr(process, 'statusOnGPU'):
@@ -1209,6 +1367,7 @@ def customizeHLTforAlpaka(process):
     process = customizeHLTforAlpakaStatus(process)
     process = customizeHLTforAlpakaPixelReco(process)
     process = customizeHLTforAlpakaEcalLocalReco(process)
+    process = customizeHLTforAlpakaHcalLocalReco(process)
     process = customizeHLTforAlpakaParticleFlowClustering(process)
     process = customizeHLTforAlpakaRename(process)
 
