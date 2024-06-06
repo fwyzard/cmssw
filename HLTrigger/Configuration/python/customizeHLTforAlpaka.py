@@ -1102,10 +1102,10 @@ def customizeHLTforAlpakaHcalLocalReco(process):
 
 
     # convert the HCAL digis to SoA format
-    from EventFilter.HcalRawToDigi.hcalDigisProducerPortable_cfi import hcalDigisProducerPortable as _hcalDigisProducerPortable
+    from EventFilter.HcalRawToDigi.hcalDigisSoAProducer_cfi import hcalDigisSoAProducer as _hcalDigisSoAProducer
 
     # convert the HCAL digis to SoA format, and copies them to the device
-    process.hltHcalDigisSoA = _hcalDigisProducerPortable.clone(
+    process.hltHcalDigisSoA = _hcalDigisSoAProducer.clone(
       hbheDigisLabel = 'hltHcalDigis',
       qie11DigiLabel = 'hltHcalDigis'
     )
@@ -1119,18 +1119,18 @@ def customizeHLTforAlpakaHcalLocalReco(process):
 
     # run the HCAL local reconstruction (MAHI) and produce the rechits in SoA format on the device, and optionally copy the rechits to the host
     process.hltHbheRecoSoA = _hbheRecHitProducerPortable.clone(
-      digisLabelF01HE = ('hltHcalDigisSoA', 'f01HEDigisGPU'),
-      digisLabelF5HB = ('hltHcalDigisSoA', 'f5HBDigisGPU'),
-      digisLabelF3HB = ('hltHcalDigisSoA', 'f3HBDigisGPU'),
+      digisLabelF01HE = ('hltHcalDigisSoA', 'f01HEDigis'),
+      digisLabelF5HB = ('hltHcalDigisSoA', 'f5HBDigis'),
+      digisLabelF3HB = ('hltHcalDigisSoA', 'f3HBDigis'),
       recHitsLabelM0HBHE = '',
       mahiPulseOffSets = 'hcalMahiPulseOffsetsESProducer:'
     )
 
     # run the HCAL local reconstruction (MAHI) and produce the rechits in SoA format on the host
     process.hltHbheRecoSoASerialSync = makeSerialClone(process.hltHbheRecoSoA,
-      digisLabelF01HE = ('hltHcalDigisSoASerialSync', 'f01HEDigisGPU'),
-      digisLabelF5HB = ('hltHcalDigisSoASerialSync', 'f5HBDigisGPU'),
-      digisLabelF3HB = ('hltHcalDigisSoASerialSync', 'f3HBDigisGPU'),
+      digisLabelF01HE = ('hltHcalDigisSoASerialSync', 'f01HEDigis'),
+      digisLabelF5HB = ('hltHcalDigisSoASerialSync', 'f5HBDigis'),
+      digisLabelF3HB = ('hltHcalDigisSoASerialSync', 'f3HBDigis'),
     )
 
 
@@ -1191,7 +1191,7 @@ def customizeHLTforAlpakaHcalLocalReco(process):
       process.hltParticleFlowClusterHBHESerialSync +
       process.hltParticleFlowClusterHCALSerialSync )
 
-    process.AlCa_PFJet40_CPUOnly_v7 = cms.Path(
+    process.AlCa_PFJet40_CPUOnly_v8 = cms.Path(
       process.HLTBeginSequence +
       process.hltL1sZeroBias +
       process.hltPreAlCaPFJet40CPUOnly +
