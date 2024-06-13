@@ -1,0 +1,9 @@
+<library file="*.cc" name="HeterogeneousCoreMPICorePlugins">
+  <use name="FWCore/Framework"/>
+  <use name="FWCore/ParameterSet"/>
+  <use name="FWCore/Sources"/>
+  <use name="FWCore/Utilities"/>
+  <use name="HeterogeneousCore/MPICore"/>
+  <use name="HeterogeneousCore/MPIServices"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
