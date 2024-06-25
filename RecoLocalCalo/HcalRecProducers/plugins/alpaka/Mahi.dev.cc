@@ -994,12 +994,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 auto const gch = channel.global;
                 auto const lch = channel.local;
 
-                if (gch >= nchannels)
-                  return;
-
                 // if chi2 is set to -9999 do not run minimization
                 if (outputGPU.chi2()[gch] == -9999.f)
-                  return;
+                  continue;
 
                 // configure shared mem
                 float* shrmem = alpaka::getDynSharedMem<float>(acc);
