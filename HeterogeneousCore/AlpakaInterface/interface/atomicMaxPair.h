@@ -5,7 +5,6 @@
 #include "FWCore/Utilities/interface/bit_cast.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
-// Note: Does not compile with ALPAKA_FN_ACC on ROCm
 template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>, typename F>
 ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void atomicMaxPair(const TAcc& acc,
                                                        unsigned long long int* address,
@@ -22,6 +21,13 @@ ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void atomicMaxPair(const TAcc& acc,
       break;
   }
 #else
+#ifdef _SINGLE_THREAD_HACK
+  /* Hack that supports only the serial CPU backend */
+  if (value.second > edm::bit_cast<float>(static_cast<unsigned int>(*address & 0xffffffff))) {
+    unsigned long long int store = (static_cast<unsigned long long int>(value.first) << 32) + edm::bit_cast<uint32_t>(value.second);
+    *address = store;
+  }
+#else
   unsigned long long int val =
       (static_cast<unsigned long long int>(value.first) << 32) + edm::bit_cast<unsigned int>(value.second);
   unsigned long long int ret = *address;
@@ -32,6 +38,7 @@ ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void atomicMaxPair(const TAcc& acc,
     if ((ret = alpaka::atomicCas(acc, address, old, val)) == old)
       break;
   }
+#endif
 #endif  // __CUDA_ARCH__ or __HIP_DEVICE_COMPILE__
 }
 

@@ -24,19 +24,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace hcal::reconstruction {
     namespace mahi {
 
-      ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float uint_as_float(unsigned long long int val) {
+      ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float uint_as_float(uint32_t val) {
 #if defined(__CUDA_ARCH__) or defined(__HIP_DEVICE_COMPILE__)
         return __uint_as_float(val);
 #else
-        return edm::bit_cast<float>(static_cast<unsigned int>(val));
+        return edm::bit_cast<float>(val);
 #endif
       }
 
-      ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE unsigned long long int float_as_uint(float val) {
+      ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE uint32_t float_as_uint(float val) {
 #if defined(__CUDA_ARCH__) or defined(__HIP_DEVICE_COMPILE__)
         return __float_as_uint(val);
 #else
-        return edm::bit_cast<unsigned int>(static_cast<float>(val));
+        return edm::bit_cast<unsigned int>(val);
 #endif
       }
 
@@ -319,8 +319,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 if (sampleWithinWindow == 0) {
                   soiSamples[gch] = -1;
                   shrMethod0EnergyAccum[lch] = 0;
-                  //TODO: check this conversion
-                  shrMethod0EnergySamplePair[lch] = float_as_uint(std::numeric_limits<float>::min());
+                  shrMethod0EnergySamplePair[lch] = 0;
                   shrEnergyM0TotalAccum[lch] = 0;
                 }
 
@@ -683,7 +682,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   auto const val = shrMethod0EnergySamplePair[lch];
                   int const max_sample = (val >> 32) & 0xffffffff;
 
-                  float const max_energy = uint_as_float(val & 0xffffffff);
+                  float const max_energy = uint_as_float(static_cast<uint32_t>(val & 0xffffffff));
 
                   float const max_energy_1 = static_cast<unsigned>(max_sample) < nsamplesForCompute - 1
                                                  ? shrEnergyM0PerTS[lch * nsamplesForCompute + max_sample + 1]
@@ -1045,14 +1044,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
                 /*
-      // TODO: provide this properly
-      int const soi = soiSamples[gch];
-      */
+                // TODO: provide this properly
+                int const soi = soiSamples[gch];
+                */
                 calo::multifit::ColumnVector<NPULSES, int> pulseOffsets;
                 CMS_UNROLL_LOOP
                 for (int i = 0; i < NPULSES; ++i)
                   pulseOffsets(i) = i;
-                //        pulseOffsets(i) = pulseOffsetValues[i] - pulseOffsetValues[0];
+                //pulseOffsets(i) = pulseOffsetValues[i] - pulseOffsetValues[0];
 
                 // output amplitudes/weights
                 calo::multifit::ColumnVector<NPULSES> resultAmplitudesVector =

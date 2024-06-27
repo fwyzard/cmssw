@@ -257,18 +257,14 @@ def customizeHLTforAlpakaParticleFlowClustering(process):
             ])
 
     # Add PF sequences to DQM_*HcalReconstruction_v Path
-    for pathNameMatch in ['DQM_HcalReconstruction_v', 'DQM_HIHcalReconstruction_v']:
-        dqmHcalRecoPathName = None
-        for pathName in process.paths_():
-            if pathName.startswith(pathNameMatch):
-                dqmHcalRecoPathName = pathName
-                break
-        if dqmHcalRecoPathName == None:
-            continue
-        dqmHcalPath = getattr(process, dqmHcalRecoPathName)
-        dqmHcalRecoPathIndex = dqmHcalPath.index(process.hltHcalConsumerGPU) + 1
-        dqmHcalPath.insert(dqmHcalRecoPathIndex, process.HLTPFHcalClusteringCPUOnly)
-        dqmHcalPath.insert(dqmHcalRecoPathIndex, process.HLTPFHcalClustering)
+    for pathName in process.paths_():
+        if pathName.startswith(('DQM_HcalReconstruction_v', 'DQM_HIHcalReconstruction_v')):
+            dqmHcalPath = getattr(process, pathName)
+            dqmHcalRecoPathIndex = dqmHcalPath.index(process.HLTEndSequence)
+            if process.HLTPFHcalClusteringCPUOnly not in dqmHcalPath._seq._collection:
+                dqmHcalPath.insert(dqmHcalRecoPathIndex, process.HLTPFHcalClusteringCPUOnly)
+            if process.HLTPFHcalClustering not in dqmHcalPath._seq._collection:
+                dqmHcalPath.insert(dqmHcalRecoPathIndex, process.HLTPFHcalClustering)
 
     return process
 
@@ -1175,7 +1171,13 @@ def customizeHLTforAlpakaHcalLocalReco(process):
       process.hltHfreco +
       process.hltHoreco )
 
-    # run the HBHE local reconstruction, potentially offloading the MHI step to the device
+    # replace HLTDoLocalHcalSequence with HLTDoLocalHcalSequenceSerialSync in HLTDoCaloSequenceSerialSync
+    if process.HLTDoLocalHcalSequence in process.HLTDoCaloSequenceSerialSync._seq._collection:
+        index = process.HLTDoCaloSequenceSerialSync.index(process.HLTDoLocalHcalSequence)
+        process.HLTDoCaloSequenceSerialSync.remove(process.HLTDoLocalHcalSequence)
+        process.HLTDoCaloSequenceSerialSync.insert(index, process.HLTDoLocalHcalSequenceSerialSync)
+
+    # run the HBHE local reconstruction, potentially offloading the MAHI step to the device
     process.HLTStoppedHSCPLocalHcalReco = cms.Sequence(
       process.hltHcalDigis +
       process.hltHcalDigisSoA +
@@ -1191,38 +1193,19 @@ def customizeHLTforAlpakaHcalLocalReco(process):
       process.hltParticleFlowClusterHBHESerialSync +
       process.hltParticleFlowClusterHCALSerialSync )
 
-    paths_AlCa_PFJet40_CPUOnly_v = [ path for path in process.paths if path.startswith('AlCa_PFJet40_CPUOnly_v') ]
-    if paths_AlCa_PFJet40_CPUOnly_v:
-      pathname = paths_AlCa_PFJet40_CPUOnly_v[0]
-      setattr(process, pathname, cms.Path(
-        process.HLTBeginSequence +
-        process.hltL1sZeroBias +
-        process.hltPreAlCaPFJet40CPUOnly +
-        process.HLTDoLocalHcalSequenceSerialSync +
-        process.HLTAK4CaloJetsSequenceSerialSync +
-        process.hltSingleCaloJet10SerialSync +
-        process.HLTAK4PFJetsSequenceSerialSync +
-        process.hltPFJetsCorrectedMatchedToCaloJets10SerialSync +
-        process.hltSinglePFJet40SerialSync +
-        process.HLTEndSequence )
-      )
-
     # compare the HCAL local reconstruction running on the device and on the host
-    paths_DQM_HcalReconstruction_v = [ path for path in process.paths if path.startswith('DQM_HcalReconstruction_v') ]
-    if paths_DQM_HcalReconstruction_v:
-      pathname = paths_DQM_HcalReconstruction_v[0]
-      setattr(process, pathname, cms.Path(
-        process.HLTBeginSequence +
-        process.hltL1sDQMHcalReconstruction +
-        process.hltPreDQMHcalReconstruction +
-        process.hltBackend +
-        process.hltStatusOnGPUFilter +
-        process.HLTDoLocalHcalSequence +
-        process.HLTDoLocalHcalSequenceSerialSync +
-        process.HLTPFHcalClustering +
-        process.HLTPFHcalClusteringSerialSync +
-        process.HLTEndSequence )
-      )
+    for pathName in process.paths_():
+        if pathName.startswith(('DQM_HcalReconstruction_v', 'DQM_HIHcalReconstruction_v')):
+            dqmHcalPath = getattr(process, pathName)
+            # add the HLTDoLocalHcalSequenceSerialSync sequence after HLTDoLocalHcalSequence
+            if process.HLTDoLocalHcalSequence in dqmHcalPath._seq._collection:
+                dqmHcalRecoPathIndex = dqmHcalPath.index(process.HLTDoLocalHcalSequence) + 1
+                dqmHcalPath.insert(dqmHcalRecoPathIndex, process.HLTDoLocalHcalSequenceSerialSync)
+            # remove the hltHcalConsumerCPU and hltHcalConsumerGPU modules
+            if process.hltHcalConsumerCPU in dqmHcalPath._seq._collection:
+                dqmHcalPath.remove(process.hltHcalConsumerCPU)
+            if process.hltHcalConsumerGPU in dqmHcalPath._seq._collection:
+                dqmHcalPath.remove(process.hltHcalConsumerGPU)
 
     # delete the obsolete modules and tasks
     del process.hcalMahiPulseOffsetsGPUESProducer
@@ -1252,6 +1235,18 @@ def customizeHLTforAlpakaHcalLocalReco(process):
 
     del process.HLTDoLocalHcalTask
     del process.HLTStoppedHSCPLocalHcalRecoTask
+
+    return process
+
+
+def customizeHLTforAlpakaPFSoA(process):
+
+    # avoid the conversion from SoA to legacy to SoA for the HCAL rechits
+    process.hltParticleFlowRecHitHBHESoA.producers[0].src = 'hltHbheRecoSoA'
+    process.hltParticleFlowRecHitHBHESoASerialSync.producers[0].src = 'hltHbheRecoSoASerialSync'
+
+    del process.hltHbheRecHitSoA
+    del process.hltHbheRecHitSoASerialSync
 
     return process
 
@@ -1377,6 +1372,7 @@ def customizeHLTforAlpaka(process):
     process = customizeHLTforAlpakaEcalLocalReco(process)
     process = customizeHLTforAlpakaHcalLocalReco(process)
     process = customizeHLTforAlpakaParticleFlowClustering(process)
+    process = customizeHLTforAlpakaPFSoA(process)
     process = customizeHLTforAlpakaRename(process)
 
     return process
