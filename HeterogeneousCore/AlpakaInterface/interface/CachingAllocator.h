@@ -5,6 +5,7 @@
 #include <exception>
 #include <iomanip>
 #include <iostream>
+#include <list>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -114,9 +115,9 @@ namespace cms::alpakatools {
                   "host CPU.");
 
     struct CachedBytes {
-      size_t free = 0;       // total bytes freed and cached on this device
-      size_t live = 0;       // total bytes currently in use oin this device
-      size_t requested = 0;  // total bytes requested and currently in use on this device
+      std::atomic<size_t> free = 0;       // total bytes freed and cached on this device
+      std::atomic<size_t> live = 0;       // total bytes currently in use oin this device
+      std::atomic<size_t> requested = 0;  // total bytes requested and currently in use on this device
     };
 
     explicit CachingAllocator(
@@ -128,6 +129,7 @@ namespace cms::alpakatools {
                                          // any queue, like host memory accessed directly or with immediate operations.
         bool debug = false)
         : device_(device),
+          cachedBlocks_(config.maxBin + 1),
           binGrowth_(config.binGrowth),
           minBin_(config.minBin),
           maxBin_(config.maxBin),
@@ -270,15 +272,19 @@ namespace cms::alpakatools {
         cachedBytes_.free += block.bytes;
         // after the call to insert(), cachedBlocks_ shares ownership of the buffer
         // TODO use std::move ?
-        cachedBlocks_.insert(std::make_pair(block.bin, block));
+        {
+          std::scoped_lock lock(cachedBlocks_[block.bin].mutex_);
+          cachedBlocks_[block.bin].blocks_.push_back(block);
+        }
 
         if (debug_) {
           std::ostringstream out;
           out << "\t" << deviceType_ << " " << alpaka::getName(device_) << " returned " << block.bytes << " bytes at "
-              << ptr << " from associated queue " << block.queue->m_spQueueImpl.get() << " , event "
-              << block.event->m_spEventImpl.get() << " .\n\t\t " << cachedBlocks_.size() << " available blocks cached ("
-              << cachedBytes_.free << " bytes), " << liveBlocks_.size() << " live blocks (" << cachedBytes_.live
-              << " bytes) outstanding." << std::endl;
+              << ptr << " from associated queue " << block.queue->m_spQueueImpl.get() << ", event "
+              << block.event->m_spEventImpl.get()
+              << " .\n\t\t " /* << cachedBlocks_.size() */ << " available blocks cached (" << cachedBytes_.free
+              << " bytes), " << liveBlocks_.size() << " live blocks (" << cachedBytes_.live << " bytes) outstanding."
+              << std::endl;
           std::cout << out.str() << std::endl;
         }
       } else {
@@ -299,7 +305,7 @@ namespace cms::alpakatools {
             out << "CachingAllocator::free() caught an alpaka error: " << e.what() << "\n";
             out << "\t" << deviceType_ << " " << alpaka::getName(device_) << " freed " << block.bytes << " bytes at "
                 << ptr << " from associated queue " << block.queue->m_spQueueImpl.get() << ", event "
-                << block.event->m_spEventImpl.get() << " .\n\t\t " << cachedBlocks_.size()
+                << block.event->m_spEventImpl.get() << " .\n\t\t " /* << cachedBlocks_.size() */
                 << " available blocks cached (" << cachedBytes_.free << " bytes), " << liveBlocks_.size()
                 << " live blocks (" << cachedBytes_.live << " bytes) outstanding." << std::endl;
             std::cout << out.str() << std::endl;
@@ -311,9 +317,10 @@ namespace cms::alpakatools {
           std::ostringstream out;
           out << "\t" << deviceType_ << " " << alpaka::getName(device_) << " freed " << block.bytes << " bytes at "
               << ptr << " from associated queue " << block.queue->m_spQueueImpl.get() << ", event "
-              << block.event->m_spEventImpl.get() << " .\n\t\t " << cachedBlocks_.size() << " available blocks cached ("
-              << cachedBytes_.free << " bytes), " << liveBlocks_.size() << " live blocks (" << cachedBytes_.live
-              << " bytes) outstanding." << std::endl;
+              << block.event->m_spEventImpl.get()
+              << " .\n\t\t " /* << cachedBlocks_.size() */ << " available blocks cached (" << cachedBytes_.free
+              << " bytes), " << liveBlocks_.size() << " live blocks (" << cachedBytes_.live << " bytes) outstanding."
+              << std::endl;
           std::cout << out.str() << std::endl;
         }
       }
@@ -369,45 +376,74 @@ namespace cms::alpakatools {
     }
 
     bool tryReuseCachedBlock(BlockDescriptor& block) {
-      std::scoped_lock lock(mutex_);
+      // lock the list of free blocks in the block's bin
+      auto& bin = cachedBlocks_[block.bin];
+      auto& blocks = bin.blocks_;
+      std::unique_lock lock(bin.mutex_);
 
       // iterate through the range of cached blocks in the same bin
-      const auto [begin, end] = cachedBlocks_.equal_range(block.bin);
-      for (auto iBlock = begin; iBlock != end; ++iBlock) {
-        if ((reuseSameQueueAllocations_ and (*block.queue == *(iBlock->second.queue))) or
-            alpaka::isComplete(*(iBlock->second.event))) {
-          // associate the cached buffer to the new queue
-          auto queue = std::move(*(block.queue));
-          // TODO cache (or remove) the debug information and use std::move()
-          block = iBlock->second;
-          block.queue = std::move(queue);
+      for (auto iBlock = blocks.begin(); iBlock != blocks.end(); ++iBlock) {
+        if ((reuseSameQueueAllocations_ and (*block.queue == *iBlock->queue)) or alpaka::isComplete(*iBlock->event)) {
+          // extract the block from the list and release the lock on the bin
+          auto found = std::move(*iBlock);
+          blocks.erase(iBlock);
+          lock.unlock();
+          assert(found.buffer);
+          assert(found.buffer->data());
+          assert(found.queue);
+          assert(found.queue->m_spQueueImpl.get());
+          assert(found.event);
+          assert(found.event->m_spEventImpl.get());
 
-          // if the new queue is on different device than the old event, create a new event
-          if (block.device() != alpaka::getDev(*(block.event))) {
+          // transfer ownership of the old buffer
+          block.buffer = std::move(found.buffer);
+          assert(block.buffer);
+          assert(block.buffer->data());
+
+          // keep the queue used to request the allocation
+          // block.queue = block.queue
+          assert(block.queue);
+          assert(block.queue->m_spQueueImpl.get());
+
+          // if the new queue is on different device than the old event, create a new event, otherwise reuse the old event
+          if (block.device() != alpaka::getDev(*(found.event))) {
             block.event = Event{block.device()};
+            assert(block.event);
+            assert(block.event->m_spEventImpl.get());
+          } else {
+            if (debug_) {
+              // only for debugging make a copy, so we can print the information of the old event
+              block.event = found.event;
+            } else {
+              block.event = std::move(found.event);
+            }
+            assert(block.event);
+            assert(block.event->m_spEventImpl.get());
           }
 
-          // insert the cached block into the live blocks
-          // TODO cache (or remove) the debug information and use std::move()
-          liveBlocks_[block.buffer->data()] = block;
+          // take the lock on the live blocks
+          {
+            std::scoped_lock global_lock(mutex_);
 
-          // update the accounting information
-          cachedBytes_.free -= block.bytes;
-          cachedBytes_.live += block.bytes;
-          cachedBytes_.requested += block.requested;
+            // insert the cached block into the live blocks
+            liveBlocks_[block.buffer->data()] = block;
+
+            // update the accounting information
+            cachedBytes_.free -= block.bytes;
+            cachedBytes_.live += block.bytes;
+            cachedBytes_.requested += block.requested;
+          }
 
           if (debug_) {
             std::ostringstream out;
             out << "\t" << deviceType_ << " " << alpaka::getName(device_) << " reused cached block at "
                 << block.buffer->data() << " (" << block.bytes << " bytes) for queue "
                 << block.queue->m_spQueueImpl.get() << ", event " << block.event->m_spEventImpl.get()
-                << " (previously associated with queue " << iBlock->second.queue->m_spQueueImpl.get() << " , event "
-                << iBlock->second.event->m_spEventImpl.get() << ")." << std::endl;
+                << " (previously associated with queue " << found.queue->m_spQueueImpl.get() << ", event "
+                << found.event->m_spEventImpl.get() << ")." << std::endl;
             std::cout << out.str() << std::endl;
           }
 
-          // remove the reused block from the list of cached blocks
-          cachedBlocks_.erase(iBlock);
           return true;
         }
       }
@@ -453,11 +489,11 @@ namespace cms::alpakatools {
       // create a new event associated to the "synchronisation device"
       block.event = Event{block.device()};
 
+      // while holding the lock, update the statistics and the list of live blocks
       {
         std::scoped_lock lock(mutex_);
         cachedBytes_.live += block.bytes;
         cachedBytes_.requested += block.requested;
-        // TODO use std::move() ?
         liveBlocks_[block.buffer->data()] = block;
       }
 
@@ -471,37 +507,44 @@ namespace cms::alpakatools {
     }
 
     void freeAllCached() {
-      std::scoped_lock lock(mutex_);
+      for (auto& bin : cachedBlocks_) {
+        std::scoped_lock lock(bin.mutex_);
 
-      while (not cachedBlocks_.empty()) {
-        auto iBlock = cachedBlocks_.begin();
-        cachedBytes_.free -= iBlock->second.bytes;
+        while (not bin.blocks_.empty()) {
+          // std::move ?
+          auto block = bin.blocks_.front();
+          bin.blocks_.pop_front();
+          cachedBytes_.free -= block.bytes;
 
-        if (debug_) {
-          std::ostringstream out;
-          out << "\t" << deviceType_ << " " << alpaka::getName(device_) << " freed " << iBlock->second.bytes
-              << " bytes.\n\t\t  " << (cachedBlocks_.size() - 1) << " available blocks cached (" << cachedBytes_.free
-              << " bytes), " << liveBlocks_.size() << " live blocks (" << cachedBytes_.live << " bytes) outstanding."
-              << std::endl;
-          std::cout << out.str() << std::endl;
+          if (debug_) {
+            std::ostringstream out;
+            out << "\t" << deviceType_ << " " << alpaka::getName(device_) << " freed " << block.bytes
+                << " bytes.\n\t\t  " /* << (cachedBlocks_.size() - 1) */ << " available blocks cached ("
+                << cachedBytes_.free << " bytes), " << liveBlocks_.size() << " live blocks (" << cachedBytes_.live
+                << " bytes) outstanding." << std::endl;
+            std::cout << out.str() << std::endl;
+          }
         }
-
-        cachedBlocks_.erase(iBlock);
       }
     }
 
-    // TODO replace with a tbb::concurrent_multimap ?
-    using CachedBlocks = std::multimap<unsigned int, BlockDescriptor>;  // ordered by the allocation bin
+    // TODO replace with a tbb::concurrent_queue ?
+    struct BlockSet {
+      mutable std::mutex mutex_;
+      std::list<BlockDescriptor> blocks_;
+    };
+
+    using CachedBlocks = std::vector<BlockSet>;  // indexed by the allocation bin
+
     // TODO replace with a tbb::concurrent_map ?
     using BusyBlocks = std::map<void*, BlockDescriptor>;  // ordered by the address of the allocated memory
+    mutable std::mutex mutex_;
 
+    Device device_;  // the device where the memory is allocated
     inline static const std::string deviceType_ = alpaka::core::demangled<Device>;
 
-    mutable std::mutex mutex_;
-    Device device_;  // the device where the memory is allocated
-
     CachedBytes cachedBytes_;
-    CachedBlocks cachedBlocks_;  // Set of cached device allocations available for reuse
+    CachedBlocks cachedBlocks_;  // vector of sets of cached device allocations available for reuse
     BusyBlocks liveBlocks_;      // map of pointers to the live device allocations currently in use
 
     const unsigned int binGrowth_;  // Geometric growth factor for bin-sizes
