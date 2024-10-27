@@ -76,6 +76,18 @@ namespace cms::alpakatools {
                   "The \"memory device\" type can either be the same as the \"synchronisation device\" type, or be the "
                   "host CPU.");
 
+    struct BlockDescriptor {
+      std::optional<Buffer> buffer;
+      std::optional<Queue> queue;
+      std::optional<Event> event;
+      size_t bytes = 0;
+      size_t requested = 0;
+      unsigned int bin = 0;
+
+      // the "synchronisation device" for this block
+      auto device() { return alpaka::getDev(*queue); }
+    };
+
     struct CachedBytes {
       size_t free;       // Total bytes freed and cached on this device
       size_t live;       // Total bytes currently in use on this device
@@ -97,24 +109,12 @@ namespace cms::alpakatools {
     CachedBytes cacheStatus() const;
 
     // Allocate given number of bytes on the current device associated to given queue
-    void* allocate(size_t bytes, Queue queue);
+    BlockDescriptor allocate(size_t bytes, Queue queue);
 
     // Frees an allocation, potentially caching the buffer in the free store
-    void free(void* ptr);
+    void free(BlockDescriptor&& block);
 
   private:
-    struct BlockDescriptor {
-      std::optional<Buffer> buffer;
-      std::optional<Queue> queue;
-      std::optional<Event> event;
-      size_t bytes = 0;
-      size_t requested = 0;  // for monitoring only
-      unsigned int bin = 0;
-
-      // the "synchronisation device" for this block
-      auto device() { return alpaka::getDev(*queue); }
-    };
-
     // Fill a memory buffer with the specified bye value.
     // If the underlying device is the host and the allocator is configured to support immediate
     // (non queue-ordered) operations, fill the memory synchronously using std::memset.
@@ -139,22 +139,16 @@ namespace cms::alpakatools {
     void freeAllCached();
 
     // TODO replace with a tbb::concurrent_queue ?
-    struct BlockSet {
+    struct BlockList {
       mutable std::mutex mutex_;
       std::list<BlockDescriptor> blocks_;
     };
 
-    using CachedBlocks = std::vector<BlockSet>;  // indexed by the allocation bin
-
-    // TODO replace with a tbb::concurrent_map ?
-    using BusyBlocks = std::map<void*, BlockDescriptor>;  // ordered by the address of the allocated memory
-    mutable std::mutex mutex_;
-
     Device device_;  // the device where the memory is allocated
     inline static const std::string deviceType_ = alpaka::core::demangled<Device>;
 
-    CachedBlocks cachedBlocks_;  // Freed allocation blocks, cached and potentially available for reuse
-    BusyBlocks liveBlocks_;      // Map of pointers to the live device allocations currently in use
+    std::vector<BlockList>
+        cachedBlocks_;  // Freed allocation blocks, cached and potentially available for reuse, index by the block bin
 
     std::atomic<size_t> totalFree_ = 0;       // Total bytes freed and cached on this device
     std::atomic<size_t> totalLive_ = 0;       // Total bytes currently in use on this device
