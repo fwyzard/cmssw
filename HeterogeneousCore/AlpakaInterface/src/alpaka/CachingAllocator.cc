@@ -4,7 +4,6 @@
 #include <iostream>
 #include <list>
 #include <map>
-#include <mutex>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -233,11 +232,8 @@ namespace cms::alpakatools {
       }
 
       // move the block into the free list
-      {
-        auto& bin = cachedBlocks_[block.bin];
-        std::scoped_lock lock(bin.mutex_);
-        bin.blocks_.push_back(std::move(block));
-      }
+      auto& bin = cachedBlocks_[block.bin];
+      bin.blocks_.push(std::move(block));
     } else {
       // If the memset fails, very likely an error has occurred in the
       // asynchronous processing. In that case the error will show up in all
@@ -313,27 +309,28 @@ namespace cms::alpakatools {
 
   template <typename TDev, typename TQueue>
   bool CachingAllocator<TDev, TQueue>::tryReuseCachedBlock(CachingAllocator<TDev, TQueue>::BlockDescriptor& block) {
-    // lock the list of free blocks in the block's bin
     auto& bin = cachedBlocks_[block.bin];
     auto& blocks = bin.blocks_;
-    std::unique_lock lock(bin.mutex_);
 
-    // iterate through the range of cached blocks in the same bin
-    for (auto iBlock = blocks.begin(); iBlock != blocks.end(); ++iBlock) {
-      if ((reuseSameQueueAllocations_ and (*block.queue == *iBlock->queue)) or alpaka::isComplete(*iBlock->event)) {
-        // extract the block from the list and release the lock on the bin
-        auto found = std::move(*iBlock);
-        blocks.erase(iBlock);
-        lock.unlock();
-        assert(found.buffer);
-        assert(found.buffer->data());
-        assert(found.queue);
-        assert(found.queue->m_spQueueImpl.get());
-        assert(found.event);
-        assert(found.event->m_spEventImpl.get());
+    std::vector<BlockDescriptor> temp;
+    temp.reserve(16);
+
+    bool found = false;
+    BlockDescriptor candidate;
+    while (not found and blocks.try_pop(candidate)) {
+      assert(candidate.buffer);
+      assert(candidate.buffer->data());
+      assert(candidate.queue);
+      assert(candidate.queue->m_spQueueImpl.get());
+      assert(candidate.event);
+      assert(candidate.event->m_spEventImpl.get());
+
+      if ((reuseSameQueueAllocations_ and (*block.queue == *candidate.queue)) or alpaka::isComplete(*candidate.event)) {
+        // reuse the block
+        found = true;
 
         // transfer ownership of the old buffer
-        block.buffer = std::move(found.buffer);
+        block.buffer = std::move(candidate.buffer);
         assert(block.buffer);
         assert(block.buffer->data());
 
@@ -342,14 +339,14 @@ namespace cms::alpakatools {
         assert(block.queue->m_spQueueImpl.get());
 
         // if the new queue is on different device than the old event, create a new event, otherwise reuse the old event
-        if (block.device() != alpaka::getDev(*(found.event))) {
+        if (block.device() != alpaka::getDev(*(candidate.event))) {
           block.event = Event{block.device()};
         } else {
           if (debug_) {
             // only for debugging make a copy, so we can print the information of the old event
-            block.event = found.event;
+            block.event = candidate.event;
           } else {
-            block.event = std::move(found.event);
+            block.event = std::move(candidate.event);
           }
         }
         assert(block.event);
@@ -365,16 +362,22 @@ namespace cms::alpakatools {
           out << "\t" << deviceType_ << " " << alpaka::getName(device_) << " reused cached block at "
               << block.buffer->data() << " (" << block.bytes << " bytes) for queue " << block.queue->m_spQueueImpl.get()
               << ", event " << block.event->m_spEventImpl.get() << " (previously associated with queue "
-              << found.queue->m_spQueueImpl.get() << ", event " << found.event->m_spEventImpl.get() << ")."
+              << candidate.queue->m_spQueueImpl.get() << ", event " << candidate.event->m_spEventImpl.get() << ")."
               << std::endl;
           std::cout << out.str() << std::endl;
         }
-
-        return true;
+      } else {
+        // the candidate block is still busy, move it to the temporary buffer
+        temp.push_back(std::move(candidate));
       }
     }
 
-    return false;
+    // either we found a block to reuse, or the free list is empty; stop looking and put the blocks in the temporary store back in the free list
+    for (auto& busy: temp) {
+      blocks.push(std::move(busy));
+    }
+
+    return found;
   }
 
   template <typename TDev, typename TQueue>
@@ -434,12 +437,9 @@ namespace cms::alpakatools {
   template <typename TDev, typename TQueue>
   void CachingAllocator<TDev, TQueue>::freeAllCached() {
     for (auto& bin : cachedBlocks_) {
-      std::scoped_lock lock(bin.mutex_);
-
-      while (not bin.blocks_.empty()) {
-        // std::move ?
-        auto block = bin.blocks_.front();
-        bin.blocks_.pop_front();
+      // pops the blocks one at a time from the queue, and let them be destroyed
+      BlockDescriptor block;
+      while (bin.blocks_.try_pop(block)) {
         totalFree_ -= block.bytes;
 
         if (debug_) {

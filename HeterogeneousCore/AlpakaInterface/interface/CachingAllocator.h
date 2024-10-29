@@ -9,6 +9,8 @@
 #include <tuple>
 #include <type_traits>
 
+#include <tbb/concurrent_queue.h>
+
 #include <alpaka/alpaka.hpp>
 
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
@@ -138,17 +140,15 @@ namespace cms::alpakatools {
 
     void freeAllCached();
 
-    // TODO replace with a tbb::concurrent_queue ?
     struct BlockList {
-      mutable std::mutex mutex_;
-      std::list<BlockDescriptor> blocks_;
+      tbb::concurrent_queue<BlockDescriptor> blocks_;
     };
 
     Device device_;  // the device where the memory is allocated
     inline static const std::string deviceType_ = alpaka::core::demangled<Device>;
 
-    std::vector<BlockList>
-        cachedBlocks_;  // Freed allocation blocks, cached and potentially available for reuse, index by the block bin
+    // List of free allocation blocks, cached and potentially available for reuse, index by the block bin
+    std::vector<BlockList> cachedBlocks_;
 
     std::atomic<size_t> totalFree_ = 0;       // Total bytes freed and cached on this device
     std::atomic<size_t> totalLive_ = 0;       // Total bytes currently in use on this device
