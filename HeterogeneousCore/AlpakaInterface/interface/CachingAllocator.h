@@ -2,7 +2,6 @@
 #define HeterogeneousCore_AlpakaInterface_interface_CachingAllocator_h
 
 #include <list>
-#include <map>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -111,10 +110,10 @@ namespace cms::alpakatools {
     CachedBytes cacheStatus() const;
 
     // Allocate given number of bytes on the current device associated to given queue
-    BlockDescriptor allocate(size_t bytes, Queue queue);
+    BlockDescriptor* allocate(size_t bytes, Queue queue);
 
     // Frees an allocation, potentially caching the buffer in the free store
-    void free(BlockDescriptor&& block);
+    void free(BlockDescriptor* block);
 
   private:
     // Fill a memory buffer with the specified bye value.
@@ -141,7 +140,7 @@ namespace cms::alpakatools {
     void freeAllCached();
 
     struct BlockList {
-      tbb::concurrent_queue<BlockDescriptor> blocks_;
+      tbb::concurrent_queue<BlockDescriptor*> blocks_;
     };
 
     Device device_;  // the device where the memory is allocated
