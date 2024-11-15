@@ -64,7 +64,7 @@ private:
   edm::StreamID sid_ = edm::StreamID::invalidStreamID();
 
   MPI_Comm comm_ = MPI_COMM_NULL;
-  MPISender sender_;
+  MPIChannel channel_;
   edm::EDPutTokenT<MPIToken> token_;
 };
 
@@ -92,7 +92,7 @@ MPIDriver::MPIDriver(edm::ParameterSet const& config)
     throw cms::Exception("UnsupportedFeature")
         << "MPIDriver supports only a single follower, but it was connected to " << size << " followers";
   }
-  sender_ = MPISender(comm_, 0);
+  channel_ = MPIChannel(comm_, 0);
 }
 
 MPIDriver::~MPIDriver() {
@@ -105,7 +105,7 @@ void MPIDriver::beginStream(edm::StreamID sid) {
   sid_ = sid;
 
   // signal the connection
-  sender_.sendConnect(sid_);
+  channel_.sendConnect(sid_);
 
   /* is there a way to access all known process histories ?
   edm::ProcessHistoryRegistry const& registry = * edm::ProcessHistoryRegistry::instance();
@@ -116,14 +116,14 @@ void MPIDriver::beginStream(edm::StreamID sid) {
   */
 
   // signal the begin stream
-  sender_.sendBeginStream(sid_);
+  channel_.sendBeginStream(sid_);
 }
 
 void MPIDriver::endStream() {
   // signal the end stream
-  sender_.sendEndStream(sid_);
+  channel_.sendEndStream(sid_);
   // signal the disconnection
-  sender_.sendDisconnect(sid_);
+  channel_.sendDisconnect(sid_);
 }
 
 void MPIDriver::beginRun(edm::Run const& run, edm::EventSetup const& setup) {
@@ -132,7 +132,7 @@ void MPIDriver::beginRun(edm::Run const& run, edm::EventSetup const& setup) {
    * Ideally the ProcessHistoryID stored in the run.runAuxiliary() should be the correct one, and
    * we could simply do
 
-  sender_.sendBeginRun(sid_, run.runAuxiliary());
+  channel_.sendBeginRun(sid_, run.runAuxiliary());
 
    * Instead, it looks like the ProcessHistoryID stored in the run.runAuxiliary() is that of the
    * _parent_ process.
@@ -141,10 +141,10 @@ void MPIDriver::beginRun(edm::Run const& run, edm::EventSetup const& setup) {
    */
   auto aux = run.runAuxiliary();
   aux.setProcessHistoryID(run.processHistory().id());
-  sender_.sendBeginRun(sid_, aux);
+  channel_.sendBeginRun(sid_, aux);
 
   // transmit the ProcessHistory
-  sender_.sendSerializedProduct(sid_, run.processHistory());
+  channel_.sendSerializedProduct(sid_, run.processHistory());
 }
 
 void MPIDriver::endRun(edm::Run const& run, edm::EventSetup const& setup) {
@@ -153,7 +153,7 @@ void MPIDriver::endRun(edm::Run const& run, edm::EventSetup const& setup) {
    * Ideally the ProcessHistoryID stored in the run.runAuxiliary() should be the correct one, and
    * we could simply do
 
-  sender_.sendEndRun(sid_, run.runAuxiliary());
+  channel_.sendEndRun(sid_, run.runAuxiliary());
 
    * Instead, it looks like the ProcessHistoryID stored in the run.runAuxiliary() is that of the
    * _parent_ process.
@@ -162,7 +162,7 @@ void MPIDriver::endRun(edm::Run const& run, edm::EventSetup const& setup) {
    */
   auto aux = run.runAuxiliary();
   aux.setProcessHistoryID(run.processHistory().id());
-  sender_.sendEndRun(sid_, aux);
+  channel_.sendEndRun(sid_, aux);
 }
 
 void MPIDriver::beginLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup) {
@@ -171,7 +171,7 @@ void MPIDriver::beginLuminosityBlock(edm::LuminosityBlock const& lumi, edm::Even
    * Ideally the ProcessHistoryID stored in the lumi.luminosityBlockAuxiliary() should be the
    * correct one, and we could simply do
 
-  sender_.sendBeginLuminosityBlock(sid_, lumi.luminosityBlockAuxiliary());
+  channel_.sendBeginLuminosityBlock(sid_, lumi.luminosityBlockAuxiliary());
 
    * Instead, it looks like the ProcessHistoryID stored in the lumi.luminosityBlockAuxiliary() is
    * that of the _parent_ process.
@@ -180,7 +180,7 @@ void MPIDriver::beginLuminosityBlock(edm::LuminosityBlock const& lumi, edm::Even
    */
   auto aux = lumi.luminosityBlockAuxiliary();
   aux.setProcessHistoryID(lumi.processHistory().id());
-  sender_.sendBeginLuminosityBlock(sid_, aux);
+  channel_.sendBeginLuminosityBlock(sid_, aux);
 }
 
 void MPIDriver::endLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup) {
@@ -189,7 +189,7 @@ void MPIDriver::endLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventS
    * Ideally the ProcessHistoryID stored in the lumi.luminosityBlockAuxiliary() should be the
    * correct one, and we could simply do
 
-  sender_.sendEndLuminosityBlock(sid_, lumi.luminosityBlockAuxiliary());
+  channel_.sendEndLuminosityBlock(sid_, lumi.luminosityBlockAuxiliary());
 
    * Instead, it looks like the ProcessHistoryID stored in the lumi.luminosityBlockAuxiliary() is
    * that of the _parent_ process.
@@ -198,7 +198,7 @@ void MPIDriver::endLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventS
    */
   auto aux = lumi.luminosityBlockAuxiliary();
   aux.setProcessHistoryID(lumi.processHistory().id());
-  sender_.sendEndLuminosityBlock(sid_, aux);
+  channel_.sendEndLuminosityBlock(sid_, aux);
 }
 
 void MPIDriver::produce(edm::Event& event, edm::EventSetup const& setup) {
@@ -219,10 +219,10 @@ void MPIDriver::produce(edm::Event& event, edm::EventSetup const& setup) {
   }
 
   // signal a new event, and transmit the EventAuxiliary
-  sender_.sendEvent(sid_, event.eventAuxiliary());
+  channel_.sendEvent(sid_, event.eventAuxiliary());
 
-  // duplicate the MPISender and put the copy into the Event
-  std::shared_ptr<MPISender> link(new MPISender(sender_.duplicate()), [](MPISender* ptr) {
+  // duplicate the MPIChannel and put the copy into the Event
+  std::shared_ptr<MPIChannel> link(new MPIChannel(channel_.duplicate()), [](MPIChannel* ptr) {
     ptr->reset();
     delete ptr;
   });

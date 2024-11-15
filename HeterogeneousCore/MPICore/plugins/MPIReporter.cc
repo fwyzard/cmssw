@@ -46,7 +46,7 @@ void MPIReporter::analyze(edm::Event const& event, edm::EventSetup const& setup)
   auto const& token = event.get(token_);
   {
     edm::LogAbsolute log("MPI");
-    log << "got the MPIToken opaque wrapper around the MPISender at 0x" << &token;
+    log << "got the MPIToken opaque wrapper around the MPIChannel at 0x" << &token;
   }
 }
 

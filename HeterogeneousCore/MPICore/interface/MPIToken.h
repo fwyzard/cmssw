@@ -4,7 +4,7 @@
 #include <memory>
 
 // forward declaration
-class MPISender;
+class MPIChannel;
 
 class MPIToken {
 public:
@@ -12,14 +12,14 @@ public:
   MPIToken() = default;
 
   // user-defined constructor
-  explicit MPIToken(std::shared_ptr<MPISender> link) : link_(link) {}
+  explicit MPIToken(std::shared_ptr<MPIChannel> channel) : channel_(channel) {}
 
   // access the data member
-  MPISender* link() const { return link_.get(); }
+  MPIChannel* channel() const { return channel_.get(); }
 
 private:
   // wrap the MPI communicator and destination
-  std::shared_ptr<MPISender> link_;
+  std::shared_ptr<MPIChannel> channel_;
 };
 
 #endif  // HeterogeneousCore_MPICore_MPIToken_h

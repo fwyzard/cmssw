@@ -32,28 +32,28 @@ namespace {
   }
 }  // namespace
 
-// build a new MPISender that uses a duplicate of the underlying communicator and the same destination
-MPISender MPISender::duplicate() const {
+// build a new MPIChannel that uses a duplicate of the underlying communicator and the same destination
+MPIChannel MPIChannel::duplicate() const {
   MPI_Comm newcomm;
   MPI_Comm_dup(comm_, &newcomm);
-  return MPISender(newcomm, dest_);
+  return MPIChannel(newcomm, dest_);
 }
 
-// close the underlying communicator and reset the MPISender to an invalid state
-void MPISender::reset() {
+// close the underlying communicator and reset the MPIChannel to an invalid state
+void MPIChannel::reset() {
   MPI_Comm_disconnect(&comm_);
   dest_ = MPI_UNDEFINED;
 }
 
 // fill an edm::RunAuxiliary object from an EDM_MPI_RunAuxiliary buffer
-void MPISender::edmFromBuffer_(EDM_MPI_RunAuxiliary_t const& buffer, edm::RunAuxiliary& aux) {
+void MPIChannel::edmFromBuffer_(EDM_MPI_RunAuxiliary_t const& buffer, edm::RunAuxiliary& aux) {
   aux = edm::RunAuxiliary(buffer.run, edm::Timestamp(buffer.beginTime), edm::Timestamp(buffer.endTime));
   aux.setProcessHistoryID(
       edm::ProcessHistoryID(std::string(buffer.processHistoryID, std::size(buffer.processHistoryID))));
 }
 
 // fill an EDM_MPI_RunAuxiliary buffer from an edm::RunAuxiliary object
-void MPISender::edmToBuffer_(EDM_MPI_RunAuxiliary_t& buffer, edm::RunAuxiliary const& aux) {
+void MPIChannel::edmToBuffer_(EDM_MPI_RunAuxiliary_t& buffer, edm::RunAuxiliary const& aux) {
   copy_and_fill(buffer.processHistoryID, aux.processHistoryID().compactForm());
   buffer.beginTime = aux.beginTime().value();
   buffer.endTime = aux.endTime().value();
@@ -61,7 +61,7 @@ void MPISender::edmToBuffer_(EDM_MPI_RunAuxiliary_t& buffer, edm::RunAuxiliary c
 }
 
 // fill an edm::LuminosityBlockAuxiliary object from an EDM_MPI_LuminosityBlockAuxiliary buffer
-void MPISender::edmFromBuffer_(EDM_MPI_LuminosityBlockAuxiliary_t const& buffer, edm::LuminosityBlockAuxiliary& aux) {
+void MPIChannel::edmFromBuffer_(EDM_MPI_LuminosityBlockAuxiliary_t const& buffer, edm::LuminosityBlockAuxiliary& aux) {
   aux = edm::LuminosityBlockAuxiliary(
       buffer.run, buffer.lumi, edm::Timestamp(buffer.beginTime), edm::Timestamp(buffer.endTime));
   aux.setProcessHistoryID(
@@ -69,7 +69,7 @@ void MPISender::edmFromBuffer_(EDM_MPI_LuminosityBlockAuxiliary_t const& buffer,
 }
 
 // fill an EDM_MPI_LuminosityBlockAuxiliary buffer from an edm::LuminosityBlockAuxiliary object
-void MPISender::edmToBuffer_(EDM_MPI_LuminosityBlockAuxiliary_t& buffer, edm::LuminosityBlockAuxiliary const& aux) {
+void MPIChannel::edmToBuffer_(EDM_MPI_LuminosityBlockAuxiliary_t& buffer, edm::LuminosityBlockAuxiliary const& aux) {
   copy_and_fill(buffer.processHistoryID, aux.processHistoryID().compactForm());
   buffer.beginTime = aux.beginTime().value();
   buffer.endTime = aux.endTime().value();
@@ -78,7 +78,7 @@ void MPISender::edmToBuffer_(EDM_MPI_LuminosityBlockAuxiliary_t& buffer, edm::Lu
 }
 
 // fill an edm::EventAuxiliary object from an EDM_MPI_EventAuxiliary buffer
-void MPISender::edmFromBuffer_(EDM_MPI_EventAuxiliary_t const& buffer, edm::EventAuxiliary& aux) {
+void MPIChannel::edmFromBuffer_(EDM_MPI_EventAuxiliary_t const& buffer, edm::EventAuxiliary& aux) {
   aux = edm::EventAuxiliary({buffer.run, buffer.lumi, buffer.event},
                             std::string(buffer.processGuid, std::size(buffer.processGuid)),
                             edm::Timestamp(buffer.time),
@@ -92,7 +92,7 @@ void MPISender::edmFromBuffer_(EDM_MPI_EventAuxiliary_t const& buffer, edm::Even
 }
 
 // fill an EDM_MPI_EventAuxiliary buffer from an edm::EventAuxiliary object
-void MPISender::edmToBuffer_(EDM_MPI_EventAuxiliary_t& buffer, edm::EventAuxiliary const& aux) {
+void MPIChannel::edmToBuffer_(EDM_MPI_EventAuxiliary_t& buffer, edm::EventAuxiliary const& aux) {
   copy_and_fill(buffer.processHistoryID, aux.processHistoryID().compactForm());
   copy_and_fill(buffer.processGuid, aux.processGUID());
   buffer.time = aux.time().value();
@@ -107,7 +107,7 @@ void MPISender::edmToBuffer_(EDM_MPI_EventAuxiliary_t& buffer, edm::EventAuxilia
 }
 
 // fill and send an EDM_MPI_Empty_t buffer
-void MPISender::sendEmpty_(int tag, int stream) {
+void MPIChannel::sendEmpty_(int tag, int stream) {
   EDM_MPI_Empty_t buffer;
   buffer.messageTag = tag;
   buffer.stream = stream;
@@ -115,7 +115,7 @@ void MPISender::sendEmpty_(int tag, int stream) {
 }
 
 // fill and send an EDM_MPI_RunAuxiliary_t buffer
-void MPISender::sendRunAuxiliary_(int tag, int stream, edm::RunAuxiliary const& aux) {
+void MPIChannel::sendRunAuxiliary_(int tag, int stream, edm::RunAuxiliary const& aux) {
   EDM_MPI_RunAuxiliary_t buffer;
   buffer.messageTag = tag;
   buffer.stream = stream;
@@ -124,7 +124,7 @@ void MPISender::sendRunAuxiliary_(int tag, int stream, edm::RunAuxiliary const& 
 }
 
 // fill and send an EDM_MPI_RunAuxiliary_t buffer
-void MPISender::sendLuminosityBlockAuxiliary_(int tag, int stream, edm::LuminosityBlockAuxiliary const& aux) {
+void MPIChannel::sendLuminosityBlockAuxiliary_(int tag, int stream, edm::LuminosityBlockAuxiliary const& aux) {
   EDM_MPI_LuminosityBlockAuxiliary_t buffer;
   buffer.messageTag = tag;
   buffer.stream = stream;
@@ -133,7 +133,7 @@ void MPISender::sendLuminosityBlockAuxiliary_(int tag, int stream, edm::Luminosi
 }
 
 // fill and send an EDM_MPI_EventAuxiliary_t buffer
-void MPISender::sendEventAuxiliary_(int stream, edm::EventAuxiliary const& aux) {
+void MPIChannel::sendEventAuxiliary_(int stream, edm::EventAuxiliary const& aux) {
   EDM_MPI_EventAuxiliary_t buffer;
   buffer.messageTag = EDM_MPI_ProcessEvent;
   buffer.stream = stream;
@@ -142,7 +142,7 @@ void MPISender::sendEventAuxiliary_(int stream, edm::EventAuxiliary const& aux) 
 }
 
 // receive an EDM_MPI_EventAuxiliary_t buffer and populate an edm::EventAuxiliary
-std::tuple<MPI_Status, int> MPISender::receiveEventAuxiliary_(edm::EventAuxiliary& aux, int source, int tag) {
+std::tuple<MPI_Status, int> MPIChannel::receiveEventAuxiliary_(edm::EventAuxiliary& aux, int source, int tag) {
   MPI_Status status;
   EDM_MPI_EventAuxiliary_t buffer;
   MPI_Recv(&buffer, 1, EDM_MPI_EventAuxiliary, source, tag, comm_, &status);
@@ -151,7 +151,7 @@ std::tuple<MPI_Status, int> MPISender::receiveEventAuxiliary_(edm::EventAuxiliar
 }
 
 // receive an EDM_MPI_EventAuxiliary_t buffer and populate an edm::EventAuxiliary
-std::tuple<MPI_Status, int> MPISender::receiveEventAuxiliary_(edm::EventAuxiliary& aux, MPI_Message& message) {
+std::tuple<MPI_Status, int> MPIChannel::receiveEventAuxiliary_(edm::EventAuxiliary& aux, MPI_Message& message) {
   MPI_Status status;
   EDM_MPI_EventAuxiliary_t buffer;
   MPI_Mrecv(&buffer, 1, EDM_MPI_EventAuxiliary, &message, &status);
@@ -160,7 +160,7 @@ std::tuple<MPI_Status, int> MPISender::receiveEventAuxiliary_(edm::EventAuxiliar
 }
 
 // serialize an object of generic type using its ROOT dictionary, and send the binary blob
-void MPISender::sendSerializedProduct_(int stream, TClass const* type, void const* product) {
+void MPIChannel::sendSerializedProduct_(int stream, TClass const* type, void const* product) {
   TBufferFile buffer{TBuffer::kWrite};
   buffer.WriteClassBuffer(type, const_cast<void*>(product));
   MPI_Send(buffer.Buffer(), buffer.Length(), MPI_BYTE, dest_, EDM_MPI_SendSerializedProduct, comm_);

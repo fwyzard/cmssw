@@ -14,15 +14,15 @@
 // local headers
 #include "messages.h"
 
-class MPISender {
+class MPIChannel {
 public:
-  MPISender() = default;
-  MPISender(MPI_Comm comm, int destination) : comm_(comm), dest_(destination) {}
+  MPIChannel() = default;
+  MPIChannel(MPI_Comm comm, int destination) : comm_(comm), dest_(destination) {}
 
-  // build a new MPISender that uses a duplicate of the underlying communicator and the same destination
-  MPISender duplicate() const;
+  // build a new MPIChannel that uses a duplicate of the underlying communicator and the same destination
+  MPIChannel duplicate() const;
 
-  // close the underlying communicator and reset the MPISender to an invalid state
+  // close the underlying communicator and reset the MPIChannel to an invalid state
   void reset();
 
   // announce that a client has just connected

@@ -56,7 +56,7 @@ private:
 
   char port_[MPI_MAX_PORT_NAME];
   MPI_Comm comm_ = MPI_COMM_NULL;
-  MPISender link_;
+  MPIChannel channel_;
   edm::EDPutTokenT<MPIToken> token_;
 
   edm::ProcessHistory history_;
@@ -89,7 +89,7 @@ MPISource::MPISource(edm::ParameterSet const& config, edm::InputSourceDescriptio
   // create an intercommunicator and accept a client connection
   edm::LogAbsolute("MPI") << "waiting for a connection to the MPI server at port " << port_;
   MPI_Comm_accept(port_, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &comm_);
-  link_ = MPISender(comm_, 0);
+  channel_ = MPIChannel(comm_, 0);
 
   // wait for a client to connect
   MPI_Status status;
@@ -224,7 +224,7 @@ bool MPISource::setRunAndEventInfo(edm::EventID& event,
       case EDM_MPI_ProcessEvent: {
         // receive the EventAuxiliary
         edm::EventAuxiliary aux;
-        auto [status, stream] = link_.receiveEvent(aux, message);
+        auto [status, stream] = channel_.receiveEvent(aux, message);
 
         // extract the original stream id and the rank of the other process (currently unused)
         (void)stream;
@@ -251,12 +251,12 @@ bool MPISource::setRunAndEventInfo(edm::EventID& event,
 }
 
 void MPISource::produce(edm::Event& event) {
-  // duplicate the MPISender and put the copy into the Event
-  std::shared_ptr<MPISender> link(new MPISender(link_.duplicate()), [](MPISender* ptr) {
+  // duplicate the MPIChannel and put the copy into the Event
+  std::shared_ptr<MPIChannel> channel(new MPIChannel(channel_.duplicate()), [](MPIChannel* ptr) {
     ptr->reset();
     delete ptr;
   });
-  event.emplace(token_, std::move(link));
+  event.emplace(token_, std::move(channel));
 }
 
 void MPISource::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
