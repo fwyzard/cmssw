@@ -32,6 +32,19 @@ namespace {
   }
 }  // namespace
 
+// build a new MPISender that uses a duplicate of the underlying communicator and the same destination
+MPISender MPISender::duplicate() const {
+  MPI_Comm newcomm;
+  MPI_Comm_dup(comm_, &newcomm);
+  return MPISender(newcomm, dest_);
+}
+
+// close the underlying communicator and reset the MPISender to an invalid state
+void MPISender::reset() {
+  MPI_Comm_disconnect(&comm_);
+  dest_ = MPI_UNDEFINED;
+}
+
 // fill an edm::RunAuxiliary object from an EDM_MPI_RunAuxiliary buffer
 void MPISender::edmFromBuffer_(EDM_MPI_RunAuxiliary_t const& buffer, edm::RunAuxiliary& aux) {
   aux = edm::RunAuxiliary(buffer.run, edm::Timestamp(buffer.beginTime), edm::Timestamp(buffer.endTime));

@@ -1,11 +1,17 @@
-#include <deque>
+// C++ headers
 #include <memory>
+#include <stdexcept>
 #include <string>
 
+// ROOT headers
 #include <TBuffer.h>
 #include <TBufferFile.h>
 #include <TClass.h>
 
+// MPI headers
+#include <mpi.h>
+
+// CMSSW headers
 #include "DataFormats/Provenance/interface/BranchListIndex.h"
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
 #include "DataFormats/Provenance/interface/EventSelectionID.h"
@@ -27,12 +33,13 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescriptionFiller.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Sources/interface/ProducerSourceBase.h"
+#include "HeterogeneousCore/MPICore/interface/MPIToken.h"
 #include "HeterogeneousCore/MPIServices/interface/MPIService.h"
 
+// local headers
 #include "api.h"
 #include "conversion.h"
 #include "messages.h"
-#include "mpi.h"
 
 class MPISource : public edm::ProducerSourceBase {
 public:
@@ -49,7 +56,8 @@ private:
 
   char port_[MPI_MAX_PORT_NAME];
   MPI_Comm comm_ = MPI_COMM_NULL;
-  MPISender link;
+  MPISender link_;
+  edm::EDPutTokenT<MPIToken> token_;
 
   edm::ProcessHistory history_;
 };
@@ -58,13 +66,8 @@ MPISource::MPISource(edm::ParameterSet const& config, edm::InputSourceDescriptio
     :  // note that almost all configuration parameters passed to IDGeneratorSourceBase via ProducerSourceBase will
        // effectively be ignored, because this ConfigurableSource will explicitly set the run, lumi, and event
        // numbers, the timestamp, and the event type
-      edm::ProducerSourceBase(config, desc, false)
-/* FIXME replace with a data product that keeps track of the MPIDriver origin
-      originBranchDescription_(makeOriginBranchDescription(desc.moduleDescription_)),
-      originProvenance_(originBranchDescription_.branchID()) {
-  // register the MPIOrigin branch
-  productRegistryUpdate().addProduct(originBranchDescription_);
-  */
+      edm::ProducerSourceBase(config, desc, false),
+      token_(produces<MPIToken>())  //
 {
   // make sure that MPI is initialised
   MPIService::required();
@@ -86,7 +89,7 @@ MPISource::MPISource(edm::ParameterSet const& config, edm::InputSourceDescriptio
   // create an intercommunicator and accept a client connection
   edm::LogAbsolute("MPI") << "waiting for a connection to the MPI server at port " << port_;
   MPI_Comm_accept(port_, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &comm_);
-  link = MPISender(comm_, 0);
+  link_ = MPISender(comm_, 0);
 
   // wait for a client to connect
   MPI_Status status;
@@ -221,21 +224,17 @@ bool MPISource::setRunAndEventInfo(edm::EventID& event,
       case EDM_MPI_ProcessEvent: {
         // receive the EventAuxiliary
         edm::EventAuxiliary aux;
-        auto [status, stream] = link.receiveEvent(aux, message);
+        auto [status, stream] = link_.receiveEvent(aux, message);
+
+        // extract the original stream id and the rank of the other process (currently unused)
+        (void)stream;
         int source = status.MPI_SOURCE;
+        (void)source;
 
         // fill the event details
         event = aux.id();
         time = aux.time().value();
         type = aux.experimentType();
-
-        (void)source;
-        (void)stream;
-        /* FIXME replace with a data product that keeps track of the MPIDriver origin
-        // store the MPI origin
-        auto origin = std::make_unique<edm::Wrapper<MPIOrigin>>(edm::WrapperBase::Emplace{}, source, stream);
-        event.eventProducts.emplace_back(std::move(origin), &originBranchDescription_, originProvenance_);
-        */
 
         // signal a new event
         return true;
@@ -251,7 +250,14 @@ bool MPISource::setRunAndEventInfo(edm::EventID& event,
   }
 }
 
-void MPISource::produce(edm::Event& event) {}
+void MPISource::produce(edm::Event& event) {
+  // duplicate the MPISender and put the copy into the Event
+  std::shared_ptr<MPISender> link(new MPISender(link_.duplicate()), [](MPISender* ptr) {
+    ptr->reset();
+    delete ptr;
+  });
+  event.emplace(token_, std::move(link));
+}
 
 void MPISource::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;

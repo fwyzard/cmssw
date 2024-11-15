@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include <mpi.h>
@@ -23,6 +24,7 @@
 #include "FWCore/Reflection/interface/TypeWithDict.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/Guid.h"
+#include "HeterogeneousCore/MPICore/interface/MPIToken.h"
 #include "HeterogeneousCore/MPIServices/interface/MPIService.h"
 
 #include "api.h"
@@ -61,11 +63,14 @@ public:
 private:
   edm::StreamID sid_ = edm::StreamID::invalidStreamID();
 
-  MPISender sender_;
   MPI_Comm comm_ = MPI_COMM_NULL;
+  MPISender sender_;
+  edm::EDPutTokenT<MPIToken> token_;
 };
 
-MPIDriver::MPIDriver(edm::ParameterSet const& config) {
+MPIDriver::MPIDriver(edm::ParameterSet const& config)
+    : token_(produces<MPIToken>())  //
+{
   // make sure that MPI is initialised
   MPIService::required();
 
@@ -216,8 +221,12 @@ void MPIDriver::produce(edm::Event& event, edm::EventSetup const& setup) {
   // signal a new event, and transmit the EventAuxiliary
   sender_.sendEvent(sid_, event.eventAuxiliary());
 
-  // FIXME produce the MPI "token"
-  //event.emplace(...);
+  // duplicate the MPISender and put the copy into the Event
+  std::shared_ptr<MPISender> link(new MPISender(sender_.duplicate()), [](MPISender* ptr) {
+    ptr->reset();
+    delete ptr;
+  });
+  event.emplace(token_, std::move(link));
 }
 
 void MPIDriver::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {

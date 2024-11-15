@@ -5,7 +5,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/Guid.h"
-#include "HeterogeneousCore/MPICore/interface/MPIOrigin.h"
+#include "HeterogeneousCore/MPICore/interface/MPIToken.h"
 
 /* MPIReporter class
  *
@@ -21,10 +21,10 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  edm::EDGetTokenT<MPIOrigin> origin_;
+  edm::EDGetTokenT<MPIToken> token_;
 };
 
-MPIReporter::MPIReporter(edm::ParameterSet const& config) : origin_(consumes<MPIOrigin>(edm::InputTag("source"))) {}
+MPIReporter::MPIReporter(edm::ParameterSet const& config) : token_(consumes<MPIToken>(edm::InputTag("source"))) {}
 
 void MPIReporter::analyze(edm::Event const& event, edm::EventSetup const& setup) {
   {
@@ -43,11 +43,10 @@ void MPIReporter::analyze(edm::Event const& event, edm::EventSetup const& setup)
     log << "\nprocessGUID " << edm::Guid(event.eventAuxiliary().processGUID(), true).toString();
   }
 
-  auto const& origin = event.get(origin_);
+  auto const& token = event.get(token_);
   {
     edm::LogAbsolute log("MPI");
-    log << "original process rank: " << origin.rank();
-    log << "\noriginal process stream: " << origin.stream();
+    log << "got the MPIToken opaque wrapper around the MPISender at 0x" << &token;
   }
 }
 

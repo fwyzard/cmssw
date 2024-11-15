@@ -19,6 +19,12 @@ public:
   MPISender() = default;
   MPISender(MPI_Comm comm, int destination) : comm_(comm), dest_(destination) {}
 
+  // build a new MPISender that uses a duplicate of the underlying communicator and the same destination
+  MPISender duplicate() const;
+
+  // close the underlying communicator and reset the MPISender to an invalid state
+  void reset();
+
   // announce that a client has just connected
   void sendConnect(int stream) { sendEmpty_(EDM_MPI_Connect, stream); }
 
@@ -113,7 +119,7 @@ private:
   MPI_Comm comm_ = MPI_COMM_NULL;
 
   // MPI destination
-  int dest_ = 0;
+  int dest_ = MPI_UNDEFINED;
 };
 
 #endif  // HeterogeneousCore_MPICore_plugins_api_h
