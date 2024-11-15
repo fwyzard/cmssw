@@ -19,6 +19,17 @@ process.options.numberOfConcurrentLuminosityBlocks = 1
 #process.mpiReporter = mpiReporter_.clone()
 #process.path = cms.Path(process.mpiReporter)
 
+process.receiver = cms.EDProducer("MPIReceiver",
+    channel = cms.InputTag("source"),
+    tag = cms.int32(99)
+)
+
+process.analyzer = cms.EDAnalyzer("ThingEventAnalyzer",
+    input = cms.untracked.InputTag('receiver')
+)
+
+process.path = cms.Path(process.receiver + process.analyzer)
+
 from eventlist_cff import eventlist
 process.check = cms.EDAnalyzer("EventIDChecker",
     eventSequence = cms.untracked(eventlist)

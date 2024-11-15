@@ -25,6 +25,12 @@ public:
   // close the underlying communicator and reset the MPIChannel to an invalid state
   void reset();
 
+  // return the communicator
+  MPI_Comm comm() const { return comm_; }
+
+  // return the rank of the remote end of the channel
+  int rank() const { return dest_; }
+
   // announce that a client has just connected
   void sendConnect(int stream) { sendEmpty_(EDM_MPI_Connect, stream); }
 
@@ -82,7 +88,7 @@ public:
   // signal that an expected product will not be transmitted
   void sendSkipProduct(int stream) { sendEmpty_(EDM_MPI_SkipProduct, stream); }
 
-  // signal that tre transmission of multiple products is complete
+  // signal that the transmission of multiple products is complete
   void sendComplete(int stream) { sendEmpty_(EDM_MPI_SendComplete, stream); }
 
 private:

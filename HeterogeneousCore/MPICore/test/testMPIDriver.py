@@ -19,8 +19,18 @@ from HeterogeneousCore.MPICore.mpiDriver_cfi import mpiDriver as mpiDriver_
 process.mpiDriver = mpiDriver_.clone()
 
 process.things = cms.EDProducer("ThingProducer",
-    offsetDelta = cms.int32(100),
-    nThings = cms.int32(50)
+    offsetDelta = cms.int32(3),
+    nThings = cms.int32(10)
 )
 
-process.path = cms.Path(process.mpiDriver + process.things)
+process.analyzer = cms.EDAnalyzer("ThingEventAnalyzer",
+    input = cms.untracked.InputTag('things')
+)
+
+process.sender = cms.EDProducer("MPISender",
+    channel = cms.InputTag("mpiDriver"),
+    tag = cms.int32(42),
+    data =  cms.InputTag("things")
+)
+
+process.path = cms.Path(process.mpiDriver + process.things + process.analyzer + process.sender)

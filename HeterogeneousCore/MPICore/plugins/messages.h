@@ -11,7 +11,6 @@ void EDM_MPI_build_types();
 
 /* MPI message tags corresponding to EDM stream transitions
  */
-
 enum EDM_MPI_MessageTag {
   EDM_MPI_Connect,
   EDM_MPI_Disconnect,
@@ -28,6 +27,10 @@ enum EDM_MPI_MessageTag {
   EDM_MPI_SendComplete,
   EDM_MPI_MessageTagCount_
 };
+
+/* Ensure that the MPI message tags can fit in a single byte
+ */
+static_assert(EDM_MPI_MessageTagCount_ <= 256);
 
 extern MPI_Datatype EDM_MPI_MessageType[EDM_MPI_MessageTagCount_];
 

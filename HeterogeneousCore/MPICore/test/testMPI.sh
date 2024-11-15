@@ -22,7 +22,7 @@ done
 
 # start the "follower" CMSSW job(s)
 {
-  mpirun --mca pmix_server_uri file:server.uri -n 1 -- cmsRun $CMSSW_BASE/src/HeterogeneousCore/MPICore/test/testMPISource.py |& tee mpisource.log
+  mpirun --mca pmix_server_uri file:server.uri -n 1 -- cmsRun $CMSSW_BASE/src/HeterogeneousCore/MPICore/test/testMPISource.py >& mpisource.log
   echo $? > mpisource.status
 } &
 
@@ -31,7 +31,7 @@ sleep 3s
 
 # start the "driver" CMSSW job(s)
 {
-  mpirun --mca pmix_server_uri file:server.uri -n 1 -- cmsRun $CMSSW_BASE/src/HeterogeneousCore/MPICore/test/testMPIDriver.py |& tee mpidriver.log
+  mpirun --mca pmix_server_uri file:server.uri -n 1 -- cmsRun $CMSSW_BASE/src/HeterogeneousCore/MPICore/test/testMPIDriver.py >& mpidriver.log
   echo $? > mpidriver.status
 } &
 
