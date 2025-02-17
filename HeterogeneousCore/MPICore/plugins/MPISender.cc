@@ -87,7 +87,7 @@ public:
       edm::ObjectWithDict const* object = handle.product();
       // send the products over MPI
       // note: currently this uses a blocking send
-      token.channel()->sendSerializedProduct(instance_, *object);
+      token.channel()->sendProduct(instance_, *object);
     }
 
     // write a shallow copy of the channel to the output, so other modules can consume it

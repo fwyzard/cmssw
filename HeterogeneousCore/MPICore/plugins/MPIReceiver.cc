@@ -57,7 +57,7 @@ public:
 
       // receive the data sent over the MPI channel
       // note: currently this uses a blocking probe/recv
-      token.channel()->receiveSerializedProduct(instance_, product->object_);
+      token.channel()->receiveProduct(instance_, product->object_);
 
       // put the data into the Event
       event.put(entry.token, std::move(product));

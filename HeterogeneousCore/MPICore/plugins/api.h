@@ -67,16 +67,21 @@ public:
 
   // serialize an object of type T using its ROOT dictionary, and transmit it
   template <typename T>
-  void sendSerializedProduct(int instance, T const& product) {
+  void sendProduct(int instance, T const& product) {
     static const TClass* type = TClass::GetClass<T>();
     sendSerializedProduct_(instance, type, &product);
   }
 
   // serialize an object of generic type using its ROOT dictionary, and transmit it
-  void sendSerializedProduct(int instance, edm::ObjectWithDict const& product) {
+  void sendProduct(int instance, edm::ObjectWithDict const& product) {
     // the expected use case is that the product type corresponds to the actual type,
     // so we access the type with typeOf() instead of dynamicType()
-    sendSerializedProduct_(instance, product.typeOf().getClass(), product.address());
+    edm::TypeWithDict const& type = product.typeOf();
+    if (not type.isFundamental()) {
+      sendSerializedProduct_(instance, product.typeOf().getClass(), product.address());
+    } else {
+      sendTrivialProduct_(instance, product);
+    }
   }
 
   // signal that an expected product will not be transmitted
@@ -87,16 +92,21 @@ public:
 
   // receive and object of type T, and deserialize it using its ROOT dictionary
   template <typename T>
-  void receiveSerializedProduct(int instance, T& product) {
+  void receiveProduct(int instance, T& product) {
     static const TClass* type = TClass::GetClass<T>();
     receiveSerializedProduct_(instance, type, &product);
   }
 
   // receive and object of generic type, and deserialize it using its ROOT dictionary
-  void receiveSerializedProduct(int instance, edm::ObjectWithDict& product) {
+  void receiveProduct(int instance, edm::ObjectWithDict& product) {
     // the expected use case is that the product type corresponds to the actual type,
     // so we access the type with typeOf() instead of dynamicType()
-    receiveSerializedProduct_(instance, product.typeOf().getClass(), product.address());
+    edm::TypeWithDict const& type = product.typeOf();
+    if (not type.isFundamental()) {
+      receiveSerializedProduct_(instance, product.typeOf().getClass(), product.address());
+    } else {
+      receiveTrivialProduct_(instance, product);
+    }
   }
 
 private:
@@ -125,6 +135,10 @@ private:
   // receive an EDM_MPI_EventAuxiliary_t buffer and populate an edm::EventAuxiliary
   MPI_Status receiveEventAuxiliary_(edm::EventAuxiliary& aux, int source, int tag);
   MPI_Status receiveEventAuxiliary_(edm::EventAuxiliary& aux, MPI_Message& message);
+
+  // send and receive generic primitive datatype
+  void sendTrivialProduct_(int instance, edm::ObjectWithDict const& product);
+  void receiveTrivialProduct_(int instance, edm::ObjectWithDict& product);
 
   // serialize a generic object using its ROOT dictionary, and send the binary blob
   void sendSerializedProduct_(int instance, TClass const* type, void const* product);
