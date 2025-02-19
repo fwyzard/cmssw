@@ -80,6 +80,9 @@ public:
     // read the MPIToken used to establish the communication channel
     MPIToken token = event.get(upstream_);
 
+    int numProducts = static_cast<int>(products_.size());
+    token.channel()->sendProduct(instance_, numProducts);
+    
     for (auto const& product : products_) {
       // read the products to be sent over the MPI channel
       edm::GenericHandle handle(product.type);

@@ -159,7 +159,7 @@ MPI_Status MPIChannel::receiveEventAuxiliary_(edm::EventAuxiliary& aux, MPI_Mess
 // serialize an object of generic type using its ROOT dictionary, and send the binary blob
 void MPIChannel::sendSerializedProduct_(int instance, TClass const* type, void const* product) {
   TBufferFile buffer{TBuffer::kWrite};
-  buffer.WriteClassBuffer(type, const_cast<void*>(product));
+  type->Streamer(const_cast<void*>(product), buffer);
   int tag = EDM_MPI_SendSerializedProduct | instance * EDM_MPI_MessageTagWidth_;
   MPI_Send(buffer.Buffer(), buffer.Length(), MPI_BYTE, dest_, tag, comm_);
 }
@@ -180,7 +180,7 @@ void MPIChannel::receiveSerializedProduct_(int instance, TClass const* type, voi
   MPI_Get_count(&status, MPI_BYTE, &size);
   TBufferFile buffer{TBuffer::kRead, size};
   MPI_Mrecv(buffer.Buffer(), size, MPI_BYTE, &message, &status);
-  const_cast<TClass*>(type)->ReadBuffer(buffer, product);
+  type->Streamer(product, buffer);
 }
 
 void MPIChannel::receiveTrivialProduct_(int instance, edm::ObjectWithDict& product) {

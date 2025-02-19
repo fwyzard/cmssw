@@ -33,7 +33,6 @@ public:
     for (auto const& product : products) {
       auto const& type = product.getParameter<std::string>("type");
       auto const& label = product.getParameter<std::string>("label");
-
       Entry entry;
       entry.type = edm::TypeWithDict::byName(type);
       entry.wrappedType = edm::TypeWithDict::byName("edm::Wrapper<" + type + ">");
@@ -49,6 +48,11 @@ public:
   void produce(edm::StreamID, edm::Event& event, edm::EventSetup const&) const override {
     // read the MPIToken used to establish the communication channel
     MPIToken token = event.get(upstream_);
+
+    // Receive the number of products
+    int numProducts;
+    token.channel()->receiveProduct(instance_, numProducts);
+    edm::LogAbsolute("MPIReceiver") << "Received number of products: " << numProducts;
 
     for (auto const& entry : products_) {
       auto product = std::make_unique<edm::GenericProduct>();

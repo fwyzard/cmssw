@@ -3,6 +3,7 @@
 
 // externals headers
 #include <mpi.h>
+#include <type_traits>
 
 // ROOT headers
 #include <TClass.h>
@@ -68,8 +69,15 @@ public:
   // serialize an object of type T using its ROOT dictionary, and transmit it
   template <typename T>
   void sendProduct(int instance, T const& product) {
-    static const TClass* type = TClass::GetClass<T>();
-    sendSerializedProduct_(instance, type, &product);
+    if constexpr (std::is_fundamental_v<T>) {
+      sendTrivialProduct_(instance, product);
+    } else {
+      static const TClass* type = TClass::GetClass<T>();
+      if (!type) {
+        throw std::runtime_error("ROOT dictionary not found for type " + std::string(typeid(T).name()));
+      }
+      sendSerializedProduct_(instance, type, &product);
+    }
   }
 
   // serialize an object of generic type using its ROOT dictionary, and transmit it
@@ -93,8 +101,15 @@ public:
   // receive and object of type T, and deserialize it using its ROOT dictionary
   template <typename T>
   void receiveProduct(int instance, T& product) {
-    static const TClass* type = TClass::GetClass<T>();
-    receiveSerializedProduct_(instance, type, &product);
+    if constexpr (std::is_fundamental_v<T>) {
+      receiveTrivialProduct_(instance, product);
+    } else {
+      static const TClass* type = TClass::GetClass<T>();
+      if (!type) {
+        throw std::runtime_error("ROOT dictionary not found for type " + std::string(typeid(T).name()));
+      }
+      receiveSerializedProduct_(instance, type, &product);
+    }
   }
 
   // receive and object of generic type, and deserialize it using its ROOT dictionary
@@ -136,8 +151,30 @@ private:
   MPI_Status receiveEventAuxiliary_(edm::EventAuxiliary& aux, int source, int tag);
   MPI_Status receiveEventAuxiliary_(edm::EventAuxiliary& aux, MPI_Message& message);
 
+  // this is what is used for sending when product is of raw fundamental type
+  template <typename T>
+  void sendTrivialProduct_(int instance, T const& product) {
+    int tag = EDM_MPI_SendTrivialProduct | instance * EDM_MPI_MessageTagWidth_;
+    MPI_Send(&product, sizeof(T), MPI_BYTE, dest_, tag, comm_);
+  }
+
   // send and receive generic primitive datatype
   void sendTrivialProduct_(int instance, edm::ObjectWithDict const& product);
+
+  // this is what is used when product is of raw fundamental type
+  template <typename T>
+  void receiveTrivialProduct_(int instance, T& product) {
+    int tag = EDM_MPI_SendTrivialProduct | instance * EDM_MPI_MessageTagWidth_;
+    MPI_Message message;
+    MPI_Status status;
+    MPI_Mprobe(dest_, tag, comm_, &message, &status);
+    int size;
+    MPI_Get_count(&status, MPI_BYTE, &size);
+    assert(static_cast<int>(sizeof(T)) == size);
+    MPI_Mrecv(&product, size, MPI_BYTE, &message, MPI_STATUS_IGNORE);
+  }
+
+  // this is what is used when fundamental datatype is wrapped in ObjectWithDict
   void receiveTrivialProduct_(int instance, edm::ObjectWithDict& product);
 
   // serialize a generic object using its ROOT dictionary, and send the binary blob
