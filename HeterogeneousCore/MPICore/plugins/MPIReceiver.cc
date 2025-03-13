@@ -38,7 +38,7 @@ public:
       entry.wrappedType = edm::TypeWithDict::byName("edm::Wrapper<" + type + ">");
       entry.token = produces(edm::TypeID{entry.type.typeInfo()}, label);
 
-      edm::LogAbsolute("MPIReceiver") << "receive type \"" << entry.type.name() << "\" for label \"" << label
+      edm::LogVerbatim("MPIReceiver") << "receive type \"" << entry.type.name() << "\" for label \"" << label
                                       << "\" over MPI channel instance " << this->instance_;
 
       products_.emplace_back(std::move(entry));
@@ -52,7 +52,7 @@ public:
     // Receive the number of products
     int numProducts;
     token.channel()->receiveProduct(instance_, numProducts);
-    edm::LogAbsolute("MPIReceiver") << "Received number of products: " << numProducts;
+    edm::LogVerbatim("MPIReceiver") << "Received number of products: " << numProducts;
 
     for (auto const& entry : products_) {
       std::unique_ptr<edm::WrapperBase> wrapper(

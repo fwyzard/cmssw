@@ -8,19 +8,22 @@ Wrapper: A template wrapper around EDProducts to hold the product ID.
 ----------------------------------------------------------------------*/
 
 #include "DataFormats/Common/interface/CMS_CLASS_VERSION.h"
-#include "DataFormats/Common/interface/MemcpyTraits.h"
+#include "DataFormats/Common/interface/TrivialCopyTraits.h"
 #include "DataFormats/Common/interface/Uninitialized.h"
 #include "DataFormats/Common/interface/WrapperBase.h"
 #include "DataFormats/Common/interface/WrapperDetail.h"
 #include "DataFormats/Provenance/interface/ProductID.h"
 #include "FWCore/Utilities/interface/EDMException.h"
+#include "FWCore/Utilities/interface/TypeDemangler.h"
 #include "FWCore/Utilities/interface/Visibility.h"
 
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <span>
 #include <string>
 #include <typeinfo>
+#include <vector>
 
 namespace edm {
   template <typename T>
@@ -84,13 +87,13 @@ namespace edm {
 
     std::shared_ptr<soa::TableExaminerBase> tableExaminer_() const override;
 
-    bool hasMemcpyTraits_() const override;
-    bool hasMemcpyInit_() const override;
-    void memcpyInitialize_(std::vector<size_t> const&) override;
-    std::vector<size_t> memcpyParameters_() const override;
-    std::vector<std::pair<void const*, size_t>> memcpyRegions_() const override;
-    std::vector<std::pair<void*, size_t>> memcpyRegions_() override;
-    void memcpyFinalize_() override;
+    bool hasTrivialCopyTraits_() const override;
+    bool hasTrivialCopyProperties_() const override;
+    void trivialCopyInitialize_(edm::AnyBuffer const& args) override;
+    edm::AnyBuffer trivialCopyParameters_() const override;
+    std::vector<std::span<const std::byte>> trivialCopyRegions_() const override;
+    std::vector<std::span<std::byte>> trivialCopyRegions_() override;
+    void trivialCopyFinalize_() override;
 
   private:
     T obj;
@@ -194,74 +197,97 @@ namespace edm {
   }
 
   template <typename T>
-  inline bool Wrapper<T>::hasMemcpyTraits_() const {
-    if constexpr (requires(T& t) { edm::MemcpyTraits<T>::regions(t); }) {
+  inline bool Wrapper<T>::hasTrivialCopyTraits_() const {
+    if constexpr (requires(T& t) { edm::TrivialCopyTraits<T>::regions(t); }) {
       return true;
     }
     return false;
   }
 
   template <typename T>
-  inline bool Wrapper<T>::hasMemcpyInit_() const {
-    if constexpr (requires(T& t) { edm::MemcpyTraits<T>::initialize(t, std::vector<std::size_t>{}); }) {
+  inline bool Wrapper<T>::hasTrivialCopyProperties_() const {
+    if constexpr (requires { typename edm::TrivialCopyTraits<T>::Properties; }) {
       return true;
     }
     return false;
   }
 
   template <typename T>
-  void Wrapper<T>::memcpyInitialize_(std::vector<size_t> const& parameters) {
+  void Wrapper<T>::trivialCopyInitialize_([[maybe_unused]] edm::AnyBuffer const& args) {
     if (not present) {
       throw edm::Exception(edm::errors::LogicError) << "Attempt to access an empty Wrapper";
     }
-    if constexpr (requires(T& t) { edm::MemcpyTraits<T>::initialize(t, std::vector<std::size_t>{}); }) {
-      edm::MemcpyTraits<T>::initialize(obj, parameters);
-    }
+    // if edm::TrivialCopyTraits<T>::Properties is not defined, do not call initialize()
+    if constexpr (not requires { typename edm::TrivialCopyTraits<T>::Properties; }) {
+      return;
+    } else
+      // if edm::TrivialCopyTraits<T>::Properties is void, call initialize() without any additional arguments
+      if constexpr (std::is_same_v<typename edm::TrivialCopyTraits<T>::Properties, void>) {
+        edm::TrivialCopyTraits<T>::initialize(obj);
+      } else
+      // if edm::TrivialCopyTraits<T>::Properties is not void, cast args to Properties and pass it as an additional argument to initialize()
+      {
+        edm::TrivialCopyTraits<T>::initialize(obj, args.cast_to<typename edm::TrivialCopyTraits<T>::Properties>());
+      }
   }
 
   template <typename T>
-  inline std::vector<size_t> Wrapper<T>::memcpyParameters_() const {
+  inline edm::AnyBuffer Wrapper<T>::trivialCopyParameters_() const {
     if (not present) {
       throw edm::Exception(edm::errors::LogicError) << "Attempt to access an empty Wrapper";
     }
-    if constexpr (requires(T& t) { edm::MemcpyTraits<T>::parameters(t); }) {
-      return edm::MemcpyTraits<T>::parameters(obj);
+    // if edm::TrivialCopyTraits<T>::Properties is not defined, do not call properties()
+    if constexpr (not requires { typename edm::TrivialCopyTraits<T>::Properties; }) {
+      return {};
+    } else
+      // if edm::TrivialCopyTraits<T>::Properties is void, do not call properties()
+      if constexpr (std::is_same_v<typename edm::TrivialCopyTraits<T>::Properties, void>) {
+        return {};
+      } else
+      // if edm::TrivialCopyTraits<T>::Properties is not void, call properties() and wrap the result in an edm::AnyBuffer
+      {
+        typename edm::TrivialCopyTraits<T>::Properties p = edm::TrivialCopyTraits<T>::properties(obj);
+        return edm::AnyBuffer(p);
+      }
+  }
+
+  template <typename T>
+  inline std::vector<std::span<const std::byte>> Wrapper<T>::trivialCopyRegions_() const {
+    if (not present) {
+      throw edm::Exception(edm::errors::LogicError) << "Attempt to access an empty Wrapper";
+    }
+    if constexpr (requires(T const& t) { edm::TrivialCopyTraits<T>::regions(t); }) {
+      return edm::TrivialCopyTraits<T>::regions(obj);
     } else {
+      throw edm::Exception(edm::errors::LogicError)
+          << "edm::TrivialCopyTraits<T>::regions(const T&) is not defined for type "
+          << edm::typeDemangle(typeid(T).name());
       return {};
     }
   }
 
   template <typename T>
-  inline std::vector<std::pair<void const*, size_t>> Wrapper<T>::memcpyRegions_() const {
+  inline std::vector<std::span<std::byte>> Wrapper<T>::trivialCopyRegions_() {
     if (not present) {
       throw edm::Exception(edm::errors::LogicError) << "Attempt to access an empty Wrapper";
     }
-    if constexpr (requires(T const& t) { edm::MemcpyTraits<T>::regions(t); }) {
-      return edm::MemcpyTraits<T>::regions(obj);
+    if constexpr (requires(T& t) { edm::TrivialCopyTraits<T>::regions(t); }) {
+      return edm::TrivialCopyTraits<T>::regions(obj);
     } else {
+      throw edm::Exception(edm::errors::LogicError)
+          << "edm::TrivialCopyTraits<T>::regions(const T&) is not defined for type "
+          << edm::typeDemangle(typeid(T).name());
       return {};
     }
   }
 
   template <typename T>
-  inline std::vector<std::pair<void*, size_t>> Wrapper<T>::memcpyRegions_() {
+  inline void Wrapper<T>::trivialCopyFinalize_() {
     if (not present) {
       throw edm::Exception(edm::errors::LogicError) << "Attempt to access an empty Wrapper";
     }
-    if constexpr (requires(T& t) { edm::MemcpyTraits<T>::regions(t); }) {
-      return edm::MemcpyTraits<T>::regions(obj);
-    } else {
-      return {};
-    }
-  }
-
-  template <typename T>
-  inline void Wrapper<T>::memcpyFinalize_() {
-    if (not present) {
-      throw edm::Exception(edm::errors::LogicError) << "Attempt to access an empty Wrapper";
-    }
-    if constexpr (requires(T& t) { edm::MemcpyTraits<T>::finalize(t); }) {
-      edm::MemcpyTraits<T>::finalize(obj);
+    if constexpr (requires(T& t) { edm::TrivialCopyTraits<T>::finalize(t); }) {
+      edm::TrivialCopyTraits<T>::finalize(obj);
     }
   }
 

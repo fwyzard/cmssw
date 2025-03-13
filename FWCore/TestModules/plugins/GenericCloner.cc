@@ -28,7 +28,6 @@
  */
 
 #include <cstring>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -50,6 +49,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Reflection/interface/ObjectWithDict.h"
 #include "FWCore/Utilities/interface/EDMException.h"
+#include "FWCore/Utilities/interface/TypeDemangler.h"
 
 namespace edmtest {
 
@@ -139,28 +139,30 @@ namespace edmtest {
       std::unique_ptr<edm::WrapperBase> clone(
           reinterpret_cast<edm::WrapperBase*>(product.wrappedType_.getClass()->New()));
 
-      if (wrapper->hasMemcpyTraits()) {
-        // Use the memcpy traits to clone the wrapped object.
+      if (wrapper->hasTrivialCopyTraits()) {
+        // Use the trivialCopy traits to clone the wrapped object.
 
         // mark the clone as present
         clone->markAsPresent();
 
         // initialise the clone, if the type requires it
-        if (wrapper->hasMemcpyInit()) {
-          clone->memcpyInitialize(wrapper->memcpyParameters());
+        if (wrapper->hasTrivialCopyProperties()) {
+          clone->trivialCopyInitialize(wrapper->trivialCopyParameters());
         }
 
         // copy the source regions to the target
-        auto sources = wrapper->memcpyRegions();
-        auto targets = clone->memcpyRegions();
+        auto sources = wrapper->trivialCopyRegions();
+        auto targets = clone->trivialCopyRegions();
         assert(sources.size() == targets.size());
         for (size_t i = 0; i < sources.size(); ++i) {
-          assert(targets[i].second == sources[i].second);
-          std::memcpy(targets[i].first, sources[i].first, sources[i].second);
+          assert(sources[i].data() != nullptr);
+          assert(targets[i].data() != nullptr);
+          assert(targets[i].size_bytes() == sources[i].size_bytes());
+          std::memcpy(targets[i].data(), sources[i].data(), sources[i].size_bytes());
         }
 
-        // finalize the clone after the memcpy, if the type requires it
-        clone->memcpyFinalize();
+        // finalize the clone after the trivialCopy, if the type requires it
+        clone->trivialCopyFinalize();
       } else {
         // Use ROOT-based serialisation and deserialisation to clone the wrapped object.
 

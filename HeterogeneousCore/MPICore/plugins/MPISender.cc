@@ -52,12 +52,13 @@ public:
               entry.token = this->consumes(
                   edm::TypeToGet{product.unwrappedTypeID(), edm::PRODUCT_TYPE},
                   edm::InputTag{product.moduleLabel(), product.productInstanceName(), product.processName()});
-              products_.emplace_back(std::move(entry));
-              //
-              edm::LogAbsolute("MPISender")
+
+              edm::LogVerbatim("MPISender")
                   << "send product \"" << product.friendlyClassName() << '_' << product.moduleLabel() << '_'
                   << product.productInstanceName() << '_' << product.processName() << "\" of type \""
                   << entry.type.name() << "\" over MPI channel instance " << instance_;
+
+              products_.emplace_back(std::move(entry));
               break;
             }
           }
