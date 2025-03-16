@@ -58,6 +58,7 @@ private:
   MPI_Comm comm_ = MPI_COMM_NULL;
   MPIChannel channel_;
   edm::EDPutTokenT<MPIToken> token_;
+  bool run_local_;
 
   edm::ProcessHistory history_;
 };
@@ -76,22 +77,37 @@ MPISource::MPISource(edm::ParameterSet const& config, edm::InputSourceDescriptio
   // make sure the EDM MPI types are available
   EDM_MPI_build_types();
 
-  // open a server-side port
-  MPI_Open_port(MPI_INFO_NULL, port_);
+  // get from parameter set whether remote mpi is used
+  run_local_ = config.getUntrackedParameter<bool>("run_local", false);
 
-  // publish the port under the name "server"
-  MPI_Info port_info;
-  MPI_Info_create(&port_info);
-  MPI_Info_set(port_info, "ompi_global_scope", "true");
-  MPI_Info_set(port_info, "ompi_unique", "true");
-  MPI_Publish_name("server", port_info, port_);
+  edm::LogAbsolute("MPI") << "Running source in " << (run_local_ ? "local" : "remote") << " mode.";
 
-  // create an intercommunicator and accept a client connection
-  edm::LogAbsolute("MPI") << "waiting for a connection to the MPI server at port " << port_;
-  MPI_Comm_accept(port_, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &comm_);
-  channel_ = MPIChannel(comm_, 0);
+  if (run_local_) {
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    std::cout << "MPI Source Rank: " << world_rank << " in MPI_COMM_WORLD" << std::endl;
+    comm_ = MPI_COMM_WORLD;
+    channel_ = MPIChannel(comm_, 1);
+  } else {
+    // open a server-side port
+    MPI_Open_port(MPI_INFO_NULL, port_);
 
-  // wait for a client to connect
+    // publish the port under the name "server"
+    MPI_Info port_info;
+    MPI_Info_create(&port_info);
+    MPI_Info_set(port_info, "ompi_global_scope", "true");
+    MPI_Info_set(port_info, "ompi_unique", "true");
+    MPI_Publish_name("server", port_info, port_);
+
+    // create an intercommunicator and accept a client connection
+    edm::LogAbsolute("MPI") << "waiting for a connection to the MPI server at port " << port_;
+
+    MPI_Comm_accept(port_, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &comm_);
+    edm::LogAbsolute("MPI") << "connection accept ";
+    channel_ = MPIChannel(comm_, 0);
+  }
+
+  // // wait for a client to connect
   MPI_Status status;
   EDM_MPI_Empty_t buffer;
   MPI_Recv(&buffer, 1, EDM_MPI_Empty, MPI_ANY_SOURCE, EDM_MPI_Connect, comm_, &status);
@@ -100,15 +116,17 @@ MPISource::MPISource(edm::ParameterSet const& config, edm::InputSourceDescriptio
 
 MPISource::~MPISource() {
   // close the intercommunicator
-  MPI_Comm_disconnect(&comm_);
+  if (!run_local_) {
+    MPI_Comm_disconnect(&comm_);
 
-  // unpublish and close the port
-  MPI_Info port_info;
-  MPI_Info_create(&port_info);
-  MPI_Info_set(port_info, "ompi_global_scope", "true");
-  MPI_Info_set(port_info, "ompi_unique", "true");
-  MPI_Unpublish_name("server", port_info, port_);
-  MPI_Close_port(port_);
+    // unpublish and close the port
+    MPI_Info port_info;
+    MPI_Info_create(&port_info);
+    MPI_Info_set(port_info, "ompi_global_scope", "true");
+    MPI_Info_set(port_info, "ompi_unique", "true");
+    MPI_Unpublish_name("server", port_info, port_);
+    MPI_Close_port(port_);
+  }
 }
 
 //MPISource::ItemTypeInfo MPISource::getNextItemType() {
@@ -258,6 +276,8 @@ void MPISource::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.setComment("Comunicate with another cmsRun process over MPI.");
   edm::ProducerSourceBase::fillDescription(desc);
+
+  desc.addOptionalUntracked<bool>("run_local");
 
   descriptions.add("source", desc);
 }

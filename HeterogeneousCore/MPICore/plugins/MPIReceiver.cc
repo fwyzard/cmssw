@@ -50,9 +50,9 @@ public:
     MPIToken token = event.get(upstream_);
 
     // Receive the number of products
-    int numProducts;
-    token.channel()->receiveProduct(instance_, numProducts);
-    edm::LogVerbatim("MPIReceiver") << "Received number of products: " << numProducts;
+    // int numProducts;
+    // token.channel()->receiveProduct(instance_, numProducts);
+    // edm::LogVerbatim("MPIReceiver") << "Received number of products: " << numProducts;
 
     for (auto const& entry : products_) {
       std::unique_ptr<edm::WrapperBase> wrapper(

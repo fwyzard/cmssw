@@ -63,6 +63,7 @@ private:
   MPI_Comm comm_ = MPI_COMM_NULL;
   MPIChannel channel_;
   edm::EDPutTokenT<MPIToken> token_;
+  bool run_local_;
 };
 
 MPIController::MPIController(edm::ParameterSet const& config)
@@ -71,30 +72,45 @@ MPIController::MPIController(edm::ParameterSet const& config)
   // make sure that MPI is initialised
   MPIService::required();
 
+  // get from parameter set whether remote mpi is used
+  run_local_ = config.getUntrackedParameter<bool>("run_local", false);
+
+  edm::LogAbsolute("MPI") << "Running controller in " << (run_local_ ? "local" : "remote") << " mode.";
+
   // FIXME move into the MPIService ?
   // make sure the EDM MPI types are available
   EDM_MPI_build_types();
 
-  // look up the "server" port
-  char port[MPI_MAX_PORT_NAME];
-  MPI_Lookup_name("server", MPI_INFO_NULL, port);
-  edm::LogAbsolute("MPI") << "Trying to connect to the MPI server on port " << port;
+  if (!run_local_) {
+    // look up the "server" port
+    char port[MPI_MAX_PORT_NAME];
+    MPI_Lookup_name("server", MPI_INFO_NULL, port);
+    edm::LogAbsolute("MPI") << "Trying to connect to the MPI server on port " << port;
 
-  // connect to the server
-  int size;
-  MPI_Comm_connect(port, MPI_INFO_NULL, 0, MPI_COMM_SELF, &comm_);
-  MPI_Comm_remote_size(comm_, &size);
-  edm::LogAbsolute("MPI") << "Client connected to " << size << (size == 1 ? " server" : " servers");
-  if (size > 1) {
-    throw cms::Exception("UnsupportedFeature")
-        << "MPIController supports only a single follower, but it was connected to " << size << " followers";
+    // connect to the server
+    int size;
+    MPI_Comm_connect(port, MPI_INFO_NULL, 0, MPI_COMM_SELF, &comm_);
+    MPI_Comm_remote_size(comm_, &size);
+    edm::LogAbsolute("MPI") << "Client connected to " << size << (size == 1 ? " server" : " servers");
+    if (size > 1) {
+      throw cms::Exception("UnsupportedFeature")
+          << "MPIController supports only a single follower, but it was connected to " << size << " followers";
+    }
+    channel_ = MPIChannel(comm_, 0);
+  } else {
+    comm_ = MPI_COMM_WORLD;
+    channel_ = MPIChannel(comm_, 0);
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    std::cout << "MPI Controller Rank: " << world_rank << " in MPI_COMM_WORLD" << std::endl;
   }
-  channel_ = MPIChannel(comm_, 0);
 }
 
 MPIController::~MPIController() {
   // close the intercommunicator
-  MPI_Comm_disconnect(&comm_);
+  if (!run_local_) {
+    MPI_Comm_disconnect(&comm_);
+  }
 }
 
 void MPIController::beginJob() {
@@ -223,6 +239,7 @@ void MPIController::fillDescriptions(edm::ConfigurationDescriptions& description
       "Runs, LuminosityBlocks and Events from the current process to the remote one.");
 
   edm::ParameterSetDescription desc;
+  desc.addOptionalUntracked<bool>("run_local", false);
   descriptions.addWithDefaultLabel(desc);
 }
 
