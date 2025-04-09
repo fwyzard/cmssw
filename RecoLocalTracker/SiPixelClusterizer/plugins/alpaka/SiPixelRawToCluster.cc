@@ -35,6 +35,8 @@
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/stream/SynchronizingEDProducer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelClusterThresholds.h"
+#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
+#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageDevice.h"
 
 #include "SiPixelRawToClusterKernel.h"
 
@@ -77,6 +79,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const bool verbose_;
     uint32_t nDigis_;
     const SiPixelClusterThresholds clusterThresholds_;
+    std::optional<SiPixelImageDevice> images_;
   };
 
   template <typename TrackerTraits>
@@ -245,8 +248,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }
+    images_ = SiPixelImageDevice(pixelTopology::Phase1::numberOfModules,iEvent.queue());
+
     Algo_.makePhase1ClustersAsync(iEvent.queue(),
                                   clusterThresholds_,
+				  images_->view(),
                                   hMap.const_view(),
                                   modulesToUnpack,
                                   dGains.const_view(),
