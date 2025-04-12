@@ -1,0 +1,9 @@
+#ifndef RecoLocalTracker_SiPixelClusterizer_interface_SiPixelImageHostCollection_h
+#define RecoLocalTracker_SiPixelClusterizer_interface_SiPixelImageHostCollection_h
+
+#include "DataFormats/Portable/interface/PortableHostCollection.h"
+#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
+
+using SiPixelImageHostCollection = PortableHostCollection<SiPixelImageSoA>;
+
+#endif  // RecoLocalTracker_SiPixelClusterizer_interface_SiPixelImageHostCollection_h

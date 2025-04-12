@@ -29,6 +29,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/warpsize.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelClusterThresholds.h"
+#include "RecoLocalTracker/SiPixelClusterizer/interface/alpaka/SiPixelImageDeviceCollection.h"
 
 // local includes
 #include "CalibPixel.h"
@@ -621,15 +622,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto moduleStartFirstElement = cms::alpakatools::make_device_view(queue, clusters_d->view().moduleStart(), 1u);
         alpaka::memcpy(queue, nModules_Clusters_h, moduleStartFirstElement);
 
-        const auto elementsPerBlockFindClus = FindClus<TrackerTraits>::maxElementsPerBlock;
+        const auto elementsPerBlockFindClus = 384;  // TODO: optimise
         const auto workDivMaxNumModules =
             cms::alpakatools::make_workdiv<Acc1D>(numberOfModules, elementsPerBlockFindClus);
 #ifdef GPU_DEBUG
         std::cout << " FindClus kernel launch with " << numberOfModules << " blocks of " << elementsPerBlockFindClus
                   << " threadsPerBlockOrElementsPerThread\n";
 #endif
-        alpaka::exec<Acc1D>(
-            queue, workDivMaxNumModules, FindClus<TrackerTraits>{}, digis_d->view(), clusters_d->view(), wordCounter);
+
+        // allocate a temporary buffer for the 2D pixel images
+        SiPixelImageDeviceCollection images(
+            TrackerTraits::numberOfModules * TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule, queue);
+
+        alpaka::exec<Acc1D>(queue,
+                            workDivMaxNumModules,
+                            FindClus<TrackerTraits>{},
+                            digis_d->view(),
+                            clusters_d->view(),
+                            images.view(),
+                            wordCounter);
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
 #endif
@@ -709,7 +720,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto moduleStartFirstElement = cms::alpakatools::make_device_view(queue, clusters_d->view().moduleStart(), 1u);
       alpaka::memcpy(queue, nModules_Clusters_h, moduleStartFirstElement);
 
-      const auto elementsPerBlockFindClus = FindClus<TrackerTraits>::maxElementsPerBlock;
+      const auto elementsPerBlockFindClus = 384;  // TODO optimise
       const auto workDivMaxNumModules =
           cms::alpakatools::make_workdiv<Acc1D>(numberOfModules, elementsPerBlockFindClus);
 #ifdef GPU_DEBUG
@@ -717,8 +728,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       std::cout << "FindClus kernel launch with " << numberOfModules << " blocks of " << elementsPerBlockFindClus
                 << " threadsPerBlockOrElementsPerThread\n";
 #endif
-      alpaka::exec<Acc1D>(
-          queue, workDivMaxNumModules, FindClus<TrackerTraits>{}, digis_view, clusters_d->view(), numDigis);
+      // allocate a temporary buffer for the 2D pixel images
+      SiPixelImageDeviceCollection images(TrackerTraits::numberOfModules * 1000 * 1000, queue);  // FIXME
+      alpaka::exec<Acc1D>(queue,
+                          workDivMaxNumModules,
+                          FindClus<TrackerTraits>{},
+                          digis_view,
+                          clusters_d->view(),
+                          images.view(),
+                          numDigis);
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
 #endif
@@ -765,7 +783,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }  //
 
     template class SiPixelRawToClusterKernel<pixelTopology::Phase1>;
+    /*
     template class SiPixelRawToClusterKernel<pixelTopology::Phase2>;
+    */
     template class SiPixelRawToClusterKernel<pixelTopology::HIonPhase1>;
 
   }  // namespace pixelDetails

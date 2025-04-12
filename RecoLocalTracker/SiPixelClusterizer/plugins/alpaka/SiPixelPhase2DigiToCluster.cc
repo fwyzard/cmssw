@@ -117,7 +117,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     assert(nDigis == nDigis_);
 
     alpaka::memcpy(iEvent.queue(), digis_d_->buffer(), digis_h.buffer());
+    /*
     algo_.makePhase2ClustersAsync(iEvent.queue(), clusterThresholds_, digis_d_->view(), nDigis_);
+    */
   }
 
   void SiPixelPhase2DigiToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {

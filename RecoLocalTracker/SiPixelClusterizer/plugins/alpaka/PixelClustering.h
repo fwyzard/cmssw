@@ -16,6 +16,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/warpsize.h"
+#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
 
 //#define GPU_DEBUG
 
@@ -130,18 +131,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
 
   template <typename TrackerTraits>
   struct FindClus {
-    // assume that we can cover the whole module with up to 16 blockDimension-wide iterations
-    static constexpr uint32_t maxIterGPU = 16;
-
-    // this must be larger than maxPixInModule / maxIterGPU, and should be a multiple of the warp size
-    static constexpr uint32_t maxElementsPerBlock =
-        cms::alpakatools::round_up_by(TrackerTraits::maxPixInModule / maxIterGPU, 128);
-
     ALPAKA_FN_ACC void operator()(Acc1D const& acc,
                                   SiPixelDigisSoAView digi_view,
                                   SiPixelClustersSoAView clus_view,
+                                  SiPixelImageSoAView images,
                                   const unsigned int numElements) const {
       static_assert(TrackerTraits::numberOfModules < ::pixelClustering::maxNumModules);
+
+      // value used to mark empty pixels in the 2d image representation
+      constexpr uint32_t kEmptyPixel = std::numeric_limits<uint16_t>::max();
 
       auto& lastPixel = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
 
@@ -163,6 +161,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
         lastPixel = numElements;
         alpaka::syncBlockThreads(acc);
 
+        // initialise the 2d image
+        for (uint32_t i : cms::alpakatools::independent_group_elements(
+                 acc, TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule)) {
+          uint32_t pos = module * TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule + i;
+          images[pos].id() = kEmptyPixel;
+        }
+
         // skip threads not associated to an existing pixel
         for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, numElements)) {
           auto id = digi_view[i].moduleId();
@@ -176,241 +181,111 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
           }
         }
 
-        using Hist = cms::alpakatools::HistoContainer<uint16_t,
-                                                      TrackerTraits::clusterBinning,
-                                                      TrackerTraits::maxPixInModule,
-                                                      TrackerTraits::clusterBits,
-                                                      uint16_t>;
-        constexpr int warpSize = cms::alpakatools::warpSize;
-        auto& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
-        auto& ws = alpaka::declareSharedVar<typename Hist::Counter[warpSize], __COUNTER__>(acc);
-        for (uint32_t j : cms::alpakatools::independent_group_elements(acc, Hist::totbins())) {
-          hist.off[j] = 0;
-        }
+        // ensure that all threads agree on the value of lastPixel
         alpaka::syncBlockThreads(acc);
-
         ALPAKA_ASSERT_ACC((lastPixel == numElements) or
                           ((lastPixel < numElements) and (digi_view[lastPixel].moduleId() != thisModuleId)));
-        // limit to maxPixInModule  (FIXME if recurrent (and not limited to simulation with low threshold) one will need to implement something cleverer)
-        if (cms::alpakatools::once_per_block(acc)) {
-          if (lastPixel - firstPixel > TrackerTraits::maxPixInModule) {
-            printf("too many pixels in module %u: %u > %u\n",
-                   thisModuleId,
-                   lastPixel - firstPixel,
-                   TrackerTraits::maxPixInModule);
-            lastPixel = TrackerTraits::maxPixInModule + firstPixel;
-          }
-        }
-        alpaka::syncBlockThreads(acc);
-        ALPAKA_ASSERT_ACC(lastPixel - firstPixel <= TrackerTraits::maxPixInModule);
 
-#ifdef GPU_DEBUG
-        auto& totGood = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
-        totGood = 0;
-        alpaka::syncBlockThreads(acc);
-#endif
+        // ensure that the total number of active pixels in the module can fit in 16 bit (- 1 for kEmptyPixel)
+        ALPAKA_ASSERT_ACC((lastPixel - firstPixel) < kEmptyPixel);
 
-        // remove duplicate pixels
         constexpr bool isPhase2 = std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value;
-        if constexpr (not isPhase2) {
-          // packed words array used to store the pixelStatus of each pixel
-          auto& status = alpaka::declareSharedVar<uint32_t[pixelStatus::size], __COUNTER__>(acc);
 
-          if (lastPixel > 1) {
-            for (uint32_t i : cms::alpakatools::independent_group_elements(acc, pixelStatus::size)) {
-              status[i] = 0;
-            }
-            alpaka::syncBlockThreads(acc);
-
-            for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel - 1)) {
-              // skip invalid pixels
-              if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
-                continue;
-              pixelStatus::promote(acc, status, digi_view[i].xx(), digi_view[i].yy());
-            }
-            alpaka::syncBlockThreads(acc);
-
-            for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel - 1)) {
-              // skip invalid pixels
-              if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
-                continue;
-              if (pixelStatus::isDuplicate(status, digi_view[i].xx(), digi_view[i].yy())) {
-                digi_view[i].moduleId() = ::pixelClustering::invalidModuleId;
-                digi_view[i].rawIdArr() = 0;
-              }
-            }
-            alpaka::syncBlockThreads(acc);
-          }
-        }
-
-        // fill histo
+        // fill the 2d image
         for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
           // skip invalid pixels
-          if (digi_view[i].moduleId() != ::pixelClustering::invalidModuleId) {
-            hist.count(acc, digi_view[i].yy());
-#ifdef GPU_DEBUG
-            alpaka::atomicAdd(acc, &totGood, 1u, alpaka::hierarchy::Blocks{});
-#endif
-          }
-        }
-        alpaka::syncBlockThreads(acc);  // FIXME this can be removed
-        for (uint32_t i : cms::alpakatools::independent_group_elements(acc, warpSize)) {
-          ws[i] = 0;  // used by prefix scan...
-        }
-        alpaka::syncBlockThreads(acc);
-        hist.finalize(acc, ws);
-        alpaka::syncBlockThreads(acc);
-#ifdef GPU_DEBUG
-        ALPAKA_ASSERT_ACC(hist.size() == totGood);
-        if (thisModuleId % 100 == 1)
-          if (cms::alpakatools::once_per_block(acc))
-            printf("histo size %d\n", hist.size());
-#endif
-        for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
-          // skip invalid pixels
-          if (digi_view[i].moduleId() != ::pixelClustering::invalidModuleId) {
-            hist.fill(acc, digi_view[i].yy(), i - firstPixel);
-          }
-        }
-
-#ifdef GPU_DEBUG
-        // look for anomalous high occupancy
-        auto& n40 = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
-        auto& n60 = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
-        if (cms::alpakatools::once_per_block(acc)) {
-          n40 = 0;
-          n60 = 0;
-        }
-        alpaka::syncBlockThreads(acc);
-        for (uint32_t j : cms::alpakatools::independent_group_elements(acc, Hist::nbins())) {
-          if (hist.size(j) > 60)
-            alpaka::atomicAdd(acc, &n60, 1u, alpaka::hierarchy::Blocks{});
-          if (hist.size(j) > 40)
-            alpaka::atomicAdd(acc, &n40, 1u, alpaka::hierarchy::Blocks{});
-        }
-        alpaka::syncBlockThreads(acc);
-        if (cms::alpakatools::once_per_block(acc)) {
-          if (n60 > 0)
-            printf("columns with more than 60 px %d in %d\n", n60, thisModuleId);
-          else if (n40 > 0)
-            printf("columns with more than 40 px %d in %d\n", n40, thisModuleId);
-        }
-        alpaka::syncBlockThreads(acc);
-#endif
-
-        [[maybe_unused]] const uint32_t blockDimension = alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u];
-        // assume that we can cover the whole module with up to maxIterGPU blockDimension-wide iterations
-        ALPAKA_ASSERT_ACC((hist.size() / blockDimension) < maxIterGPU);
-
-        // number of elements per thread
-        constexpr uint32_t maxElements =
-            cms::alpakatools::requires_single_thread_per_block_v<Acc1D> ? maxElementsPerBlock : 1;
-        ALPAKA_ASSERT_ACC((alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u] <= maxElements));
-
-        constexpr unsigned int maxIter = maxIterGPU * maxElements;
-
-        // nearest neighbours (nn)
-        // allocate space for duplicate pixels: a pixel can appear more than once with different charge in the same event
-        constexpr int maxNeighbours = 10;
-        uint16_t nn[maxIter][maxNeighbours];
-        uint8_t nnn[maxIter];  // number of nn
-        for (uint32_t k = 0; k < maxIter; ++k) {
-          nnn[k] = 0;
-        }
-
-        alpaka::syncBlockThreads(acc);  // for hit filling!
-
-        // fill the nearest neighbours
-        uint32_t k = 0;
-        for (uint32_t j : cms::alpakatools::independent_group_elements(acc, hist.size())) {
-          ALPAKA_ASSERT_ACC(k < maxIter);
-          auto p = hist.begin() + j;
-          auto i = *p + firstPixel;
-          ALPAKA_ASSERT_ACC(digi_view[i].moduleId() != ::pixelClustering::invalidModuleId);
-          ALPAKA_ASSERT_ACC(digi_view[i].moduleId() == thisModuleId);  // same module
-          auto bin = Hist::bin(digi_view[i].yy() + 1);
-          auto end = hist.end(bin);
-          ++p;
-          ALPAKA_ASSERT_ACC(0 == nnn[k]);
-          for (; p < end; ++p) {
-            auto m = *p + firstPixel;
-            ALPAKA_ASSERT_ACC(m != i);
-            ALPAKA_ASSERT_ACC(int(digi_view[m].yy()) - int(digi_view[i].yy()) >= 0);
-            ALPAKA_ASSERT_ACC(int(digi_view[m].yy()) - int(digi_view[i].yy()) <= 1);
-            if (std::abs(int(digi_view[m].xx()) - int(digi_view[i].xx())) <= 1) {
-              auto l = nnn[k]++;
-              ALPAKA_ASSERT_ACC(l < maxNeighbours);
-              nn[k][l] = *p;
+          if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
+            continue;
+          uint16_t x = digi_view[i].xx();
+          uint16_t y = digi_view[i].yy();
+          uint32_t pos = module * TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule +
+                         y * TrackerTraits::numColsInModule + x;
+          if constexpr (isPhase2) {
+            images[pos].id() = static_cast<uint16_t>(i - firstPixel);
+          } else {
+            // check for duplicate pixels only for the Phase 1 detector
+            if (alpaka::atomicCas(acc, &images[pos].id(), kEmptyPixel, static_cast<uint32_t>(i - firstPixel)) !=
+                kEmptyPixel) {
+              digi_view[i].moduleId() = ::pixelClustering::invalidModuleId;
+              digi_view[i].rawIdArr() = 0;
             }
           }
-          ++k;
         }
 
-        // for each pixel, look at all the pixels until the end of the module;
-        // when two valid pixels within +/- 1 in x or y are found, set their id to the minimum;
-        // after the loop, all the pixel in each cluster should have the id equeal to the lowest
-        // pixel in the cluster ( clus[i] == i ).
+        // ensure that all threads have completed filling the image
+        alpaka::syncBlockThreads(acc);
+
+        // for each pixel, look at its 8 neighbours; when two valid pixels
+        // within +/- 1 in x or y are found, set their id to the minimum;
+        // after the loop, all the pixel in each cluster should have the id
+        // equal to the lowest pixel in the cluster (clus[i] == i).
         bool more = true;
-        /*
-          int nloops = 0;
-          */
         while (alpaka::syncBlockThreadsPredicate<alpaka::BlockOr>(acc, more)) {
-          /*
-            if (nloops % 2 == 0) {
-              // even iterations of the outer loop
-            */
           more = false;
-          uint32_t k = 0;
-          for (uint32_t j : cms::alpakatools::independent_group_elements(acc, hist.size())) {
-            ALPAKA_ASSERT_ACC(k < maxIter);
-            auto p = hist.begin() + j;
-            auto i = *p + firstPixel;
-            for (int kk = 0; kk < nnn[k]; ++kk) {
-              auto l = nn[k][kk];
-              auto m = l + firstPixel;
-              ALPAKA_ASSERT_ACC(m != i);
-              // FIXME ::Threads ?
-              auto old = alpaka::atomicMin(acc, &digi_view[m].clus(), digi_view[i].clus(), alpaka::hierarchy::Blocks{});
-              if (old != digi_view[i].clus()) {
-                // end the loop only if no changes were applied
-                more = true;
-              }
-              // FIXME ::Threads ?
-              alpaka::atomicMin(acc, &digi_view[i].clus(), old, alpaka::hierarchy::Blocks{});
-            }  // neighbours loop
-            ++k;
-          }  // pixel loop
-          /*
-              // use the outer loop to force a synchronisation
-            } else {
-              // odd iterations of the outer loop
-            */
-          alpaka::syncBlockThreads(acc);
-          for (uint32_t j : cms::alpakatools::independent_group_elements(acc, hist.size())) {
-            auto p = hist.begin() + j;
-            auto i = *p + firstPixel;
-            auto m = digi_view[i].clus();
-            while (m != digi_view[m].clus())
-              m = digi_view[m].clus();
-            digi_view[i].clus() = m;
-          }
-          /*
+          for (uint32_t i : cms::alpakatools::independent_group_elements(
+                   acc, TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule)) {
+            uint32_t pos = module * TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule + i;
+
+            // do not update empty pixels
+            if (images[pos].id() == kEmptyPixel) {
+              continue;
             }
-            ++nloops;
-            */
+
+            int16_t y = i / TrackerTraits::numColsInModule;
+            int16_t x = i % TrackerTraits::numColsInModule;
+            int16_t x_min = alpaka::math::max(acc, x - 1, 0);
+            int16_t y_min = alpaka::math::max(acc, y - 1, 0);
+            int16_t x_max = alpaka::math::min(acc, x + 1, TrackerTraits::numColsInModule - 1);
+            int16_t y_max = alpaka::math::min(acc, y + 1, TrackerTraits::numRowsInModule - 1);
+
+            // any valid value is smaller than kEmptyPixel
+            uint32_t tmp = kEmptyPixel;
+            for (int16_t iy = y_min; iy <= y_max; ++iy) {
+              for (int16_t ix = x_min; ix <= x_max; ++ix) {
+                uint32_t ipos = module * TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule +
+                                iy * TrackerTraits::numColsInModule + ix;
+                // potential race condition (here: reading images[i], line 292: writing images[i])
+                // however, at most this skips ahead one update, so the result should still be ok
+                uint32_t val = images[ipos].id();
+                tmp = alpaka::math::min(acc, tmp, val);
+              }
+            }
+            if (images[pos].id() != tmp) {
+              ALPAKA_ASSERT_ACC(tmp != kEmptyPixel);
+              /* should nver happen 
+              if (tmp == kEmptyPixel) {
+                printf("invalid update at x=%d, y=%d, id=%d\n", x, y, images[pos].id());
+                printf("  "); for (int16_t iy = y_min; iy < y_max; ++iy) { printf("______  "); }; printf("\n");
+                for (int16_t ix = x_min; ix < x_max; ++ix) {
+                  printf("[ ");
+                  for (int16_t iy = y_min; iy < y_max; ++iy) {
+                    uint32_t ipos = module * TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule + iy * TrackerTraits::numColsInModule + ix;
+                    int32_t val = images[ipos].id();
+                    printf("%6d  ", val);
+                  }
+                  printf(" ]\n");
+                }
+                printf("  "); for (int16_t iy = y_min; iy < y_max; ++iy) { printf("^^^^^^  "); }; printf("\n");
+                printf("\n");
+              }
+              */
+              images[pos].id() = tmp;
+              more = true;
+            }
+          }  // pixel loop
         }  // end while
 
-        /*
-            // check that all threads in the block have executed the same number of iterations
-            auto& n0 = alpaka::declareSharedVar<int, __COUNTER__>(acc);
-            if (cms::alpakatools::once_per_block(acc))
-              n0 = nloops;
-            alpaka::syncBlockThreads(acc);
-            ALPAKA_ASSERT_ACC(alpaka::syncBlockThreadsPredicate<alpaka::BlockAnd>(acc, nloops == n0));
-            if (thisModuleId % 100 == 1)
-              if (cms::alpakatools::once_per_block(acc))
-                printf("# loops %d\n", nloops);
-          */
+        // copy the cluster id back into the digi_view
+        for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
+          // skip invalid or duplicate pixels
+          if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
+            continue;
+          uint16_t x = digi_view[i].xx();
+          uint16_t y = digi_view[i].yy();
+          uint32_t pos = module * TrackerTraits::numRowsInModule * TrackerTraits::numColsInModule +
+                         y * TrackerTraits::numColsInModule + x;
+          digi_view[i].clus() = images[pos].id() + firstPixel;
+        }
 
         auto& foundClusters = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
         foundClusters = 0;
@@ -419,7 +294,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
         // find the number of different clusters, identified by a pixels with clus[i] == i;
         // mark these pixels with a negative id.
         for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
-          // skip invalid pixels
+          // skip invalid or duplicate pixels
           if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
             continue;
           if (digi_view[i].clus() == static_cast<int>(i)) {
