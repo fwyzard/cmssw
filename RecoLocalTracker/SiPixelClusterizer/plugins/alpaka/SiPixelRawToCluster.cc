@@ -81,8 +81,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const bool verbose_;
     uint32_t nDigis_;
     const SiPixelClusterThresholds clusterThresholds_;
-    std::optional<SiPixelImageDevice> imagesNoMorph_;
-    std::optional<SiPixelImageMorphDevice> imagesMorph_;
+    //std::optional<SiPixelImageDevice> imagesNoMorph_;
+    //std::optional<SiPixelImageMorphDevice> imagesMorph_;
     SiPixelMorphingConfig digiMorphingConfig_;
   };
 
@@ -279,11 +279,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }
     if (doDigiMorphing_) {
-      imagesMorph_ = SiPixelImageMorphDevice(pixelTopology::Phase1::numberOfModules, iEvent.queue());
+      //imagesMorph_ = SiPixelImageMorphDevice(pixelTopology::Phase1::numberOfModules, iEvent.queue());
 
       Algo_.template makePhase1ClustersAsync<SiPixelImageMorphDevice>(iEvent.queue(),
                                                                       clusterThresholds_,
-                                                                      imagesMorph_->view(),
+                                                                      //imagesMorph_->view(),
                                                                       doDigiMorphing_,
                                                                       &digiMorphingConfig_,
                                                                       hMap.const_view(),
@@ -296,11 +296,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                                       includeErrors_,
                                                                       verbose_);
     } else {
-      imagesNoMorph_ = SiPixelImageDevice(pixelTopology::Phase1::numberOfModules, iEvent.queue());
+      //imagesNoMorph_ = SiPixelImageDevice(pixelTopology::Phase1::numberOfModules, iEvent.queue());
 
       Algo_.template makePhase1ClustersAsync<SiPixelImageDevice>(iEvent.queue(),
                                                                  clusterThresholds_,
-                                                                 imagesNoMorph_->view(),
+                                                                 //imagesNoMorph_->view(),
                                                                  doDigiMorphing_,
                                                                  &digiMorphingConfig_,
                                                                  hMap.const_view(),
