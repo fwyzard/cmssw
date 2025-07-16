@@ -265,35 +265,33 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }
     if (doDigiMorphing_) {
-      Algo_.template makePhase1ClustersAsync<SiPixelImageMorphDevice>(
-          iEvent.queue(),
-          clusterThresholds_,
-          doDigiMorphing_,
-          &digiMorphingConfig_,  // TODO it may be more efficient to pass these to the kernel by value
-          hMap.const_view(),
-          modulesToUnpack,
-          dGains.const_view(),
-          wordFedAppender,
-          wordCounter,
-          fedCounter,
-          useQuality_,
-          includeErrors_,
-          verbose_);
+      Algo_.template makePhase1ClustersAsync<SiPixelImageMorphDevice>(iEvent.queue(),
+                                                                      clusterThresholds_,
+                                                                      doDigiMorphing_,
+                                                                      digiMorphingConfig_,
+                                                                      hMap.const_view(),
+                                                                      modulesToUnpack,
+                                                                      dGains.const_view(),
+                                                                      wordFedAppender,
+                                                                      wordCounter,
+                                                                      fedCounter,
+                                                                      useQuality_,
+                                                                      includeErrors_,
+                                                                      verbose_);
     } else {
-      Algo_.template makePhase1ClustersAsync<SiPixelImageDevice>(
-          iEvent.queue(),
-          clusterThresholds_,
-          doDigiMorphing_,
-          &digiMorphingConfig_,  // TODO it may be more efficient to pass these to the kernel by value
-          hMap.const_view(),
-          modulesToUnpack,
-          dGains.const_view(),
-          wordFedAppender,
-          wordCounter,
-          fedCounter,
-          useQuality_,
-          includeErrors_,
-          verbose_);
+      Algo_.template makePhase1ClustersAsync<SiPixelImageDevice>(iEvent.queue(),
+                                                                 clusterThresholds_,
+                                                                 doDigiMorphing_,
+                                                                 digiMorphingConfig_,
+                                                                 hMap.const_view(),
+                                                                 modulesToUnpack,
+                                                                 dGains.const_view(),
+                                                                 wordFedAppender,
+                                                                 wordCounter,
+                                                                 fedCounter,
+                                                                 useQuality_,
+                                                                 includeErrors_,
+                                                                 verbose_);
     }
   }
 

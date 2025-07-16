@@ -505,7 +505,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         Queue &queue,
         const SiPixelClusterThresholds clusterThresholds,
         bool doDigiMorphing,
-        const SiPixelMorphingConfig *digiMorphingConfig,
+        const SiPixelMorphingConfig &digiMorphingConfig,
         const SiPixelMappingSoAConstView &cablingMap,
         const unsigned char *modToUnp,
         const SiPixelGainCalibrationForHLTSoAConstView &gains,
@@ -628,12 +628,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
         int offset = int(doDigiMorphing) + 1;
 
-        auto kernel1_d = cms::alpakatools::make_device_buffer<int32_t[]>(queue, digiMorphingConfig->kernel1.size());
-        auto kernel2_d = cms::alpakatools::make_device_buffer<int32_t[]>(queue, digiMorphingConfig->kernel2.size());
+        auto kernel1_d = cms::alpakatools::make_device_buffer<int32_t[]>(queue, digiMorphingConfig.kernel1.size());
+        auto kernel2_d = cms::alpakatools::make_device_buffer<int32_t[]>(queue, digiMorphingConfig.kernel2.size());
         auto kernel1_h =
-            cms::alpakatools::make_host_view(digiMorphingConfig->kernel1.data(), digiMorphingConfig->kernel1.size());
+            cms::alpakatools::make_host_view(digiMorphingConfig.kernel1.data(), digiMorphingConfig.kernel1.size());
         auto kernel2_h =
-            cms::alpakatools::make_host_view(digiMorphingConfig->kernel2.data(), digiMorphingConfig->kernel2.size());
+            cms::alpakatools::make_host_view(digiMorphingConfig.kernel2.data(), digiMorphingConfig.kernel2.size());
 
         alpaka::memcpy(queue, kernel1_d, kernel1_h);
         alpaka::memcpy(queue, kernel2_d, kernel2_h);
@@ -648,12 +648,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             digis_d->view(),
                             images.view(),
                             offset,
-                            kernel1_d.data(),
-                            kernel2_d.data(),
+                            kernel1_d.data(),  // TODO it may be more efficient to pass these by value
+                            kernel2_d.data(),  // TODO it may be more efficient to pass these by value
                             clusters_d->view(),
                             wordCounter);
-        //alpaka::exec<Acc1D>(
-        //   queue, workDivMaxNumModules, FindClus<TrackerTraits>{}, digis_d->view(), clusters_d->view(), wordCounter);
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
 #endif
@@ -709,9 +707,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template void Phase1Kernel::makePhase1ClustersAsync<SiPixelImageDevice>(
         Queue &,
         const SiPixelClusterThresholds,
-        //    SiPixelImageDevice::View,
         bool,
-        const SiPixelMorphingConfig *,
+        const SiPixelMorphingConfig &,
         const SiPixelMappingSoAConstView &,
         const unsigned char *,
         const SiPixelGainCalibrationForHLTSoAConstView &,
@@ -724,9 +721,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template void Phase1Kernel::makePhase1ClustersAsync<SiPixelImageMorphDevice>(
         Queue &,
         const SiPixelClusterThresholds,
-        //    SiPixelImageMorphDevice::View,
         bool,
-        const SiPixelMorphingConfig *,
+        const SiPixelMorphingConfig &,
         const SiPixelMappingSoAConstView &,
         const unsigned char *,
         const SiPixelGainCalibrationForHLTSoAConstView &,
@@ -739,9 +735,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template void HIonPhase1Kernel::makePhase1ClustersAsync<SiPixelImageDevice>(
         Queue &,
         const SiPixelClusterThresholds,
-        //  SiPixelImageDevice::View,
         bool,
-        const SiPixelMorphingConfig *,
+        const SiPixelMorphingConfig &,
         const SiPixelMappingSoAConstView &,
         const unsigned char *,
         const SiPixelGainCalibrationForHLTSoAConstView &,
@@ -754,9 +749,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template void HIonPhase1Kernel::makePhase1ClustersAsync<SiPixelImageMorphDevice>(
         Queue &,
         const SiPixelClusterThresholds,
-        //    SiPixelImageMorphDevice::View,
         bool,
-        const SiPixelMorphingConfig *,
+        const SiPixelMorphingConfig &,
         const SiPixelMappingSoAConstView &,
         const unsigned char *,
         const SiPixelGainCalibrationForHLTSoAConstView &,
