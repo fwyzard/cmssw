@@ -35,8 +35,8 @@
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/stream/SynchronizingEDProducer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelClusterThresholds.h"
-#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
 #include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageDevice.h"
+#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
 
 #include "SiPixelRawToClusterKernel.h"
 #include "SiPixelMorphingConfig.h"
@@ -150,8 +150,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
     {
       edm::ParameterSetDescription psd1;
-      psd1.addOptional<std::vector<int32_t>>("kernel1");
-      psd1.addOptional<std::vector<int32_t>>("kernel2");
+      psd1.add<std::vector<int32_t>>("kernel1", {1, 1, 1, 1, 1, 1, 1, 1, 1});
+      psd1.add<std::vector<int32_t>>("kernel2", {0, 1, 0, 1, 1, 1, 0, 1, 0});
       desc.add<edm::ParameterSetDescription>("DigiMorphing", psd1)
           ->setComment("## Parameter settings for digi morphing to heal split clusters");
     }
