@@ -4,9 +4,12 @@
 #include <array>
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
-using SiPixelImage = std::array<std::array<uint16_t, 162>, 418>;
-using SiPixelImageMorph = std::array<std::array<uint16_t, 164>, 420>;
+using SiPixelImage = std::array<std::array<uint16_t, pixelTopology::Phase1::numRowsInModule + 2>,
+                                pixelTopology::Phase1::numColsInModule + 2>;
+using SiPixelImageMorph = std::array<std::array<uint16_t, pixelTopology::Phase1::numRowsInModule + 4>,
+                                     pixelTopology::Phase1::numColsInModule + 4>;
 
 GENERATE_SOA_LAYOUT(SiPixelImageLayout, SOA_COLUMN(SiPixelImage, clus))
 
