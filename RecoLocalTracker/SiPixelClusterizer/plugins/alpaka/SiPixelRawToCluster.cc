@@ -35,8 +35,6 @@
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/stream/SynchronizingEDProducer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelClusterThresholds.h"
-#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageDevice.h"
-#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
 
 #include "SiPixelRawToClusterKernel.h"
 #include "SiPixelMorphingConfig.h"
@@ -264,35 +262,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }
-    if (doDigiMorphing_) {
-      Algo_.template makePhase1ClustersAsync<SiPixelImageMorphDevice>(iEvent.queue(),
-                                                                      clusterThresholds_,
-                                                                      doDigiMorphing_,
-                                                                      digiMorphingConfig_,
-                                                                      hMap.const_view(),
-                                                                      modulesToUnpack,
-                                                                      dGains.const_view(),
-                                                                      wordFedAppender,
-                                                                      wordCounter,
-                                                                      fedCounter,
-                                                                      useQuality_,
-                                                                      includeErrors_,
-                                                                      verbose_);
-    } else {
-      Algo_.template makePhase1ClustersAsync<SiPixelImageDevice>(iEvent.queue(),
-                                                                 clusterThresholds_,
-                                                                 doDigiMorphing_,
-                                                                 digiMorphingConfig_,
-                                                                 hMap.const_view(),
-                                                                 modulesToUnpack,
-                                                                 dGains.const_view(),
-                                                                 wordFedAppender,
-                                                                 wordCounter,
-                                                                 fedCounter,
-                                                                 useQuality_,
-                                                                 includeErrors_,
-                                                                 verbose_);
-    }
+    Algo_.makePhase1ClustersAsync(iEvent.queue(),
+                                  clusterThresholds_,
+                                  doDigiMorphing_,
+                                  digiMorphingConfig_,
+                                  hMap.const_view(),
+                                  modulesToUnpack,
+                                  dGains.const_view(),
+                                  wordFedAppender,
+                                  wordCounter,
+                                  fedCounter,
+                                  useQuality_,
+                                  includeErrors_,
+                                  verbose_);
   }
 
   template <typename TrackerTraits>

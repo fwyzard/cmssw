@@ -23,8 +23,6 @@
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"
 #include "DataFormats/SiPixelDetId/interface/PixelChannelIdentifier.h"
-#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
-#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageDevice.h"
 #include "SiPixelMorphingConfig.h"
 
 namespace pixelDetails {
@@ -153,7 +151,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       SiPixelRawToClusterKernel& operator=(const SiPixelRawToClusterKernel&) = delete;
       SiPixelRawToClusterKernel& operator=(SiPixelRawToClusterKernel&&) = delete;
 
-      template <typename ImageType>
       void makePhase1ClustersAsync(Queue& queue,
                                    const SiPixelClusterThresholds clusterThresholds,
                                    bool doDigiMorphing,

@@ -17,7 +17,6 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/warpsize.h"
 #include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
-#include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageDevice.h"
 #include "SiPixelMorphingConfig.h"
 
 //#define GPU_DEBUG
@@ -136,7 +135,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
     }
   };
 
-  template <typename TrackerTraits, typename ImageType>
+  template <typename TrackerTraits>
   struct FindClus {
     // assume that we can cover the whole module with up to 16 blockDimension-wide iterations
     static constexpr uint32_t maxIterGPU = 16;
@@ -147,8 +146,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
 
     ALPAKA_FN_ACC void operator()(Acc1D const& acc,
                                   SiPixelDigisSoAView digi_view,
-                                  typename ImageType::View images,
-                                  int offset,
+                                  SiPixelImageMorphSoAView images,
+                                  bool doMorphing,
                                   int32_t* kernel1,
                                   int32_t* kernel2,
                                   SiPixelClustersSoAView clus_view,
@@ -207,10 +206,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
         alpaka::syncBlockThreads(acc);
         ALPAKA_ASSERT_ACC(lastPixel - firstPixel <= TrackerTraits::maxPixInModule);
 
-        uint32_t imageSizeX = pixelStatus::pixelSizeX + offset * 2;
-        uint32_t imageSizeY = pixelStatus::pixelSizeY + offset * 2;
-        uint32_t imgsize = imageSizeX * imageSizeY;
-        uint32_t pixsize = pixelStatus::pixelSizeX * pixelStatus::pixelSizeY;
+        constexpr uint32_t offset = 2;
+        constexpr uint32_t imageSizeX = pixelStatus::pixelSizeX + offset * 2;
+        constexpr uint32_t imageSizeY = pixelStatus::pixelSizeY + offset * 2;
+        constexpr uint32_t imgsize = imageSizeX * imageSizeY;
+        constexpr uint32_t pixsize = pixelStatus::pixelSizeX * pixelStatus::pixelSizeY;
         for (uint32_t j : cms::alpakatools::independent_group_elements(acc, imgsize)) {
           uint16_t row = j / imageSizeY;
           uint16_t col = j % imageSizeY;
@@ -293,7 +293,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
           }
         }
 
-        if (offset > 1) {
+        if (doMorphing) {
           uint32_t morphingsize = (pixelStatus::pixelSizeX + 2) * (pixelStatus::pixelSizeY + 2);
           //Morphing: Dilation
           for (uint32_t j : cms::alpakatools::independent_group_elements(acc, morphingsize)) {
