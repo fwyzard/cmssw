@@ -159,7 +159,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
 
       // block id, used to choose the image to use as scratch space
       int block = alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0];
-      auto image = images[block];
+      auto& image = images[block].clus();
 
       const uint32_t lastModule = clus_view[0].moduleStart();
       for (uint32_t module : cms::alpakatools::independent_groups(acc, lastModule)) {
@@ -214,7 +214,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
         for (uint32_t j : cms::alpakatools::independent_group_elements(acc, imgsize)) {
           uint16_t row = j / imageSizeY;
           uint16_t col = j % imageSizeY;
-          image.clus()[col][row] = pixelStatus::empVal;
+          image[col][row] = pixelStatus::empVal;
         }
         alpaka::syncBlockThreads(acc);
 
@@ -259,7 +259,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
             }
             alpaka::syncBlockThreads(acc);
 
-            alpaka::syncBlockThreads(acc);
             for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
               // skip invalid pixels
               if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
@@ -272,7 +271,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
               }
               int fpX = digi_view[i].xx() + offset;
               int fpY = digi_view[i].yy() + offset;
-              image.clus()[fpY][fpX] = static_cast<uint16_t>(digi_view[i].clus() - firstPixel);
+              image[fpY][fpX] = static_cast<uint16_t>(digi_view[i].clus() - firstPixel);
             }
             alpaka::syncBlockThreads(acc);
           }
@@ -290,7 +289,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
             int32_t uniqueClusterId =
                 alpaka::atomicInc(acc, &clusterCounter, int(0xFFFFFFFF), alpaka::hierarchy::Blocks{});
             ALPAKA_ASSERT_ACC(uniqueClusterId < static_cast<uint16_t>(std::numeric_limits<uint16_t>::max() - 5));
-            image.clus()[fpY][fpX] = static_cast<uint16_t>(uniqueClusterId);
+            image[fpY][fpX] = static_cast<uint16_t>(uniqueClusterId);
           }
         }
 
@@ -300,11 +299,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
           for (uint32_t j : cms::alpakatools::independent_group_elements(acc, morphingsize)) {
             uint16_t row = j / (pixelStatus::pixelSizeY + 2) + 1;
             uint16_t col = j % (pixelStatus::pixelSizeY + 2) + 1;
-            for (int i = 0; i < 3 && image.clus()[col][row] == pixelStatus::empVal; i++) {
+            for (int i = 0; i < 3 and image[col][row] == pixelStatus::empVal; i++) {
               for (int jj = 0; jj < 3; jj++) {
-                if (image.clus()[col + i - 1][row + jj - 1] != pixelStatus::empVal &&
-                    image.clus()[col + i - 1][row + jj - 1] != pixelStatus::fakeVal && kernel1[i * 3 + jj]) {
-                  image.clus()[col][row] = pixelStatus::fakeVal;
+                if (image[col + i - 1][row + jj - 1] != pixelStatus::empVal and
+                    image[col + i - 1][row + jj - 1] != pixelStatus::fakeVal and kernel1[i * 3 + jj]) {
+                  image[col][row] = pixelStatus::fakeVal;
                 }
               }
             }
@@ -314,10 +313,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
           for (uint32_t j : cms::alpakatools::independent_group_elements(acc, morphingsize)) {
             uint16_t row = j / (pixelStatus::pixelSizeY + 2) + 1;
             uint16_t col = j % (pixelStatus::pixelSizeY + 2) + 1;
-            for (int i = 0; i < 3 && image.clus()[col][row] == pixelStatus::fakeVal; i++) {
+            for (int i = 0; i < 3 and image[col][row] == pixelStatus::fakeVal; i++) {
               for (int jj = 0; jj < 3; jj++) {
-                if (image.clus()[col + i - 1][row + jj - 1] == pixelStatus::empVal && kernel2[i * 3 + jj]) {
-                  image.clus()[col][row] = pixelStatus::eroded;
+                if (image[col + i - 1][row + jj - 1] == pixelStatus::empVal and kernel2[i * 3 + jj]) {
+                  image[col][row] = pixelStatus::eroded;
                   break;
                 }
               }
@@ -337,19 +336,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
           for (uint32_t j : cms::alpakatools::independent_group_elements(acc, pixsize)) {
             uint16_t row = j / pixelStatus::pixelSizeY + offset;
             uint16_t col = j % pixelStatus::pixelSizeY + offset;
-            if (image.clus()[col][row] >= pixelStatus::eroded) {
+            if (image[col][row] >= pixelStatus::eroded) {
               continue;
             }
             int32_t tmp = pixelStatus::empVal;
 
             for (int kk = -1; kk < 2; kk++) {
               for (int jj = -1; jj < 2; jj++) {
-                int32_t clus = image.clus()[col + kk][row + jj];
+                int32_t clus = image[col + kk][row + jj];
                 tmp = alpaka::math::min(acc, tmp, clus);
               }
             }
-            if (image.clus()[col][row] != tmp) {
-              image.clus()[col][row] = tmp;
+            if (image[col][row] != tmp) {
+              image[col][row] = tmp;
               more = true;
             }
           }
@@ -362,7 +361,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
           int fpY = digi_view[i].yy() + offset;
           if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
             continue;
-          digi_view[i].clus() = image.clus()[fpY][fpX] + firstPixel;
+          digi_view[i].clus() = image[fpY][fpX] + firstPixel;
         }
 
         alpaka::syncBlockThreads(acc);
