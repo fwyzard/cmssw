@@ -17,7 +17,9 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/warpsize.h"
 #include "RecoLocalTracker/SiPixelClusterizer/interface/SiPixelImageSoA.h"
+
 #include "SiPixelMorphingConfig.h"
+#include "atomicCas16.h"
 
 //#define GPU_DEBUG
 
@@ -26,76 +28,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
 #ifdef GPU_DEBUG
   DEVICE_GLOBAL uint32_t gMaxHit = 0;
 #endif
-
-  namespace pixelStatus {
-    // Phase-1 pixel modules
-    constexpr uint32_t pixelSizeX = pixelTopology::Phase1::numRowsInModule;
-    constexpr uint32_t pixelSizeY = pixelTopology::Phase1::numColsInModule;
-    constexpr uint16_t empVal = std::numeric_limits<uint16_t>::max() -
-                                2;  // TODO: Move this to DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h
-    constexpr uint16_t fakeVal = std::numeric_limits<uint16_t>::max() -
-                                 4;  // TODO: Move this to DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h
-    constexpr uint16_t eroded = std::numeric_limits<uint16_t>::max() -
-                                3;  // TODO: Move this to DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h
-    // Use 0x00, 0x01, 0x03 so each can be OR'ed on top of the previous ones
-    enum Status : uint32_t { kEmpty = 0x00, kFound = 0x01, kDuplicate = 0x03 };
-
-    constexpr uint32_t bits = 2;
-    constexpr uint32_t mask = (0x01 << bits) - 1;
-    constexpr uint32_t valuesPerWord = sizeof(uint32_t) * 8 / bits;
-    constexpr uint32_t size = pixelSizeX * pixelSizeY / valuesPerWord;
-
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr uint32_t getIndex(uint16_t x, uint16_t y) {
-      return (pixelSizeX * y + x) / valuesPerWord;
-    }
-
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr uint32_t getShift(uint16_t x, uint16_t y) {
-      return (x % valuesPerWord) * 2;
-    }
-
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr Status getStatus(uint32_t const* __restrict__ status,
-                                                              uint16_t x,
-                                                              uint16_t y) {
-      uint32_t index = getIndex(x, y);
-      uint32_t shift = getShift(x, y);
-      return Status{(status[index] >> shift) & mask};
-    }
-
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr bool isDuplicate(uint32_t const* __restrict__ status,
-                                                              uint16_t x,
-                                                              uint16_t y) {
-      return getStatus(status, x, y) == kDuplicate;
-    }
-
-    /* FIXME
-       * In the more general case (e.g. a multithreaded CPU backend) there is a potential race condition
-       * between the read of status[index] at line NNN and the atomicCas at line NNN.
-       * We should investigate:
-       *   - if `status` should be read through a `volatile` pointer (CUDA/ROCm)
-       *   - if `status` should be read with an atomic load (CPU)
-       */
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr void promote(Acc1D const& acc,
-                                                          uint32_t* __restrict__ status,
-                                                          const uint16_t x,
-                                                          const uint16_t y) {
-      uint32_t index = getIndex(x, y);
-      uint32_t shift = getShift(x, y);
-      uint32_t old_word = status[index];
-      uint32_t expected = old_word;
-      do {
-        expected = old_word;
-        Status old_status{(old_word >> shift) & mask};
-        if (kDuplicate == old_status) {
-          // nothing to do
-          return;
-        }
-        Status new_status = (kEmpty == old_status) ? kFound : kDuplicate;
-        uint32_t new_word = old_word | (static_cast<uint32_t>(new_status) << shift);
-        old_word = alpaka::atomicCas(acc, &status[index], expected, new_word, alpaka::hierarchy::Blocks{});
-      } while (expected != old_word);
-    }
-
-  }  // namespace pixelStatus
 
   template <typename TrackerTraits>
   struct CountModules {
@@ -143,6 +75,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
     // this must be larger than maxPixInModule / maxIterGPU, and should be a multiple of the warp size
     static constexpr uint32_t maxElementsPerBlock =
         cms::alpakatools::round_up_by(TrackerTraits::maxPixInModule / maxIterGPU, 128);
+
+    // FIXME use TrackerTraits::numRowsInModule, TrackerTraits::numColsInModule.
+    static constexpr uint32_t kPixelSizeX = pixelTopology::Phase1::numRowsInModule;
+    static constexpr uint32_t kPixelSizeY = pixelTopology::Phase1::numColsInModule;
+
+    enum MorphingStatus : uint16_t {
+      kEmpty = std::numeric_limits<uint16_t>::max() - 2,
+      kEroded = std::numeric_limits<uint16_t>::max() - 3,
+      kFake = std::numeric_limits<uint16_t>::max() - 4
+    };
 
     ALPAKA_FN_ACC void operator()(Acc1D const& acc,
                                   SiPixelDigisSoAView digi_view,
@@ -205,77 +147,43 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
         }
         alpaka::syncBlockThreads(acc);
         ALPAKA_ASSERT_ACC(lastPixel - firstPixel <= TrackerTraits::maxPixInModule);
+        ALPAKA_ASSERT_ACC(lastPixel - firstPixel < kFake);
 
         constexpr uint32_t offset = 2;
-        constexpr uint32_t imageSizeX = pixelStatus::pixelSizeX + offset * 2;
-        constexpr uint32_t imageSizeY = pixelStatus::pixelSizeY + offset * 2;
+        constexpr uint32_t imageSizeX = kPixelSizeX + offset * 2;
+        constexpr uint32_t imageSizeY = kPixelSizeY + offset * 2;
         constexpr uint32_t imgsize = imageSizeX * imageSizeY;
-        constexpr uint32_t pixsize = pixelStatus::pixelSizeX * pixelStatus::pixelSizeY;
+        constexpr uint32_t pixsize = kPixelSizeX * kPixelSizeY;
+
+        // initialise the 2D image
         for (uint32_t j : cms::alpakatools::independent_group_elements(acc, imgsize)) {
           uint16_t row = j / imageSizeY;
           uint16_t col = j % imageSizeY;
-          image[col][row] = pixelStatus::empVal;
+          image[col][row] = kEmpty;
         }
         alpaka::syncBlockThreads(acc);
 
-        // remove duplicate pixels
-#if 0
-		      constexpr bool isPhase2 = std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value;
-		      for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
-			      if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
-				      continue;
-			      int fpX = digi_view[i].xx() + offset;
-			      int fpY = digi_view[i].yy() + offset;
-			      if constexpr (not isPhase2) {
-				      int32_t kEmp = pixelStatus::empVal;
-				      int32_t old_value = alpaka::atomicCas(acc, &images[module].clus()[fpY][fpX], kEmp, digi_view[i].clus());
-				      if (old_value != pixelStatus::empVal) {
-					      digi_view[i].moduleId() = ::pixelClustering::invalidModuleId;
-					      digi_view[i].rawIdArr() = 0;
-				      }
-			      } else {
-				      images[module].clus()[fpY][fpX] = digi_view[i].clus();
-			      }
-		      }
-		      alpaka::syncBlockThreads(acc);
-#endif
-
+        // fill the 2D image and remove duplicate pixels
         constexpr bool isPhase2 = std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value;
         if constexpr (not isPhase2) {
-          // packed words array used to store the pixelStatus of each pixel
-          auto& status = alpaka::declareSharedVar<uint32_t[pixelStatus::size], __COUNTER__>(acc);
-
-          if (lastPixel > 1) {
-            for (uint32_t i : cms::alpakatools::independent_group_elements(acc, pixelStatus::size)) {
-              status[i] = 0;
+          // Phase 1
+          for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
+            // skip invalid pixels
+            if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
+              continue;
+            int fpX = digi_view[i].xx() + offset;
+            int fpY = digi_view[i].yy() + offset;
+            uint16_t id = static_cast<uint16_t>(digi_view[i].clus() - firstPixel);
+            uint16_t old = alpaka::atomicCas(
+                acc, &image[fpY][fpX], static_cast<uint16_t>(kEmpty), id, alpaka::hierarchy::Threads{});
+            if (old != kEmpty) {
+              // duplicate pixel
+              digi_view[i].moduleId() = ::pixelClustering::invalidModuleId;
+              digi_view[i].rawIdArr() = 0;
             }
-            alpaka::syncBlockThreads(acc);
-
-            for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
-              // skip invalid pixels
-              if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
-                continue;
-              pixelStatus::promote(acc, status, digi_view[i].xx(), digi_view[i].yy());
-            }
-            alpaka::syncBlockThreads(acc);
-
-            for (uint32_t i : cms::alpakatools::independent_group_elements(acc, firstPixel, lastPixel)) {
-              // skip invalid pixels
-              if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
-                continue;
-
-              if (pixelStatus::isDuplicate(status, digi_view[i].xx(), digi_view[i].yy())) {
-                digi_view[i].moduleId() = ::pixelClustering::invalidModuleId;
-                digi_view[i].rawIdArr() = 0;
-                continue;
-              }
-              int fpX = digi_view[i].xx() + offset;
-              int fpY = digi_view[i].yy() + offset;
-              image[fpY][fpX] = static_cast<uint16_t>(digi_view[i].clus() - firstPixel);
-            }
-            alpaka::syncBlockThreads(acc);
           }
         } else {
+          // Phase 2
           auto& clusterCounter = alpaka::declareSharedVar<int32_t, __COUNTER__>(acc);
           if (cms::alpakatools::once_per_block(acc)) {
             clusterCounter = 0;
@@ -292,18 +200,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
             image[fpY][fpX] = static_cast<uint16_t>(uniqueClusterId);
           }
         }
+        alpaka::syncBlockThreads(acc);
 
         if (doMorphing) {
-          uint32_t morphingsize = (pixelStatus::pixelSizeX + 2) * (pixelStatus::pixelSizeY + 2);
+          uint32_t morphingsize = (kPixelSizeX + 2) * (kPixelSizeY + 2);
           //Morphing: Dilation
           for (uint32_t j : cms::alpakatools::independent_group_elements(acc, morphingsize)) {
-            uint16_t row = j / (pixelStatus::pixelSizeY + 2) + 1;
-            uint16_t col = j % (pixelStatus::pixelSizeY + 2) + 1;
-            for (int i = 0; i < 3 and image[col][row] == pixelStatus::empVal; i++) {
+            uint16_t row = j / (kPixelSizeY + 2) + 1;
+            uint16_t col = j % (kPixelSizeY + 2) + 1;
+            for (int i = 0; i < 3 and image[col][row] == kEmpty; i++) {
               for (int jj = 0; jj < 3; jj++) {
-                if (image[col + i - 1][row + jj - 1] != pixelStatus::empVal and
-                    image[col + i - 1][row + jj - 1] != pixelStatus::fakeVal and kernel1[i * 3 + jj]) {
-                  image[col][row] = pixelStatus::fakeVal;
+                if (image[col + i - 1][row + jj - 1] != kEmpty and image[col + i - 1][row + jj - 1] != kFake and
+                    kernel1[i * 3 + jj]) {
+                  image[col][row] = kFake;
                 }
               }
             }
@@ -311,12 +220,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
           alpaka::syncBlockThreads(acc);
           //Morphing: Erosion
           for (uint32_t j : cms::alpakatools::independent_group_elements(acc, morphingsize)) {
-            uint16_t row = j / (pixelStatus::pixelSizeY + 2) + 1;
-            uint16_t col = j % (pixelStatus::pixelSizeY + 2) + 1;
-            for (int i = 0; i < 3 and image[col][row] == pixelStatus::fakeVal; i++) {
+            uint16_t row = j / (kPixelSizeY + 2) + 1;
+            uint16_t col = j % (kPixelSizeY + 2) + 1;
+            for (int i = 0; i < 3 and image[col][row] == kFake; i++) {
               for (int jj = 0; jj < 3; jj++) {
-                if (image[col + i - 1][row + jj - 1] == pixelStatus::empVal and kernel2[i * 3 + jj]) {
-                  image[col][row] = pixelStatus::eroded;
+                if (image[col + i - 1][row + jj - 1] == kEmpty and kernel2[i * 3 + jj]) {
+                  image[col][row] = kEroded;
                   break;
                 }
               }
@@ -334,12 +243,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelClustering {
         while (alpaka::syncBlockThreadsPredicate<alpaka::BlockOr>(acc, more)) {
           more = false;
           for (uint32_t j : cms::alpakatools::independent_group_elements(acc, pixsize)) {
-            uint16_t row = j / pixelStatus::pixelSizeY + offset;
-            uint16_t col = j % pixelStatus::pixelSizeY + offset;
-            if (image[col][row] >= pixelStatus::eroded) {
+            uint16_t row = j / kPixelSizeY + offset;
+            uint16_t col = j % kPixelSizeY + offset;
+            if (image[col][row] >= kEroded) {
               continue;
             }
-            int32_t tmp = pixelStatus::empVal;
+            int32_t tmp = kEmpty;
 
             for (int kk = -1; kk < 2; kk++) {
               for (int jj = -1; jj < 2; jj++) {
