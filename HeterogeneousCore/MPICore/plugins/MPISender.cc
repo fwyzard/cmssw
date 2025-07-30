@@ -80,23 +80,6 @@ public:
                   << "send product \"" << product.friendlyClassName() << '_' << product.moduleLabel() << '_'
                   << product.productInstanceName() << '_' << product.processName() << "\" of type \""
                   << entry.type.name() << "\" over MPI channel instance " << instance_;
-
-              // edm::Handle<edm::WrapperBase> handle(entry.type.typeInfo());
-
-              // edm::WrapperBase const* wrapper = handle.product();
-
-              // parameter getting does not work in constructor, i suppose wee need an event for this
-
-              // if (wrapper->hasTrivialCopyTraits()) {
-              //   metadata_size_ += 9;
-              // } else {
-              // parameter getting does not work in constructor, i suppose wee need an event for this
-
-              // edm::AnyBuffer buffer = wrapper->trivialCopyParameters();
-              // metadata_size_ += buffer.size_bytes();
-              //   metadata_size_ += 9;
-              //   metadata_size_ += 24;
-              // }
               products_.emplace_back(std::move(entry));
               break;
             }
@@ -123,15 +106,11 @@ public:
     // we need 1 byte for type, 8 bytes for size and at least 8 bytes for trivial copy parameters buffer
     auto meta = std::make_shared<ProductMetadataBuilder>(products_.size() * 24);
     size_t index = 0;
-    // this seems to work fine, but does this vector indeed persist between acquire() and produce()?
-    // serializedBuffers_.clear();
     buffer_->Reset();
     buffer_offset_ = 0;
     meta->setProductCount(products_.size());
     has_serialized_ = false;
-
-    // estimate buffer size in the constructor
-
+    
     for (auto const& entry : products_) {
       // Get the product
       edm::Handle<edm::WrapperBase> handle(entry.type.typeInfo());

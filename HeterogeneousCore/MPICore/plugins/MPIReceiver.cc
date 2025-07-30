@@ -74,8 +74,6 @@ public:
         std::move(holder),
         [this, token]() {
           token.channel()->receiveMetadata(instance_, received_meta_);
-          // assert((received_meta_.product_num == products_.size()) &&
-          //        "Receiver number of products is different than expected");
         },
         []() { return "Calling MPIReceiver::acquire()"; });
   }
@@ -83,7 +81,6 @@ public:
   void produce(edm::Event& event, edm::EventSetup const&) final {
     // read the MPIToken used to establish the communication channel
     MPIToken token = event.get(upstream_);
-    // received_meta_->debugPrintMetadataSummary();
 
     char* buf_ptr = nullptr;
     size_t full_buffer_size = 0;
