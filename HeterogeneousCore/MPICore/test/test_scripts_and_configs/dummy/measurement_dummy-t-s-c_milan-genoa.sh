@@ -10,8 +10,8 @@ thread_stream_combos=("1:1" "4:4" "8:8" "16:16" "24:24" "32:32")
 message_sizes=(4 1024 $((1024*1024))) # Example sizes: 1KB, 4KB, 16KB
 
 # Script to run
-script_local="dummy_local_3send.py"
-script_remote="dummy_remote_3rec.py"
+script_local="dummy_local_1send.py"
+script_remote="dummy_remote_1rec.py"
 
 # Base directory for logs
 BASE_DIR="../../test_results/dummy/mpich/async_number_of_products/different_machines"

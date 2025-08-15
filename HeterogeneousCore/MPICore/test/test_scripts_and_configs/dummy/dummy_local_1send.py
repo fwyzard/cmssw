@@ -22,6 +22,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 # FastTimer output
 experiment_name = os.environ.get("EXPERIMENT_NAME", "unnamed")
 output_dir = os.environ.get("EXPERIMENT_OUTPUT_DIR", "../../test_results/one_time_tests/")
+size_in_bytes = os.environ.get("MESSAGE_SIZE", 1024)
 
 process.FastTimerService = cms.Service( "FastTimerService",
     printEventSummary = cms.untracked.bool( False ),
@@ -72,24 +73,25 @@ process.MPIService.pmix_server_uri = "file:server.uri"
 # Controller
 from HeterogeneousCore.MPICore.mpiController_cfi import mpiController as mpiController_
 process.mpiController = mpiController_.clone()
-process.mpiController.run_local = cms.untracked.bool(True)
 
-# Dummy producer
-process.dummyProducer = cms.EDProducer("DummyProducer",
-    sizeInBytes=cms.uint32(1024)
+
+doubleValues = [ 0.0 for i in range(size_in_bytes//8) ]
+
+process.fixedSizeVectorProducer = cms.EDProducer("edmtest::GlobalVectorProducer",
+    values = cms.vdouble(doubleValues)
 )
 
 # MPI sender
 process.mpiSender = cms.EDProducer("MPISender",
     upstream=cms.InputTag("mpiController"),
     instance=cms.int32(1),
-    products=cms.vstring("*_dummyProducer__*")
+    products=cms.vstring("*_fixedSizeVectorProducer__*")
 )
 
 # Path
 process.dummyPath = cms.Path(
     process.mpiController +
-    process.dummyProducer +
+    process.fixedSizeVectorProducer +
     process.mpiSender
 )
 

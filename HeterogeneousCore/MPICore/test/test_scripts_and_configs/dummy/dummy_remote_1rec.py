@@ -5,7 +5,6 @@ process = cms.Process("DUMMYREMOTE")
 
 # Source: receive from MPI
 process.source = cms.Source("MPISource",
-    run_local=cms.untracked.bool(True),
     firstRun=cms.untracked.uint32(1)
 )
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
@@ -78,7 +77,7 @@ process.remoteDummyReceiver = cms.EDProducer("MPIReceiver",
     instance=cms.int32(1),
     products=cms.VPSet(
         cms.PSet(
-            type=cms.string("edm::FixedSizeDummy"),
+            type=cms.string("std::vector<double>"),
             label=cms.string("")
         )
     )
