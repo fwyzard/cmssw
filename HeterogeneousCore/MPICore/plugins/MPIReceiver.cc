@@ -82,17 +82,10 @@ public:
     // read the MPIToken used to establish the communication channel
     MPIToken token = event.get(upstream_);
 
-    char* buf_ptr = nullptr;
-    size_t full_buffer_size = 0;
-    size_t buffer_offset_ = 0;
-
     std::unique_ptr<TBufferFile> serialized_buffer;
 
     if (received_meta_->hasSerialized()) {
       serialized_buffer = token.channel()->receiveSerializedBuffer(instance_);
-      buf_ptr = serialized_buffer->Buffer();
-      full_buffer_size = serialized_buffer->BufferSize();
-      buffer_offset_ = 0;
     }
 
     for (auto const& entry : products_) {
@@ -107,11 +100,7 @@ public:
       }
 
       else if (product_meta.kind == ProductMetadata::Kind::Serialized) {
-        auto productBuffer = TBufferFile(TBuffer::kRead, product_meta.sizeMeta);
-        assert(buffer_offset_ < full_buffer_size && "serialized data buffer is shorter than expected");
-        productBuffer.SetBuffer(buf_ptr + buffer_offset_, product_meta.sizeMeta, kFALSE /* adopt = false */);
-        buffer_offset_ += product_meta.sizeMeta;
-        entry.wrappedType.getClass()->Streamer(wrapper.get(), productBuffer);
+        entry.wrappedType.getClass()->Streamer(wrapper.get(), *serialized_buffer);
       }
 
       else if (product_meta.kind == ProductMetadata::Kind::TrivialCopy) {
@@ -128,8 +117,6 @@ public:
       // put the data into the Event
       event.put(entry.token, std::move(wrapper));
     }
-
-    assert(buffer_offset_ == full_buffer_size && "serialized data buffer is not equal to the expected length");
 
     // write a shallow copy of the channel to the output, so other modules can consume it
     // to indicate that they should run after this
