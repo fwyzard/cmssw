@@ -1,5 +1,0 @@
-set(unittest_extra_libraries Acts::Fatras)
-
-add_unittest(FatrasKinematicCasts KinematicCastsTests.cpp)
-add_unittest(FatrasParticleSelectors ParticleSelectorsTests.cpp)
-add_unittest(FatrasSelectorHelpers SelectorHelpersTests.cpp)

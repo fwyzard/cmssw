@@ -1,0 +1,9 @@
+<use name="acts-core"/>
+<use name="acts-covfie"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="CovfieFieldConversionTest.cpp" name="ActsUnitTestCovfieFieldConversion">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCovfieFieldConversion"/>
+</bin>

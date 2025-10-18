@@ -1,0 +1,53 @@
+<use name="acts-core"/>
+<use name="acts-root"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="RootMaterialMapIoTests.cpp" name="ActsUnitTestRootMaterialMapIo">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRootMaterialMapIo"/>
+</bin>
+
+<bin file="RootMagneticFieldIoTests.cpp" name="ActsUnitTestRootMagneticFieldIo">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRootMagneticFieldIo"/>
+</bin>
+
+<bin file="RootMeasurementIoTests.cpp" name="ActsUnitTestRootMeasurementIo">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRootMeasurementIo"/>
+</bin>
+
+<bin file="TGeoArb8ConversionTests.cpp" name="ActsUnitTestTGeoArb8Conversion">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoArb8Conversion"/>
+</bin>
+
+<bin file="TGeoBBoxConversionTests.cpp" name="ActsUnitTestTGeoBBoxConversion">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoBBoxConversion"/>
+</bin>
+
+<bin file="TGeoTrd1ConversionTests.cpp" name="ActsUnitTestTGeoTrd1Conversion">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoTrd1Conversion"/>
+</bin>
+
+<bin file="TGeoTrd2ConversionTests.cpp" name="ActsUnitTestTGeoTrd2Conversion">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoTrd2Conversion"/>
+</bin>
+
+<bin file="TGeoTubeConversionTests.cpp" name="ActsUnitTestTGeoTubeConversion">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoTubeConversion"/>
+</bin>
+
+<bin file="TGeoLayerBuilderTests.cpp" name="ActsUnitTestTGeoLayerBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoLayerBuilder"/>
+</bin>
+
+<bin file="TGeoMaterialConverterTests.cpp" name="ActsUnitTestTGeoMaterialConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoMaterialConverter"/>
+</bin>
+
+<bin file="TGeoParserTests.cpp" name="ActsUnitTestTGeoParser">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoParser"/>
+</bin>
+
+<bin file="TGeoPrimitivesHelperTests.cpp" name="ActsUnitTestTGeoPrimitivesHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTGeoPrimitivesHelper"/>
+</bin>

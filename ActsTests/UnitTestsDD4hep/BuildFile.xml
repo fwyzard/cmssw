@@ -1,0 +1,6 @@
+<use name="acts-dd4hep"/>
+<use name="dd4hep-core"/>
+<!-- listcomponents_dd4hep $CMSSW_BASE/lib/$SCRAM_ARCH/libActsTestsUnitTestsDD4hep.so -o $CMSSW_BASE/lib/$SCRAM_ARCH/libActsTestsUnitTestsDD4hep.components -->
+<export>
+  <lib name="1"/>
+</export>

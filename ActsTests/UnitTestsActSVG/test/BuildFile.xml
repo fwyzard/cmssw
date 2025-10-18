@@ -1,0 +1,37 @@
+<use name="acts-core"/>
+<use name="acts-svg"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="GridSvgConverterTests.cpp" name="ActsUnitTestGridSvgConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGridSvgConverter"/>
+</bin>
+
+<bin file="DetectorSvgConverterTests.cpp" name="ActsUnitTestDetectorSvgConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorSvgConverter"/>
+</bin>
+
+<bin file="DetectorVolumeSvgConverterTests.cpp" name="ActsUnitTestDetectorVolumeSvgConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorVolumeSvgConverter"/>
+</bin>
+
+<bin file="IndexedSurfacesSvgConverterTests.cpp" name="ActsUnitTestIndexedSurfacesSvgConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestIndexedSurfacesSvgConverter"/>
+</bin>
+
+<bin file="PortalSvgConverterTests.cpp" name="ActsUnitTestPortalSvgConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPortalSvgConverter"/>
+</bin>
+
+<bin file="SurfaceSvgConverterTests.cpp" name="ActsUnitTestSurfaceSvgConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceSvgConverter"/>
+</bin>
+
+<bin file="LayerSvgConverterTests.cpp" name="ActsUnitTestLayerSvgConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLayerSvgConverter"/>
+</bin>
+
+<bin file="TrackingGeometrySvgConverterTests.cpp" name="ActsUnitTestTrackingGeometrySvgConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackingGeometrySvgConverter"/>
+</bin>
