@@ -1,0 +1,15 @@
+<bin file="*.cpp" name="TracccTestCPU">
+  <use name="google-test-main"/>
+  <use name="covfie"/>
+  <use name="detray"/>
+  <use name="vecmem"/>
+  <use name="TracccTests/Common"/>
+  <use name="traccc"/>
+  <use name="traccc-io"/>
+  <use name="traccc-performance"/>
+  <!--
+    detray::io
+    detray::test_common
+    traccc-simulation
+  -->
+</bin>
