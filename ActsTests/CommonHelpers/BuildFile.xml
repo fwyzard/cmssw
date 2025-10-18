@@ -1,0 +1,5 @@
+<use name="acts-core"/>
+<flags CXXFLAGS='-DACTS_TEST_DATA_DIR=\"/scratch/acts/CMSSW_16_0_0_pre1/src/ActsTests/CommonHelpers/data\"'/>
+<export>
+  <lib name="1"/>
+</export>

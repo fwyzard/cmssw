@@ -1,0 +1,31 @@
+<use name="acts-core"/>
+<use name="acts-dd4hep"/>
+<use name="dd4hep-core"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<use name="ActsTests/UnitTestsDD4hep"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="DD4hepCylinderLayerStructureTests.cpp" name="ActsUnitTestDD4hepCylinderLayerStructure">
+ <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDD4hepCylinderLayerStructure"/>
+</bin>
+
+<bin file="DD4hepCylindricalDetectorTests.cpp" name="ActsUnitTestDD4hepCylindricalDetector">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDD4hepCylindricalDetector"/>
+</bin>
+
+<bin file="DD4hepDetectorElementTests.cpp" name="ActsUnitTestDD4hepDetectorElement">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDD4hepDetectorElement"/>
+</bin>
+
+<bin file="DD4hepDiscLayerStructureTests.cpp" name="ActsUnitTestDD4hepDiscLayerStructure">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDD4hepDiscLayerStructure"/>
+</bin>
+
+<bin file="DD4hepDetectorSurfaceFactoryTests.cpp" name="ActsUnitTestDD4hepDetectorSurfaceFactory">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDD4hepDetectorSurfaceFactory"/>
+</bin>
+
+<bin file="DD4hepCylindricalDetectorGen3Tests.cpp" name="ActsUnitTestDD4hepCylindricalDetectorGen3">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDD4hepCylindricalDetectorGen3"/>
+</bin>

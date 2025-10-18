@@ -1,0 +1,25 @@
+<use name="acts-core"/>
+<use name="acts-geant4"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="Geant4ConvertersTests.cpp" name="ActsUnitTestGeant4Converters">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeant4Converters"/>
+</bin>
+
+<bin file="Geant4DetectorElementTests.cpp" name="ActsUnitTestGeant4DetectorElement">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeant4DetectorElement"/>
+</bin>
+
+<bin file="Geant4PhysicalVolumeSelectorsTests.cpp" name="ActsUnitTestGeant4PhysicalVolumeSelectors">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeant4PhysicalVolumeSelectors"/>
+</bin>
+
+<bin file="Geant4DetectorSurfaceFactoryTests.cpp" name="ActsUnitTestGeant4DetectorSurfaceFactory">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeant4DetectorSurfaceFactory"/>
+</bin>
+
+<bin file="Geant4SurfaceProviderTests.cpp" name="ActsUnitTestGeant4SurfaceProvider">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeant4SurfaceProvider"/>
+</bin>

@@ -1,0 +1,81 @@
+<use name="acts-core"/>
+<use name="acts-json"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="AlgebraJsonConverterTests.cpp" name="ActsUnitTestAlgebraJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAlgebraJsonConverter"/>
+</bin>
+
+<bin file="DetectorJsonConverterTests.cpp" name="ActsUnitTestDetectorJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorJsonConverter"/>
+</bin>
+
+<bin file="DetectorVolumeJsonConverterTests.cpp" name="ActsUnitTestDetectorVolumeJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorVolumeJsonConverter"/>
+</bin>
+
+<bin file="DetectorVolumeFinderJsonConverterTests.cpp" name="ActsUnitTestDetectorVolumeFinderJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorVolumeFinderJsonConverter"/>
+</bin>
+
+<bin file="ExtentJsonConverterTests.cpp" name="ActsUnitTestExtentJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestExtentJsonConverter"/>
+</bin>
+
+<bin file="GeometryIdentifierJsonConverterTests.cpp" name="ActsUnitTestGeometryIdentifierJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeometryIdentifierJsonConverter"/>
+</bin>
+
+<bin file="GeometryHierarchyMapJsonConverterTests.cpp" name="ActsUnitTestGeometryHierarchyMapJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeometryHierarchyMapJsonConverter"/>
+</bin>
+
+<bin file="GridJsonConverterTests.cpp" name="ActsUnitTestGridJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGridJsonConverter"/>
+</bin>
+
+<bin file="MaterialJsonConverterTests.cpp" name="ActsUnitTestMaterialJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialJsonConverter"/>
+</bin>
+
+<bin file="MaterialMapJsonConverterTests.cpp" name="ActsUnitTestMaterialMapJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialMapJsonConverter"/>
+</bin>
+
+<bin file="PortalJsonConverterTests.cpp" name="ActsUnitTestPortalJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPortalJsonConverter"/>
+</bin>
+
+<bin file="ProtoAxisJsonConverterTests.cpp" name="ActsUnitTestProtoAxisJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestProtoAxisJsonConverter"/>
+</bin>
+
+<bin file="ProtoDetectorJsonConverterTests.cpp" name="ActsUnitTestProtoDetectorJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestProtoDetectorJsonConverter"/>
+</bin>
+
+<bin file="UtilitiesJsonConverterTests.cpp" name="ActsUnitTestUtilitiesJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestUtilitiesJsonConverter"/>
+</bin>
+
+<bin file="SurfaceBoundsJsonConverterTests.cpp" name="ActsUnitTestSurfaceBoundsJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceBoundsJsonConverter"/>
+</bin>
+
+<bin file="SurfaceJsonConverterTests.cpp" name="ActsUnitTestSurfaceJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceJsonConverter"/>
+</bin>
+
+<bin file="VolumeBoundsJsonConverterTests.cpp" name="ActsUnitTestVolumeBoundsJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVolumeBoundsJsonConverter"/>
+</bin>
+
+<bin file="TrackParametersJsonConverterTests.cpp" name="ActsUnitTestTrackParametersJsonConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackParametersJsonConverter"/>
+</bin>
+
+<bin file="JsonSurfacesReaderTests.cpp" name="ActsUnitTestJsonSurfacesReader">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestJsonSurfacesReader"/>
+</bin>

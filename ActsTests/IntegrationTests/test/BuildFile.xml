@@ -1,0 +1,52 @@
+<use name="acts-core"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="InterpolatedSolenoidBFieldTest.cpp" name="ActsIntegrationTestInterpolatedSolenoidBField">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestInterpolatedSolenoidBField"/>
+</bin>
+
+<bin file="NavigatorConsistency.cpp" name="ActsIntegrationTestNavigatorConsistency">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestNavigatorConsistency"/>
+</bin>
+
+<bin file="PrintDataDirectory.cpp" name="ActsIntegrationTestPrintDataDirectory">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPrintDataDirectory"/>
+</bin>
+
+<bin file="PropagationAtlasConstant.cpp" name="ActsIntegrationTestPropagationAtlasConstant">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationAtlasConstant"/>
+</bin>
+
+<bin file="PropagationBentTracks.cpp" name="ActsIntegrationTestPropagationBentTracks">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationBentTracks"/>
+</bin>
+
+<bin file="PropagationCompareAtlasEigenConstant.cpp" name="ActsIntegrationTestPropagationCompareAtlasEigenConstant">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationCompareAtlasEigenConstant"/>
+</bin>
+
+<bin file="PropagationCompareEigenStraightLine.cpp" name="ActsIntegrationTestPropagationCompareEigenStraightLine">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationCompareEigenStraightLine"/>
+</bin>
+
+<bin file="PropagationEigenConstant.cpp" name="ActsIntegrationTestPropagationEigenConstant">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationEigenConstant"/>
+</bin>
+
+<bin file="PropagationEigenDenseConstant.cpp" name="ActsIntegrationTestPropagationEigenDenseConstant">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationEigenDenseConstant"/>
+</bin>
+
+<bin file="PropagationStraightLine.cpp" name="ActsIntegrationTestPropagationStraightLine">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationStraightLine"/>
+</bin>
+
+<bin file="PropagationSympyConstant.cpp" name="ActsIntegrationTestPropagationSympyConstant">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationSympyConstant"/>
+</bin>
+
+<bin file="PropagationSympyDenseConstant.cpp" name="ActsIntegrationTestPropagationSympyDenseConstant">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsIntegrationTestPropagationSympyDenseConstant"/>
+</bin>

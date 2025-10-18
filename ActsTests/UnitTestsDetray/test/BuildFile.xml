@@ -1,0 +1,26 @@
+<use name="acts-core"/>
+<use name="acts-detray"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+<flags CXXFLAGS="-DVECMEM_HAVE_PMR_MEMORY_RESOURCE"/>
+
+<bin file="DetrayConverterTests.cpp" name="ActsUnitTestRNTupleSoA">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRNTupleSoA"/>
+</bin>
+
+<bin file="DetrayGeometryConverterTests.cpp" name="ActsUnitTestDetrayGeometryConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetrayGeometryConverter"/>
+</bin>
+
+<bin file="DetrayMaterialConverterTests.cpp" name="ActsUnitTestDetrayMaterialConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetrayMaterialConverter"/>
+</bin>
+
+<bin file="DetrayPayloadConverterTests.cpp" name="ActsUnitTestDetrayPayloadConverter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetrayPayloadConverter"/>
+</bin>
+
+<bin file="DetrayMaterialConversionTests.cpp" name="ActsUnitTestDetrayMaterialConversion">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetrayMaterialConversion"/>
+</bin>

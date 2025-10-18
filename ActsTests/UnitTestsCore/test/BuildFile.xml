@@ -1,0 +1,1175 @@
+<use name="acts-core"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="VersionTests.cpp" name="ActsUnitTestVersion">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVersion"/>
+</bin>
+
+<!-- AmbiguityResolution -->
+<bin file="AmbiguityResolution/ScoreBasedAmbiguityResolutionTest.cpp" name="ActsUnitTestScoreBasedAmbiguityResolution">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestScoreBasedAmbiguityResolution"/>
+</bin>
+
+<!-- Clusterization -->
+<bin file="Clusterization/ClusterizationTests1D.cpp" name="ActsUnitTestClusterization1D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestClusterization1D"/>
+</bin>
+
+<bin file="Clusterization/ClusterizationTests2D.cpp" name="ActsUnitTestClusterization2D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestClusterization2D"/>
+</bin>
+
+<bin file="Clusterization/TimedClusterizationTests.cpp" name="ActsUnitTestTimedClusterization">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTimedClusterization"/>
+</bin>
+
+<!-- Definitions -->
+<bin file="Definitions/DirectionTests.cpp" name="ActsUnitTestDirection">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDirection"/>
+</bin>
+
+<bin file="Definitions/UnitsTests.cpp" name="ActsUnitTestUnits">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestUnits"/>
+</bin>
+
+<!-- Detector -->
+<bin file="Detector/BlueprintTests.cpp" name="ActsUnitTestGen2Blueprint">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGen2Blueprint"/>
+</bin>
+
+<bin file="Detector/BlueprintHelperTests.cpp" name="ActsUnitTestBlueprintHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBlueprintHelper"/>
+</bin>
+
+<bin file="Detector/CylindricalContainerBuilderTests.cpp" name="ActsUnitTestCylindricalContainerBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylindricalContainerBuilder"/>
+</bin>
+
+<bin file="Detector/CylindricalDetectorFromBlueprintTests.cpp" name="ActsUnitTestCylindricalDetectorFromBlueprint">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylindricalDetectorFromBlueprint"/>
+</bin>
+
+<bin file="Detector/CuboidalDetectorFromBlueprintTests.cpp" name="ActsUnitTestCuboidalDetectorFromBlueprint">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCuboidalDetectorFromBlueprint"/>
+</bin>
+
+<bin file="Detector/CuboidalDetectorHelperTests.cpp" name="ActsUnitTestCuboidalDetectorHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCuboidalDetectorHelper"/>
+</bin>
+
+<bin file="Detector/CuboidalContainerBuilderTests.cpp" name="ActsUnitTestCuboidalContainerBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCuboidalContainerBuilder"/>
+</bin>
+
+<bin file="Detector/CylindricalDetectorHelperTests.cpp" name="ActsUnitTestCylindricalDetectorHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylindricalDetectorHelper"/>
+</bin>
+
+<bin file="Detector/DetectorTests.cpp" name="ActsUnitTestDetector">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetector"/>
+</bin>
+
+<bin file="Detector/DetectorBuilderTests.cpp" name="ActsUnitTestDetectorBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorBuilder"/>
+</bin>
+
+<bin file="Detector/DetectorVolumeTests.cpp" name="ActsUnitTestDetectorVolume">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorVolume"/>
+</bin>
+
+<bin file="Detector/DetectorVolumeConsistencyTests.cpp" name="ActsUnitTestDetectorVolumeConsistency">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorVolumeConsistency"/>
+</bin>
+
+<bin file="Detector/DetectorVolumeBuilderTests.cpp" name="ActsUnitTestDetectorVolumeBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorVolumeBuilder"/>
+</bin>
+
+<bin file="Detector/GeometryIdGeneratorTests.cpp" name="ActsUnitTestGeometryIdGenerator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeometryIdGenerator"/>
+</bin>
+
+<bin file="Detector/IndexedRootVolumeFinderBuilderTests.cpp" name="ActsUnitTestIndexedRootVolumeFinderBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestIndexedRootVolumeFinderBuilder"/>
+</bin>
+
+<bin file="Detector/IndexedSurfaceGridFillerTests.cpp" name="ActsUnitTestIndexedSurfaceGridFiller">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestIndexedSurfaceGridFiller"/>
+</bin>
+
+<bin file="Detector/IndexedSurfacesGeneratorTests.cpp" name="ActsUnitTestIndexedSurfacesGenerator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestIndexedSurfacesGenerator"/>
+</bin>
+
+<bin file="Detector/KdtSurfacesProviderTests.cpp" name="ActsUnitTestKdtSurfacesProvider">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestKdtSurfacesProvider"/>
+</bin>
+
+<bin file="Detector/LayerStructureBuilderTests.cpp" name="ActsUnitTestLayerStructureBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLayerStructureBuilder"/>
+</bin>
+
+<bin file="Detector/ReferenceGeneratorsTests.cpp" name="ActsUnitTestReferenceGenerators">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestReferenceGenerators"/>
+</bin>
+
+<bin file="Detector/SupportSurfacesHelperTests.cpp" name="ActsUnitTestSupportSurfacesHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSupportSurfacesHelper"/>
+</bin>
+
+<bin file="Detector/ProtoDetectorTests.cpp" name="ActsUnitTestProtoDetector">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestProtoDetector"/>
+</bin>
+
+<bin file="Detector/PortalTests.cpp" name="ActsUnitTestDetectorPortal">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorPortal"/>
+</bin>
+
+<bin file="Detector/PortalGeneratorsTests.cpp" name="ActsUnitTestPortalGenerators">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPortalGenerators"/>
+</bin>
+
+<bin file="Detector/VolumeStructureBuilderTests.cpp" name="ActsUnitTestVolumeStructureBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVolumeStructureBuilder"/>
+</bin>
+
+<bin file="Detector/MultiWireStructureBuilderTests.cpp" name="ActsUnitTestMultiWireStructureBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiWireStructureBuilder"/>
+</bin>
+
+<!-- EventData -->
+<bin file="EventData/BoundTrackParametersTests.cpp" name="ActsUnitTestBoundTrackParameters">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBoundTrackParameters"/>
+</bin>
+
+<bin file="EventData/ChargeTests.cpp" name="ActsUnitTestCharge">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCharge"/>
+</bin>
+
+<bin file="EventData/CurvilinearTrackParametersTests.cpp" name="ActsUnitTestCurvilinearTrackParameters">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCurvilinearTrackParameters"/>
+</bin>
+
+<bin file="EventData/FreeTrackParametersTests.cpp" name="ActsUnitTestFreeTrackParameters">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestFreeTrackParameters"/>
+</bin>
+
+<bin file="EventData/MeasurementHelpersTests.cpp" name="ActsUnitTestMeasurementHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMeasurementHelpers"/>
+</bin>
+
+<bin file="EventData/MultiComponentBoundTrackParametersTests.cpp" name="ActsUnitTestMultiComponentBoundTrackParameters">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiComponentBoundTrackParameters"/>
+</bin>
+
+<bin file="EventData/MultiTrajectoryTests.cpp" name="ActsUnitTestMultiTrajectory">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiTrajectory"/>
+</bin>
+
+<bin file="EventData/TransformHelpersTests.cpp" name="ActsUnitTestTransformHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTransformHelpers"/>
+</bin>
+
+<bin file="EventData/CorrectedTransformFreeToBoundTests.cpp" name="ActsUnitTestCorrectedTransformFreeToBound">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCorrectedTransformFreeToBound"/>
+</bin>
+
+<bin file="EventData/TrackTests.cpp" name="ActsUnitTestTrack">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrack"/>
+</bin>
+
+<bin file="EventData/TrackTestsExtra.cpp" name="ActsUnitTestTrackExtra">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrack"/>
+</bin>
+
+<bin file="EventData/SourceLinkTests.cpp" name="ActsUnitTestSourceLink">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSourceLink"/>
+</bin>
+
+<bin file="EventData/TrackStatePropMaskTests.cpp" name="ActsUnitTestTrackStatePropMask">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackStatePropMask"/>
+</bin>
+
+<bin file="EventData/ParticleHypothesisTests.cpp" name="ActsUnitTestParticleHypothesis">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestParticleHypothesis"/>
+</bin>
+
+<bin file="EventData/MultiTrajectoryHelpersTests.cpp" name="ActsUnitTestMultiTrajectoryHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiTrajectoryHelpers"/>
+</bin>
+
+<bin file="EventData/SubspaceHelpersTests.cpp" name="ActsUnitTestSubspaceHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSubspaceHelpers"/>
+</bin>
+
+<bin file="EventData/SeedEdmTests.cpp" name="ActsUnitTestSeedEdm">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSeedEdm"/>
+</bin>
+
+<bin file="EventData/SpacePointContainerEdmTests.cpp" name="ActsUnitTestSpacePointContainerEdm">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSpacePointContainerEdm"/>
+</bin>
+
+<bin file="EventData/TrackParameterHelpersTests.cpp" name="ActsUnitTestTrackParameterHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackParameterHelpers"/>
+</bin>
+
+<bin file="EventData/SpacePointContainer2Tests.cpp" name="ActsUnitTestSpacePointContainer2">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSpacePointContainer2"/>
+</bin>
+
+<bin file="EventData/SeedContainer2Tests.cpp" name="ActsUnitTestSeedContainer2">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSeedContainer2"/>
+</bin>
+
+<!-- Geometry -->
+<bin file="Geometry/AlignmentContextTests.cpp" name="ActsUnitTestAlignmentContext">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAlignmentContext"/>
+</bin>
+
+<bin file="Geometry/BlueprintTests.cpp" name="ActsUnitTestBlueprint">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBlueprint"/>
+</bin>
+
+<bin file="Geometry/BlueprintApiTests.cpp" name="ActsUnitTestBlueprintApi">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBlueprintApi"/>
+</bin>
+
+<bin file="Geometry/ConeVolumeBoundsTests.cpp" name="ActsUnitTestConeVolumeBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestConeVolumeBounds"/>
+</bin>
+
+<bin file="Geometry/ConeLayerTests.cpp" name="ActsUnitTestConeLayer">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestConeLayer"/>
+</bin>
+
+<bin file="Geometry/CuboidVolumeBoundsTests.cpp" name="ActsUnitTestCuboidVolumeBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCuboidVolumeBounds"/>
+</bin>
+
+<bin file="Geometry/CuboidVolumeBuilderTests.cpp" name="ActsUnitTestCuboidVolumeBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCuboidVolumeBuilder"/>
+</bin>
+
+<bin file="Geometry/CutoutCylinderVolumeBoundsTests.cpp" name="ActsUnitTestCutoutCylinderVolumeBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCutoutCylinderVolumeBounds"/>
+</bin>
+
+<bin file="Geometry/CuboidPortalShellTests.cpp" name="ActsUnitTestCuboidPortalShell">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCuboidPortalShell"/>
+</bin>
+
+<bin file="Geometry/CylinderPortalShellTests.cpp" name="ActsUnitTestCylinderPortalShell">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylinderPortalShell"/>
+</bin>
+
+<bin file="Geometry/CylinderLayerTests.cpp" name="ActsUnitTestCylinderLayer">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylinderLayer"/>
+</bin>
+
+<bin file="Geometry/CylinderVolumeBoundsTests.cpp" name="ActsUnitTestCylinderVolumeBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylinderVolumeBounds"/>
+</bin>
+
+<bin file="Geometry/CylinderVolumeBuilderTests.cpp" name="ActsUnitTestCylinderVolumeBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylinderVolumeBuilder"/>
+</bin>
+
+<bin file="Geometry/DiscLayerTests.cpp" name="ActsUnitTestDiscLayer">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDiscLayer"/>
+</bin>
+
+<bin file="Geometry/ExtentTests.cpp" name="ActsUnitTestExtent">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestExtent"/>
+</bin>
+
+<bin file="Geometry/GenericApproachDescriptorTests.cpp" name="ActsUnitTestGenericApproachDescriptor">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGenericApproachDescriptor"/>
+</bin>
+
+<bin file="Geometry/GenericCuboidVolumeBoundsTests.cpp" name="ActsUnitTestGenericCuboidVolumeBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGenericCuboidVolumeBounds"/>
+</bin>
+
+<bin file="Geometry/GeometryHierarchyMapTests.cpp" name="ActsUnitTestGeometryHierarchyMap">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeometryHierarchyMap"/>
+</bin>
+
+<bin file="Geometry/GeometryIdentifierTests.cpp" name="ActsUnitTestGeometryIdentifier">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGeometryIdentifier"/>
+</bin>
+
+<bin file="Geometry/KDTreeTrackingGeometryBuilderTests.cpp" name="ActsUnitTestKDTreeTrackingGeometryBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestKDTreeTrackingGeometryBuilder"/>
+</bin>
+
+<bin file="Geometry/LayerCreatorTests.cpp" name="ActsUnitTestLayerCreator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLayerCreator"/>
+</bin>
+
+<bin file="Geometry/LayerTests.cpp" name="ActsUnitTestLayer">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLayer"/>
+</bin>
+
+<bin file="Geometry/NavigationLayerTests.cpp" name="ActsUnitTestNavigationLayer">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestNavigationLayer"/>
+</bin>
+
+<bin file="Geometry/PlaneLayerTests.cpp" name="ActsUnitTestPlaneLayer">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPlaneLayer"/>
+</bin>
+
+<bin file="Geometry/ProtoLayerTests.cpp" name="ActsUnitTestProtoLayer">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestProtoLayer"/>
+</bin>
+
+<bin file="Geometry/ProtoLayerHelperTests.cpp" name="ActsUnitTestProtoLayerHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestProtoLayerHelper"/>
+</bin>
+
+<bin file="Geometry/PolyhedronTests.cpp" name="ActsUnitTestPolyhedron">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPolyhedron"/>
+</bin>
+
+<bin file="Geometry/SimpleGeometryTests.cpp" name="ActsUnitTestSimpleGeometry">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSimpleGeometry"/>
+</bin>
+
+<bin file="Geometry/SurfaceArrayCreatorTests.cpp" name="ActsUnitTestSurfaceArrayCreator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceArrayCreator"/>
+</bin>
+
+<bin file="Geometry/SurfaceBinningMatcherTests.cpp" name="ActsUnitTestSurfaceBinningMatcher">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceBinningMatcher"/>
+</bin>
+
+<bin file="Geometry/TrackingGeometryClosureTests.cpp" name="ActsUnitTestTrackingGeometryClosureGeometry">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackingGeometryClosureGeometry"/>
+</bin>
+
+<bin file="Geometry/TrackingGeometryCreationTests.cpp" name="ActsUnitTestTrackingGeometryCreation">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackingGeometryCreation"/>
+</bin>
+
+<bin file="Geometry/TrackingGeometryGeometryIdTests.cpp" name="ActsUnitTestTrackingGeometryGeometryId">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackingGeometryGeometryId"/>
+</bin>
+
+<bin file="Geometry/TrackingVolumeTests.cpp" name="ActsUnitTestTrackingVolume">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackingVolume"/>
+</bin>
+
+<bin file="Geometry/TrapezoidPortalShellTests.cpp" name="ActsUnitTestTrapezoidPortalShell">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrapezoidPortalShell"/>
+</bin>
+
+<bin file="Geometry/TrapezoidVolumeBoundsTests.cpp" name="ActsUnitTestTrapezoidVolumeBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrapezoidVolumeBounds"/>
+</bin>
+
+<bin file="Geometry/VolumeBoundsTests.cpp" name="ActsUnitTestVolumeBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVolumeBounds"/>
+</bin>
+
+<bin file="Geometry/VolumeTests.cpp" name="ActsUnitTestVolume">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVolume"/>
+</bin>
+
+<bin file="Geometry/CylinderVolumeStackTests.cpp" name="ActsUnitTestCylinderVolumeStack">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylinderVolumeStack"/>
+</bin>
+
+<bin file="Geometry/CuboidVolumeStackTests.cpp" name="ActsUnitTestCuboidVolumeStack">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCuboidVolumeStack"/>
+</bin>
+
+<bin file="Geometry/PortalLinkTests.cpp" name="ActsUnitTestPortalLink">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPortalLink"/>
+</bin>
+
+<bin file="Geometry/PortalTests.cpp" name="ActsUnitTestPortal">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPortal"/>
+</bin>
+
+<!-- MagneticField -->
+<bin file="MagneticField/ConstantBFieldTests.cpp" name="ActsUnitTestConstantBField">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestConstantBField"/>
+</bin>
+
+<bin file="MagneticField/InterpolatedBFieldMapTests.cpp" name="ActsUnitTestInterpolatedBFieldMap">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestInterpolatedBFieldMap"/>
+</bin>
+
+<bin file="MagneticField/SolenoidBFieldTests.cpp" name="ActsUnitTestSolenoidBField">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSolenoidBField"/>
+</bin>
+
+<bin file="MagneticField/MultiRangeBFieldTests.cpp" name="ActsUnitTestMultiRangeBField">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiRangeBField"/>
+</bin>
+
+<bin file="MagneticField/MagneticFieldProviderTests.cpp" name="ActsUnitTestMagneticFieldProvider">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMagneticFieldProvider"/>
+</bin>
+
+<bin file="MagneticField/TextMagneticFieldIoTests.cpp" name="ActsUnitTestTextMagneticFieldIo">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTextMagneticFieldIo"/>
+</bin>
+
+<!-- Material -->
+<bin file="Material/AccumulatedMaterialSlabTests.cpp" name="ActsUnitTestAccumulatedMaterialSlab">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAccumulatedMaterialSlab"/>
+</bin>
+
+<bin file="Material/AccumulatedSurfaceMaterialTests.cpp" name="ActsUnitTestAccumulatedSurfaceMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAccumulatedSurfaceMaterial"/>
+</bin>
+
+<bin file="Material/AccumulatedVolumeMaterialTests.cpp" name="ActsUnitTestAccumulatedVolumeMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAccumulatedVolumeMaterial"/>
+</bin>
+
+<bin file="Material/AverageMaterialsTests.cpp" name="ActsUnitTestAverageMaterials">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAverageMaterials"/>
+</bin>
+
+<bin file="Material/BinnedSurfaceMaterialTests.cpp" name="ActsUnitTestBinnedSurfaceMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBinnedSurfaceMaterial"/>
+</bin>
+
+<bin file="Material/BinnedSurfaceMaterialAccumulaterTests.cpp" name="ActsUnitTestBinnedSurfaceMaterialAccumulater">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBinnedSurfaceMaterialAccumulater"/>
+</bin>
+
+<bin file="Material/GridSurfaceMaterialTests.cpp" name="ActsUnitTestGridSurfaceMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGridSurfaceMaterial"/>
+</bin>
+
+<bin file="Material/HomogeneousSurfaceMaterialTests.cpp" name="ActsUnitTestHomogeneousSurfaceMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestHomogeneousSurfaceMaterial"/>
+</bin>
+
+<bin file="Material/HomogeneousVolumeMaterialTests.cpp" name="ActsUnitTestHomogeneousVolumeMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestHomogeneousVolumeMaterial"/>
+</bin>
+
+<bin file="Material/InteractionsTests.cpp" name="ActsUnitTestInteractions">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestInteractions"/>
+</bin>
+
+<bin file="Material/InterpolatedMaterialMapTests.cpp" name="ActsUnitTestInterpolatedMaterialMap">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestInterpolatedMaterialMap"/>
+</bin>
+
+<bin file="Material/IntersectionMaterialAssignerTests.cpp" name="ActsUnitTestIntersectionMaterialAssigner">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestIntersectionMaterialAssigner"/>
+</bin>
+
+<bin file="Material/ISurfaceMaterialTests.cpp" name="ActsUnitTestISurfaceMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestISurfaceMaterial"/>
+</bin>
+
+<bin file="Material/MaterialCompositionTests.cpp" name="ActsUnitTestMaterialComposition">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialComposition"/>
+</bin>
+
+<bin file="Material/MaterialGridHelperTests.cpp" name="ActsUnitTestMaterialGridHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialGridHelper"/>
+</bin>
+
+<bin file="Material/MaterialInteractionAssignmentTests.cpp" name="ActsUnitTestMaterialInteractionAssignment">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialInteractionAssignment"/>
+</bin>
+
+<bin file="Material/MaterialMapperTests.cpp" name="ActsUnitTestMaterialMapper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialMapper"/>
+</bin>
+
+<bin file="Material/MaterialSlabTests.cpp" name="ActsUnitTestMaterialSlab">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialSlab"/>
+</bin>
+
+<bin file="Material/MaterialValidaterTests.cpp" name="ActsUnitTestMaterialValidater">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialValidater"/>
+</bin>
+
+<bin file="Material/MaterialTests.cpp" name="ActsUnitTestMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterial"/>
+</bin>
+
+<bin file="Material/ProtoSurfaceMaterialTests.cpp" name="ActsUnitTestProtoSurfaceMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestProtoSurfaceMaterial"/>
+</bin>
+
+<bin file="Material/ProtoVolumeMaterialTests.cpp" name="ActsUnitTestProtoVolumeMaterial">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestProtoVolumeMaterial"/>
+</bin>
+
+<bin file="Material/PropagatorMaterialAssignerTests.cpp" name="ActsUnitTestPropagatorMaterialAssigner">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPropagatorMaterialAssigner"/>
+</bin>
+
+<bin file="Material/SurfaceMaterialMapperTests.cpp" name="ActsUnitTestSurfaceMaterialMapper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceMaterialMapper"/>
+</bin>
+
+<bin file="Material/VolumeMaterialMapperTests.cpp" name="ActsUnitTestVolumeMaterialMapper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVolumeMaterialMapper"/>
+</bin>
+
+<!-- Navigation -->
+<bin file="Navigation/PortalNavigationTests.cpp" name="ActsUnitTestPortalNavigation">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPortalNavigation"/>
+</bin>
+
+<bin file="Navigation/DetectorVolumeFindersTests.cpp" name="ActsUnitTestDetectorVolumeFinders">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorVolumeFinders"/>
+</bin>
+
+<bin file="Navigation/NavigationStateTests.cpp" name="ActsUnitTestNavigationState">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestNavigationState"/>
+</bin>
+
+<bin file="Navigation/NavigationStreamTests.cpp" name="ActsUnitTestNavigationStream">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestNavigationStream"/>
+</bin>
+
+<bin file="Navigation/NavigationStateUpdatersTests.cpp" name="ActsUnitTestNavigationStateUpdaters">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestNavigationStateUpdaters"/>
+</bin>
+
+<bin file="Navigation/DetectorNavigatorTests.cpp" name="ActsUnitTestDetectorNavigator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDetectorNavigator"/>
+</bin>
+
+<bin file="Navigation/MultiWireNavigationTests.cpp" name="ActsUnitTestMultiWireNavigation">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiWireNavigation"/>
+</bin>
+
+<bin file="Navigation/NavigationPolicyTests.cpp" name="ActsUnitTestNavigationPolicy">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestNavigationPolicy"/>
+</bin>
+
+<!-- Propagator -->
+<bin file="Propagator/AtlasStepperTests.cpp" name="ActsUnitTestAtlasStepper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAtlasStepper"/>
+</bin>
+
+<bin file="Propagator/ConstrainedStepTests.cpp" name="ActsUnitTestConstrainedStep">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestConstrainedStep"/>
+</bin>
+
+<bin file="Propagator/CovarianceEngineTests.cpp" name="ActsUnitTestCovarianceEngine">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCovarianceEngine"/>
+</bin>
+
+<bin file="Propagator/DirectNavigatorTests.cpp" name="ActsUnitTestDirectNavigator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDirectNavigator"/>
+</bin>
+
+<bin file="Propagator/ExtrapolatorTests.cpp" name="ActsUnitTestExtrapolator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestExtrapolator"/>
+</bin>
+
+<bin file="Propagator/JacobianTests.cpp" name="ActsUnitTestJacobian">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestJacobian"/>
+</bin>
+
+<bin file="Propagator/JacobianEngineTests.cpp" name="ActsUnitTestJacobianEngine">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestJacobianEngine"/>
+</bin>
+
+<bin file="Propagator/KalmanExtrapolatorTests.cpp" name="ActsUnitTestKalmanExtrapolator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestKalmanExtrapolator"/>
+</bin>
+
+<bin file="Propagator/LoopProtectionTests.cpp" name="ActsUnitTestLoopProtection">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLoopProtection"/>
+</bin>
+
+<bin file="Propagator/MaterialCollectionTests.cpp" name="ActsUnitTestMaterialCollection">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialCollection"/>
+</bin>
+
+<bin file="Propagator/MultiEigenStepperLoopTests.cpp" name="ActsUnitTestMultiEigenStepperLoop">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiEigenStepperLoop"/>
+</bin>
+
+<bin file="Propagator/MultiSympyStepperLoopTests.cpp" name="ActsUnitTestMultiSympyStepperLoop">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiSympyStepperLoop"/>
+</bin>
+
+<bin file="Propagator/NavigatorTests.cpp" name="ActsUnitTestNavigator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestNavigator"/>
+</bin>
+
+<bin file="Propagator/PropagatorTests.cpp" name="ActsUnitTestPropagator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPropagator"/>
+</bin>
+
+<bin file="Propagator/EigenStepperTests.cpp" name="ActsUnitTestEigenStepper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestEigenStepper"/>
+</bin>
+
+<bin file="Propagator/StraightLineStepperTests.cpp" name="ActsUnitTestStraightLineStepper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestStraightLineStepper"/>
+</bin>
+
+<bin file="Propagator/VolumeMaterialInteractionTests.cpp" name="ActsUnitTestVolumeMaterialInteraction">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVolumeMaterialInteraction"/>
+</bin>
+
+<bin file="Propagator/BoundToCurvilinearConversionTests.cpp" name="ActsUnitTestBoundToCurvilinearConversionTests">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBoundToCurvilinearConversionTests"/>
+</bin>
+
+<bin file="Propagator/SympyStepperTests.cpp" name="ActsUnitTestSympyStepper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSympyStepper"/>
+</bin>
+
+<!-- Seeding -->
+<bin file="Seeding/SeedFinderTest.cpp" name="ActsUnitTestSeedFinder">
+  <use name="boost"/>
+  <flags TEST_RUNNER_CMD="ActsUnitTestSeedFinder -f ${LOCALTOP}/src/ActsTests/UnitTestsCore/test/Seeding/sp.txt"/>
+</bin>
+
+<bin file="Seeding/EstimateTrackParamsFromSeedTest.cpp" name="ActsUnitTestEstimateTrackParamsFromSeed">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestEstimateTrackParamsFromSeed"/>
+</bin>
+
+<bin file="Seeding/BinnedGroupTest.cpp" name="ActsUnitTestBinnedGroupTest">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBinnedGroupTest"/>
+</bin>
+
+<bin file="Seeding/PathSeederTest.cpp" name="ActsUnitTestPathSeeder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPathSeeder"/>
+</bin>
+
+<bin file="Seeding/HoughTransformTest.cpp" name="ActsUnitTestHoughTransformTest">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestHoughTransformTest"/>
+</bin>
+
+<bin file="Seeding/UtilityFunctionsTests.cpp" name="ActsUnitTestUtilityFunctions">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestUtilityFunctions"/>
+</bin>
+
+<bin file="Seeding/CandidatesForMiddleSpTests.cpp" name="ActsUnitTestCandidatesForMiddleSp">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCandidatesForMiddleSp"/>
+</bin>
+
+<bin file="Seeding/StrawLineResidualTest.cpp" name="ActsUnitTestStrawLineResiduals">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestStrawLineResiduals"/>
+</bin>
+
+<bin file="Seeding/FastStrawLineFitTests.cpp" name="ActsUnitTestFastStrawLineFitTests">
+  <use name="rootcore"/>
+  <use name="rootrio"/>
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestFastStrawLineFitTests"/>
+</bin>
+
+<bin file="Seeding/StrawLineFitterTest.cpp" name="ActsUnitTestStrawLineFitterTest">
+  <use name="rootcore"/>
+  <use name="rootrio"/>
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestStrawLineFitterTest"/>
+</bin>
+
+<!-- SpacePointFormation -->
+<bin file="SpacePointFormation/SpacePointBuilderTests.cpp" name="ActsUnitTestSpacePointBuilder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSpacePointBuilder"/>
+</bin>
+
+<!-- Surfaces -->
+<bin file="Surfaces/BoundaryToleranceTests.cpp" name="ActsUnitTestBoundaryTolerance">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBoundaryTolerance"/>
+</bin>
+
+<bin file="Surfaces/AnnulusBoundsTests.cpp" name="ActsUnitTestAnnulusBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAnnulusBounds"/>
+</bin>
+
+<bin file="Surfaces/ConeBoundsTests.cpp" name="ActsUnitTestConeBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestConeBounds"/>
+</bin>
+
+<bin file="Surfaces/ConeSurfaceTests.cpp" name="ActsUnitTestConeSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestConeSurface"/>
+</bin>
+
+<bin file="Surfaces/ConvexPolygonBoundsTests.cpp" name="ActsUnitTestConvexPolygonBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestConvexPolygonBounds"/>
+</bin>
+
+<bin file="Surfaces/CurvilinearSurfaceTests.cpp" name="ActsUnitTestCurvilinearSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCurvilinearSurface"/>
+</bin>
+
+<bin file="Surfaces/CylinderBoundsTests.cpp" name="ActsUnitTestCylinderBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylinderBounds"/>
+</bin>
+
+<bin file="Surfaces/CylinderSurfaceTests.cpp" name="ActsUnitTestCylinderSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCylinderSurface"/>
+</bin>
+
+<bin file="Surfaces/DiamondBoundsTests.cpp" name="ActsUnitTestDiamondBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDiamondBounds"/>
+</bin>
+
+<bin file="Surfaces/DiscSurfaceTests.cpp" name="ActsUnitTestDiscSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDiscSurface"/>
+</bin>
+
+<bin file="Surfaces/DiscTrapezoidBoundsTests.cpp" name="ActsUnitTestDiscTrapezoidBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDiscTrapezoidBounds"/>
+</bin>
+
+<bin file="Surfaces/EllipseBoundsTests.cpp" name="ActsUnitTestEllipseBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestEllipseBounds"/>
+</bin>
+
+<bin file="Surfaces/IntersectionHelper2DTests.cpp" name="ActsUnitTestIntersectionHelper2D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestIntersectionHelper2D"/>
+</bin>
+
+<bin file="Surfaces/InfiniteBoundsTests.cpp" name="ActsUnitTestInfiniteBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestInfiniteBounds"/>
+</bin>
+
+<bin file="Surfaces/LineBoundsTests.cpp" name="ActsUnitTestLineBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLineBounds"/>
+</bin>
+
+<bin file="Surfaces/LineSurfaceTests.cpp" name="ActsUnitTestLineSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLineSurface"/>
+</bin>
+
+<bin file="Surfaces/PerigeeSurfaceTests.cpp" name="ActsUnitTestPerigeeSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPerigeeSurface"/>
+</bin>
+
+<bin file="Surfaces/PlaneSurfaceTests.cpp" name="ActsUnitTestPlaneSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPlaneSurface"/>
+</bin>
+
+<bin file="Surfaces/RadialBoundsTests.cpp" name="ActsUnitTestRadialBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRadialBounds"/>
+</bin>
+
+<bin file="Surfaces/RectangleBoundsTests.cpp" name="ActsUnitTestRectangleBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRectangleBounds"/>
+</bin>
+
+<bin file="Surfaces/StrawSurfaceTests.cpp" name="ActsUnitTestStrawSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestStrawSurface"/>
+</bin>
+
+<bin file="Surfaces/SurfaceArrayTests.cpp" name="ActsUnitTestSurfaceArray">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceArray"/>
+</bin>
+
+<bin file="Surfaces/SurfaceBoundsTests.cpp" name="ActsUnitTestSurfaceBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceBounds"/>
+</bin>
+
+<bin file="Surfaces/SurfaceIntersectionTests.cpp" name="ActsUnitTestSurfaceIntersection">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceIntersection"/>
+</bin>
+
+<bin file="Surfaces/SurfaceLocalToGlobalRoundtripTests.cpp" name="ActsUnitTestSurfaceLocalToGlobalRoundtrip">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceLocalToGlobalRoundtrip"/>
+</bin>
+
+<bin file="Surfaces/SurfaceTests.cpp" name="ActsUnitTestSurface">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurface"/>
+</bin>
+
+<bin file="Surfaces/TrapezoidBoundsTests.cpp" name="ActsUnitTestTrapezoidBounds">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrapezoidBounds"/>
+</bin>
+
+<bin file="Surfaces/VerticesHelperTests.cpp" name="ActsUnitTestVerticesHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVerticesHelper"/>
+</bin>
+
+<bin file="Surfaces/AlignmentHelperTests.cpp" name="ActsUnitTestAlignmentHelper">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAlignmentHelper"/>
+</bin>
+
+<bin file="Surfaces/PolyhedronSurfacesTests.cpp" name="ActsUnitTestPolyhedronSurfacesTests">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPolyhedronSurfacesTests"/>
+</bin>
+
+<bin file="Surfaces/BoundsRegressionTests.cpp" name="ActsUnitTestBoundsRegression">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBoundsRegression"/>
+</bin>
+
+<bin file="Surfaces/LineIntersectionTests.cpp" name="ActsUnitTestLineIntersection">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLineIntersection"/>
+</bin>
+
+<!-- TrackFinding -->
+<bin file="TrackFinding/CombinatorialKalmanFilterTests.cpp" name="ActsUnitTestCombinatorialKalmanFilter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCombinatorialKalmanFilter"/>
+</bin>
+
+<bin file="TrackFinding/TrackSelectorTests.cpp" name="ActsUnitTestTrackSelector">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackSelector"/>
+</bin>
+
+<bin file="TrackFinding/TrackParamsLookupAccumulatorTests.cpp" name="ActsUnitTestTrackParamsLookupAccumulator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackParamsLookupAccumulator"/>
+</bin>
+
+<!-- TrackFitting -->
+<bin file="TrackFitting/GainMatrixSmootherTests.cpp" name="ActsUnitTestGainMatrixSmoother">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGainMatrixSmoother"/>
+</bin>
+
+<bin file="TrackFitting/GainMatrixUpdaterTests.cpp" name="ActsUnitTestGainMatrixUpdater">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGainMatrixUpdater"/>
+</bin>
+
+<bin file="TrackFitting/KalmanFitterTests.cpp" name="ActsUnitTestKalmanFitter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestKalmanFitter"/>
+</bin>
+
+<bin file="TrackFitting/GsfTests.cpp" name="ActsUnitTestGsf">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGsf"/>
+</bin>
+
+<bin file="TrackFitting/GsfComponentMergingTests.cpp" name="ActsUnitTestGsfComponentMerging">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGsfComponentMerging"/>
+</bin>
+
+<bin file="TrackFitting/GsfMixtureReductionTests.cpp" name="ActsUnitTestGsfMixtureReduction">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGsfMixtureReduction"/>
+</bin>
+
+<bin file="TrackFitting/Gx2fTests.cpp" name="ActsUnitTestGx2f">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGx2f"/>
+</bin>
+
+<bin file="TrackFitting/MbfSmootherTests.cpp" name="ActsUnitTestMbfSmoother">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMbfSmoother"/>
+</bin>
+
+<!-- Utilities -->
+<bin file="Utilities/AlgebraHelpersTests.cpp" name="ActsUnitTestAlgebraHelpersTests">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAlgebraHelpersTests"/>
+</bin>
+
+<bin file="Utilities/AnnealingUtilityTests.cpp" name="ActsUnitTestAnnealingUtility">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAnnealingUtility"/>
+</bin>
+
+<bin file="Utilities/AxesTests.cpp" name="ActsUnitTestAxes">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAxes"/>
+</bin>
+
+<bin file="Utilities/BFieldMapUtilsTests.cpp" name="ActsUnitTestBFieldMapUtils">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBFieldMapUtils"/>
+</bin>
+
+<bin file="Utilities/BinAdjustmentTests.cpp" name="ActsUnitTestBinAdjustment">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBinAdjustment"/>
+</bin>
+
+<bin file="Utilities/BinAdjustmentVolumeTests.cpp" name="ActsUnitTestBinAdjustmentVolume">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBinAdjustmentVolume"/>
+</bin>
+
+<bin file="Utilities/BinningDataTests.cpp" name="ActsUnitTestBinningData">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBinningData"/>
+</bin>
+
+<bin file="Utilities/BinUtilityTests.cpp" name="ActsUnitTestBinUtility">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBinUtility"/>
+</bin>
+
+<bin file="Utilities/PointerConceptTest.cpp" name="ActsUnitTestPointerConcept">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPointerConcept"/>
+</bin>
+
+<bin file="Utilities/LineWithPartialTests.cpp" name="ActsUnitTestLineWithPartialTest">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLineWithPartialTest"/>
+</bin>
+
+<bin file="Utilities/BoundingBoxTest.cpp" name="ActsUnitTestBoundingBox">
+  <!-- <use mame="filesystem"/> -->
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestBoundingBox"/>
+</bin>
+
+<bin file="Utilities/DBScanTests.cpp" name="ActsUnitTestDBScan">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDBScan"/>
+</bin>
+
+<bin file="Utilities/ExtendableTests.cpp" name="ActsUnitTestExtendable">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestExtendable"/>
+</bin>
+
+<bin file="Utilities/FiniteStateMachineTests.cpp" name="ActsUnitTestFiniteStateMachine">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestFiniteStateMachine"/>
+</bin>
+
+<bin file="Utilities/FrustumTest.cpp" name="ActsUnitTestFrustum">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestFrustum"/>
+</bin>
+
+<bin file="Utilities/GridTests.cpp" name="ActsUnitTestGrid">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGrid"/>
+</bin>
+
+<bin file="Utilities/GridAccessHelpersTests.cpp" name="ActsUnitTestGridAccessHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGridAccessHelpers"/>
+</bin>
+
+<bin file="Utilities/GridAxisGeneratorsTests.cpp" name="ActsUnitTestGridAxisGenerators">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGridAxisGenerators"/>
+</bin>
+
+<bin file="Utilities/GridBinFinderTests.cpp" name="ActsUnitTestGridBinFinder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGridBinFinder"/>
+</bin>
+
+<bin file="Utilities/GridIterationTests.cpp" name="ActsUnitTestGridIteration">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGridIteration"/>
+</bin>
+
+<bin file="Utilities/HelpersTests.cpp" name="ActsUnitTestHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestHelpers"/>
+</bin>
+
+<bin file="Utilities/InterpolationTests.cpp" name="ActsUnitTestInterpolation">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestInterpolation"/>
+</bin>
+
+<bin file="Utilities/IntersectionTests.cpp" name="ActsUnitTestIntersection">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestIntersection"/>
+</bin>
+
+<bin file="Utilities/KDTreeTests.cpp" name="ActsUnitTestKDTree">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestKDTree"/>
+</bin>
+
+<bin file="Utilities/LoggerTests.cpp" name="ActsUnitTestLogger">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLogger"/>
+</bin>
+
+<bin file="Utilities/MaterialMapUtilsTests.cpp" name="ActsUnitTestMaterialMapUtils">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMaterialMapUtils"/>
+</bin>
+
+<bin file="Utilities/MultiIndexTests.cpp" name="ActsUnitTestMultiIndex">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMultiIndex"/>
+</bin>
+
+<bin file="Utilities/PeriodicTests.cpp" name="ActsUnitTestPeriodic">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPeriodic"/>
+</bin>
+
+<bin file="Utilities/ProtoAxisTests.cpp" name="ActsUnitTestProtoAxis">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestProtoAxis"/>
+</bin>
+
+<bin file="Utilities/Range1DTests.cpp" name="ActsUnitTestRange1D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRange1D"/>
+</bin>
+
+<bin file="Utilities/RangeXDTests.cpp" name="ActsUnitTestRangeXD">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRangeXD"/>
+</bin>
+
+<bin file="Utilities/RayTest.cpp" name="ActsUnitTestRay">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRay"/>
+</bin>
+
+<bin file="Utilities/RealQuadraticEquationTests.cpp" name="ActsUnitTestRealQuadraticEquation">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestRealQuadraticEquation"/>
+</bin>
+
+<bin file="Utilities/ResultTests.cpp" name="ActsUnitTestResult">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestResult"/>
+</bin>
+
+<bin file="Utilities/TypeListTests.cpp" name="ActsUnitTestTypeList">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTypeList"/>
+</bin>
+
+<bin file="Utilities/UnitVectorsTests.cpp" name="ActsUnitTestUnitVectors">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestUnitVectors"/>
+</bin>
+
+<bin file="Utilities/DelegateTests.cpp" name="ActsUnitTestDelegate">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestDelegate"/>
+</bin>
+
+<bin file="Utilities/HashedStringTests.cpp" name="ActsUnitTestHashedString">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestHashedString"/>
+</bin>
+
+<iftool name="cuda-gcc-support">
+  <!--
+  <bin file="Utilities/CudaTests.cu" name="ActsUnitTestCuda">
+    <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCuda"/>
+  </bin>
+
+  <bin file="Utilities/CudaMostSimplifiedTests.cu" name="ActsUnitTestCudaMostSimplified">
+    <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestCudaMostSimplified"/>
+  </bin>
+  -->
+</iftool>
+
+<bin file="Utilities/AnyTests.cpp" name="ActsUnitTestAny">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAny"/>
+</bin>
+
+<bin file="Utilities/AnyTests.cpp" name="ActsUnitTestAnyDebug">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAnyDebug"/>
+  <flags CXXFLAGS="-D_ACTS_ANY_ENABLE_VERBOSE"/>
+  <flags CXXFLAGS="-D_ACTS_ANY_ENABLE_DEBUG"/>
+  <flags CXXFLAGS="-D_ACTS_ANY_ENABLE_TRACK_ALLOCATIONS"/>
+</bin>
+
+<bin file="Utilities/ParticleDataTests.cpp" name="ActsUnitTestParticleData">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestParticleData"/>
+</bin>
+
+<bin file="Utilities/ZipTests.cpp" name="ActsUnitTestZip">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestZip"/>
+</bin>
+
+<bin file="Utilities/TransformRangeTests.cpp" name="ActsUnitTestTransformRange">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTransformRange"/>
+</bin>
+
+<bin file="Utilities/MathHelpersTests.cpp" name="ActsUnitTestMathHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestMathHelpers"/>
+</bin>
+
+<bin file="Utilities/AngleHelpersTests.cpp" name="ActsUnitTestAngleHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAngleHelpers"/>
+</bin>
+
+<bin file="Utilities/VectorHelpersTests.cpp" name="ActsUnitTestVectorHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVectorHelpers"/>
+</bin>
+
+<bin file="Utilities/PolynomialTests.cpp" name="ActsUnitTestPolynomialTests">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPolynomialTests"/>
+</bin>
+
+<bin file="Utilities/TrackHelpersTests.cpp" name="ActsUnitTestTrackHelpers">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackHelpers"/>
+</bin>
+
+<bin file="Utilities/GraphVizTests.cpp" name="ActsUnitTestGraphViz">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGraphViz"/>
+</bin>
+
+<bin file="Utilities/JoinStringsTests.cpp" name="ActsUnitTestJoinStrings">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestJoinStrings"/>
+</bin>
+
+<bin file="Utilities/ContextTypeTests.cpp" name="ActsUnitTestContextType">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestContextType"/>
+</bin>
+
+<bin file="Utilities/AnyGridViewTests.cpp" name="ActsUnitTestAnyGridView">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAnyGridView"/>
+</bin>
+
+<bin file="Utilities/TransformComparatorTests.cpp" name="ActsUnitTestTransformComparator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTransformComparator"/>
+</bin>
+
+<bin file="Utilities/TableTests.cpp" name="ActsUnitTestTable">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTable"/>
+</bin>
+
+<bin file="Utilities/TypeDispatcherTests.cpp" name="ActsUnitTestTypeDispatcher">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTypeDispatcher"/>
+</bin>
+
+<!-- Vertexing -->
+<bin file="Vertexing/FullBilloirVertexFitterTests.cpp" name="ActsUnitTestFullBilloirVertexFitter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestFullBilloirVertexFitter"/>
+</bin>
+
+<bin file="Vertexing/ImpactPointEstimatorTests.cpp" name="ActsUnitTestImpactPointEstimator">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestImpactPointEstimator"/>
+</bin>
+
+<bin file="Vertexing/IterativeVertexFinderTests.cpp" name="ActsUnitTestIterativeVertexFinder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestIterativeVertexFinder"/>
+</bin>
+
+<bin file="Vertexing/KalmanVertexUpdaterTests.cpp" name="ActsUnitTestKalmanVertexUpdater">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestKalmanVertexUpdater"/>
+</bin>
+
+<bin file="Vertexing/LinearizedTrackFactoryTests.cpp" name="ActsUnitTestLinearizedTrackFactory">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestLinearizedTrackFactory"/>
+</bin>
+
+<bin file="Vertexing/AdaptiveMultiVertexFitterTests.cpp" name="ActsUnitTestAdaptiveMultiVertexFitter">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAdaptiveMultiVertexFitter"/>
+</bin>
+
+<bin file="Vertexing/AdaptiveMultiVertexFinderTests.cpp" name="ActsUnitTestAdaptiveMultiVertexFinder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAdaptiveMultiVertexFinder"/>
+</bin>
+
+<bin file="Vertexing/ZScanVertexFinderTests.cpp" name="ActsUnitTestZScanVertexFinder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestZScanVertexFinder"/>
+</bin>
+
+<bin file="Vertexing/TrackDensityVertexFinderTests.cpp" name="ActsUnitTestTrackDensityVertexFinder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackDensityVertexFinder"/>
+</bin>
+
+<bin file="Vertexing/GaussianGridTrackDensityTests.cpp" name="ActsUnitTestGaussianGridTrackDensity">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGaussianGridTrackDensity"/>
+</bin>
+
+<bin file="Vertexing/GridDensityVertexFinderTests.cpp" name="ActsUnitTestGridDensityVertexFinder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestGridDensityVertexFinder"/>
+</bin>
+
+<bin file="Vertexing/AdaptiveGridTrackDensityTests.cpp" name="ActsUnitTestAdaptiveGridTrackDensity">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestAdaptiveGridTrackDensity"/>
+</bin>
+
+<bin file="Vertexing/HoughVertexFinderTests.cpp" name="ActsUnitTestHoughVertexFinder">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestHoughVertexFinder"/>
+</bin>
+
+<!-- Visualization -->
+<bin file="Visualization/Visualization3DTests.cpp" name="ActsUnitTestVisualization3D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVisualization3D"/>
+</bin>
+
+<bin file="Visualization/EventDataView3DTests.cpp" name="ActsUnitTestEventDataView3D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestEventDataView3D"/>
+</bin>
+
+<bin file="Visualization/Interpolation3DTests.cpp" name="ActsUnitTestInterpolation3D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestInterpolation3D"/>
+</bin>
+
+<bin file="Visualization/PrimitivesView3DTests.cpp" name="ActsUnitTestPrimitivesView3D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestPrimitivesView3D"/>
+</bin>
+
+<bin file="Visualization/SurfaceView3DTests.cpp" name="ActsUnitTestSurfaceView3D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestSurfaceView3D"/>
+</bin>
+
+<bin file="Visualization/TrackingGeometryView3DTests.cpp" name="ActsUnitTestTrackingGeometryView3D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestTrackingGeometryView3D"/>
+</bin>
+
+<bin file="Visualization/VolumeView3DTests.cpp" name="ActsUnitTestVolumeView3D">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVolumeView3D"/>
+</bin>

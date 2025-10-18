@@ -1,6 +1,0 @@
-add_unittest(ConstantBField ConstantBFieldTests.cpp)
-add_unittest(InterpolatedBFieldMap InterpolatedBFieldMapTests.cpp)
-add_unittest(SolenoidBField SolenoidBFieldTests.cpp)
-add_unittest(MultiRangeBField MultiRangeBFieldTests.cpp)
-add_unittest(MagneticFieldProvider MagneticFieldProviderTests.cpp)
-add_unittest(TextMagneticFieldIo TextMagneticFieldIoTests.cpp)

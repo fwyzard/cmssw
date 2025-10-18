@@ -1,0 +1,8 @@
+<use name="acts-core"/>
+<use name="boost_test"/>
+<use name="ActsTests/CommonHelpers"/>
+<flags CXXFLAGS="-DBOOST_TEST_DYN_LINK"/>
+
+<bin file="BenchmarkTools.cpp" name="ActsUnitTestBenchmarkTools">
+  <flags CXXFLAGS="-DBOOST_TEST_MODULE=ActsUnitTestVersion"/>
+</bin>
