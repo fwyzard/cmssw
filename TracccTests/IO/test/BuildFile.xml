@@ -1,0 +1,9 @@
+<bin file="*.cpp" name="TracccTestIO">
+  <use name="google-test-main"/>
+  <use name="traccc"/>
+  <use name="traccc-io"/>
+  <use name="traccc-performance"/>
+  <use name="TracccTests/Common"/>
+  <flags CXXFLAGS="-DTRACCC_TEST_IO_MOCK_DATA_DIR=&apos;&quot;${CMSSW_BASE}/src/TracccTests/IO/data&quot;&apos;"/>
+  <flags CXXFLAGS="-Wno-sign-compare"/>
+</bin>

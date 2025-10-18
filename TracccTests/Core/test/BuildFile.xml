@@ -1,0 +1,7 @@
+<bin file="*.cpp" name="TracccTestCore">
+  <use name="google-test-main"/>
+  <use name="rootcling"/>
+  <use name="traccc"/>
+  <use name="traccc-io"/>
+  <use name="TracccTests/Common"/>
+</bin>

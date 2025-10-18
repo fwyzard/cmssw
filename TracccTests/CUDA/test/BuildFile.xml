@@ -1,0 +1,19 @@
+<bin file="*.cpp *.cu" name="TracccTestCUDA">
+  <use name="cuda"/>
+  <use name="google-test"/>
+  <use name="vecmem-cuda"/>
+  <use name="detray"/>
+  <use name="traccc"/>
+  <use name="traccc-cuda"/>
+  <use name="traccc-io"/>
+  <use name="traccc-performance"/>
+  <use name="TracccTests/Common"/>
+  <use name="TracccTests/CUDA"/>
+  <!--
+    detray::io
+    detray::test_common
+    traccc::device_common
+    traccc::simulation
+  ?-->
+  <flags CXXFLAGS="-Wno-sign-compare"/>
+</bin>

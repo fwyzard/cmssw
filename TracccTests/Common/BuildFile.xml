@@ -1,0 +1,13 @@
+<use name="acts-core"/>
+<use name="covfie"/>
+<use name="detray"/>
+<use name="google-test"/>
+<use name="roothistmatrix"/>
+<use name="traccc"/>
+<use name="traccc-io"/>
+<use name="vecmem"/>
+<!-- dfelibs::dfelibs -->
+<!-- traccc_simulation -->
+<export>
+  <lib name="1"/>
+</export>
