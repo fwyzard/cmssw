@@ -22,3 +22,5 @@
   <use name="HeterogeneousCore/AlpakaInterface"/>
   <flags ALPAKA_BACKENDS="1"/>
 </bin>
+
+<test name="TestDataFormatsPortableGenericCloner" command="cmsRun ${LOCALTOP}/src/FWCore/TestModules/test/testGenericCloner_cfg.py"/>
