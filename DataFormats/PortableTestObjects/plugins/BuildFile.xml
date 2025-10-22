@@ -1,0 +1,8 @@
+<library file="alpaka/TrivialSerialisationPlugins.cc" name="DataFormatsPortableTestObjectsPluginsAlpaka">
+  <use name="DataFormats/PortableTestObjects"/>
+  <use name="HeterogeneousCore/AlpakaInterface"/>
+  <use name="TrivialSerialisation/Common"/>
+  <use name="alpaka"/>
+  <flags ALPAKA_BACKENDS="1"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
