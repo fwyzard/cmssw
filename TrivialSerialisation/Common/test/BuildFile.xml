@@ -1,0 +1,1 @@
+<test name="TestTrivialSerialisationCommonHeterogeneousPortableGenericCloner" command="cmsRun ${LOCALTOP}/src/TrivialSerialisation/Common/test/testGenericCloner_cfg.py"/>

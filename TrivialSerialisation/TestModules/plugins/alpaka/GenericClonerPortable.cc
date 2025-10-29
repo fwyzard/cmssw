@@ -1,0 +1,283 @@
+/*
+ * This EDProducer will clone all the event products declared by its configuration, using their ROOT dictionaries.
+ *
+ * The products can be specified either as module labels (e.g. "<module label>") or as branch names (e.g.
+ * "<product type>_<module label>_<instance name>_<process name>").
+ *
+ * If a module label is used, no underscore ("_") must be present; this module will clone all the products produced by
+ * that module, including those produced by the Transformer functionality (such as the implicitly copied-to-host
+ * products in case of Alpaka-based modules).
+ * If a branch name is used, all four fields must be present, separated by underscores; this module will clone only on
+ * the matching product(s).
+ *
+ * Glob expressions ("?" and "*") are supported in module labels and within the individual fields of branch names,
+ * similar to an OutputModule's "keep" statements.
+ * Use "*" to clone all products.
+ *
+ * For example, in the case of Alpaka-based modules running on a device, using
+ *
+ *   eventProducts = cms.untracked.vstring( "module" )
+ *
+ * will cause "module" to run, along with automatic copy of its device products to the host, and will attempt to clone
+ * all device and host products.
+ * To clone only the host product, the branch can be specified explicitly with
+ *
+ *   eventProducts = cms.untracked.vstring( "HostProductType_module_*_*" )
+ *
+ *
+ */
+
+#include <cstdio>
+#include <cstring>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#include <TBufferFile.h>
+
+#include "DataFormats/Common/interface/TrivialCopyTraits.h"
+#include "DataFormats/Common/interface/WrapperBase.h"
+#include "DataFormats/Provenance/interface/ProductDescription.h"
+#include "DataFormats/Provenance/interface/ProductNamePattern.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/WrapperBaseHandle.h"
+#include "FWCore/Framework/interface/WrapperBaseOrphanHandle.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
+#include "FWCore/ParameterSet/interface/ParameterDescriptionNode.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
+#include "FWCore/Utilities/interface/EDMException.h"
+
+#include "FWCore/Utilities/interface/EDPutToken.h"
+#include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDPutToken.h"
+#include "TrivialSerialisation/Common/interface/SerialiserFactory.h"
+#include "TrivialSerialisation/Common/interface/TrivialSerialiserBase.h"
+
+#include <alpaka/alpaka.hpp>
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
+#include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
+#include "HeterogeneousCore/AlpakaCore/interface/alpaka/stream/EDProducer.h"
+
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
+#include "alpaka/dev/Traits.hpp"
+
+namespace ALPAKA_ACCELERATOR_NAMESPACE {
+
+  class GenericClonerPortable : public stream::EDProducer<> {
+  public:
+    explicit GenericClonerPortable(edm::ParameterSet const&);
+    ~GenericClonerPortable() override = default;
+
+    void produce(device::Event&, device::EventSetup const&) override;
+    auto getDev(device::Event& event, auto& serialiser);
+
+    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
+  private:
+    struct Entry {
+      edm::TypeWithDict objectType_;
+      edm::TypeWithDict wrappedType_;
+      edm::EDGetToken getToken_;
+      edm::EDPutToken putToken_;
+    };
+
+    std::vector<edm::ProductNamePattern> eventPatterns_;
+    std::vector<Entry> eventProducts_;
+    bool verbose_;
+  };
+
+  GenericClonerPortable::GenericClonerPortable(edm::ParameterSet const& config)
+      : EDProducer<>(config),
+        eventPatterns_(edm::productPatterns(config.getParameter<std::vector<std::string>>("eventProducts"))),
+        verbose_(config.getUntrackedParameter<bool>("verbose")) {
+    eventProducts_.reserve(eventPatterns_.size());
+
+    callWhenNewProductsRegistered([this](edm::ProductDescription const& product) {
+      static const std::string_view kPathStatus("edm::PathStatus");
+      static const std::string_view kEndPathStatus("edm::EndPathStatus");
+      static const std::string_view kBackend("backend");
+
+      switch (product.branchType()) {
+        case edm::InEvent:
+          if (product.className() == kPathStatus or product.className() == kEndPathStatus) {
+            return;
+          }
+          if (product.productInstanceName() == kBackend) {
+            return;
+          }
+          for (auto& pattern : eventPatterns_) {
+            if (pattern.match(product)) {
+              // check that the product is not transient
+              if (product.transient()) {
+                // edm::LogWarning("GenericClonerPortable")
+                // << "Event product " << product.branchName() << " of type " << product.unwrappedType()
+                // << " is transient, will not be cloned.";
+                // break;
+              }
+              if (verbose_) {
+                edm::LogInfo("GenericClonerPortable")
+                    << "will clone Event product " << product.branchName() << " of type " << product.unwrappedType();
+              }
+              Entry entry;
+              entry.objectType_ = product.unwrappedType();
+              entry.wrappedType_ = product.wrappedType();
+
+              // TODO move this to EDConsumerBase::consumes() ?
+              entry.getToken_ = this->consumes(
+                  edm::TypeToGet{product.unwrappedTypeID(), edm::PRODUCT_TYPE},
+                  edm::InputTag{product.moduleLabel(), product.productInstanceName(), product.processName()});
+              printf("Type name: %s\n", product.unwrappedTypeID().typeInfo().name());
+              printf("Event product: %s\n", product.branchName().c_str());
+              printf("Product Instance Name: %s\n", product.productInstanceName().c_str());
+              printf("process Name: %s\n", product.processName().c_str());
+
+              entry.putToken_ =
+                  this->producesCollector().produces(product.unwrappedTypeID(), product.productInstanceName());
+              eventProducts_.emplace_back(std::move(entry));
+              break;
+            }
+          }
+          break;
+
+        case edm::InLumi:
+        case edm::InRun:
+        case edm::InProcess:
+          // lumi, run and process products are not supported
+          break;
+
+        default:
+          throw edm::Exception(edm::errors::LogicError)
+              << "Unexpected product type " << product.branchType() << "\nPlease contact a Framework developer.";
+      }
+    });
+  }
+
+  void GenericClonerPortable::produce(device::Event& event, device::EventSetup const& /*unused*/) {
+    for (auto& product : eventProducts_) {
+      // std::cout << "Running on device " << alpaka::getName(event.device()) << std::endl;
+
+      edm::Handle<edm::WrapperBase> handle(product.objectType_.typeInfo());
+
+      static_cast<edm::Event const&>(event).getByToken(product.getToken_, handle);
+
+      // create a "wrapper", whose wrapped product will be cloned into "clone"
+      edm::WrapperBase const* wrapper = handle.product();
+      std::unique_ptr<edm::WrapperBase> clone(static_cast<edm::WrapperBase*>(product.wrappedType_.getClass()->New()));
+
+      std::unique_ptr<ngt::SerialiserBase> serialiser{
+          ngt::SerialiserFactory::get()->tryToCreate(product.objectType_.typeInfo().name())};
+
+      if (serialiser) {
+        edm::LogInfo("GenericClonerPortable")
+            << "A specialisation of TrivialCopyTraits exists for type " << product.objectType_.typeInfo().name() << ".";
+
+        // initialise a const and a mutable TrivialSerialisers.
+        auto reader = serialiser->initialize(*wrapper);
+        auto writer = serialiser->initialize(*clone);
+
+        edm::LogInfo("GenericCloner") << "A specialization of TrivialCopyTraits exists for type "
+                                      << product.objectType_.typeInfo().name() << ".";
+
+        // initialise the clone, if the type requires it
+        writer->initialize(reader->parameters());
+
+        // copy the source regions to the target
+        auto targets = writer->regions();
+        auto sources = reader->regions();
+
+        auto doMemcpy = [&sources, &targets, &event](auto const& readerDev, auto const& writerDev) {
+          assert(sources.size() == targets.size());
+          for (size_t i = 0; i < sources.size(); ++i) {
+            assert(sources[i].data() != nullptr);
+            assert(targets[i].data() != nullptr);
+            assert(targets[i].size_bytes() == sources[i].size_bytes());
+
+            auto src_view = alpaka::createView(readerDev, sources[i].data(), sources[i].size_bytes());
+            auto trg_view = alpaka::createView(writerDev, targets[i].data(), targets[i].size_bytes());
+
+            alpaka::memcpy(event.queue(), trg_view, src_view);
+          }
+        };
+
+        if (reader->isDeviceMemory()) {
+          auto readerDev = event.device();
+          if (writer->isDeviceMemory()) {
+            auto writerDev = event.device();
+            doMemcpy(readerDev, writerDev);
+          } else {
+            auto const& writerDev = cms::alpakatools::host();
+            doMemcpy(readerDev, writerDev);
+          }
+        } else {
+          auto const& readerDev = cms::alpakatools::host();
+          if (writer->isDeviceMemory()) {
+            auto writerDev = event.device();
+            doMemcpy(readerDev, writerDev);
+          } else {
+            auto const& writerDev = cms::alpakatools::host();
+            doMemcpy(readerDev, writerDev);
+          }
+        }
+
+        alpaka::wait(event.queue());
+
+        // finalize the clone after the trivialCopy, if the type requires it
+        writer->trivialCopyFinalize();
+      } else {
+        edm::LogInfo("GenericClonerPortable")
+            << "No specialization of TrivialCopyTraits found for type " << product.objectType_.typeInfo().name()
+            << ", falling back to the ROOT serialization.";
+        // Use ROOT-based serialisation and deserialisation to clone the wrapped object.
+
+        // write the wrapper into a TBuffer
+        TBufferFile buffer(TBuffer::kWrite);
+        product.wrappedType_.getClass()->Streamer(const_cast<edm::WrapperBase*>(wrapper), buffer);
+
+        // read back a copy of the product form the TBuffer
+        buffer.SetReadMode();
+        buffer.SetBufferOffset(0);
+        product.wrappedType_.getClass()->Streamer(clone.get(), buffer);
+      }
+
+      event.put(product.putToken_, std::move(clone));
+    }
+  }
+
+  void GenericClonerPortable::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+    descriptions.setComment(
+        R"(This EDProducer will clone all the event products declared by its configuration, using their ROOT dictionaries.
+
+  The products can be specified either as module labels (e.g. "<module label>") or as branch names (e.g. "<product type>_<module label>_<instance name>_<process name>").
+  If a module label is used, no underscore ("_") must be present; this module will clone all the products produced by that module, including those produced by the Transformer functionality (such as the implicitly copied-to-host products in case of Alpaka-based modules).
+  If a branch name is used, all four fields must be present, separated by underscores; this module will clone only on the matching product(s).
+
+  Glob expressions ("?" and "*") are supported in module labels and within the individual fields of branch names, similar to an OutputModule's "keep" statements.
+  Use "*" to clone all products.
+
+  For example, in the case of Alpaka-based modules running on a device, using
+
+      eventProducts = cms.untracked.vstring( "module" )
+
+  will cause "module" to run, along with automatic copy of its device products to the host, and will attempt to clone all device and host products.
+  To clone only the host product, the branch can be specified explicitly with
+
+      eventProducts = cms.untracked.vstring( "HostProductType_module_*_*" )
+
+  .)");
+
+    edm::ParameterSetDescription desc;
+    desc.add<std::vector<std::string>>("eventProducts", {})
+        ->setComment("List of modules or branches whose event products will be cloned.");
+    desc.addUntracked<bool>("verbose", false)
+        ->setComment("Print the branch names of the products that will be cloned.");
+    descriptions.addWithDefaultLabel(desc);
+    edm::ParameterSetDescription productDesc;
+    desc.addVPSet("products", productDesc, {})->setComment("Output product configuration.");
+  }
+
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
+
+DEFINE_FWK_ALPAKA_MODULE(GenericClonerPortable);
