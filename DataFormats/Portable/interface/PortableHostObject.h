@@ -124,9 +124,10 @@ namespace edm {
     // this specialisation requires a initialize() method, but does not need to pass any parameters to it
     using Properties = void;
 
-    static void initialize(PortableHostObject<T>& object) {
+    template <typename TQueue, typename = std::enable_if_t<alpaka::isQueue<TQueue>>>
+    static void initialize(PortableHostObject<T>& object, TQueue && queue) {
       // replace the default-constructed empty object with one where the buffer has been allocated in pageable system memory
-      object = PortableHostObject<T>(cms::alpakatools::host());
+      object = PortableHostObject<T>(std::forward<TQueue>(queue));
     }
 
     static std::vector<std::span<std::byte>> regions(PortableHostObject<T>& object) {

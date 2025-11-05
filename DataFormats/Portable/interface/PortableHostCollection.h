@@ -436,9 +436,10 @@ namespace edm {
     // The properties needed to initialize a new PrortableHostCollection are just its size
     static Properties properties(value_type const& object) { return object->metadata().size(); }
 
-    static void initialize(value_type& object, Properties const& size) {
+    template <typename TQueue, typename... Args>
+    static void initialize(value_type& object, TQueue& queue, Properties const& size) {
       // replace the default-constructed empty object with one where the buffer has been allocated in pageable system memory
-      object = value_type(size, cms::alpakatools::host());
+      object = value_type(size, queue);
     }
 
     static std::vector<std::span<std::byte>> regions(value_type& object) {
@@ -463,9 +464,10 @@ namespace edm {
     // The properties needed to initialize a new PrortableHostMultiCollection are the sizes of all underlying PortableHostCollections
     static Properties properties(PortableHostMultiCollection<T0, Args...> const& object) { return object.sizes(); }
 
-    static void initialize(PortableHostMultiCollection<T0, Args...>& object, Properties const& sizes) {
+    template <typename TQueue, typename = std::enable_if_t<alpaka::isQueue<TQueue>>>
+    static void initialize(PortableHostMultiCollection<T0, Args...>& object, TQueue& queue, Properties const& sizes) {
       // replace the default-constructed empty object with one where the buffer has been allocated in pageable system memory
-      object = PortableHostMultiCollection<T0, Args...>(sizes, cms::alpakatools::host());
+      object = PortableHostMultiCollection<T0, Args...>(sizes, queue);
     }
 
     static std::vector<std::span<std::byte>> regions(PortableHostMultiCollection<T0, Args...>& object) {
