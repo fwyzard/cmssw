@@ -53,8 +53,8 @@
 
 #include "FWCore/Utilities/interface/EDPutToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDPutToken.h"
-#include "TrivialSerialisation/Common/interface/SerialiserFactory.h"
-#include "TrivialSerialisation/Common/interface/TrivialSerialiserBase.h"
+#include "TrivialSerialisation/Common/interface/alpaka/SerialiserFactory.h"
+#include "TrivialSerialisation/Common/interface/alpaka/TrivialSerialiserBase.h"
 
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
@@ -72,7 +72,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ~GenericClonerPortable() override = default;
 
     void produce(device::Event&, device::EventSetup const&) override;
-    auto getDev(device::Event& event, auto& serialiser);
+    auto getDev(device::Event& event, auto& serialiser) { return event.device(); }
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -167,8 +167,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       edm::WrapperBase const* wrapper = handle.product();
       std::unique_ptr<edm::WrapperBase> clone(static_cast<edm::WrapperBase*>(product.wrappedType_.getClass()->New()));
 
+      printf("Getting the serialiser for type: %s\n", product.objectType_.typeInfo().name());
       std::unique_ptr<ngt::SerialiserBase> serialiser{
-          ngt::SerialiserFactory::get()->tryToCreate(product.objectType_.typeInfo().name())};
+          ngt::SerialiserFactoryPortable::get()->tryToCreate(product.objectType_.typeInfo().name())};
+      printf("Got it: %s\n", product.objectType_.typeInfo().name());
 
       if (serialiser) {
         edm::LogInfo("GenericClonerPortable")
@@ -182,44 +184,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                       << product.objectType_.typeInfo().name() << ".";
 
         // initialise the clone, if the type requires it
-        writer->initialize(reader->parameters());
+        writer->initialize(reader->parameters(), event.queue());
+
+        // get the writer queue
 
         // copy the source regions to the target
         auto targets = writer->regions();
         auto sources = reader->regions();
 
-        auto doMemcpy = [&sources, &targets, &event](auto const& readerDev, auto const& writerDev) {
-          assert(sources.size() == targets.size());
-          for (size_t i = 0; i < sources.size(); ++i) {
-            assert(sources[i].data() != nullptr);
-            assert(targets[i].data() != nullptr);
-            assert(targets[i].size_bytes() == sources[i].size_bytes());
+        assert(sources.size() == targets.size());
+        for (size_t i = 0; i < sources.size(); ++i) {
+          assert(sources[i].data() != nullptr);
+          assert(targets[i].data() != nullptr);
+          assert(targets[i].size_bytes() == sources[i].size_bytes());
 
-            auto src_view = alpaka::createView(readerDev, sources[i].data(), sources[i].size_bytes());
-            auto trg_view = alpaka::createView(writerDev, targets[i].data(), targets[i].size_bytes());
+          // TODO: the views, or at least the device, should come from the serialisers
+          auto src_view = alpaka::createView(event.device(), sources[i].data(), sources[i].size_bytes());
+          auto trg_view = alpaka::createView(event.device(), targets[i].data(), targets[i].size_bytes());
 
-            alpaka::memcpy(event.queue(), trg_view, src_view);
-          }
-        };
-
-        if (reader->isDeviceMemory()) {
-          auto readerDev = event.device();
-          if (writer->isDeviceMemory()) {
-            auto writerDev = event.device();
-            doMemcpy(readerDev, writerDev);
-          } else {
-            auto const& writerDev = cms::alpakatools::host();
-            doMemcpy(readerDev, writerDev);
-          }
-        } else {
-          auto const& readerDev = cms::alpakatools::host();
-          if (writer->isDeviceMemory()) {
-            auto writerDev = event.device();
-            doMemcpy(readerDev, writerDev);
-          } else {
-            auto const& writerDev = cms::alpakatools::host();
-            doMemcpy(readerDev, writerDev);
-          }
+          alpaka::memcpy(event.queue(), trg_view, src_view);
         }
 
         alpaka::wait(event.queue());

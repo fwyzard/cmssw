@@ -10,7 +10,10 @@
   <use name="eigen"/>
   <use name="DataFormats/Portable"/>
   <use name="DataFormats/SoATemplate"/>
+  <use name="FWCore/PluginManager"/>
+  <use name="HeterogeneousCore/AlpakaCore"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>
+  <use name="TrivialSerialisation/Common"/>
   <flags ALPAKA_BACKENDS="1"/>
 </bin>
 

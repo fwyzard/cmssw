@@ -1,0 +1,7 @@
+<bin name="TestDataFormatsStdDictionariesOnHost" file="test_catch2_*.cc">
+  <use name="DataFormats/Common"/>
+  <use name="FWCore/PluginManager"/>
+  <use name="DataFormats/StdDictionaries"/>
+  <use name="TrivialSerialisation/Common"/>
+  <use name="catch2"/>
+</bin>

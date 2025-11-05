@@ -1,0 +1,9 @@
+<library file="alpaka/TrivialSerialisationPlugins.cc" name="DataFormatsPortableAlpakaTrivialSerialisationPlugins">
+  <use name="TrivialSerialisation/Common"></use>
+  <use name="DataFormats/SoATemplate"></use>
+  <use name="catch2"></use>
+  <use name="eigen"></use>
+  <use name="HeterogeneousCore/AlpakaCore"></use>
+  <use name="HeterogeneousCore/AlpakaInterface"></use>
+  <flags ALPAKA_BACKENDS="1"></flags>
+</library>

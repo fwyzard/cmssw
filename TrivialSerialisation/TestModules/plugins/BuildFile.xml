@@ -1,21 +1,14 @@
-
-
-
 <library file="alpaka/*.cc" name="testingthis">
   <use name="alpaka"/>
-<!---->
   <use name="DataFormats/Provenance"></use>
   <use name="FWCore/Framework"></use>
   <use name="FWCore/ParameterSet"></use>
   <use name="FWCore/Utilities"></use>
   <use name="DataFormats/Portable"></use>
   <use name="FWCore/PluginManager"></use>
-<!--   <use name="DataFormats/SoATemplate"></use> -->
   <use name="TrivialSerialisation/Common"></use>
   <use name="HeterogeneousCore/AlpakaCore"></use>
   <use name="HeterogeneousCore/AlpakaInterface"></use>
-<!---->
   <flags ALPAKA_BACKENDS="1"/>
   <flags EDM_PLUGIN="1"/>
-<!---->
 </library>

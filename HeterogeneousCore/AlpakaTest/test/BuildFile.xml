@@ -25,3 +25,5 @@
   <use name='HeterogeneousCore/AlpakaTest'/>
   <flags ALPAKA_BACKENDS="1"/>
 </bin>
+
+<test name="testHeterogeneousCoreAlpakaTestModulesGenericCloner" command="cmsRun ${LOCALTOP}/src/FWCore/TestModules/test/testGenericCloner_cfg.py"/>
