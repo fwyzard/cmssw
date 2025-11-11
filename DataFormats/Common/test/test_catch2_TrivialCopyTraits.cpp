@@ -1,13 +1,13 @@
-#include <catch.hpp>
-
-#include "DataFormats/Common/interface/TrivialCopyTraits.h"
-
 #include <cmath>
+#include <cstring>
 #include <map>
+#include <numeric>
 #include <type_traits>
 #include <vector>
-#include <numeric>
-#include <cstring>
+
+#include <catch2/catch_all.hpp>
+
+#include "DataFormats/Common/interface/TrivialCopyTraits.h"
 
 // Catch2 tests for TrivialCopyTraits
 //

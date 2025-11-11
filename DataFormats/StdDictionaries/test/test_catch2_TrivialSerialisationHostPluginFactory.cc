@@ -1,15 +1,15 @@
-#define CATCH_CONFIG_MAIN
-
-#include <catch.hpp>
 #include <cstring>
 #include <vector>
 
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_all.hpp>
+
 #include "DataFormats/Common/interface/TrivialCopyTraits.h"
 #include "DataFormats/Common/interface/Wrapper.h"
-#include "TrivialSerialisation/Common/interface/SerialiserFactory.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/PluginManager/interface/PluginManager.h"
 #include "FWCore/PluginManager/interface/standard.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "TrivialSerialisation/Common/interface/SerialiserFactory.h"
 
 /*
 * This test demonstrates how TrivialSerialiser can be utilized to copy simple types TODO: fill this

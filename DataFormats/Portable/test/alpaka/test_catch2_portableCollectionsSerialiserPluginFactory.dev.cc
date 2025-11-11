@@ -1,5 +1,5 @@
 #include <alpaka/alpaka.hpp>
-#include <catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include "DataFormats/Common/interface/TrivialCopyTraits.h"
 #include "DataFormats/Common/interface/Wrapper.h"
