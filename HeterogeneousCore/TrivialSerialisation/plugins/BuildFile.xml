@@ -2,3 +2,14 @@
   <use name="HeterogeneousCore/TrivialSerialisation"/>
   <flags EDM_PLUGIN="1"/>
 </library>
+
+<library file="GenericCloner.cc" name="HeterogeneousCoreTrivialSerialisationPlugins">
+  <use name="DataFormats/Portable"/>
+  <use name="DataFormats/Provenance"/>
+  <use name="FWCore/Framework"/>
+  <use name="FWCore/ParameterSet"/>
+  <use name="FWCore/PluginManager"/>
+  <use name="FWCore/Utilities"/>
+  <use name="HeterogeneousCore/TrivialSerialisation"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
