@@ -2,3 +2,5 @@
   <use name="catch2"/>
   <use name="HeterogeneousCore/SerialisationCore"/>
 </bin>
+
+<test name="TestHeterogeneousCoreSerialisationCoreGenericCloner" command="cmsRun ${LOCALTOP}/src/HeterogeneousCore/SerialisationCore/test/testGenericCloner_cfg.py"/>
