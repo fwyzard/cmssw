@@ -6,5 +6,19 @@
   <use name="HeterogeneousCore/SerialisationCore"/>
 </bin>
 
+<bin name="TestHeterogeneousCoreSerialisationCorePortable" file="alpaka/test_catch2_*.cpp">
+  <use name="alpaka"/>
+  <use name="catch2"/>
+  <use name="eigen"/>
+  <use name="DataFormats/Common"/>
+  <use name="DataFormats/Portable"/>
+  <use name="DataFormats/PortableTestObjects"/>
+  <use name="FWCore/PluginManager"/>
+  <use name="HeterogeneousCore/AlpakaInterface"/>
+  <use name="HeterogeneousCore/SerialisationCore"/>
+  <flags ALPAKA_BACKENDS="1"/>
+</bin>
+
 <test name="TestHeterogeneousCoreSerialisationCoreGenericCloner" command="cmsRun ${LOCALTOP}/src/HeterogeneousCore/SerialisationCore/test/testGenericCloner_cfg.py"/>
 <test name="TestHeterogeneousCoreSerialisationCoreGenericClonerHost" command="cmsRun ${LOCALTOP}/src/HeterogeneousCore/SerialisationCore/test/testGenericClonerHost_cfg.py"/>
+<test name="TestHeterogeneousCoreSerialisationCoreGenericClonerPortable" command="cmsRun ${LOCALTOP}/src/HeterogeneousCore/SerialisationCore/test/testGenericClonerPortable_cfg.py"/>

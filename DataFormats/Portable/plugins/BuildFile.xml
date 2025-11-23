@@ -1,0 +1,7 @@
+<library file="alpaka/*.cc" name="DataFormatsPortableAlpakaTrivialSerialisationPlugins">
+  <use name="HeterogeneousCore/SerialisationCore"/>
+  <use name="DataFormats/Portable"/>
+  <use name="HeterogeneousCore/AlpakaCore"/>
+  <use name="HeterogeneousCore/AlpakaInterface"/>
+  <flags ALPAKA_BACKENDS="1"></flags>
+</library>

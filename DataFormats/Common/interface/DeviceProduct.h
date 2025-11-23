@@ -3,8 +3,11 @@
 
 #include <cassert>
 #include <memory>
+#include <type_traits>
+#include <utility>
 
 #include "DataFormats/Common/interface/Uninitialized.h"
+#include "HeterogeneousCore/SerialisationCore/interface/MemoryCopyTraits.h"
 
 namespace edm {
   class DeviceProductBase {
@@ -76,9 +79,59 @@ namespace edm {
       md.synchronize(std::forward<Args>(args)...);
       return data_;
     }
+    T const& product() const { return data_; }
+    T& product() { return data_; }
 
   private:
     T data_;  //!
   };
 }  // namespace edm
+
+namespace ngt {
+
+  template <typename T>
+    requires HasMemoryCopyTraits<T> && HasTrivialCopyProperties<T>
+  struct MemoryCopyTraits<edm::DeviceProduct<T>> {
+    using Properties = TrivialCopyProperties<T>;
+
+    static Properties properties(edm::DeviceProduct<T> const& wrapper) {
+      return MemoryCopyTraits<T>::properties(wrapper.product());
+    }
+
+    template <typename... Args>
+    static void initialize(edm::DeviceProduct<T>& wrapper, Args&&... args) {
+      MemoryCopyTraits<T>::initialize(wrapper.product(), std::forward<Args>(args)...);
+    }
+
+    static std::vector<std::span<std::byte>> regions(edm::DeviceProduct<T>& wrapper) {
+      return MemoryCopyTraits<T>::regions(wrapper.product());
+    }
+
+    static std::vector<std::span<const std::byte>> regions(edm::DeviceProduct<T> const& wrapper) {
+      return MemoryCopyTraits<T>::regions(wrapper.product());
+    }
+  };
+
+  template <typename T>
+    requires HasMemoryCopyTraits<T> && (!HasTrivialCopyProperties<T>)
+  struct MemoryCopyTraits<edm::DeviceProduct<T>> {
+    using Properties = void;
+
+    template <typename... Args>
+    static void initialize(edm::DeviceProduct<T>& wrapper, Args&&... args) {
+      MemoryCopyTraits<T>::initialize(wrapper.product(), std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    static std::vector<std::span<std::byte>> regions(edm::DeviceProduct<T>& wrapper, Args&&... args) {
+      return MemoryCopyTraits<T>::regions(wrapper.product(), std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    static std::vector<std::span<const std::byte>> regions(edm::DeviceProduct<T> const& wrapper, Args&&... args) {
+      return MemoryCopyTraits<T>::regions(wrapper.product(), std::forward<Args>(args)...);
+    }
+  };
+
+}  // namespace ngt
 #endif
