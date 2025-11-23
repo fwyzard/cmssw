@@ -1,0 +1,4 @@
+<library file="serialisation.cc" name="HeterogeneousCoreSerialisationCoreSerialisationPlugins">
+  <use name="HeterogeneousCore/SerialisationCore"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
