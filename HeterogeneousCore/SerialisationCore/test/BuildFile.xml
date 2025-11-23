@@ -1,0 +1,4 @@
+<bin name="TestHeterogeneousCoreSerialisationCore" file="test_catch2_*.cc">
+  <use name="catch2"/>
+  <use name="HeterogeneousCore/SerialisationCore"/>
+</bin>
