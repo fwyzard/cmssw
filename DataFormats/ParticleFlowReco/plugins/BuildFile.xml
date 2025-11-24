@@ -1,0 +1,5 @@
+<library file="serialisation.cc" name="DataFormatsParticleFlowRecoSerialisation">
+  <use name="DataFormats/ParticleFlowReco"/>
+  <use name="HeterogeneousCore/TrivialSerialisation"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
