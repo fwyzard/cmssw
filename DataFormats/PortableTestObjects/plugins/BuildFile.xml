@@ -3,3 +3,11 @@
   <use name="HeterogeneousCore/SerialisationCore"/>
   <flags EDM_PLUGIN="1"/>
 </library>
+
+<library file="alpaka/*.cc" name="DataFormatsPortableTestObjectsPluginsAlpaka">
+  <use name="DataFormats/PortableTestObjects"/>
+  <use name="HeterogeneousCore/AlpakaInterface"/>
+  <use name="HeterogeneousCore/SerialisationCore"/>
+  <flags ALPAKA_BACKENDS="cuda rocm"/>
+  <flags EDM_PLUGIN="1"/>
+</library>

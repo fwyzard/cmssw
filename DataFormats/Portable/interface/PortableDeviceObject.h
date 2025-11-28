@@ -10,6 +10,7 @@
 #include "DataFormats/Common/interface/Uninitialized.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
+#include "HeterogeneousCore/SerialisationCore/interface/MemoryCopyTraits.h"
 
 // generic object in device memory
 template <typename T, typename TDev, typename = std::enable_if_t<alpaka::isDevice<TDev>>>
@@ -79,5 +80,26 @@ public:
 private:
   std::optional<Buffer> buffer_;
 };
+
+namespace ngt {
+
+  // Specialize the MemoryCopyTraits for PortableDeviceObject
+  template <typename T, typename TDev, typename TEnable>
+  struct MemoryCopyTraits<PortableDeviceObject<T, TDev, TEnable>> {
+    template <typename TQueue, typename = std::enable_if_t<alpaka::isQueue<TQueue>>>
+    static void initialize(PortableDeviceObject<T, TDev, TEnable>& object, TQueue& queue) {
+      object = PortableDeviceObject<T, TDev, TEnable>(queue);
+    }
+
+    static std::vector<std::span<std::byte>> regions(PortableDeviceObject<T, TDev, TEnable>& object) {
+      return {{reinterpret_cast<std::byte*>(object.data()), sizeof(T)}};
+    }
+
+    static std::vector<std::span<const std::byte>> regions(PortableDeviceObject<T, TDev, TEnable> const& object) {
+      return {{reinterpret_cast<std::byte const*>(object.data()), sizeof(T)}};
+    }
+  };
+
+}  // namespace ngt
 
 #endif  // DataFormats_Portable_interface_PortableDeviceObject_h

@@ -14,6 +14,7 @@
 #include "DataFormats/Portable/interface/PortableCollectionCommon.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
+#include "HeterogeneousCore/SerialisationCore/interface/MemoryCopyTraits.h"
 
 // generic SoA-based product in device memory
 template <typename T, typename TDev, typename = std::enable_if_t<alpaka::isDevice<TDev>>>
@@ -373,5 +374,65 @@ private:
   std::optional<Buffer> buffer_;  //!
   Implementation impl_;           // (serialized: this is where the layouts live)
 };
+
+namespace ngt {
+
+  // Specialize the MemoryCopyTraits for PortableDeviceCollection
+  template <typename T, typename TDev>
+  struct MemoryCopyTraits<PortableDeviceCollection<T, TDev>> {
+    using Properties = uint32_t;
+
+    static Properties properties(PortableDeviceCollection<T, TDev> const& object) {
+      return static_cast<uint32_t>(object.view().metadata().size());
+    }
+
+    template <typename TQueue, typename = std::enable_if_t<alpaka::isQueue<TQueue>>>
+    static void initialize(PortableDeviceCollection<T, TDev>& object, TQueue& queue, Properties const& props) {
+      object = PortableDeviceCollection<T, TDev>(props, queue);
+    }
+
+    static std::vector<std::span<std::byte>> regions(PortableDeviceCollection<T, TDev>& object) {
+      std::byte* address = reinterpret_cast<std::byte*>(object.buffer().data());
+      size_t size = alpaka::getExtentProduct(object.buffer());
+      return {{address, size}};
+    }
+
+    static std::vector<std::span<const std::byte>> regions(PortableDeviceCollection<T, TDev> const& object) {
+      const std::byte* address = reinterpret_cast<const std::byte*>(object.buffer().data());
+      size_t size = alpaka::getExtentProduct(object.buffer());
+      return {{address, size}};
+    }
+  };
+
+  // Specialize the MemoryCopyTraits for PortableDeviceMultiCollection
+  template <typename TDev, typename T0, typename... Args>
+  struct MemoryCopyTraits<PortableDeviceMultiCollection<TDev, T0, Args...>> {
+    using Properties = typename PortableDeviceMultiCollection<TDev, T0, Args...>::SizesArray;
+
+    static Properties properties(PortableDeviceMultiCollection<TDev, T0, Args...> const& object) {
+      return object.sizes();
+    }
+
+    template <typename TQueue, typename = std::enable_if_t<alpaka::isQueue<TQueue>>>
+    static void initialize(PortableDeviceMultiCollection<TDev, T0, Args...>& object,
+                           TQueue& queue,
+                           Properties const& sizes) {
+      object = PortableDeviceMultiCollection<TDev, T0, Args...>(sizes, queue);
+    }
+
+    static std::vector<std::span<std::byte>> regions(PortableDeviceMultiCollection<TDev, T0, Args...>& object) {
+      std::byte* address = reinterpret_cast<std::byte*>(object.buffer().data());
+      size_t size = alpaka::getExtentProduct(object.buffer());
+      return {{address, size}};
+    }
+
+    static std::vector<std::span<const std::byte>> regions(
+        PortableDeviceMultiCollection<TDev, T0, Args...> const& object) {
+      const std::byte* address = reinterpret_cast<const std::byte*>(object.buffer().data());
+      size_t size = alpaka::getExtentProduct(object.buffer());
+      return {{address, size}};
+    }
+  };
+}  // namespace ngt
 
 #endif  // DataFormats_Portable_interface_PortableDeviceCollection_h

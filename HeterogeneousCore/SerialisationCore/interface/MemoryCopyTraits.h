@@ -62,6 +62,17 @@ namespace ngt {
   using TrivialCopyProperties = decltype(MemoryCopyTraits<T>::properties(std::declval<T const&>()));
 
   // Checks if the declaration of initialize(...) is consistent with the presence or absence of properties.
+  template <typename T, typename TQueue>
+  concept HasValidInitializeAsync =
+      // does not have properties(...) and initialize() takes object and queue arguments, or
+      (not HasTrivialCopyProperties<T> and
+       requires(T& object, TQueue& queue) { MemoryCopyTraits<T>::initialize(object, queue); }) or
+      // does have properties(...) and initialize() takes object, queue and properties arguments
+      (HasTrivialCopyProperties<T> and requires(T& object, TQueue& queue, TrivialCopyProperties<T> props) {
+        MemoryCopyTraits<T>::initialize(object, queue, props);
+      });
+
+  // Checks if the declaration of initialize(...) is consistent with the presence or absence of properties.
   template <typename T>
   concept HasValidInitialize =
       // does not have properties(...) and initialize(object) takes a single argument, or
@@ -84,6 +95,13 @@ namespace ngt {
       (HasRegions<T>) and
       // has either no initialize(...) or a valid one
       (not requires { &MemoryCopyTraits<T>::initialize; } or HasValidInitialize<T>);
+
+  template <typename T, typename TQueue>
+  concept HasMemoryCopyTraitsAsync =
+      // Has memory regions declared and
+      (HasRegions<T>) and
+      // has either no initialize(...) or a valid async one
+      (not requires { &MemoryCopyTraits<T>::initialize; } or HasValidInitializeAsync<T, TQueue>);
 
   // Checks if finalize(...) is defined
   template <typename T>
