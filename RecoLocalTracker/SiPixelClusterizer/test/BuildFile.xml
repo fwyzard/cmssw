@@ -33,3 +33,18 @@
 <library file="Triplet.cc" name="Triplet">
   <flags EDM_PLUGIN="1"/>
 </library>
+
+<bin file="alpaka/gpuClustering_t.dev.cc" name="gpuClustering_t">
+  <use name="alpaka"/>
+  <use name="HeterogeneousCore/CUDAUtilities"/>
+  <flags ALPAKA_BACKENDS="1"/>
+  <flags CXXFLAGS="-g"/>
+</bin>
+
+<bin file="alpaka/gpuClustering_t.dev.cc" name="gpuClustering_debug">
+  <use name="alpaka"/>
+  <use name="HeterogeneousCore/CUDAUtilities"/>
+  <flags ALPAKA_BACKENDS="1"/>
+  <flags CXXFLAGS="-g -DGPU_DEBUG"/>
+  <flags CUDA_FLAGS="-g -DGPU_DEBUG"/>
+</bin>
