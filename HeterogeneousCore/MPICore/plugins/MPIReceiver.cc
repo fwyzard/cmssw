@@ -150,6 +150,22 @@ public:
     event.emplace(token_, token);
   }
 
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+    descriptions.setComment("MPISender");
+
+    edm::ParameterSetDescription product;
+    product.add<std::string>("type");
+    product.add<std::string>("label");
+
+    edm::ParameterSetDescription desc;
+    desc.add<edm::InputTag>("upstream", {"source"})->setComment("...");
+    desc.addVPSet("products", product, {})->setComment("...");
+    desc.add<int32_t>("instance", 0)
+        ->setComment("A value between 1 and 255 used to identify a matching pair of MPISender/MPIRecevier.");
+
+    descriptions.addWithDefaultLabel(desc);
+  }
+
 private:
   struct Entry {
     edm::TypeWithDict type;

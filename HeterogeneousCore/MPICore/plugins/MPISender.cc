@@ -199,6 +199,18 @@ public:
     event.emplace(token_, token);
   }
 
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+    descriptions.setComment("MPISender");
+
+    edm::ParameterSetDescription desc;
+    desc.add<edm::InputTag>("upstream", {"source"})->setComment("...");
+    desc.add<std::vector<std::string>>("products", {})->setComment("...");
+    desc.add<int32_t>("instance", 0)
+        ->setComment("A value between 1 and 255 used to identify a matching pair of MPISender/MPIRecevier.");
+
+    descriptions.addWithDefaultLabel(desc);
+  }
+
 private:
   size_t serializeAndStoreBuffer_(size_t index, TClass* type, void const* product) {
     buffer_->ResetMap();
