@@ -9,9 +9,10 @@ process.options.numberOfConcurrentRuns = 2
 process.options.wantSummary = False
 
 process.load("HeterogeneousCore.MPIServices.MPIService_cfi")
-process.MPIService.pmix_server_uri = "file:server.uri"
 
-process.source = cms.Source("MPISource")
+from HeterogeneousCore.MPICore.modules import *
+
+process.source = MPISource()
 
 process.maxEvents.input = -1
 
@@ -19,27 +20,27 @@ process.maxEvents.input = -1
 #from HeterogeneousCore.MPICore.mpiReporter_cfi import mpiReporter as mpiReporter_
 #process.reporter = mpiReporter_.clone()
 
-process.receiver = cms.EDProducer("MPIReceiver",
-    upstream = cms.InputTag("source"),
-    instance = cms.int32(42),
+process.receiver = MPIReceiver(
+    upstream = "source",
+    instance = 42,
     products = cms.VPSet(cms.PSet(
         type = cms.string("edm::EventID"),
         label = cms.string("")
     ))
 )
 
-process.otherreceiver = cms.EDProducer("MPIReceiver",
-    upstream = cms.InputTag("source"),
-    instance = cms.int32(19),
+process.otherreceiver = MPIReceiver(
+    upstream = "source",
+    instance = 19,
     products = cms.VPSet(cms.PSet(
         type = cms.string("edm::EventID"),
         label = cms.string("")
     ))
 )
 
-process.sender = cms.EDProducer("MPISender",
-    upstream = cms.InputTag("otherreceiver"),  # guarantees that this module will only run after otherreceiver has run
-    instance = cms.int32(99),
+process.sender = MPISender(
+    upstream = "otherreceiver", # guarantees that this module will only run after otherreceiver has run
+    instance = 99,
     products = cms.vstring("edmEventID_otherreceiver__*")
 )
 
