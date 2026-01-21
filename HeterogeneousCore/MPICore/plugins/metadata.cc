@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 ProductMetadataBuilder::ProductMetadataBuilder() : buffer_(nullptr), capacity_(0), size_(0), readOffset_(0) {
   // reserve at least 13 bytes for header
@@ -159,6 +160,7 @@ void ProductMetadataBuilder::debugPrintMetadataSummary() const {
     return;
   }
 
+  std::ostringstream out;
   size_t offset = headerSize_;  // Skip the header
   size_t count = 0;
   size_t numMissing = 0;
@@ -167,13 +169,13 @@ void ProductMetadataBuilder::debugPrintMetadataSummary() const {
 
   uint64_t headerCount = 0;
   std::memcpy(&headerCount, buffer_, sizeof(uint64_t));
-  uint8_t flags = buffer_[8];
+  uint8_t flags = buffer_[sizeof(uint64_t)];
 
-  std::cerr << "---- ProductMetadata Debug Summary ----\n";
-  std::cerr << "Header:\n";
-  std::cerr << "  Product count:  " << headerCount << "\n";
-  std::cerr << "  Flags: " << ((flags & HasMissing) ? "Missing " : "") << ((flags & HasSerialized) ? "Serialized " : "")
-            << ((flags & HasTrivialCopy) ? "TrivialCopy " : "") << "\n\n";
+  out << "---- ProductMetadata Debug Summary ----\n";
+  out << "Header:\n";
+  out << "  Product count:  " << headerCount << "\n";
+  out << "  Flags: " << ((flags & HasMissing) ? "Missing " : "") << ((flags & HasSerialized) ? "Serialized " : "")
+      << ((flags & HasTrivialCopy) ? "TrivialCopy " : "") << "\n\n";
 
   while (offset < size_) {
     uint8_t kindVal = buffer_[offset];
@@ -181,55 +183,57 @@ void ProductMetadataBuilder::debugPrintMetadataSummary() const {
     offset += sizeof(uint8_t);
     count++;
 
-    std::cerr << "Product #" << count << ": ";
+    out << "Product #" << count << ": ";
 
     switch (kind) {
       case ProductMetadata::Kind::Missing:
         numMissing++;
-        std::cerr << "Missing\n";
+        out << "Missing\n";
         break;
 
       case ProductMetadata::Kind::Serialized: {
         if (offset + sizeof(size_t) > size_) {
-          std::cerr << "ERROR: Corrupted serialized metadata\n";
+          out << "ERROR: Corrupted serialized metadata\n";
           return;
         }
         size_t sz;
         std::memcpy(&sz, buffer_ + offset, sizeof(size_t));
         offset += sizeof(size_t);
         numSerialized++;
-        std::cerr << "Serialized, size = " << sz << "\n";
+        out << "Serialized, size = " << sz << "\n";
         break;
       }
 
       case ProductMetadata::Kind::TrivialCopy: {
         if (offset + sizeof(size_t) > size_) {
-          std::cerr << "ERROR: Corrupted trivial copy metadata\n";
+          out << "ERROR: Corrupted trivial copy metadata\n";
           return;
         }
         size_t sz;
         std::memcpy(&sz, buffer_ + offset, sizeof(size_t));
         offset += sizeof(size_t);
         if (offset + sz > size_) {
-          std::cerr << "ERROR: Trivial copy data overflows buffer\n";
+          out << "ERROR: Trivial copy data overflows buffer\n";
           return;
         }
         offset += sz;
         numTrivial++;
-        std::cerr << "TrivialCopy, size = " << sz << "\n";
+        out << "TrivialCopy, size = " << sz << "\n";
         break;
       }
 
       default:
-        std::cerr << "Unknown kind: " << static_cast<int>(kindVal) << "\n";
+        out << "Unknown kind: " << static_cast<int>(kindVal) << "\n";
         return;
     }
   }
 
-  std::cerr << "----------------------------------------\n";
-  std::cerr << "Total entries parsed:   " << count << "\n";
-  std::cerr << "  Missing:              " << numMissing << "\n";
-  std::cerr << "  Serialized:           " << numSerialized << "\n";
-  std::cerr << "  TrivialCopy:          " << numTrivial << "\n";
-  std::cerr << "Total buffer size:      " << size_ << " bytes\n";
+  out << "----------------------------------------\n";
+  out << "Total entries parsed:   " << count << "\n";
+  out << "  Missing:              " << numMissing << "\n";
+  out << "  Serialized:           " << numSerialized << "\n";
+  out << "  TrivialCopy:          " << numTrivial << "\n";
+  out << "Total buffer size:      " << size_ << " bytes\n";
+
+  std::cerr << out.str() << std::flush;
 }
