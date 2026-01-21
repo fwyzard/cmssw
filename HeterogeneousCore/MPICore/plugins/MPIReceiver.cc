@@ -55,8 +55,8 @@ public:
       entry.wrappedType = edm::TypeWithDict::byName("edm::Wrapper<" + type + ">");
       entry.token = produces(edm::TypeID{entry.type.typeInfo()}, label);
 
-      edm::LogVerbatim("MPIReceiver") << "receive type \"" << entry.type.name() << "\" for label \"" << label
-                                      << "\" over MPI channel instance " << this->instance_;
+      LogTrace("MPIReceiver") << "receive type \"" << entry.type.name() << "\" for label \"" << label
+                              << "\" over MPI channel instance " << this->instance_;
 
       products_.emplace_back(std::move(entry));
     }
@@ -78,8 +78,10 @@ public:
   void produce(edm::Event& event, edm::EventSetup const&) final {
     // read the MPIToken used to establish the communication channel
     MPIToken token = event.get(upstream_);
-    // see the summary of metadata for dubug purposes
-    // received_meta_->debugPrintMetadataSummary();
+#ifdef EDM_ML_DEBUG
+    // dump the summary of metadata
+    received_meta_->debugPrintMetadataSummary();
+#endif
 
     // if filter was false before the sender, receive nothing
     if (received_meta_->productCount() == -1) {
@@ -87,16 +89,20 @@ public:
       return;
     }
 
-    char* buf_ptr = nullptr;
-    size_t full_buffer_size = 0;
-    size_t buffer_offset_ = 0;
-
+    int buffer_offset = 0;
     std::unique_ptr<TBufferFile> serialized_buffer;
-
     if (received_meta_->hasSerialized()) {
       serialized_buffer = token.channel()->receiveSerializedBuffer(instance_, received_meta_->serializedBufferSize());
-      buf_ptr = serialized_buffer->Buffer();
-      full_buffer_size = serialized_buffer->BufferSize();
+#ifdef EDM_ML_DEBUG
+      {
+        edm::LogSystem msg("MPISender");
+        msg << "Received serialised product:\n";
+        for (int i = 0; i < serialized_buffer->Length(); ++i) {
+          msg << "0x" << std::hex << std::setw(2) << std::setfill('0')
+              << (unsigned int)(unsigned char)serialized_buffer->Buffer()[i] << (i % 16 == 15 ? '\n' : ' ');
+        }
+      }
+#endif
     }
 
     for (auto const& entry : products_) {
@@ -110,19 +116,18 @@ public:
         std::unique_ptr<edm::WrapperBase> wrapper(
             reinterpret_cast<edm::WrapperBase*>(entry.wrappedType.getClass()->New()));
         auto productBuffer = TBufferFile(TBuffer::kRead, product_meta.sizeMeta);
-        // assert(!wrapper->hasTrivialCopyTraits() && "mismatch between expected and factual metadata type");
-        assert(buffer_offset_ < full_buffer_size && "serialized data buffer is shorter than expected");
-        productBuffer.SetBuffer(buf_ptr + buffer_offset_, product_meta.sizeMeta, kFALSE /* adopt = false */);
-        buffer_offset_ += product_meta.sizeMeta;
+        // assert(!wrapper->hasTrivialCopyTraits() && "mismatch between expected and actual metadata type");
+        assert(buffer_offset < serialized_buffer->BufferSize() && "serialized data buffer is shorter than expected");
+        productBuffer.SetBuffer(serialized_buffer->Buffer() + buffer_offset, product_meta.sizeMeta, false);
+        buffer_offset += product_meta.sizeMeta;
         entry.wrappedType.getClass()->Streamer(wrapper.get(), productBuffer);
         // put the data into the Event
         event.put(entry.token, std::move(wrapper));
       }
 
       else if (product_meta.kind == ProductMetadata::Kind::TrivialCopy) {
-        // assert(wrapper->hasTrivialCopyTraits() && "mismatch between expected and factual metadata type");
+        // assert(wrapper->hasTrivialCopyTraits() && "mismatch between expected and actual metadata type");
         std::unique_ptr<ngt::SerialiserBase> serialiser =
-            //  ngt::SerialiserFactory::get()->tryToCreate(entry.objectType_.typeInfo().name());
             ngt::SerialiserFactory::get()->tryToCreate(entry.type.typeInfo().name());
         if (not serialiser) {
           throw cms::Exception("SerializerError") << "Receiver could not retrieve its serializer when it was expected";
@@ -130,7 +135,6 @@ public:
         auto writer = serialiser->writer();
         ngt::AnyBuffer buffer = writer->uninitialized_parameters();  // constructs buffer with typeid
         assert(buffer.size_bytes() == product_meta.sizeMeta);
-        // TDL: can we add func to AnyBuffer to replace pointer to the data?
         std::memcpy(buffer.data(), product_meta.trivialCopyOffset, product_meta.sizeMeta);
         // why both of these methods are called initialize? I find this rather confusing
         writer->initialize(buffer);
@@ -142,7 +146,7 @@ public:
     }
 
     if (received_meta_->hasSerialized()) {
-      assert(static_cast<int>(buffer_offset_) == received_meta_->serializedBufferSize() &&
+      assert(buffer_offset == received_meta_->serializedBufferSize() &&
              "serialized data buffer is not equal to the expected length");
     }
 
@@ -174,7 +178,6 @@ private:
     edm::EDPutToken token;
   };
 
-  // TODO consider if upstream_ should be a vector instead of a single token ?
   edm::EDGetTokenT<MPIToken> const upstream_;  // MPIToken used to establish the communication channel
   edm::EDPutTokenT<MPIToken> const token_;  // copy of the MPIToken that may be used to implement an ordering relation
   std::vector<Entry> products_;             // data to be read over the channel and put into the Event

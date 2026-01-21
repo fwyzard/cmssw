@@ -12,6 +12,7 @@
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
 #include "DataFormats/Provenance/interface/RunAuxiliary.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/ReaderBase.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/WriterBase.h"
 
@@ -155,9 +156,12 @@ MPI_Status MPIChannel::receiveEventAuxiliary_(edm::EventAuxiliary& aux, int sour
 
 // receive an EDM_MPI_EventAuxiliary_t buffer and populate an edm::EventAuxiliary
 MPI_Status MPIChannel::receiveEventAuxiliary_(edm::EventAuxiliary& aux, MPI_Message& message) {
-  MPI_Status status;
+  MPI_Status status = {};
   EDM_MPI_EventAuxiliary_t buffer;
-  MPI_Mrecv(&buffer, 1, EDM_MPI_EventAuxiliary, &message, &status);
+#ifdef EDM_ML_DEBUG
+  memset(&buffer, 0x00, sizeof(buffer));
+#endif
+  status.MPI_ERROR = MPI_Mrecv(&buffer, 1, EDM_MPI_EventAuxiliary, &message, &status);
   edmFromBuffer_(buffer, aux);
   return status;
 }
@@ -189,11 +193,14 @@ std::unique_ptr<TBufferFile> MPIChannel::receiveSerializedBuffer(int instance, i
   int tag = EDM_MPI_SendSerializedProduct | instance * EDM_MPI_MessageTagWidth_;
   MPI_Status status;
   auto buffer = std::make_unique<TBufferFile>(TBuffer::kRead, bufSize);
+#ifdef EDM_ML_DEBUG
+  memset(buffer->Buffer(), 0xff, buffer->BufferSize());
+#endif
   MPI_Recv(buffer->Buffer(), bufSize, MPI_BYTE, dest_, tag, comm_, &status);
   int receivedCount = 0;
   MPI_Get_count(&status, MPI_BYTE, &receivedCount);
   assert(receivedCount == bufSize && "received serialized buffer size mismatches the size expected from metadata");
-  // adjust the buffer length
+  // set the buffer length
   buffer->SetBufferOffset(receivedCount);
   return buffer;
 }
