@@ -1,6 +1,8 @@
 // C++ include files
 #include <condition_variable>
 #include <mutex>
+#include <iomanip>
+#include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -76,10 +78,10 @@ public:
                   edm::TypeToGet{product.unwrappedTypeID(), edm::PRODUCT_TYPE},
                   edm::InputTag{product.moduleLabel(), product.productInstanceName(), product.processName()});
 
-              edm::LogVerbatim("MPISender")
-                  << "send product \"" << product.friendlyClassName() << '_' << product.moduleLabel() << '_'
-                  << product.productInstanceName() << '_' << product.processName() << "\" of type \""
-                  << entry.type.name() << "\" over MPI channel instance " << instance_;
+              LogDebug("MPISender") << "send product \"" << product.friendlyClassName() << '_' << product.moduleLabel()
+                                    << '_' << product.productInstanceName() << '_' << product.processName()
+                                    << "\" of type \"" << entry.type.name() << "\" over MPI channel instance "
+                                    << instance_;
 
               products_[pattern_index] = std::move(entry);
               break;
@@ -123,7 +125,7 @@ public:
       event.getByToken(entry.token, handle);
 
       // product count -1 indicates that the event was filtered out on given path
-      if (!handle.isValid() && entry.type.name() == "edm::PathStateToken") {
+      if (not handle.isValid() and entry.type.name() == "edm::PathStateToken") {
         meta->setProductCount(-1);
         is_active_ = false;
         break;
@@ -135,13 +137,14 @@ public:
             ngt::SerialiserFactory::get()->tryToCreate(entry.type.typeInfo().name());
 
         if (serialiser) {
-          edm::LogVerbatim("MPISender") << "Found serializer for type " << entry.type.typeInfo().name();
+          LogDebug("MPISender") << "Found serializer for type \"" << entry.type.name() << "\" ("
+                                << entry.type.typeInfo().name() << ")";
           auto reader = serialiser->reader(*wrapper);
           ngt::AnyBuffer buffer = reader->parameters();
           meta->addTrivialCopy(buffer.data(), buffer.size_bytes());
         } else {
-          edm::LogVerbatim("MPISender") << "No serializer for type " << entry.type.typeInfo().name()
-                                        << ", using ROOT serialization";
+          LogDebug("MPISender") << "No serializer for type \"" << entry.type.name() << "\" ("
+                                << entry.type.typeInfo().name() << "), using ROOT serialization";
           TClass* cls = entry.wrappedType.getClass();
           if (!cls) {
             throw cms::Exception("MPISender") << "Failed to get TClass for type: " << entry.type.name();
@@ -175,6 +178,16 @@ public:
     }
 
     if (has_serialized_) {
+#ifdef EDM_ML_DEBUG
+      {
+        edm::LogSystem msg("MPISender");
+        msg << "Sending serialised product:\n";
+        for (int i = 0; i < buffer_->Length(); ++i) {
+          msg << "0x" << std::hex << std::setw(2) << std::setfill('0')
+              << (unsigned int)(unsigned char)buffer_->Buffer()[i] << (i % 16 == 15 ? '\n' : ' ');
+        }
+      }
+#endif
       token.channel()->sendBuffer(buffer_->Buffer(), buffer_->Length(), instance_, EDM_MPI_SendSerializedProduct);
     }
 
