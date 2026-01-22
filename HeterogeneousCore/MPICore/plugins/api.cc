@@ -142,6 +142,7 @@ void MPIChannel::sendEventAuxiliary_(edm::EventAuxiliary const& aux) {
   MPI_Send(&buffer, 1, EDM_MPI_EventAuxiliary, dest_, EDM_MPI_ProcessEvent, comm_);
 }
 
+/*
 // receive an EDM_MPI_EventAuxiliary_t buffer and populate an edm::EventAuxiliary
 MPI_Status MPIChannel::receiveEventAuxiliary_(edm::EventAuxiliary& aux, int source, int tag) {
   MPI_Status status;
@@ -150,6 +151,7 @@ MPI_Status MPIChannel::receiveEventAuxiliary_(edm::EventAuxiliary& aux, int sour
   edmFromBuffer_(buffer, aux);
   return status;
 }
+*/
 
 // receive an EDM_MPI_EventAuxiliary_t buffer and populate an edm::EventAuxiliary
 MPI_Status MPIChannel::receiveEventAuxiliary_(edm::EventAuxiliary& aux, MPI_Message& message) {
