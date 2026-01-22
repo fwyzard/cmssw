@@ -65,11 +65,14 @@ public:
   // signal a new event, and transmit the EventAuxiliary
   void sendEvent(edm::EventAuxiliary const& aux) { sendEventAuxiliary_(aux); }
 
+  /*
   // start processing a new event, and receive the EventAuxiliary
-  // MPI_Status receiveEvent(edm::EventAuxiliary& aux, int source) {
-  //   return receiveEventAuxiliary_(aux, source, EDM_MPI_ProcessEvent);
-  // }
+  MPI_Status receiveEvent(edm::EventAuxiliary& aux, int source) {
+    return receiveEventAuxiliary_(aux, source, EDM_MPI_ProcessEvent);
+  }
+  */
 
+  // start processing a new event, and receive the EventAuxiliary
   MPI_Status receiveEvent(edm::EventAuxiliary& aux, MPI_Message& message) {
     return receiveEventAuxiliary_(aux, message);
   }
