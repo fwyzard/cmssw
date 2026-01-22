@@ -1,12 +1,16 @@
+// C++ headers
 #include <iostream>
 #include <memory>
 #include <sstream>
 
+// MPI headers
 #include <mpi.h>
 
+// ROOT headers
 #include <TBufferFile.h>
 #include <TClass.h>
 
+// CMSSW headers
 #include "DataFormats/Provenance/interface/BranchKey.h"
 #include "DataFormats/Provenance/interface/ProcessHistoryRegistry.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -27,6 +31,7 @@
 #include "HeterogeneousCore/MPICore/interface/MPIToken.h"
 #include "HeterogeneousCore/MPIServices/interface/MPIService.h"
 
+// local headers
 #include "api.h"
 #include "messages.h"
 

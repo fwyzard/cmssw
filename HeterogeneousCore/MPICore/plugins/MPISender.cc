@@ -1,3 +1,6 @@
+// C++ include files
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -29,11 +32,6 @@
 #include "HeterogeneousCore/TrivialSerialisation/interface/AnyBuffer.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/SerialiserBase.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/SerialiserFactory.h"
-
-#include <condition_variable>
-#include <mutex>
-
-#include <iostream>
 
 // local include files
 #include "api.h"

@@ -1,5 +1,12 @@
 // C++ include files
+#include <cassert>
+#include <condition_variable>
+#include <mutex>
 #include <utility>
+
+// ROOT headers
+#include <TBufferFile.h>
+#include <TClass.h>
 
 // CMSSW include files
 #include "FWCore/Concurrency/interface/Async.h"
@@ -21,14 +28,8 @@
 #include "HeterogeneousCore/TrivialSerialisation/interface/SerialiserBase.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/SerialiserFactory.h"
 
-#include <condition_variable>
-#include <mutex>
-#include <cassert>
-
 // local include files
 #include "api.h"
-#include <TBufferFile.h>
-#include <TClass.h>
 
 class MPIReceiver : public edm::stream::EDProducer<edm::ExternalWork> {
 public:

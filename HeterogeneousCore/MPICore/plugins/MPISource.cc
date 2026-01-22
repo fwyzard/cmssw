@@ -3,13 +3,13 @@
 #include <stdexcept>
 #include <string>
 
+// MPI headers
+#include <mpi.h>
+
 // ROOT headers
 #include <TBuffer.h>
 #include <TBufferFile.h>
 #include <TClass.h>
-
-// MPI headers
-#include <mpi.h>
 
 // CMSSW headers
 #include "DataFormats/Provenance/interface/BranchListIndex.h"
