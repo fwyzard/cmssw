@@ -1,15 +1,18 @@
 #ifndef HeterogeneousCore_MPICore_interface_metadata_h
 #define HeterogeneousCore_MPICore_interface_metadata_h
 
+// C++ standard library headers
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <vector>
-#include <stdexcept>
 #include <cstring>
-#include <span>
-#include <variant>
 #include <iostream>
-#include <cassert>
+#include <span>
+#include <stdexcept>
+#include <variant>
+#include <vector>
+
+// MPI headers
 #include <mpi.h>
 
 enum ProductFlags : uint8_t {

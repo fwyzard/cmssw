@@ -1,8 +1,10 @@
 #ifndef HeterogeneousCore_MPICore_interface_messages_h
 #define HeterogeneousCore_MPICore_interface_messages_h
 
+// C++ standard library headers
 #include <cstdint>
 
+// MPI headers
 #include <mpi.h>
 
 /* register the MPI message types forthe EDM communication

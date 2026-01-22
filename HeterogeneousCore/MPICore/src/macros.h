@@ -1,9 +1,14 @@
 #ifndef HeterogeneousCore_MPICore_interface_macros_h
 #define HeterogeneousCore_MPICore_interface_macros_h
 
-#include <boost/preprocessor.hpp>
+// C++ standard library headers
 #include <iterator>
+
+// MPI headers
 #include <mpi.h>
+
+// Boost headers
+#include <boost/preprocessor.hpp>
 
 namespace mpi_traits {
   template <typename T>

@@ -1,8 +1,10 @@
-#include "HeterogeneousCore/MPICore/interface/metadata.h"
-
+// C++ standard library headers
 #include <cstring>
 #include <iostream>
 #include <sstream>
+
+// CMSSW headers
+#include "HeterogeneousCore/MPICore/interface/metadata.h"
 
 ProductMetadataBuilder::ProductMetadataBuilder() : buffer_(nullptr), capacity_(0), size_(0), readOffset_(0) {
   // reserve at least 13 bytes for header

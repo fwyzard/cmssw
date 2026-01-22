@@ -1,11 +1,17 @@
+// C++ standard library headers
 #include <mutex>
 
-#include <boost/preprocessor.hpp>
-
+// MPI headers
 #include <mpi.h>
 
-#include "macros.h"
+// Boost headers
+#include <boost/preprocessor.hpp>
+
+// CMSSW headers
 #include "HeterogeneousCore/MPICore/interface/messages.h"
+
+// local headers
+#include "macros.h"
 
 MPI_Datatype EDM_MPI_Empty;
 MPI_Datatype EDM_MPI_RunAuxiliary;

@@ -36,7 +36,6 @@
 #include "HeterogeneousCore/TrivialSerialisation/interface/SerialiserBase.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/SerialiserFactory.h"
 
-
 class MPISender : public edm::stream::EDProducer<edm::ExternalWork> {
 public:
   MPISender(edm::ParameterSet const& config)

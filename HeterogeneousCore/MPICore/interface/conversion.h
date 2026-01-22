@@ -1,8 +1,8 @@
 #ifndef HeterogeneousCore_MPICore_interface_conversion_h
 #define HeterogeneousCore_MPICore_interface_conversion_h
 
+// CMSSW headers
 #include "DataFormats/Provenance/interface/ProvenanceFwd.h"
-
 #include "HeterogeneousCore/MPICore/interface/messages.h"
 
 // fill an edm::RunAuxiliary object from an EDM_MPI_RunAuxiliary_t buffer

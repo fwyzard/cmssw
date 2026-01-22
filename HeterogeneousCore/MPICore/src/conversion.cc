@@ -1,10 +1,11 @@
+// C++ standard library headers
 #include <array>
 #include <cstring>
 
+// CMSSW headers
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
 #include "DataFormats/Provenance/interface/RunAuxiliary.h"
-
 #include "HeterogeneousCore/MPICore/interface/conversion.h"
 #include "HeterogeneousCore/MPICore/interface/messages.h"
 

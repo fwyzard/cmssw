@@ -1,9 +1,14 @@
 #ifndef HeterogeneousCore_MPICore_interface_api_h
 #define HeterogeneousCore_MPICore_interface_api_h
 
-// externals headers
-#include <mpi.h>
+// C++ standard library headers
+#include <bitset>
+#include <iostream>
 #include <type_traits>
+#include <utility>
+
+// MPI headers
+#include <mpi.h>
 
 // ROOT headers
 #include <TClass.h>
@@ -16,10 +21,6 @@
 #include "HeterogeneousCore/MPICore/interface/metadata.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/ReaderBase.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/WriterBase.h"
-
-#include <iostream>
-#include <utility>
-#include <bitset>
 
 class MPIChannel {
 public:

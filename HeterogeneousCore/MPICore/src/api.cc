@@ -1,8 +1,9 @@
 // C++ standard library headers
 #include <array>
-#include <cstring>
-#include <tuple>
 #include <cassert>
+#include <cstring>
+#include <iostream>
+#include <tuple>
 
 // ROOT headers
 #include <TBufferFile.h>
@@ -18,8 +19,6 @@
 #include "HeterogeneousCore/MPICore/interface/messages.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/ReaderBase.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/WriterBase.h"
-
-#include <iostream>
 
 namespace {
   // copy the content of an std::string-like object to an N-sized char buffer:
