@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_MPICore_plugins_messages_h
-#define HeterogeneousCore_MPICore_plugins_messages_h
+#ifndef HeterogeneousCore_MPICore_interface_messages_h
+#define HeterogeneousCore_MPICore_interface_messages_h
 
 #include <cstdint>
 
@@ -114,4 +114,4 @@ union EDM_MPI_Any_t {
   EDM_MPI_EventAuxiliary_t eventAuxiliary;
 };
 
-#endif  // HeterogeneousCore_MPICore_plugins_messages_h
+#endif  // HeterogeneousCore_MPICore_interface_messages_h

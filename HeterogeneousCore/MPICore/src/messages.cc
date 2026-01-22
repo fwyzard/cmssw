@@ -5,7 +5,7 @@
 #include <mpi.h>
 
 #include "macros.h"
-#include "messages.h"
+#include "HeterogeneousCore/MPICore/interface/messages.h"
 
 MPI_Datatype EDM_MPI_Empty;
 MPI_Datatype EDM_MPI_RunAuxiliary;

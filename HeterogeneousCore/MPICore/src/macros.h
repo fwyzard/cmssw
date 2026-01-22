@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_MPICore_plugins_macros_h
-#define HeterogeneousCore_MPICore_plugins_macros_h
+#ifndef HeterogeneousCore_MPICore_interface_macros_h
+#define HeterogeneousCore_MPICore_interface_macros_h
 
 #include <boost/preprocessor.hpp>
 #include <iterator>
@@ -141,4 +141,4 @@ namespace mpi_traits {
 
 // clang-format on
 
-#endif  // HeterogeneousCore_MPICore_plugins_macros_h
+#endif  // HeterogeneousCore_MPICore_interface_macros_h

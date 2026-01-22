@@ -1,9 +1,9 @@
-#ifndef HeterogeneousCore_MPICore_plugins_conversion_h
-#define HeterogeneousCore_MPICore_plugins_conversion_h
+#ifndef HeterogeneousCore_MPICore_interface_conversion_h
+#define HeterogeneousCore_MPICore_interface_conversion_h
 
 #include "DataFormats/Provenance/interface/ProvenanceFwd.h"
 
-#include "messages.h"
+#include "HeterogeneousCore/MPICore/interface/messages.h"
 
 // fill an edm::RunAuxiliary object from an EDM_MPI_RunAuxiliary_t buffer
 void edmFromBuffer(EDM_MPI_RunAuxiliary_t const &, edm::RunAuxiliary &);
@@ -23,4 +23,4 @@ void edmFromBuffer(EDM_MPI_EventAuxiliary_t const &, edm::EventAuxiliary &);
 // fill an EDM_MPI_EventAuxiliary_t buffer from an edm::EventAuxiliary object
 void edmToBuffer(EDM_MPI_EventAuxiliary_t &, edm::EventAuxiliary const &);
 
-#endif  // HeterogeneousCore_MPICore_plugins_conversion_h
+#endif  // HeterogeneousCore_MPICore_interface_conversion_h
