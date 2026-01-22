@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_MPICore_plugins_api_h
-#define HeterogeneousCore_MPICore_plugins_api_h
+#ifndef HeterogeneousCore_MPICore_interface_api_h
+#define HeterogeneousCore_MPICore_interface_api_h
 
 // externals headers
 #include <mpi.h>
@@ -12,12 +12,10 @@
 #include "DataFormats/Common/interface/WrapperBase.h"
 #include "DataFormats/Provenance/interface/ProvenanceFwd.h"
 #include "FWCore/Reflection/interface/ObjectWithDict.h"
+#include "HeterogeneousCore/MPICore/interface/messages.h"
+#include "HeterogeneousCore/MPICore/interface/metadata.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/ReaderBase.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/WriterBase.h"
-
-// local headers
-#include "messages.h"
-#include "metadata.h"
 
 #include <iostream>
 #include <utility>
@@ -180,4 +178,4 @@ private:
   int dest_ = MPI_UNDEFINED;
 };
 
-#endif  // HeterogeneousCore_MPICore_plugins_api_h
+#endif  // HeterogeneousCore_MPICore_interface_api_h

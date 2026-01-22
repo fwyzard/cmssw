@@ -13,13 +13,11 @@
 #include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
 #include "DataFormats/Provenance/interface/RunAuxiliary.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "HeterogeneousCore/MPICore/interface/api.h"
+#include "HeterogeneousCore/MPICore/interface/conversion.h"
+#include "HeterogeneousCore/MPICore/interface/messages.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/ReaderBase.h"
 #include "HeterogeneousCore/TrivialSerialisation/interface/WriterBase.h"
-
-// local headers
-#include "api.h"
-#include "conversion.h"
-#include "messages.h"
 
 #include <iostream>
 

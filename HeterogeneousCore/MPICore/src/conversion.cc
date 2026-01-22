@@ -5,8 +5,8 @@
 #include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
 #include "DataFormats/Provenance/interface/RunAuxiliary.h"
 
-#include "conversion.h"
-#include "messages.h"
+#include "HeterogeneousCore/MPICore/interface/conversion.h"
+#include "HeterogeneousCore/MPICore/interface/messages.h"
 
 namespace {
   // copy the content of an std::string-like object to an N-sized char buffer:

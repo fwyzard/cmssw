@@ -1,5 +1,5 @@
-#ifndef PRODUCT_METADATA_BUILDER_H
-#define PRODUCT_METADATA_BUILDER_H
+#ifndef HeterogeneousCore_MPICore_interface_metadata_h
+#define HeterogeneousCore_MPICore_interface_metadata_h
 
 #include <cstdint>
 #include <cstdlib>
@@ -108,4 +108,4 @@ private:
   }
 };
 
-#endif  // PRODUCT_METADATA_BUILDER_H
+#endif  // HeterogeneousCore_MPICore_interface_metadata_h
