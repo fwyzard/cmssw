@@ -6,6 +6,9 @@
 <test name="testMPIControllerFollower" command="testMPICommWorld.sh ${CMSSW_BASE}/src/HeterogeneousCore/MPICore/test/controller_cfg.py ${CMSSW_BASE}/src/HeterogeneousCore/MPICore/test/follower_cfg.py">
 </test>
 
+<test name="testMPIControllerFollower" command="testMPICommWorld.sh ${CMSSW_BASE}/src/HeterogeneousCore/MPICore/test/controller_soa.py ${CMSSW_BASE}/src/HeterogeneousCore/MPICore/test/follower_soa.py">
+</test>
+
 <bin name="testSerialisation" file="testSerialisation.cc">
     <use name="root"/>
 </bin>
