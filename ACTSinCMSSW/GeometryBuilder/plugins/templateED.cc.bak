@@ -1,0 +1,123 @@
+/// ######################################################################################
+/// # Plugin used to convert the CMSSW detector elements in ACTS detector elements.      #
+/// # The output is a vector of Acts::CMSDetectorElement which can be used to            #
+/// # build the Tracking Geometry.                                                       #
+/// # NOTE: Plugins list:                                                                #  
+/// # (1) Converts the CMSSW detElements into ACTS ones and builds the Tracking Geometry # <- DONE (I) <->(III) flags to map material
+/// # (2) Produces a JSON material file starting from material tracks                    # <- DONE (II)
+/// # (3) Takes as input the tracking geometry from (1) and the json file from (3) and   # <- DONE (IV) validation only
+/// #     decorates the tracking geometry with material. It performs material Validation #  
+/// ######################################################################################
+// git cms-addpkg
+#include "FWCore/Framework/interface/one/EDProducer.h"
+#include "FWCore/Framework/interface/ESProducer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/ESGetToken.h"
+#include "FWCore/Framework/interface/ModuleFactory.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "Geometry/Records/interface/ACTSTrackerGeometryRecord.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
+#include "DataFormats/GeometrySurface/interface/RectangularPlaneBounds.h"
+#include "DataFormats/GeometrySurface/interface/TrapezoidalPlaneBounds.h"
+
+#include "DataFormats/TrackerCommon/interface/PixelBarrelName.h"
+#include "DataFormats/TrackerCommon/interface/PixelEndcapName.h"
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DetectorDescription/Core/interface/DDRotationMatrix.h"
+#include "CLHEP/Units/GlobalSystemOfUnits.h"
+#include "Math/RotationZ.h"
+#include "FWCore/Framework/interface/ESConsumesCollector.h"
+
+#include "Math/Rotation3D.h"
+#include "Math/AxisAngle.h"
+
+#include "Acts/Definitions/Algebra.hpp"
+#include "Acts/Detector/KdtSurfacesProvider.hpp"
+#include "Acts/Geometry/Polyhedron.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Visualization/GeometryView3D.hpp"
+#include "Acts/Visualization/ObjVisualization3D.hpp"
+#include "ActsPlugins/Json/JsonDetectorElement.hpp"
+#include "Acts/Visualization/ViewConfig.hpp"
+
+#include "Acts/Geometry/Blueprint.hpp"
+#include "Acts/Geometry/ContainerBlueprintNode.hpp" 
+#include "Acts/Geometry/LayerBlueprintNode.hpp" 
+#include "Acts/Geometry/MaterialDesignatorBlueprintNode.hpp" 
+#include "Acts/Geometry/SurfaceArrayCreator.hpp"
+#include "Acts/Detector/KdtSurfacesProvider.hpp"
+#include "Acts/Detector/ProtoDetector.hpp"
+#include "Acts/Detector/detail/ReferenceGenerators.hpp"
+#include "Acts/Detector/interface/ISurfacesProvider.hpp"
+#include "Acts/Detector/LayerStructureBuilder.hpp"
+#include "Acts/Detector/detail/BlueprintHelper.hpp"
+#include "Acts/Detector/detail/BlueprintDrawer.hpp"
+#include "Acts/Definitions/Units.hpp"
+#include "Acts/Navigation/SurfaceArrayNavigationPolicy.hpp"
+#include "Acts/Navigation/TryAllNavigationPolicy.hpp"
+#include "ActsPlugins/ActSVG/DetectorSvgConverter.hpp"
+#include "ActsPlugins/Json/JsonSurfacesReader.hpp"
+#include "ActsPlugins/Json/JsonMaterialDecorator.hpp"
+#include "ActsPlugins/ActSVG/TrackingGeometrySvgConverter.hpp"
+#include "ActsPlugins/ActSVG/SurfaceArraySvgConverter.hpp"
+#include "ActsPlugins/Root/RootMaterialTrackIo.hpp"
+
+#include "Acts/Material/PropagatorMaterialAssigner.hpp"
+#include "Acts/Material/BinnedSurfaceMaterialAccumulater.hpp"
+#include "Acts/Material/BinnedSurfaceMaterial.hpp"
+#include "Acts/Material/AccumulatedMaterialSlab.hpp"
+#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
+#include "Acts/Material/IntersectionMaterialAssigner.hpp"
+#include "Acts/Material/MaterialValidater.hpp"
+#include "Acts/Material/MaterialMapper.hpp"
+
+#include <fstream>
+#include <iomanip>
+#include <random>
+#include <nlohmann/json.hpp> 
+#include "TChain.h"
+#include "TFile.h"
+
+#include "ACTSinCMSSW/GeometryDataFormat/interface/CMSDetectorElement.h"
+#include "ACTSinCMSSW/GeometryDataFormat/interface/JsonMaterialWriter.hpp"
+
+using json = nlohmann::json;
+using KdtSurfacesDim2Bin100 = Acts::Experimental::KdtSurfaces<2u, 100u>;
+const std::array<Acts::AxisDirection, 2UL> casts{Acts::AxisDirection::AxisZ, Acts::AxisDirection::AxisR};
+
+using DetElVect = std::vector<std::shared_ptr<Acts::CMSDetectorElement>>;
+
+
+class JsonMaterialMapsProducer : public edm::one::EDProducer<> {
+public:
+  explicit JsonMaterialMapsProducer(const edm::ParameterSet& ps);
+  ~JsonMaterialMapsProducer() override = default;
+  void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
+
+private:
+  edm::ESGetToken<Acts::TrackingGeometry, ACTSTrackerGeometryRecord> trackerGeomToken_;
+
+};
+
+JsonMaterialMapsProducer::JsonMaterialMapsProducer(const edm::ParameterSet& ps)
+    : trackerGeomToken_(esConsumes()) {}
+
+void JsonMaterialMapsProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) { 
+
+
+
+}
+
+DEFINE_FWK_MODULE(JsonMaterialMapsProducer);
+
+

@@ -1,0 +1,24 @@
+<use name="Geometry/TrackerGeometryBuilder"/>
+<use name="Geometry/CommonDetUnit"/>
+<use name="Geometry/Records"/>
+<use name="DataFormats/TrackerCommon"/>
+<use name="DataFormats/TrackerRecHit2D"/>
+<use name="DataFormats/SiStripDetId"/>
+<use name="DataFormats/GeometrySurface"/>
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/MessageLogger"/>
+<use name="CondFormats/SiStripObjects"/>
+<use name="DetectorDescription/Core"/>
+<use name="ROOT"/>
+
+<use name="acts-core"/>
+<use name="acts-json"/>
+<use name="acts-svg"/>
+
+<use name="rootcore"/>
+<use name="FWCore/Utilities"/>
+
+<export>
+  <lib name="1"/>
+</export>

@@ -1,0 +1,38 @@
+<use name = "FWCore/Framework"/>
+<use name = "FWCore/ParameterSet"/>
+<use name = "FWCore/Utilities"/>
+<use name = "FWCore/MessageLogger"/>
+<use name = "Geometry/TrackerGeometryBuilder"/>
+<use name = "Geometry/CommonDetUnit"/>
+<use name = "Geometry/Records"/>
+<use name = "DataFormats/TrackerCommon"/>
+<use name = "DataFormats/TrackerRecHit2D"/>
+<use name = "DataFormats/SiStripDetId"/>
+<use name = "DataFormats/GeometrySurface"/>
+<use name = "FWCore/Framework"/>
+<use name = "FWCore/ParameterSet"/>
+<use name = "FWCore/MessageLogger"/>
+<use name = "CondFormats/SiStripObjects"/>
+<use name = "DetectorDescription/Core"/>
+<use name = "ACTSinCMSSW/GeometryDataFormat"/>
+<use name = "MagneticField/Engine"/>
+<use name = "MagneticField/Records"/>
+<use name = "SimDataFormats/TrackingAnalysis"/>
+<use name = "SimGeneral/TrackingAnalysis"/>
+<use name = "SimGeneral/MixingModule"/>
+
+<use name = "RecoTracker/TransientTrackingRecHit"/>
+<use name = "RecoTracker/TrackProducer"/>
+
+<use name = "FWCore/PluginManager"/>
+<use name = "FWCore/ServiceRegistry"/>
+<use name = "rootcore"/>
+
+<use name="acts-core"/>
+<use name="acts-json"/>
+<use name="acts-svg"/>
+<use name="acts-root"/>
+
+<library file="*.cc" name="GeometryBuilder">
+  <flags EDM_PLUGIN="1"/>
+</library>

@@ -60,41 +60,59 @@ void TrackerValidationVariables::fillHitQuantities(reco::Track const& track, std
   auto const& trajParams = track.extra()->trajParams();
   auto const& residuals = track.extra()->residuals();
 
-  assert(trajParams.size() == track.recHitsSize());
+  // std::cout << "\n[DEBUG] Track has " << track.recHitsSize() << " hits" << std::endl;
+
+  //assert(trajParams.size() == track.recHitsSize());
   auto hb = track.recHitsBegin();
   for (unsigned int h = 0; h < track.recHitsSize(); h++) {
+    // std::cout << "\n--- Hit " << h << " ---" << std::endl;
+
     auto hit = *(hb + h);
-    if (!hit->isValid())
+    // std::cout << "[DEBUG] hit ptr = " << hit << std::endl;
+
+    if (!hit->isValid()) {
+      //std::cout << "[DEBUG][SKIP] hit is NULL" << std::endl;
       continue;
+    }
+    // std::cout << "[DEBUG] isValid = " << hit->isValid() << std::endl;
 
     AVHitStruct hitStruct;
     const DetId& hit_detId = hit->geographicalId();
     auto IntRawDetID = hit_detId.rawId();
     auto IntSubDetID = hit_detId.subdetId();
 
-    if (IntSubDetID == 0)
+    // std::cout << "[DEBUG] detId = " << IntRawDetID << " subdet = " << IntSubDetID << std::endl;
+
+    if (IntSubDetID == 0){
+      // std::cout << "[DEBUG] Subdet = 0 → skipping" << std::endl;
       continue;
+    }
 
     if (IntSubDetID == PixelSubdetector::PixelBarrel || IntSubDetID == PixelSubdetector::PixelEndcap) {
-      const SiPixelRecHit* prechit = dynamic_cast<const SiPixelRecHit*>(
-          hit);  //to be used to get the associated cluster and the cluster probability
+      const SiPixelRecHit* prechit = dynamic_cast<const SiPixelRecHit*>(hit);  //to be used to get the associated cluster and the cluster probability
+      // std::cout << "[DEBUG] Pixel hit ptr: " << prechit << std::endl;
       if (prechit->isOnEdge())
         hitStruct.isOnEdgePixel = true;
       if (prechit->hasBadPixels())
         hitStruct.isOtherBadPixel = true;
     }
 
-    auto lPTrk = trajParams[h].position();  // update state
-    auto lVTrk = trajParams[h].direction();
+    // auto lPTrk = trajParams[h].position();  // update state
+    // auto lVTrk = trajParams[h].direction();
 
-    auto gtrkdirup = hit->surface()->toGlobal(lVTrk);
+    // auto gtrkdirup = hit->surface()->toGlobal(lVTrk);
 
     hitStruct.rawDetId = IntRawDetID;
-    hitStruct.phi = gtrkdirup.phi();  // direction, not position
-    hitStruct.eta = gtrkdirup.eta();  // same
+    // hitStruct.phi = gtrkdirup.phi();  // direction, not position
+    // hitStruct.eta = gtrkdirup.eta();  // same
 
-    hitStruct.localAlpha = std::atan2(lVTrk.x(), lVTrk.z());  // wrt. normal tg(alpha)=x/z
-    hitStruct.localBeta = std::atan2(lVTrk.y(), lVTrk.z());   // wrt. normal tg(beta)= y/z
+    // hitStruct.localAlpha = std::atan2(lVTrk.x(), lVTrk.z());  // wrt. normal tg(alpha)=x/z
+    // hitStruct.localBeta = std::atan2(lVTrk.y(), lVTrk.z());   // wrt. normal tg(beta)= y/z
+
+    float resx = residuals.residualX(h);
+    float resy = residuals.residualY(h);
+
+    // std::cout << "[DEBUG] residualX = " << resx << " residualY = " << resy << std::endl;
 
     hitStruct.resX = residuals.residualX(h);
     hitStruct.resY = residuals.residualY(h);
@@ -104,8 +122,8 @@ void TrackerValidationVariables::fillHitQuantities(reco::Track const& track, std
     // hitStruct.localX = lPhit.x();
     // hitStruct.localY = lPhit.y();
     // EM: use predictions for local coordinates
-    hitStruct.localX = lPTrk.x();
-    hitStruct.localY = lPTrk.y();
+    // hitStruct.localX = lPTrk.x();
+    // hitStruct.localY = lPTrk.y();
 
     // now calculate residuals taking global orientation of modules and radial topology in TID/TEC into account
     float resXprime(999.F), resYprime(999.F);
@@ -146,7 +164,7 @@ void TrackerValidationVariables::fillHitQuantities(reco::Track const& track, std
 
         const RectangularPlaneBounds* rectangularBound = dynamic_cast<const RectangularPlaneBounds*>(&bound);
         if (rectangularBound != nullptr) {
-          hitStruct.inside = rectangularBound->inside(lPTrk);
+          // hitStruct.inside = rectangularBound->inside(lPTrk);
           length = rectangularBound->length();
           width = rectangularBound->width();
           hitStruct.localXnorm = 2 * hitStruct.localX / width;

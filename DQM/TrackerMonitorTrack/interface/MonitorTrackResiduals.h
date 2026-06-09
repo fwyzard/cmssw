@@ -84,6 +84,7 @@ private:
 
   unsigned long long m_cacheID_;
   bool ModOn;
+  std::string TopFolderName_;
   bool applyVertexCut_;
 
   GenericTriggerEventFlag *genTriggerEventFlag_;

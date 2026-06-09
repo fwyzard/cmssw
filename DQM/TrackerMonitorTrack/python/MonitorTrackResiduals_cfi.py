@@ -7,6 +7,7 @@ MonitorTrackResiduals = DQMEDAnalyzer("MonitorTrackResiduals",
     # should histogramms on module level be booked and filled?
     Mod_On = cms.bool(True),
     VertexCut = cms.untracked.bool(True),
+    TopFolderName = cms.string('MonitorTrackResiduals'),
     OutputFileName = cms.string('test_monitortracks.root'),
     genericTriggerEventPSet = cms.PSet(),
     # bining and range for absolute and normalized residual histogramms

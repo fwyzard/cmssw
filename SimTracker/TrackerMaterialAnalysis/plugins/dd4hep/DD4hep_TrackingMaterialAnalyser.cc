@@ -177,6 +177,30 @@ void DD4hep_TrackingMaterialAnalyser::analyze(const edm::Event& event, const edm
     MaterialAccountingTrack track(*t);
     split(track);
   }
+
+  for (unsigned int i = 0; i < m_groups.size(); ++i) {
+    DD4hep_MaterialAccountingGroup& layer = *(m_groups[i]);
+    
+    edm::LogVerbatim("TrackerMaterialAnalysis") << "TrackingMaterialAnalyser" << layer.name() << std::endl;
+    edm::LogVerbatim("TrackerMaterialAnalysis")
+        << "TrackingMaterialAnalyser" << fmt::sprintf("\tnumber of hits:               %9d", layer.tracks())
+        << std::endl;
+    edm::LogVerbatim("TrackerMaterialAnalysis")
+        << "TrackingMaterialAnalyser"
+        << fmt::sprintf("\tnormalized segment length:    %9.1f ± %9.1f cm", layer.averageLength(), layer.sigmaLength())
+        << std::endl;
+    edm::LogVerbatim("TrackerMaterialAnalysis") << "TrackingMaterialAnalyser"
+                                                << fmt::sprintf("\tnormalized radiation lengths: %9.3f ± %9.3f",
+                                                                layer.averageRadiationLengths(),
+                                                                layer.sigmaRadiationLengths())
+                                                << std::endl;
+    edm::LogVerbatim("TrackerMaterialAnalysis")
+        << "TrackingMaterialAnalyser"
+        << fmt::sprintf("\tnormalized energy loss:       %6.5fe-03 ± %6.5fe-03 GeV",
+                        layer.averageEnergyLoss(),
+                        layer.sigmaEnergyLoss())
+        << std::endl;
+  }
 }
 
 //-------------------------------------------------------------------

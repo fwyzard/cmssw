@@ -1,0 +1,16 @@
+CMSSW16/src/ACTSinCMSSW/
+                        GeometryBuilder/ <-pluings
+                                        /plugins/
+                                                /BuildFile.xml
+                                                /DetectorElementsProducer.cc
+                                                /TrackingGeometryProducer.cc
+                                        /python/
+                                                /geometryBuilderPh1_test.py
+                        GeometryDataFormat/ <- classi usate dai plugins
+                                        /BuildFile.xml
+                                        /interface
+                                                /classes_def.xml
+                                                /classes.h
+                                                /CMSDetectorElement.h
+                                        /src    
+                                                /CMSDetectorElement.cc

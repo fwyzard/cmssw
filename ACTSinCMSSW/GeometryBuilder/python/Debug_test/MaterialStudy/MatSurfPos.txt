@@ -1,0 +1,107 @@
+[Material Debug] Surface vol=139|bnd=1 has material! center: Z = 3000 R = 0 type: Disc bounds = 0 1200 3.14159 0 
+[Material Debug] Surface vol=29|bnd=1 has material! center: Z = -3000 R = 0 type: Disc bounds = 0 1200 3.14159 0 
+[Material Debug] Surface vol=1|bnd=3 has material! center: Z = -2.27374e-13 R = 0 type: Cylinder bounds = 1200 3000 3.14159 0 0 0 
+[Material Debug] Surface vol=1|bnd=1 has material! center: Z = -1258.67 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=1|bnd=2 has material! center: Z = -1210 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=2|bnd=1 has material! center: Z = -1190 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=2|bnd=2 has material! center: Z = -1160 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=3|bnd=1 has material! center: Z = -1140 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=4|bnd=2 has material! center: Z = 1140 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=5|bnd=1 has material! center: Z = 1160 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=5|bnd=2 has material! center: Z = 1190 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=6|bnd=1 has material! center: Z = 1210 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=6|bnd=2 has material! center: Z = 1258.16 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=7|bnd=2 has material! center: Z = -2560 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=8|bnd=1 has material! center: Z = -2540 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=8|bnd=2 has material! center: Z = -2507.25 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=9|bnd=1 has material! center: Z = -2387.39 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=9|bnd=2 has material! center: Z = -2360 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=10|bnd=1 has material! center: Z = -2340 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=10|bnd=2 has material! center: Z = -2302.42 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=11|bnd=1 has material! center: Z = -2182.68 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=11|bnd=2 has material! center: Z = -2160 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=12|bnd=1 has material! center: Z = -2140 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=12|bnd=2 has material! center: Z = -2113.23 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=13|bnd=1 has material! center: Z = -1992.97 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=13|bnd=2 has material! center: Z = -1938.23 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=14|bnd=1 has material! center: Z = -1818.19 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=14|bnd=2 has material! center: Z = -1798.29 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=15|bnd=1 has material! center: Z = -1678.34 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=15|bnd=2 has material! center: Z = -1658.43 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=16|bnd=1 has material! center: Z = -1538.48 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=16|bnd=2 has material! center: Z = -1518.55 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=17|bnd=1 has material! center: Z = -1398.59 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=17|bnd=2 has material! center: Z = -1378.65 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=34|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 540 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=35|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 570 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=36|bnd=1 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 1101.57 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=37|bnd=1 has material! center: Z = -810 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=38|bnd=1 has material! center: Z = -790 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=38|bnd=2 has material! center: Z = -710 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=39|bnd=1 has material! center: Z = -690 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=39|bnd=2 has material! center: Z = -610 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=40|bnd=1 has material! center: Z = -590 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=40|bnd=2 has material! center: Z = -527.113 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=41|bnd=1 has material! center: Z = -289.386 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=42|bnd=2 has material! center: Z = 289.387 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=43|bnd=1 has material! center: Z = 527.111 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=43|bnd=2 has material! center: Z = 590 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=44|bnd=1 has material! center: Z = 610 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=44|bnd=2 has material! center: Z = 690 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=45|bnd=1 has material! center: Z = 710 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=45|bnd=2 has material! center: Z = 790 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=46|bnd=1 has material! center: Z = 810 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=50|bnd=1 has material! center: Z = -459.376 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=50|bnd=2 has material! center: Z = -432.112 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=51|bnd=1 has material! center: Z = -364.381 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=51|bnd=2 has material! center: Z = -357.113 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=56|bnd=2 has material! center: Z = 0 R = 0 type: Cylinder bounds = 34.8884 271.906 3.14159 0 0 0 
+[Material Debug] Surface vol=57|bnd=2 has material! center: Z = 0 R = 0 type: Cylinder bounds = 73.6652 271.906 3.14159 0 0 0 
+[Material Debug] Surface vol=58|bnd=2 has material! center: Z = 0 R = 0 type: Cylinder bounds = 114.505 271.906 3.14159 0 0 0 
+[Material Debug] Surface vol=59|bnd=1 has material! center: Z = 0 R = 0 type: Cylinder bounds = 165.511 271.906 3.14159 0 0 0 
+[Material Debug] Surface vol=64|bnd=1 has material! center: Z = 357.113 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=64|bnd=2 has material! center: Z = 364.384 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=65|bnd=1 has material! center: Z = 432.114 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=65|bnd=2 has material! center: Z = 459.378 R = 0 type: Disc bounds = 10 200 3.14159 0 
+[Material Debug] Surface vol=73|bnd=1 has material! center: Z = -738.465 R = 0 type: Disc bounds = 219.845 524.422 3.14159 0 
+[Material Debug] Surface vol=74|bnd=2 has material! center: Z = 738.504 R = 0 type: Disc bounds = 219.845 524.422 3.14159 0 
+[Material Debug] Surface vol=75|bnd=2 has material! center: Z = -974.819 R = 0 type: Disc bounds = 219.845 524.422 3.14159 0 
+[Material Debug] Surface vol=76|bnd=1 has material! center: Z = -867.97 R = 0 type: Disc bounds = 219.845 524.422 3.14159 0 
+[Material Debug] Surface vol=76|bnd=2 has material! center: Z = -845.364 R = 0 type: Disc bounds = 219.845 524.422 3.14159 0 
+[Material Debug] Surface vol=81|bnd=2 has material! center: Z = 0 R = 0 type: Cylinder bounds = 279.747 668.917 3.14159 0 0 0 
+[Material Debug] Surface vol=82|bnd=2 has material! center: Z = 0 R = 0 type: Cylinder bounds = 365.978 668.917 3.14159 0 0 0 
+[Material Debug] Surface vol=83|bnd=2 has material! center: Z = 0 R = 0 type: Cylinder bounds = 441.395 668.917 3.14159 0 0 0 
+[Material Debug] Surface vol=89|bnd=1 has material! center: Z = 845.358 R = 0 type: Disc bounds = 219.845 524.422 3.14159 0 
+[Material Debug] Surface vol=89|bnd=2 has material! center: Z = 867.969 R = 0 type: Disc bounds = 219.845 524.422 3.14159 0 
+[Material Debug] Surface vol=90|bnd=1 has material! center: Z = 974.814 R = 0 type: Disc bounds = 219.845 524.422 3.14159 0 
+[Material Debug] Surface vol=96|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 635.321 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=97|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 655 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=98|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 718.389 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=99|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 750 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=100|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 801.903 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=101|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 810 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=102|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 889.782 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=103|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 943 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=104|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 986.657 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=105|bnd=2 has material! center: Z = 0.0102545 R = 0 type: Cylinder bounds = 1050 1104.29 3.14159 0 0 0 
+[Material Debug] Surface vol=117|bnd=1 has material! center: Z = 1378.64 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=117|bnd=2 has material! center: Z = 1398.57 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=118|bnd=1 has material! center: Z = 1518.53 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=118|bnd=2 has material! center: Z = 1538.45 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=119|bnd=1 has material! center: Z = 1658.4 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=119|bnd=2 has material! center: Z = 1678.31 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=120|bnd=1 has material! center: Z = 1798.26 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=120|bnd=2 has material! center: Z = 1818.15 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=121|bnd=1 has material! center: Z = 1938.2 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=121|bnd=2 has material! center: Z = 1992.93 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=122|bnd=1 has material! center: Z = 2113.22 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=122|bnd=2 has material! center: Z = 2140 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=123|bnd=1 has material! center: Z = 2160 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=123|bnd=2 has material! center: Z = 2182.67 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=124|bnd=1 has material! center: Z = 2302.96 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=124|bnd=2 has material! center: Z = 2340 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=125|bnd=1 has material! center: Z = 2360 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=125|bnd=2 has material! center: Z = 2387.34 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=126|bnd=1 has material! center: Z = 2507.94 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=126|bnd=2 has material! center: Z = 2540 R = 0 type: Disc bounds = 10 1200 3.14159 0 
+[Material Debug] Surface vol=127|bnd=1 has material! center: Z = 2560 R = 0 type: Disc bounds = 10 1200 3.14159 0 

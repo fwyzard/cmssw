@@ -4,6 +4,13 @@
 <use name="TrackingTools/TrajectoryState"/>
 <use name="TrackPropagation/RungeKutta"/>
 <use name="DataFormats/GeometryCommonDetAlgo"/>
+
+<use name = "ACTSinCMSSW/GeometryDataFormat"/>
+<use name="acts-core"/>
+<use name="acts-json"/>
+<use name="acts-svg"/>
+<use name="acts-root"/>
+
 <export>
   <lib name="1"/>
 </export>

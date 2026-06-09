@@ -1,0 +1,8 @@
+mtllib /afs/cern.ch/user/l/ldamenti/CMSSW_16_0_0_pre1/src/ACTSinCMSSW/GeometryBuilder/python/Surfaces.mtl
+usemtl material_250_0_0
+v 27.17 16.17 -202.1
+v 31.61 0.5922 -202.1
+v 31.61 0.5899 -266.9
+v 27.17 16.17 -266.9
+usemtl material_250_0_0
+f 1 2 3 4

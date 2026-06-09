@@ -24,6 +24,7 @@ MonitorTrackResidualsBase<pixel_or_strip>::MonitorTrackResidualsBase(const edm::
       avalidator_(iConfig, consumesCollector()) {
   applyVertexCut_ = conf_.getUntrackedParameter<bool>("VertexCut", true);
   ModOn = conf_.getParameter<bool>("Mod_On");
+  TopFolderName_ = conf_.getParameter<std::string>("TopFolderName");
   offlinePrimaryVerticesToken_ = consumes<reco::VertexCollection>(std::string("offlinePrimaryVertices"));
 }
 
@@ -42,12 +43,12 @@ void MonitorTrackResidualsBase<pixel_or_strip>::bookHistograms(DQMStore::IBooker
     m_cacheID_ = cacheID;
     this->createMEs(ibooker, iSetup);
   }
-  std::string topFolderName_ = "SiStrip";
+  // std::string topFolderName_ = "SiStrip";
   SiStripFolderOrganizer folder_organizer;
-  folder_organizer.setSiStripFolderName(topFolderName_);
+  folder_organizer.setSiStripFolderName(TopFolderName_);
   const TkDetMap *tkDetMap = &iSetup.getData(tkDetMapToken_);
   tkhisto_ResidualsMean =
-      std::make_unique<TkHistoMap>(tkDetMap, ibooker, topFolderName_, "TkHMap_ResidualsMean", 0.0, true);
+      std::make_unique<TkHistoMap>(tkDetMap, ibooker, TopFolderName_, "TkHMap_ResidualsMean", 0.0, true);
 }
 
 template <TrackerType pixel_or_strip>
@@ -170,10 +171,12 @@ void MonitorTrackResidualsBase<pixel_or_strip>::createMEs(DQMStore::IBooker &ibo
         // We can't use the folder organizer here (SiPixelActionExecutor.cc#1638
         // does the same)
         case 1:
-          ibooker.setCurrentFolder("Pixel/Barrel");
+          // ibooker.setCurrentFolder("Pixel/Barrel");
+          ibooker.setCurrentFolder(TopFolderName_ + "/Barrel");
           break;
         case 2:
-          ibooker.setCurrentFolder("Pixel/Endcap");
+          // ibooker.setCurrentFolder("Pixel/Endcap");
+          ibooker.setCurrentFolder(TopFolderName_ + "/Endcap");
           break;
         // All strip
         default:

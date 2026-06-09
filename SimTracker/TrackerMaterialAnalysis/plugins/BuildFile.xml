@@ -11,7 +11,6 @@
   <use name="SimDataFormats/ValidationFormats"/>
   <use name="SimG4Core/Watcher"/>
   <use name="boost"/>
-  <use name="fmt"/>
   <use name="geant4core"/>
   <use name="rootgpad"/>
   <flags EDM_PLUGIN="1"/>
@@ -29,7 +28,6 @@
   <use name="SimDataFormats/ValidationFormats"/>
   <use name="SimG4Core/Watcher"/>
   <use name="boost"/>
-  <use name="fmt"/>
   <use name="geant4core"/>
   <use name="rootgpad"/>
   <use name="DetectorDescription/DDCMS"/>

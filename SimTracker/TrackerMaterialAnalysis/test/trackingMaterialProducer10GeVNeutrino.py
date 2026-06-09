@@ -1,17 +1,18 @@
 #!/usr/bin/env cmsRun
 
 import FWCore.ParameterSet.Config as cms
+from Configuration.ProcessModifiers.dd4hep_cff import dd4hep
 
-process = cms.Process("Geometry")
+process = cms.Process("Geometry",dd4hep)
 
-readGeometryFromDB = True
+readGeometryFromDB = False
 
 # N.B. for the time being we load the geometry from local
 # XML, whle in future we will have to use the DB. This is
 # only a temporary hack, since the material description has
 # been updated in release via XML and the DB is behind.
 if not readGeometryFromDB:
-  process.load('Configuration.Geometry.GeometryExtended2021Reco_cff')
+  process.load('Configuration.Geometry.GeometryDD4hepExtended2017Reco_cff')
 else:
 # GlobalTag and geometry via GT
   process.load('Configuration.Geometry.GeometrySimDB_cff')
@@ -40,7 +41,7 @@ process.load("SimTracker.TrackerMaterialAnalysis.trackingMaterialProducer_cff")
 process.trackingMaterialProducer.StackingAction.TrackNeutrino = True
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(200000)
+    input = cms.untracked.int32(1000)
 )
 
 # Input source

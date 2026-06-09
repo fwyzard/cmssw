@@ -30,7 +30,8 @@
 #define SEP "/"
 
 SiStripFolderOrganizer::SiStripFolderOrganizer() {
-  TopFolderName = "SiStrip";
+  // TopFolderName = "SiStrip";
+  TopFolderName = "ACTSStripResiduals";
   // get a pointer to DQMStore
   dbe_ = edm::Service<DQMStore>().operator->();
 }

@@ -12,17 +12,20 @@ TrackRefitter.TrajectoryInEvent = True
 from DQM.TrackerMonitorTrack.MonitorTrackResiduals_cfi import *
 MonitorTrackResidualsTier0 = MonitorTrackResiduals.clone(
     OutputMEsInRootFile = False,
-    Mod_On = False
+    Mod_On = False,
+    TopFolderName = 'MonitorTrackResiduals'
 )
 
 MonitorTrackResidualsDQM = MonitorTrackResiduals.clone(
     OutputMEsInRootFile = False,
-    Mod_On = True
+    Mod_On = True,
+    TopFolderName = 'MonitorTrackResiduals'
 )
 
 MonitorTrackResidualsStandAlone = MonitorTrackResiduals.clone(
     OutputMEsInRootFile = True,
-    Mod_On = False
+    Mod_On = False,
+    TopFolderName = 'MonitorTrackResiduals'
 )
 
 # Sequences

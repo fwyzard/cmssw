@@ -1,0 +1,84 @@
+#ifndef CMS_KF_CALIBRATOR_HPP
+#define CMS_KF_CALIBRATOR_HPP
+
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+
+#include "Acts/Definitions/Algebra.hpp"
+#include "Acts/Definitions/TrackParametrization.hpp"
+#include "Acts/EventData/SourceLink.hpp"
+#include "ACTSinCMSSW/GeometryDataFormat/interface/CMSDetectorSourceLink.hpp"
+#include "ACTSinCMSSW/GeometryDataFormat/interface/CMSDetectorElement.h"
+#include <iostream>
+#include "Acts/Utilities/CalibrationContext.hpp"
+
+template <typename traj_t>
+class CMSKFCalibrator {
+public:
+    CMSKFCalibrator(const Acts::GeometryContext& gctx,
+                    const Acts::CalibrationContext& cctx,
+                    const TrackerGeometry* TrkGeo)
+                    : m_trackerGeometry(TrkGeo) {}
+    
+    static void calibrate(const Acts::SourceLink& sl,
+                   typename traj_t::TrackStateProxy state) {
+
+        const auto& myLink = sl.get<CMSDetectorSourceLink>();
+
+        const auto& surf = myLink.GetSurface();
+
+        if (myLink.hitType == HitType::Hit2D) {
+
+            state.allocateCalibrated(2);
+            state.template calibrated<2>() = myLink.lPos;
+            state.template calibratedCovariance<2>() << myLink.lCov;
+
+            state.setProjectorSubspaceIndices(std::array<Acts::BoundIndices, 2>{Acts::eBoundLoc0, Acts::eBoundLoc1});
+            //std::cout << "Calibrating 1D hit: pos = " << myLink.lPos << ", cov = " << myLink.lCov << std::endl;
+
+        } else if (myLink.hitType == HitType::Hit1D){
+
+            // vettore 1D
+            Eigen::Matrix<double, 1, 1> pos1d;
+            pos1d(0) = myLink.lPos[0];
+
+            state.allocateCalibrated(1);
+            state.template calibrated<1>() = pos1d;
+            state.template calibratedCovariance<1>() << myLink.lCov(0,0);
+
+            state.setProjectorSubspaceIndices(std::array<Acts::BoundIndices, 1>{Acts::eBoundLoc0});
+            //std::cout << "Calibrating 1D hit: pos = " << pos1d << ", cov = " << myLink.lCov(0,0) << std::endl;
+        } else {
+            std::cout << "ERROR: Unrecognized hit type" << std::endl;
+        } 
+    }
+
+    static Acts::Vector3 localToGlobal(const Acts::SourceLink& sl) {
+
+        const auto& myLink = sl.get<CMSDetectorSourceLink>();
+        const auto& surf_acts = myLink.GetSurface();
+
+        auto detEl = dynamic_cast<const Acts::CMSDetectorElement*>(surf_acts->associatedDetectorElement());
+        auto detID = detEl->detID();
+
+        const GeomDet* geomDet = m_trackerGeometry->idToDet(detID);        
+
+        auto surf_cmssw = geomDet->specificSurface();
+
+        Acts::Vector2 local_acts = myLink.lPos;
+
+        LocalPoint localP(local_acts[0], local_acts[1]);
+        GlobalPoint gPoint_cmssw = surf_cmssw.toGlobal(localP);
+
+        Acts::Vector3 global_acts = Acts::Vector3{gPoint_cmssw.x(), gPoint_cmssw.y(), gPoint_cmssw.z()};
+
+        return global_acts;
+    }
+
+private:
+    static const TrackerGeometry* m_trackerGeometry;
+
+};
+
+
+#endif // CMS_KF_CALIBRATOR_HPP
+

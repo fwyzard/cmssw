@@ -1,6 +1,25 @@
 <use name="ofast-flag"/>
 <use name="TrackingTools/Records"/>
 <use name="TrackingTools/MaterialEffects"/>
+
+<use name = "CommonTools/UtilAlgos"/>
+<use name = "DataFormats/MuonReco"/>
+<use name = "TrackingTools/TransientTrack"/>
+<use name = "RecoVertex/KalmanVertexFit"/>
+
+<use name = "RecoTracker/TransientTrackingRecHit"/>
+<use name = "ACTSinCMSSW/GeometryDataFormat"/>
+<use name = "RecoTracker/TrackProducer"/>
+
+<use name = "FWCore/PluginManager"/>
+<use name = "FWCore/ServiceRegistry"/>
+<use name = "rootcore"/>
+
+<use name="acts-core"/>
+<use name="acts-json"/>
+<use name="acts-svg"/>
+<use name="acts-root"/>
+
 <library file="*.cc" name="TrackingToolsMaterialEffectsPlugins">
   <flags EDM_PLUGIN="1"/>
 </library>

@@ -1,0 +1,503 @@
+/// ######################################################################################
+/// # Plugin used to convert the CMSSW detector elements in ACTS detector elements.      #
+/// # The output is a vector of Acts::CMSDetectorElement which can be used to            #
+/// # build the Tracking Geometry.                                                       #
+/// # NOTE: Plugins list:                                                                #  
+/// # (1) Converts the CMSSW detElements into ACTS ones and builds the Tracking Geometry # <- DONE (I) <->(III) flags to map material
+/// # (2) Produces a JSON material file starting from material tracks                    # <- DONE (II)
+/// # (3) Takes as input the tracking geometry from (1) and the json file from (3) and   # <- DONE (IV) validation only
+/// #     decorates the tracking geometry with material. It performs material Validation #  
+/// ######################################################################################
+// git cms-addpkg
+#include "FWCore/Framework/interface/one/EDProducer.h"
+#include "FWCore/Framework/interface/ESProducer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/ESGetToken.h"
+#include "FWCore/Framework/interface/ModuleFactory.h"
+
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "Geometry/Records/interface/ACTSTrackerGeometryRecord.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
+#include "DataFormats/GeometrySurface/interface/RectangularPlaneBounds.h"
+#include "DataFormats/GeometrySurface/interface/TrapezoidalPlaneBounds.h"
+
+#include "DataFormats/TrackerCommon/interface/PixelBarrelName.h"
+#include "DataFormats/TrackerCommon/interface/PixelEndcapName.h"
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DetectorDescription/Core/interface/DDRotationMatrix.h"
+#include "CLHEP/Units/GlobalSystemOfUnits.h"
+#include "Math/RotationZ.h"
+#include "FWCore/Framework/interface/ESConsumesCollector.h"
+
+#include "Math/Rotation3D.h"
+#include "Math/AxisAngle.h"
+
+#include "Acts/Definitions/Algebra.hpp"
+#include "Acts/Detector/KdtSurfacesProvider.hpp"
+#include "Acts/Geometry/Polyhedron.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Visualization/GeometryView3D.hpp"
+#include "Acts/Visualization/ObjVisualization3D.hpp"
+#include "ActsPlugins/Json/JsonDetectorElement.hpp"
+#include "Acts/Visualization/ViewConfig.hpp"
+
+#include "Acts/Geometry/Blueprint.hpp"
+#include "Acts/Geometry/ContainerBlueprintNode.hpp" 
+#include "Acts/Geometry/LayerBlueprintNode.hpp" 
+#include "Acts/Geometry/MaterialDesignatorBlueprintNode.hpp" 
+#include "Acts/Geometry/SurfaceArrayCreator.hpp"
+#include "Acts/Detector/KdtSurfacesProvider.hpp"
+#include "Acts/Detector/ProtoDetector.hpp"
+#include "Acts/Detector/detail/ReferenceGenerators.hpp"
+#include "Acts/Detector/interface/ISurfacesProvider.hpp"
+#include "Acts/Detector/LayerStructureBuilder.hpp"
+#include "Acts/Detector/detail/BlueprintHelper.hpp"
+#include "Acts/Detector/detail/BlueprintDrawer.hpp"
+#include "Acts/Definitions/Units.hpp"
+#include "Acts/Navigation/SurfaceArrayNavigationPolicy.hpp"
+#include "Acts/Navigation/TryAllNavigationPolicy.hpp"
+#include "ActsPlugins/ActSVG/DetectorSvgConverter.hpp"
+#include "ActsPlugins/Json/JsonSurfacesReader.hpp"
+#include "ActsPlugins/Json/JsonMaterialDecorator.hpp"
+#include "ActsPlugins/ActSVG/TrackingGeometrySvgConverter.hpp"
+#include "ActsPlugins/ActSVG/SurfaceArraySvgConverter.hpp"
+#include "ActsPlugins/Root/RootMaterialTrackIo.hpp"
+
+#include "Acts/Material/PropagatorMaterialAssigner.hpp"
+#include "Acts/Material/BinnedSurfaceMaterialAccumulater.hpp"
+#include "Acts/Material/BinnedSurfaceMaterial.hpp"
+#include "Acts/Material/AccumulatedMaterialSlab.hpp"
+#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
+#include "Acts/Material/IntersectionMaterialAssigner.hpp"
+#include "Acts/Material/MaterialValidater.hpp"
+#include "Acts/Material/MaterialMapper.hpp"
+
+#include <fstream>
+#include <iomanip>
+#include <random>
+#include <nlohmann/json.hpp> 
+#include "TChain.h"
+#include "TFile.h"
+
+#include "ACTSinCMSSW/GeometryDataFormat/interface/CMSDetectorElement.h"
+#include "ACTSinCMSSW/GeometryDataFormat/interface/JsonMaterialWriter.hpp"
+
+using json = nlohmann::json;
+using KdtSurfacesDim2Bin100 = Acts::Experimental::KdtSurfaces<2u, 100u>;
+const std::array<Acts::AxisDirection, 2UL> casts{Acts::AxisDirection::AxisZ, Acts::AxisDirection::AxisR};
+
+using DetElVect = std::vector<std::shared_ptr<Acts::CMSDetectorElement>>;
+// ############################## MATERIAL METHODS ##############################
+
+struct MaterialConfig {
+  /// material collection to read
+  std::string outputMaterialTracks = "material-tracks";
+  /// name of the output tree
+  std::string treeName = "material-tracks";
+  /// List of input files
+  std::vector<std::string> fileList;
+
+  // Read surface information for the root file
+  bool readCachedSurfaceInformation = false;
+};
+
+template <typename element_t, typename index_t>
+void stableSort(index_t numElements, const element_t* elements,
+                index_t* sortedIndices, Bool_t sortDescending) {
+  for (index_t i = 0; i < numElements; i++) {
+    sortedIndices[i] = i;
+  }
+
+  if (sortDescending) {
+    std::stable_sort(sortedIndices, sortedIndices + numElements,
+                     CompareDesc<const element_t*>(elements));
+  } else {
+    std::stable_sort(sortedIndices, sortedIndices + numElements,
+                     CompareAsc<const element_t*>(elements));
+  }
+}
+
+class MyMaterialEvReader {
+public:
+    MyMaterialEvReader(const MaterialConfig& config)
+      : m_cfg(config){
+
+      ActsPlugins::RootMaterialTrackIo::Config ioCfg;
+      m_payload = std::make_unique<ActsPlugins::RootMaterialTrackIo>(ioCfg);
+      
+      m_inputChain = std::make_unique<TChain>(m_cfg.treeName.c_str());
+
+      // loop over the input files
+      for (const auto& inputFile : m_cfg.fileList) {
+        // add file to the input chain
+        m_inputChain->Add(inputFile.c_str());
+        //std::cout << "Adding File " << inputFile << " to tree '" << m_cfg.treeName << "'." << std::endl;
+      }
+
+      // Connect the branches
+      m_payload->connectForRead(*m_inputChain);
+
+      // get the number of entries, which also loads the tree
+      std::size_t nentries = m_inputChain->GetEntries();
+      m_events = static_cast<std::size_t>(m_inputChain->GetMaximum("event_id") + 1);
+      m_batchSize = nentries / m_events;
+      //std::cout << "The full chain has "
+      //           << nentries << " entries for " << m_events
+      //           << " events this corresponds to a batch size of: " << m_batchSize << std::endl;
+
+      // Sort the entry numbers of the events
+      {
+        // necessary to guarantee that m_inputChain->GetV1() is valid for the
+        // entire range
+        m_inputChain->SetEstimate(nentries + 1);
+
+        m_entryNumbers.resize(nentries);
+        m_inputChain->Draw("event_id", "", "goff");
+        stableSort(m_inputChain->GetEntries(), m_inputChain->GetV1(),
+                                m_entryNumbers.data(), false);
+      }
+    }
+
+    std::unordered_map<std::size_t, Acts::RecordedMaterialTrack> read(std::size_t eventNumber) {
+
+      mtrackCollection.clear();
+      
+      // Loop over the entries for this event
+      for (std::size_t ib = 0; ib < m_batchSize; ++ib) {
+        // Read the correct entry: startEntry + ib
+        auto entry = m_batchSize * eventNumber + ib;
+        entry = m_entryNumbers.at(entry);
+        //std::cout << "Reading event: " << eventNumber
+        //                               << " with stored entry: " << entry << std::endl; 
+        m_inputChain->GetEntry(entry);
+
+        Acts::RecordedMaterialTrack rmTrack = m_payload->read();
+
+        //std::cout << "Track vertex:  " << rmTrack.first.first << std::endl;
+        //std::cout << "Track momentum:" << rmTrack.first.second << std::endl;
+
+        mtrackCollection[ib] = (std::move(rmTrack));
+      }
+
+      return mtrackCollection;
+    }
+
+private:
+    MaterialConfig m_cfg;
+    std::unique_ptr<TChain> m_inputChain;
+    std::unique_ptr<ActsPlugins::RootMaterialTrackIo> m_payload;
+    
+    std::vector<long long> m_entryNumbers = {};
+
+    std::size_t m_events = 0;
+    std::size_t m_batchSize = 0;
+
+    std::unordered_map<std::size_t, Acts::RecordedMaterialTrack> mtrackCollection;
+};
+
+struct MaterialSurfaceSelector {
+  std::vector<const Acts::Surface*> surfaces = {};
+
+  /// @param surface is the test surface
+  void operator()(const Acts::Surface* surface) {
+    if (surface->surfaceMaterial() != nullptr && !rangeContainsValue(surfaces, surface)) {
+      surfaces.push_back(surface);
+    }
+  }
+};
+
+// ##########################################################################################
+
+
+// ##################### Decorator Methods #################################################                     
+
+struct myMutableVisitor : public Acts::TrackingGeometryMutableVisitor {
+    std::vector<Acts::Surface*> SurfVec;
+    void visitSurface(Acts::Surface& surface) {
+      if(surface.surfaceMaterial() != nullptr){
+        SurfVec.push_back(&surface);
+    
+      }
+    }
+};
+
+struct MaterialValidation_cfg{
+  /// Number of tracks per event
+  std::size_t ntracks = 1000;
+  /// Start position for the scan
+  Acts::Vector3 startPosition = Acts::Vector3(0., 0., 0.);
+  /// Start direction for the scan: phi
+  std::pair<double, double> phiRange = {-std::numbers::pi, std::numbers::pi};
+  /// Start direction for the scan: eta
+  std::pair<double, double> etaRange = {-4., 4.};
+  // The validater
+  std::shared_ptr<Acts::MaterialValidater> materialValidater = nullptr;
+  /// Output collection name
+  std::string outputMaterialTracks = "material_tracks";
+
+};
+
+using RandomEngine = std::mt19937;
+using RandomSeed = uint32_t;
+
+struct myContext{
+  /// Magnetic and Geometry contrext
+  Acts::GeometryContext geoContext;
+  Acts::MagneticFieldContext magFieldContext;
+  /// Number of event
+  std::size_t EvNumber; 
+};
+
+class MaterialValidator {
+public:
+  MaterialValidator(const MaterialValidation_cfg& cfg)
+  : m_cfg(cfg){
+    if(m_cfg.materialValidater == nullptr){
+      throw std::invalid_argument("Missing material validater.");
+    }
+  }
+
+  std::unordered_map<std::size_t, Acts::RecordedMaterialTrack> execute(const myContext& context, bool debug = false){
+    // Create a random number generator
+    RandomSeed seed = 1234567890u;
+    RandomEngine rng(seed + context.EvNumber);
+
+    // Setup random number distributions for some quantities
+    std::uniform_real_distribution<double> phiDist(m_cfg.phiRange.first, m_cfg.phiRange.second);
+    std::uniform_real_distribution<double> etaDist(m_cfg.etaRange.first, m_cfg.etaRange.second);
+
+    // Loop over the number of tracks
+    for (std::size_t iTrack = 0; iTrack < m_cfg.ntracks; ++iTrack) {
+      if(debug) std::cout << "\rEv: " << context.EvNumber << ", Track " << iTrack + 1 << " out of " << m_cfg.ntracks << std::flush;
+      // Generate a random phi and eta
+      double phi = phiDist(rng);
+      double eta = etaDist(rng);
+      double theta = 2 * std::atan(std::exp(-eta));
+      Acts::Vector3 direction(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+
+      // Record the material
+      auto rMaterial = m_cfg.materialValidater->recordMaterial(
+          context.geoContext, context.magFieldContext, m_cfg.startPosition,
+          direction);
+
+      recordedMaterialTracks[iTrack] = rMaterial;
+    }
+
+    return recordedMaterialTracks;
+  }
+
+private:
+  MaterialValidation_cfg m_cfg;
+  std::unordered_map<std::size_t, Acts::RecordedMaterialTrack> recordedMaterialTracks;
+
+};
+
+struct MyMaterialTrackWriter_cfg {
+  /// material collection to write
+  std::string inputMaterialTracks = "material-tracks";
+  /// path of the output file
+  std::string filePath = "";
+  /// file access mode
+  std::string fileMode = "RECREATE";
+  /// name of the output tree
+  std::string treeName = "material-tracks";
+
+  /// Re-calculate total values from individual steps (for cross-checks)
+  bool recalculateTotals = false;
+  /// Write aut pre and post step (for G4), otherwise central step position
+  bool prePostStep = false;
+  /// Write the surface to which the material step correpond
+  bool storeSurface = false;
+  /// Write the volume to which the material step correpond
+  bool storeVolume = false;
+  /// Collapse consecutive interactions of a single surface into a single
+  /// interaction
+  bool collapseInteractions = false;
+};
+
+class MyMaterialTrackWriter {
+ public:
+      MyMaterialTrackWriter(const MyMaterialTrackWriter_cfg& config)
+        : m_cfg(config){
+
+      ActsPlugins::RootMaterialTrackIo::Config ioCfg;
+      m_payload = std::make_unique<ActsPlugins::RootMaterialTrackIo>(ioCfg);
+
+      // An input collection name and tree name must be specified
+      if (m_cfg.inputMaterialTracks.empty()) {
+        throw std::invalid_argument("Missing input collection");
+      } else if (m_cfg.treeName.empty()) {
+        throw std::invalid_argument("Missing tree name");
+      }
+
+      // Setup ROOT I/O
+      m_outputFile = TFile::Open(m_cfg.filePath.c_str(), m_cfg.fileMode.c_str());
+      if (m_outputFile == nullptr) {
+        throw std::ios_base::failure("Could not open '" + m_cfg.filePath + "'");
+      }
+
+      m_outputFile->cd();
+      m_outputTree = new TTree(m_cfg.treeName.c_str(), "TTree from RootMaterialTrackWriter");
+      if (m_outputTree == nullptr) {
+        throw std::bad_alloc();
+      }
+      // Connect the branches
+      m_payload->connectForWrite(*m_outputTree);
+      }
+
+      ~MyMaterialTrackWriter() {
+          m_outputTree = nullptr;
+          m_outputFile = nullptr;
+      }
+
+      void finalize() {
+        if (m_outputFile && m_outputTree) {
+            m_outputFile->cd();
+            m_outputTree->Write();
+            m_outputFile->Close();
+        }
+        m_outputTree = nullptr;
+        m_outputFile = nullptr;
+      }
+
+      void writeT(
+          const myContext& ctx, 
+          const std::unordered_map<std::size_t, Acts::RecordedMaterialTrack>& materialTracks) {
+
+        // Loop over the material tracks and write them out
+        for (auto& [idTrack, mtrack] : materialTracks) {
+          m_payload->write(ctx.geoContext, ctx.EvNumber, mtrack);
+          m_outputTree->Fill();
+        }
+      }
+
+ private:
+      /// The config class
+      MyMaterialTrackWriter_cfg m_cfg;
+      /// The output file name
+      TFile* m_outputFile = nullptr;
+      /// The output tree name
+      TTree* m_outputTree = nullptr;
+      /// The read - write payload
+      std::unique_ptr<ActsPlugins::RootMaterialTrackIo> m_payload;
+};
+// ##########################################################################################
+
+//class DetectorElementsProducer : public edm::one::EDProducer<> {
+class DetectorElementsProducer : public edm::ESProducer {
+public:
+  explicit DetectorElementsProducer(const edm::ParameterSet& ps);
+  ~DetectorElementsProducer() override = default;
+  //void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
+  void produce(const ACTSTrackerGeometryRecord& iRecord);
+
+private:
+  edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> trackerGeomToken_;//ACTSTrackerGeometryRecord
+  std::string outputFile_;
+  bool saveObjfile_;
+  std::vector<double> rangeZ_;
+  std::vector<double> rangeR_;
+};
+
+DetectorElementsProducer::DetectorElementsProducer(const edm::ParameterSet& ps)
+    : outputFile_(ps.getUntrackedParameter<std::string>("outputFile")),
+      saveObjfile_(ps.getUntrackedParameter<bool>("saveObjfile")),
+      rangeZ_(ps.getUntrackedParameter<std::vector<double>>("rangeZ")),
+      rangeR_(ps.getUntrackedParameter<std::vector<double>>("rangeR")) {
+
+    auto cc = setWhatProduced(this);
+    trackerGeomToken_ = cc.consumes();
+
+  }
+
+//void DetectorElementsProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) { 
+void DetectorElementsProducer::produce(const ACTSTrackerGeometryRecord& iRecord) { 
+  //const TrackerGeometry& trackerGeom = iSetup.getData(trackerGeomToken_);
+  const TrackerGeometry& trackingGeometry = iRecord.get(trackerGeomToken_);
+
+
+  // ===== Collect Material Tracks =====
+  Acts::GeometryContext gCtx;
+  Acts::MagneticFieldContext mfCtx;
+
+  MaterialConfig test_reader_cfg;
+  test_reader_cfg.treeName = "material-tracks";
+  test_reader_cfg.fileList = {"/eos/user/l/ldamenti/G4MaterialFiles/MaterialFile_ExtendedGeo2023_10000_100_test_TrkOnly.root"};
+  MyMaterialEvReader my_reader(test_reader_cfg);
+
+  // Collect the material surfaces from the trackingGeometry:
+  MaterialSurfaceSelector selector;
+  trackingGeometry->visitSurfaces(selector, false);
+  std::vector<const Acts::Surface*> map_surf = selector.surfaces;
+
+  // Define the Material mapper -> (1) Accumulater and (2) Assigner
+  Acts::BinnedSurfaceMaterialAccumulater::Config Mat_Acc_cfg;
+  Mat_Acc_cfg.geoContext = gCtx;
+  Mat_Acc_cfg.materialSurfaces = map_surf;
+  std::unique_ptr<const Acts::Logger> AccLogger = Acts::getDefaultLogger("BinnedSurfaceMaterialAccumulater", Acts::Logging::INFO);
+  Acts::IntersectionMaterialAssigner::Config Mat_Assigner_cfg;
+  Mat_Assigner_cfg.surfaces = map_surf;
+  std::unique_ptr<const Acts::Logger> AssigLogger = Acts::getDefaultLogger("IntersectionMaterialAssigner", Acts::Logging::INFO);
+
+  Acts::MaterialMapper::Config MatMap_cfg;
+  MatMap_cfg.assignmentFinder = std::make_shared<Acts::IntersectionMaterialAssigner>(Mat_Assigner_cfg, std::move(AssigLogger));        // (1)
+  MatMap_cfg.surfaceMaterialAccumulater = std::make_shared<Acts::BinnedSurfaceMaterialAccumulater>(Mat_Acc_cfg, std::move(AccLogger)); // (2)
+  std::unique_ptr<const Acts::Logger> mlogger_MM = Acts::getDefaultLogger("Test", Acts::Logging::DEBUG);
+  Acts::MaterialMapper MatMapper(MatMap_cfg, std::move(mlogger_MM));
+
+  // Preparation before the loop: definition of the state, the WhiteBoard and the number of total event: 
+  auto state = MatMapper.createState();
+  double ref_index = 0;
+  double Tot_events = 10000;
+  double tracks_count = 0;
+
+  // Loop over the total number of events:
+  std::unordered_map<std::size_t, Acts::RecordedMaterialTrack> MappedTracks;
+  for(int i = 0; i < Tot_events; i++){
+    std::cout << "\rAnalysing event " << i+1 << " out of " << Tot_events << std::flush;
+    ref_index+=1;
+
+    //ActsExamples::AlgorithmContext AlgCont(0, i, WB);
+    //reader.read(AlgCont);
+    //std::unordered_map<std::size_t, Acts::RecordedMaterialTrack> this_event = reader.getMaterialTracks();
+    std::unordered_map<std::size_t, Acts::RecordedMaterialTrack> this_event = my_reader.read(i);
+
+    // Loop over all the tracks of this event: 
+    for (const auto& [index, track] : this_event){
+      auto [mappedTrk, unmappedTrk] = MatMapper.mapMaterial(*state, gCtx, mfCtx, track);
+
+      //MatTrackWriter.writeT(gCtx, tracks_count, mappedTrk);
+      //MappedTracks[tracks_count] = mappedTrk;
+      tracks_count+=1;  
+    }
+  }
+  std::cout << "" << std::endl;
+  std::cout << "TRACKS COUNT: " << tracks_count << std::endl;
+
+  // ===== Save the material maps into a json file =====
+
+  Acts::TrackingGeometryMaterial trkGeoMat_maps = MatMapper.finalizeMaps(*state);
+
+  JsonMaterialWriter::Config json_cfg;
+  json_cfg.fileName = "MaterialMaps";
+  JsonMaterialWriter json_writer(json_cfg, Acts::Logging::Level::INFO);
+  json_writer.writeMaterial(trkGeoMat_maps);
+
+
+
+
+}
+
+//#include "FWCore/Framework/interface/MakerMacros.h"
+DEFINE_FWK_EVENTSETUP_MODULE(DetectorElementsProducer);
+//DEFINE_FWK_MODULE(DetectorElementsProducer);
+
+

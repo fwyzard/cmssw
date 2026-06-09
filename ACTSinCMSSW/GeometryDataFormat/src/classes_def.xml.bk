@@ -1,0 +1,12 @@
+<lcgdict>
+
+  <class name="Acts::CMSDetectorElement">
+
+    <field name="m_surface" transient="true"/>
+    <field name="m_transform" transient="true"/>
+    
+  </class>
+  <class name="std::vector<Acts::CMSDetectorElement>"/>
+  <class name="vector<Acts::CMSDetectorElement*>"/>
+  <class name="edm::Wrapper<std::vector<Acts::CMSDetectorElement>>"/>
+</lcgdict>

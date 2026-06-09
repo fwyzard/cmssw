@@ -117,7 +117,7 @@ optPh = str(sys.argv[1])
 groups = None
 if( optPh.lower() == "phasei"):
     groups = groupsPh1
-    process.load('Configuration.Geometry.GeometryDD4hepExtended2021Reco_cff')
+    process.load('Configuration.Geometry.GeometryDD4hepExtended2017Reco_cff')
 elif( optPh.lower() == "phaseii"):
     groups = groupsPh2
 else:
@@ -145,10 +145,10 @@ process.trackingMaterialAnalyser = cms.EDAnalyzer(
     DDDetector = cms.ESInputTag("",""),
     SkipBeforeFirstDetector = cms.bool(False),
     SkipAfterLastDetector = cms.bool(True),
-    SaveSummaryPlot = cms.bool(True),
-    SaveDetailedPlots = cms.bool(True),
+    SaveSummaryPlot = cms.bool(False),
+    SaveDetailedPlots = cms.bool(False),
     SaveParameters = cms.bool(True),
-    SaveXML = cms.bool(True),
+    SaveXML = cms.bool(False),
     isHGCal = cms.bool(False),
     isHFNose = cms.bool(False),
     Groups = groups
@@ -162,7 +162,22 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
 
-process.MessageLogger.files.LogTrackingMaterialAnalysis = dict()
-process.MessageLogger.TrackingMaterialAnalysis=dict()
+# ===== Logger =====
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.cerr.TrackerMaterialAnalysis = cms.untracked.PSet(
+    limit = cms.untracked.int32(-1)
+)
+process.MessageLogger.files.LogTrackingMaterialAnalysis = cms.untracked.PSet(
+    noTimeStamps = cms.untracked.bool(False),
+    threshold = cms.untracked.string('INFO'),
+    TrackerMaterialAnalysis = cms.untracked.PSet(limit = cms.untracked.int32(-1))
+)
+
+
+
+
+
 process.path = cms.Path(process.trackingMaterialAnalyser)
 
