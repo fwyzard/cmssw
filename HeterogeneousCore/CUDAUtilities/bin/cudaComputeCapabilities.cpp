@@ -18,9 +18,10 @@
 namespace {
   // print a short usage message
   void printUsage(std::string_view name) {
-    std::cout << "Usage: " << name << " [--verbose|-v] [--help|-h]\n\n"
+    std::cout << "Usage: " << name << " [-u|--uuid] [-v|--verbose] [-h|--help]\n\n"
               << "Print the index, compute capability and name of each visible CUDA device.\n\n"
               << "Options:\n"
+              << "  -u, --uuid      print the device UUIDs instead of indices\n"
               << "  -v, --verbose   print detailed properties for each device\n"
               << "  -h, --help      print this help message and exit\n";
   }
@@ -32,6 +33,20 @@ namespace {
     std::ostringstream out;
     out << std::hex << std::setfill('0') << std::setw(4) << properties.pciDomainID << ':' << std::setw(2)
         << properties.pciBusID << ':' << std::setw(2) << properties.pciDeviceID << ".0";
+    return out.str();
+  }
+
+  // format the device UUID
+  std::string uuid(cudaDeviceProp const& properties) {
+    std::ostringstream out;
+    out << "GPU-";
+    for (size_t i = 0; i < std::size(properties.uuid.bytes); ++i) {
+      out << std::hex << std::setfill('0') << std::setw(2)
+          << static_cast<unsigned int>(static_cast<unsigned char>(properties.uuid.bytes[i]));
+      if (i == 8 or i == 12 or i == 16 or i == 20) {
+        out << '-';
+      }
+    }
     return out.str();
   }
 
@@ -60,6 +75,7 @@ namespace {
 
     std::vector<std::pair<std::string_view, std::string>> rows = {
         {"PCI device id:", pciId(properties)},
+        {"UUID:", uuid(properties)},
         {"integrated:", value(yesno(properties.integrated))},
         {"total global memory:", value(properties.totalGlobalMem >> 20, " MiB")},
         {"L2 cache size:", value(properties.l2CacheSize >> 10, " KiB")},
@@ -98,15 +114,19 @@ namespace {
       std::cout << "        " << std::left << std::setw(static_cast<int>(labelWidth)) << label << "  " << std::right
                 << std::setw(static_cast<int>(valueWidth)) << text << "\n";
     }
+    std::cout << '\n';
   }
 }  // namespace
 
 int main(int argc, char** argv) {
+  bool useuuid = false;
   bool verbose = false;
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
     if (arg == "--verbose" or arg == "-v") {
       verbose = true;
+    } else if (arg == "--uuid" or arg == "-u") {
+      useuuid = true;
     } else if (arg == "--help" or arg == "-h") {
       printUsage(argv[0]);
       return EXIT_SUCCESS;
@@ -127,8 +147,12 @@ int main(int argc, char** argv) {
   for (int i = 0; i < devices; ++i) {
     cudaDeviceProp properties;
     cudaGetDeviceProperties(&properties, i);
-    std::cout << std::setw(4) << i << "    " << std::setw(2) << properties.major << "." << properties.minor << "    "
-              << properties.name;
+    if (useuuid) {
+      std::cout << uuid(properties);
+    } else {
+      std::cout << std::setw(2) << i;
+    }
+    std::cout << "    " << std::setw(2) << properties.major << "." << properties.minor << "    " << properties.name;
     if (not isCudaDeviceSupported(i)) {
       std::cout << " (unsupported)";
     }
