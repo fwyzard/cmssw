@@ -12,7 +12,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "FWCore/Framework/interface/global/EDProducer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -37,20 +37,21 @@
 #include "RecoMuon/TrackerSeedGenerator/interface/SeedMvaEstimator.h"
 
 // class declaration
-bool sortByMvaScore(const std::pair<unsigned, double>& A, const std::pair<unsigned, double>& B) {
-  return (A.second > B.second);
-};
-
-class MuonHLTSeedMVAClassifier : public edm::stream::EDProducer<> {
+class MuonHLTSeedMVAClassifier : public edm::global::EDProducer<> {
 public:
   explicit MuonHLTSeedMVAClassifier(const edm::ParameterSet&);
   ~MuonHLTSeedMVAClassifier() override = default;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-  bool checkMVAFileConsistency(const std::string& weightsFileFullPath, bool isFromL1) const;
+  static bool checkMVAFileConsistency(const std::string& weightsFileFullPath, bool isFromL1);
 
 private:
-  void produce(edm::Event&, const edm::EventSetup&) override;
+  void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
+
+  enum Region { kBarrel, kEndcap };
+
+  // read the barrel or endcap estimator from its XML file; empty if rejectAll is set
+  static std::unique_ptr<const SeedMvaEstimator> makeMvaEstimator(const edm::ParameterSet&, Region region);
 
   // member data
   const edm::EDGetTokenT<TrajectorySeedCollection> seedToken_;
@@ -58,20 +59,11 @@ private:
   const edm::EDGetTokenT<reco::RecoChargedCandidateCollection> l2MuonToken_;
   const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> trackerGeometryToken_;
 
-  typedef std::pair<std::unique_ptr<const SeedMvaEstimator>, std::unique_ptr<const SeedMvaEstimator>>
-      PairSeedMvaEstimator;
-  PairSeedMvaEstimator mvaEstimator_;
+  // read once per job and shared by all streams
+  const std::unique_ptr<const SeedMvaEstimator> mvaEstimatorB_;
+  const std::unique_ptr<const SeedMvaEstimator> mvaEstimatorE_;
 
   const bool rejectAll_;
-  const bool isFromL1_;
-
-  const edm::FileInPath mvaFileB_;
-  const edm::FileInPath mvaFileE_;
-
-  const std::vector<double> mvaScaleMeanB_;
-  const std::vector<double> mvaScaleStdB_;
-  const std::vector<double> mvaScaleMeanE_;
-  const std::vector<double> mvaScaleStdE_;
 
   const bool doSort_;
   const int nSeedsMaxB_;
@@ -81,18 +73,15 @@ private:
   const double mvaCutB_;
   const double mvaCutE_;
 
-  const int minL1Qual_;
   const double baseScore_;
 
-  double getSeedMva(const PairSeedMvaEstimator& pairMvaEstimator,
-                    const TrajectorySeed& seed,
+  double getSeedMva(const TrajectorySeed& seed,
                     const GlobalVector& global_p,
                     const l1t::MuonBxCollection& l1Muons,
-                    const reco::RecoChargedCandidateCollection& l2Muons);
+                    const reco::RecoChargedCandidateCollection& l2Muons) const;
 };
 
-bool MuonHLTSeedMVAClassifier::checkMVAFileConsistency(const std::string& weightsFileFullPath,
-                                                       const bool isFromL1) const {
+bool MuonHLTSeedMVAClassifier::checkMVAFileConsistency(const std::string& weightsFileFullPath, const bool isFromL1) {
   tinyxml2::XMLDocument xmlDoc;
   if (reco::details::hasEnding(weightsFileFullPath, ".xml")) {
     xmlDoc.LoadFile(weightsFileFullPath.c_str());
@@ -123,46 +112,49 @@ bool MuonHLTSeedMVAClassifier::checkMVAFileConsistency(const std::string& weight
   return condition;
 }
 
+std::unique_ptr<const SeedMvaEstimator> MuonHLTSeedMVAClassifier::makeMvaEstimator(const edm::ParameterSet& iConfig,
+                                                                                   Region region) {
+  // suffix of the parameter names of this region
+  const std::string suffix = (region == kBarrel) ? "B" : "E";
+
+  const bool isFromL1 = iConfig.getParameter<bool>("isFromL1");
+  const auto mvaFile = iConfig.getParameter<edm::FileInPath>("mvaFile" + suffix);
+
+  if (!checkMVAFileConsistency(mvaFile.fullPath(), isFromL1)) {
+    throw cms::Exception("ConfigurationError") << " MVA files appear to be not consistent with the value of isFromL1 "
+                                                  "parameter.\n Please check your configuration.";
+  }
+
+  if (iConfig.getParameter<bool>("rejectAll"))
+    return nullptr;
+
+  return std::make_unique<SeedMvaEstimator>(mvaFile,
+                                            iConfig.getParameter<std::vector<double>>("mvaScaleMean" + suffix),
+                                            iConfig.getParameter<std::vector<double>>("mvaScaleStd" + suffix),
+                                            isFromL1,
+                                            iConfig.getParameter<int>("minL1Qual"));
+}
+
 MuonHLTSeedMVAClassifier::MuonHLTSeedMVAClassifier(const edm::ParameterSet& iConfig)
     : seedToken_(consumes<TrajectorySeedCollection>(iConfig.getParameter<edm::InputTag>("src"))),
       l1MuonToken_(consumes<l1t::MuonBxCollection>(iConfig.getParameter<edm::InputTag>("L1Muon"))),
       l2MuonToken_(consumes<reco::RecoChargedCandidateCollection>(iConfig.getParameter<edm::InputTag>("L2Muon"))),
       trackerGeometryToken_(esConsumes<TrackerGeometry, TrackerDigiGeometryRecord>()),
+      mvaEstimatorB_(makeMvaEstimator(iConfig, kBarrel)),
+      mvaEstimatorE_(makeMvaEstimator(iConfig, kEndcap)),
       rejectAll_(iConfig.getParameter<bool>("rejectAll")),
-      isFromL1_(iConfig.getParameter<bool>("isFromL1")),
-      mvaFileB_(iConfig.getParameter<edm::FileInPath>("mvaFileB")),
-      mvaFileE_(iConfig.getParameter<edm::FileInPath>("mvaFileE")),
-      mvaScaleMeanB_(iConfig.getParameter<std::vector<double>>("mvaScaleMeanB")),
-      mvaScaleStdB_(iConfig.getParameter<std::vector<double>>("mvaScaleStdB")),
-      mvaScaleMeanE_(iConfig.getParameter<std::vector<double>>("mvaScaleMeanE")),
-      mvaScaleStdE_(iConfig.getParameter<std::vector<double>>("mvaScaleStdE")),
       doSort_(iConfig.getParameter<bool>("doSort")),
       nSeedsMaxB_(iConfig.getParameter<int>("nSeedsMaxB")),
       nSeedsMaxE_(iConfig.getParameter<int>("nSeedsMaxE")),
       etaEdge_(iConfig.getParameter<double>("etaEdge")),
       mvaCutB_(iConfig.getParameter<double>("mvaCutB")),
       mvaCutE_(iConfig.getParameter<double>("mvaCutE")),
-      minL1Qual_(iConfig.getParameter<int>("minL1Qual")),
       baseScore_(iConfig.getParameter<double>("baseScore")) {
-  const auto& mvaFileBPath = mvaFileB_.fullPath();
-  const auto& mvaFileEPath = mvaFileE_.fullPath();
-
-  if (!checkMVAFileConsistency(mvaFileBPath, isFromL1_) || !checkMVAFileConsistency(mvaFileEPath, isFromL1_)) {
-    throw cms::Exception("ConfigurationError") << " MVA files appear to be not consistent with the value of isFromL1 "
-                                                  "parameter.\n Please check your configuration.";
-  }
-
-  if (!rejectAll_) {
-    mvaEstimator_ = std::make_pair(
-        std::make_unique<SeedMvaEstimator>(mvaFileB_, mvaScaleMeanB_, mvaScaleStdB_, isFromL1_, minL1Qual_),
-        std::make_unique<SeedMvaEstimator>(mvaFileE_, mvaScaleMeanE_, mvaScaleStdE_, isFromL1_, minL1Qual_));
-  }
-
   produces<TrajectorySeedCollection>();
 }
 
 // -- method called on each new Event
-void MuonHLTSeedMVAClassifier::produce(edm::Event& iEvent, edm::EventSetup const& iEventSetup) {
+void MuonHLTSeedMVAClassifier::produce(edm::StreamID, edm::Event& iEvent, edm::EventSetup const& iEventSetup) const {
   auto result = std::make_unique<TrajectorySeedCollection>();
 
   if (rejectAll_) {
@@ -221,7 +213,7 @@ void MuonHLTSeedMVAClassifier::produce(edm::Event& iEvent, edm::EventSetup const
       }
     }
 
-    double mva = getSeedMva(mvaEstimator_, seed, global_p, l1Muons, l2Muons);
+    double mva = getSeedMva(seed, global_p, l1Muons, l2Muons);
 
     double score = 1. / (1. + std::exp(-1. * mva));
     bool passMva = isB ? score > mvaCutB_ : score > mvaCutE_;
@@ -239,6 +231,10 @@ void MuonHLTSeedMVAClassifier::produce(edm::Event& iEvent, edm::EventSetup const
   }
 
   if (doSort_) {
+    // sort the seeds by decreasing MVA score
+    auto sortByMvaScore = [](const std::pair<unsigned, double>& a, const std::pair<unsigned, double>& b) {
+      return a.second > b.second;
+    };
     std::sort(pairSeedIdxMvaScoreB.begin(), pairSeedIdxMvaScoreB.end(), sortByMvaScore);
     std::sort(pairSeedIdxMvaScoreE.begin(), pairSeedIdxMvaScoreE.end(), sortByMvaScore);
 
@@ -260,16 +256,15 @@ void MuonHLTSeedMVAClassifier::produce(edm::Event& iEvent, edm::EventSetup const
   iEvent.put(std::move(result));
 }
 
-double MuonHLTSeedMVAClassifier::getSeedMva(const PairSeedMvaEstimator& pairMvaEstimator,
-                                            const TrajectorySeed& seed,
+double MuonHLTSeedMVAClassifier::getSeedMva(const TrajectorySeed& seed,
                                             const GlobalVector& global_p,
                                             const l1t::MuonBxCollection& l1Muons,
-                                            const reco::RecoChargedCandidateCollection& l2Muons) {
+                                            const reco::RecoChargedCandidateCollection& l2Muons) const {
   double mva = 0.;
   if (std::abs(global_p.eta()) < etaEdge_) {
-    mva = pairMvaEstimator.first->computeMva(seed, global_p, l1Muons, l2Muons);
+    mva = mvaEstimatorB_->computeMva(seed, global_p, l1Muons, l2Muons);
   } else {
-    mva = pairMvaEstimator.second->computeMva(seed, global_p, l1Muons, l2Muons);
+    mva = mvaEstimatorE_->computeMva(seed, global_p, l1Muons, l2Muons);
   }
 
   return (mva + baseScore_);
