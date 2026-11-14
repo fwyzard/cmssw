@@ -8,7 +8,6 @@
 // system include files
 #include <memory>
 #include <cmath>
-#include <tinyxml2.h>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -23,8 +22,6 @@
 // Geometry
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
-
-#include "CommonTools/MVAUtils/interface/TMVAZipReader.h"
 
 // TrajectorySeed
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeed.h"
@@ -43,14 +40,14 @@ public:
   ~MuonHLTSeedMVAClassifier() override = default;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-  static bool checkMVAFileConsistency(const std::string& weightsFileFullPath, bool isFromL1);
 
 private:
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
 
   enum Region { kBarrel, kEndcap };
 
-  // read the barrel or endcap estimator from its XML file; empty if rejectAll is set
+  // read the barrel or endcap estimator from its XML file, and check that its number of input variables is
+  // consistent with isFromL1; empty if rejectAll is set
   static std::unique_ptr<const SeedMvaEstimator> makeMvaEstimator(const edm::ParameterSet&, Region region);
 
   // member data
@@ -81,58 +78,28 @@ private:
                     const reco::RecoChargedCandidateCollection& l2Muons) const;
 };
 
-bool MuonHLTSeedMVAClassifier::checkMVAFileConsistency(const std::string& weightsFileFullPath, const bool isFromL1) {
-  tinyxml2::XMLDocument xmlDoc;
-  if (reco::details::hasEnding(weightsFileFullPath, ".xml")) {
-    xmlDoc.LoadFile(weightsFileFullPath.c_str());
-  } else {
-    edm::LogError("MuonHLTSeedMVAClassifier") << "unsupported file extension, it should be a .xml file!";
-    return false;
-  }
-  tinyxml2::XMLElement* root = xmlDoc.FirstChildElement("MethodSetup");
-  if (root == nullptr) {
-    edm::LogError("MuonHLTSeedMVAClassifier") << "could not retrieve the MethodSetup node from XML file!";
-    return false;
-  }
-
-  const auto& vars = root->FirstChildElement("Variables");
-  size_t n = 0;
-  if (vars != nullptr) {
-    for (tinyxml2::XMLElement* e = vars->FirstChildElement("Variable"); e != nullptr;
-         e = e->NextSiblingElement("Variable")) {
-      ++n;
-    }
-  } else {
-    edm::LogError("MuonHLTSeedMVAClassifier") << "could not retrieve the Variables node from XML file!";
-    return false;
-  }
-
-  LogTrace("MuonHLTSeedMVAClassifier") << "MVA file:" << weightsFileFullPath.c_str() << " n Var:" << n;
-  bool condition = (isFromL1 && (n == inputIndexes::kLastL1)) || (!isFromL1 && (n == inputIndexes::kLastL2));
-  return condition;
-}
-
 std::unique_ptr<const SeedMvaEstimator> MuonHLTSeedMVAClassifier::makeMvaEstimator(const edm::ParameterSet& iConfig,
                                                                                    Region region) {
   // suffix of the parameter names of this region
   const std::string suffix = (region == kBarrel) ? "B" : "E";
 
-  const bool isFromL1 = iConfig.getParameter<bool>("isFromL1");
-  const auto mvaFile = iConfig.getParameter<edm::FileInPath>("mvaFile" + suffix);
-
-  if (!checkMVAFileConsistency(mvaFile.fullPath(), isFromL1)) {
-    throw cms::Exception("ConfigurationError") << " MVA files appear to be not consistent with the value of isFromL1 "
-                                                  "parameter.\n Please check your configuration.";
-  }
-
   if (iConfig.getParameter<bool>("rejectAll"))
     return nullptr;
 
-  return std::make_unique<SeedMvaEstimator>(mvaFile,
-                                            iConfig.getParameter<std::vector<double>>("mvaScaleMean" + suffix),
-                                            iConfig.getParameter<std::vector<double>>("mvaScaleStd" + suffix),
-                                            isFromL1,
-                                            iConfig.getParameter<int>("minL1Qual"));
+  const bool isFromL1 = iConfig.getParameter<bool>("isFromL1");
+  auto estimator =
+      std::make_unique<SeedMvaEstimator>(iConfig.getParameter<edm::FileInPath>("mvaFile" + suffix),
+                                         iConfig.getParameter<std::vector<double>>("mvaScaleMean" + suffix),
+                                         iConfig.getParameter<std::vector<double>>("mvaScaleStd" + suffix),
+                                         isFromL1,
+                                         iConfig.getParameter<int>("minL1Qual"));
+
+  const unsigned int expected = isFromL1 ? inputIndexes::kLastL1 : inputIndexes::kLastL2;
+  if (estimator->nVariables() != expected) {
+    throw cms::Exception("ConfigurationError") << " MVA files appear to be not consistent with the value of isFromL1 "
+                                                  "parameter.\n Please check your configuration.";
+  }
+  return estimator;
 }
 
 MuonHLTSeedMVAClassifier::MuonHLTSeedMVAClassifier(const edm::ParameterSet& iConfig)
