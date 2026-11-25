@@ -1172,23 +1172,23 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             typename Cell::hindex_type hits[TrackerTraits::maxHitsOnTrack];
 
             stack.reset();
-            thisCell.template find_ntuplets<maxDepth>(acc,
-                                                      hh,
-                                                      ntupletCuts,
-                                                      cc,
-                                                      cells,
-                                                      *foundNtuplets,
-                                                      cellNeighborsHisto,
-                                                      cellTracksHisto,
-                                                      nCellTracks,
-                                                      ct,
-                                                      *apc,
-                                                      tracks_view.quality().data(),
-                                                      tracks_view.nLayers().data(),
-                                                      tracks_view.pt().data(),
-                                                      stack,
-                                                      hits,
-                                                      params.minHitsPerNtuplet_);
+            thisCell.template find_ntuplets_iterative<maxDepth>(acc,
+                                                                hh,
+                                                                ntupletCuts,
+                                                                cc,
+                                                                cells,
+                                                                *foundNtuplets,
+                                                                cellNeighborsHisto,
+                                                                cellTracksHisto,
+                                                                nCellTracks,
+                                                                ct,
+                                                                *apc,
+                                                                tracks_view.quality().data(),
+                                                                tracks_view.nLayers().data(),
+                                                                tracks_view.pt().data(),
+                                                                stack,
+                                                                hits,
+                                                                params.minHitsPerNtuplet_);
             ALPAKA_ASSERT_ACC(stack.empty());
           }
         }
