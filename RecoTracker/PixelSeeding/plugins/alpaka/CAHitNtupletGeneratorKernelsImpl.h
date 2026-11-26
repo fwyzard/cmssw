@@ -2977,8 +2977,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // applying combinatoric cleaning such as fishbone at this stage is too expensive
     //
 
-    const auto nthTot = 64;
-    const auto stride = 4;
+    const auto nthTot = 32;
+    const auto stride = 2;
     auto blockSize = nthTot / stride;
     // The cell/tuple kernels here and below launch over the FULL container capacity. The
     // loops inside are bounded by the true counts, so coverage never relies on the
